@@ -1,0 +1,139 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**/*.md'
+      - 'LICENSE'
+      - 'NOTICE'
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - '**/*.md'
+      - 'LICENSE'
+      - 'NOTICE'
+  workflow_dispatch:
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  DOTNET_NOLOGO: 1
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+  NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+
+jobs:
+  test:
+    name: ${{ matrix.os }} / ${{ matrix.framework }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        # Test client to library under test:
+        #   net10.0 -> net10.0
+        #   net9.0  -> netstandard2.0  (see SetTargetFramework in the test csproj)
+        #   net8.0  -> net8.0
+        framework: [net10.0, net9.0, net8.0]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Each leg needs its own runtime to execute on, plus the .NET 10 SDK to
+      # build with. Installing all three keeps the setup identical across legs.
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+            10.0.x
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.NUGET_PACKAGES }}
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', '**/*.slnx') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Restore
+        run: dotnet restore NOpenNLP.slnx -p:TestFrameworks=true
+
+      # Builds the library for all of its target frameworks, so the
+      # netstandard2.0 leg is compiled here even on the net10.0 run.
+      - name: Build library
+        run: dotnet build src/NOpenNLP.Tools/NOpenNLP.Tools.csproj --configuration Release --no-restore
+
+      - name: Build tests (${{ matrix.framework }})
+        run: >
+          dotnet build src/NOpenNLP.Tools.Tests/NOpenNLP.Tools.Tests.csproj
+          --configuration Release
+          --framework ${{ matrix.framework }}
+          --no-restore
+          -p:TestFrameworks=true
+
+      - name: Test (${{ matrix.framework }})
+        run: >
+          dotnet test src/NOpenNLP.Tools.Tests/NOpenNLP.Tools.Tests.csproj
+          --configuration Release
+          --framework ${{ matrix.framework }}
+          --no-build
+          --no-restore
+          -p:TestFrameworks=true
+          --logger "console;verbosity=normal"
+          --logger "trx;LogFileName=TestResults.trx"
+          --results-directory "${{ github.workspace }}/testresults"
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: testresults-${{ matrix.os }}-${{ matrix.framework }}
+          path: ${{ github.workspace }}/testresults
+          if-no-files-found: warn
+
+  pack:
+    name: Pack
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore src/NOpenNLP.Tools/NOpenNLP.Tools.csproj
+
+      # Confirms the package still builds and carries LICENSE/NOTICE, which the
+      # Apache 2.0 terms on the ported OpenNLP source require us to ship.
+      - name: Pack
+        run: dotnet pack src/NOpenNLP.Tools/NOpenNLP.Tools.csproj --configuration Release --no-restore
+
+      - name: Verify NOTICE and README are packaged
+        shell: bash
+        run: |
+          set -euo pipefail
+          package="$(find src/NOpenNLP.Tools/bin/Release -name '*.nupkg' ! -name '*.symbols.nupkg' | head -1)"
+          echo "Inspecting $package"
+          contents="$(unzip -Z1 "$package")"
+          echo "$contents"
+          for required in NOTICE README.md lib/net10.0/NOpenNLP.Tools.dll lib/net8.0/NOpenNLP.Tools.dll lib/netstandard2.0/NOpenNLP.Tools.dll; do
+            if ! grep -qx "$required" <<<"$contents"; then
+              echo "::error::$required is missing from the package"
+              exit 1
+            fi
+          done
+          echo "All required package contents are present."
+
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: nupkg
+          path: |
+            src/NOpenNLP.Tools/bin/Release/*.nupkg
+            src/NOpenNLP.Tools/bin/Release/*.snupkg

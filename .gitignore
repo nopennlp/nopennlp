@@ -10,4 +10,7 @@ obj/
 [Dd]ebug/
 [Rr]elease/
 artifacts/
+testresults/
+TestResults/
+*.trx
 .DS_Store

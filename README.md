@@ -1,5 +1,7 @@
 # NOpenNLP
 
+[![Build and Test](https://github.com/nopennlp/nopennlp/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/nopennlp/nopennlp/actions/workflows/build-and-test.yml)
+
 A C# port of [Apache OpenNLP](https://opennlp.apache.org/) 1.9.1 — a machine
 learning toolkit for natural language processing.
 
@@ -36,6 +38,31 @@ var tokens = SimpleTokenizer.INSTANCE.Tokenize("Hello, world!");
 Types and members keep their upstream OpenNLP names so that the Java
 documentation and examples carry over directly, with .NET casing conventions
 applied (`TokenizerME.tokenize` becomes `TokenizerME.Tokenize`).
+
+## Building and testing
+
+```
+dotnet build NOpenNLP.slnx
+dotnet test NOpenNLP.slnx
+```
+
+Tests run against `net10.0` by default, so the current SDK alone is enough. CI
+additionally runs them against every target the library ships, on Linux, Windows
+and macOS:
+
+| Test client | Library under test |
+|---|---|
+| `net10.0` | `net10.0` |
+| `net9.0` | `netstandard2.0` |
+| `net8.0` | `net8.0` |
+
+`netstandard2.0` has no runtime of its own, so `net9.0` is designated as its test
+client. To reproduce the full matrix locally (this needs the .NET 8, 9 and 10
+runtimes installed):
+
+```
+dotnet test NOpenNLP.slnx -p:TestFrameworks=true
+```
 
 ## Attribution
 

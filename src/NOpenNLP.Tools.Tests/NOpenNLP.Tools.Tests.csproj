@@ -2,12 +2,23 @@
 
   <PropertyGroup>
     <!--
-      Tests run on net10.0 by default so a clone with only the current SDK can
-      run them. Set TestAllFrameworks=true (as CI does) to also exercise net8.0,
-      which needs the .NET 8 runtime installed.
+      Tests run on net10.0 by default, so a clone with only the current SDK can
+      run them. Set TestFrameworks=true (as CI does) to build every test client.
+
+      Test client to target under test:
+
+        Test client | Library under test
+        net10.0     | net10.0
+        net9.0      | netstandard2.0
+        net8.0      | net8.0
+
+      netstandard2.0 has no runtime of its own, so net9.0 is designated as its
+      test client (see SetTargetFramework below). Without this the netstandard2.0
+      build would ship untested, and it is the leg most likely to break, since it
+      lacks the BCL APIs the other targets have.
     -->
     <TargetFrameworks>net10.0</TargetFrameworks>
-    <TargetFrameworks Condition=" '$(TestAllFrameworks)' == 'true' ">net10.0;net8.0</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(TestFrameworks)' == 'true' ">net10.0;net9.0;net8.0</TargetFrameworks>
     <LangVersion>12.0</LangVersion>
     <RootNamespace>NOpenNLP.Tools</RootNamespace>
     <AssemblyName>NOpenNLP.Tools.Tests</AssemblyName>
@@ -23,8 +34,19 @@
     <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
   </ItemGroup>
 
+  <!--
+    Points the net9.0 test client at the netstandard2.0 build of the library
+    rather than letting NuGet resolution pick net8.0, which is what makes the
+    netstandard2.0 target testable at all.
+  -->
+  <PropertyGroup Label="Mismatched Target Framework (to override the target framework under test)">
+    <SetTargetFramework></SetTargetFramework>
+    <SetTargetFramework Condition=" '$(TargetFramework)' == 'net9.0' ">TargetFramework=netstandard2.0</SetTargetFramework>
+  </PropertyGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\NOpenNLP.Tools\NOpenNLP.Tools.csproj" />
+    <ProjectReference Include="..\NOpenNLP.Tools\NOpenNLP.Tools.csproj"
+                      SetTargetFramework="$(SetTargetFramework)" />
   </ItemGroup>
 
 </Project>
