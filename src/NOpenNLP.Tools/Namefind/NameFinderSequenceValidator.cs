@@ -23,7 +23,7 @@ using NOpenNLP.Tools.Util;
 namespace NOpenNLP.Tools.Namefind;
 
 /// <summary>
-/// This class is created by the {@link BioCodec}.
+/// This class is created by the <see cref="BioCodec"/>.
 /// </summary>
 public class NameFinderSequenceValidator : ISequenceValidator<string>
 {

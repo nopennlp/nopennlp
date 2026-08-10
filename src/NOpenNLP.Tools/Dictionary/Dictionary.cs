@@ -96,7 +96,7 @@ public class Dictionary : IEnumerable<StringList> //, ISerializableArtifact
     private int maxTokenCount = 0;
 
     /// <summary>
-    /// Initializes an empty {@link Dictionary}.
+    /// Initializes an empty <see cref="Dictionary"/>.
     /// </summary>
     public Dictionary() : this(false)
     {
@@ -108,9 +108,9 @@ public class Dictionary : IEnumerable<StringList> //, ISerializableArtifact
     }
 
     /// <summary>
-    /// Initializes the {@link Dictionary} from an existing dictionary resource.
+    /// Initializes the <see cref="Dictionary"/> from an existing dictionary resource.
     /// </summary>
-    /// <param name="in">{@link InputStream}</param>
+    /// <param name="in"><see cref="System.IO.Stream"/></param>
     public Dictionary(Stream @in)
     {
         isCaseSensitive = DictionaryEntryPersistor.Create(@in, (entry) => Put(entry.GetTokens()));
@@ -165,7 +165,7 @@ public class Dictionary : IEnumerable<StringList> //, ISerializableArtifact
     /// <summary>
     /// Retrieves an Iterator over all tokens.
     /// </summary>
-    /// <returns>token-{@link Iterator}</returns>
+    /// <returns>token-<see cref="System.Collections.Generic.IEnumerator{T}"/></returns>
     public virtual IEnumerator<StringList> GetEnumerator()
     {
         // NOpenNLP: upstream returns an anonymous Iterator; a C# iterator
@@ -187,11 +187,11 @@ public class Dictionary : IEnumerable<StringList> //, ISerializableArtifact
         return entrySet.Count;
     }
 
-    /// <summary>
-    /// Writes the current instance to the given {@link OutputStream}.
-    /// </summary>
-    /// <param name="out">{@link OutputStream}</param>
-    /// <exception cref="IOException"></exception>
+    ///// <summary>
+    ///// Writes the current instance to the given <see cref="System.IO.Stream"/>.
+    ///// </summary>
+    ///// <param name="out"><see cref="System.IO.Stream"/></param>
+    ///// <exception cref="System.IO.IOException"></exception>
     //public virtual void Serialize(OutputStream @out)
     //{
     //    IEnumerator<Entry> entryIterator = new AnonymousIEnumerator1(this);
@@ -257,7 +257,7 @@ public class Dictionary : IEnumerable<StringList> //, ISerializableArtifact
     /// Reads a dictionary which has one entry per line. The tokens inside an
     /// entry are whitespace delimited.
     /// </summary>
-    /// <param name="in">{@link Reader}</param>
+    /// <param name="in"><see cref="System.IO.TextReader"/></param>
     /// <returns>the parsed dictionary</returns>
     /// <exception cref="IOException"></exception>
     public static Dictionary ParseOneEntryPerLine(TextReader @in)
@@ -278,11 +278,11 @@ public class Dictionary : IEnumerable<StringList> //, ISerializableArtifact
     }
 
     /// <summary>
-    /// Gets this dictionary as a {@code Set<String>}. Only {@code iterator()},
-    /// {@code size()} and {@code contains(Object)} methods are implemented.
-    ///
+    /// Gets this dictionary as an <see cref="ISet{T}"/> of <see cref="string"/>. Only the
+    /// enumerator, <c>Count</c> and <c>Contains</c> members are implemented.
+    /// <para/>
     /// If this dictionary entries are multi tokens only the first token of the
-    /// entry will be part of the Set.
+    /// entry will be part of the set.
     /// </summary>
     /// <returns>a Set containing the entries of this dictionary</returns>
     public virtual ISet<string> AsStringSet()
@@ -367,9 +367,9 @@ public class Dictionary : IEnumerable<StringList> //, ISerializableArtifact
     }
 
     ///// <summary>
-    ///// Gets the Serializer Class for {@link Dictionary}
+    ///// Gets the Serializer Class for <see cref="Dictionary"/>
     ///// </summary>
-    ///// <returns>{@link DictionarySerializer}</returns>
+    ///// <returns><see cref="DictionarySerializer"/></returns>
     //public virtual Class<TWildcardTodo> GetArtifactSerializerClass()
     //{
     //    return typeof(DictionarySerializer);

@@ -31,10 +31,10 @@ using NOpenNLP.Tools.Support;
 namespace NOpenNLP.Tools.Namefind;
 
 /// <summary>
-/// The {@link TokenNameFinderModel} is the model used
-/// by a learnable {@link ITokenNameFinder}.
+/// The <see cref="TokenNameFinderModel"/> is the model used
+/// by a learnable <see cref="ITokenNameFinder"/>.
 /// </summary>
-/// <remarks>@seeNameFinderME</remarks>
+/// <seealso cref="NameFinderME"/>
 // TODO: Fix the model validation, on loading via constructors and input streams
 public class TokenNameFinderModel : BaseModel
 {
@@ -189,10 +189,10 @@ public class TokenNameFinderModel : BaseModel
 
     /// <summary>
     /// Create the artifact serializers. Currently for serializers related to
-    /// features that require external resources, such as {@code W2VClassesDictionary}
+    /// features that require external resources, such as <c>W2VClassesDictionary</c>
     /// objects, the convention is to add its element tag name as key of the serializer map.
-    /// For example, the element tag name for the {@code WordClusterFeatureGenerator} which
-    /// uses {@code W2VClassesDictionary} objects serialized by the {@code W2VClassesDictionarySerializer}
+    /// For example, the element tag name for the <c>WordClusterFeatureGenerator</c> which
+    /// uses <c>W2VClassesDictionary</c> objects serialized by the <c>W2VClassesDictionarySerializer</c>
     /// is 'wordcluster', which is the key used to add the serializer to the map.
     /// </summary>
     /// <returns>the map containing the added serializers</returns>

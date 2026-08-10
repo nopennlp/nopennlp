@@ -27,7 +27,7 @@ namespace NOpenNLP.Tools.Lemmatizer;
 public class LemmatizerFactory : BaseToolFactory
 {
     /// <summary>
-    /// Creates a {@link LemmatizerFactory} that provides the default implementation
+    /// Creates a <see cref="LemmatizerFactory"/> that provides the default implementation
     /// of the resources.
     /// </summary>
     public LemmatizerFactory()

@@ -27,7 +27,7 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 
 /// <summary>
 /// </summary>
-/// <remarks>@seeAggregatedFeatureGenerator</remarks>
+/// <seealso cref="AggregatedFeatureGenerator"/>
 public class AggregatedFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
     public AggregatedFeatureGeneratorFactory() : base()

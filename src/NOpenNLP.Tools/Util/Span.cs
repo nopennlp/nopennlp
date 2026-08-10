@@ -354,7 +354,7 @@ public class Span : IComparable<Span>
     }
 
     /// <summary>
-    /// Converts an array of {@link Span}s to an array of {@link String}s.
+    /// Converts an array of <see cref="Span"/>s to an array of <see cref="string"/>s.
     /// </summary>
     /// <param name="spans"></param>
     /// <param name="s"></param>

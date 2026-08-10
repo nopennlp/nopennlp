@@ -25,7 +25,7 @@ using System.Text;
 namespace NOpenNLP.Tools.Util;
 
 /// <summary>
-/// The {@link StringList} is an immutable list of {@link String}s.
+/// The <see cref="StringList"/> is an immutable list of <see cref="string"/>s.
 /// </summary>
 public class StringList : IEnumerable<string>
 {
@@ -51,7 +51,7 @@ public class StringList : IEnumerable<string>
     /// Note: <br/>
     /// Token Strings will be replaced by identical internal String object.
     /// </summary>
-    /// <param name="tokens">the string parts of the new {@link StringList}, an empty
+    /// <param name="tokens">the string parts of the new <see cref="StringList"/>, an empty
     ///     tokens array or null is not permitted.</param>
     public StringList(params string[] tokens)
     {
@@ -96,7 +96,7 @@ public class StringList : IEnumerable<string>
     public int Count => tokens.Length;
 
     /// <summary>
-    /// Retrieves an {@link Iterator} over all tokens.
+    /// Retrieves an <see cref="System.Collections.Generic.IEnumerator{T}"/> over all tokens.
     /// </summary>
     /// <returns>iterator over tokens</returns>
     public virtual IEnumerator<string> Iterator()

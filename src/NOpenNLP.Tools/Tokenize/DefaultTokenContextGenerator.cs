@@ -45,9 +45,7 @@ public class DefaultTokenContextGenerator : ITokenContextGenerator
         this.inducedAbbreviations = inducedAbbreviations;
     }
 
-    /* (non-Javadoc)
-     * @see opennlp.tools.tokenize.ITokenContextGenerator#getContext(java.lang.String, int)
-     */
+    /// <inheritdoc/>
     public virtual string[] GetContext(string sentence, int index)
     {
         IList<string> preds = CreateContext(sentence, index);
@@ -55,15 +53,15 @@ public class DefaultTokenContextGenerator : ITokenContextGenerator
     }
 
     /// <summary>
-    /// Returns an {@link ArrayList} of features for the specified sentence string
+    /// Returns a list of features for the specified sentence string
     /// at the specified index. Extensions of this class can override this method
-    /// to create a customized {@link ITokenContextGenerator}
+    /// to create a customized <see cref="ITokenContextGenerator"/>
     /// </summary>
     /// <param name="sentence">
     ///          the token been analyzed</param>
     /// <param name="index">
     ///          the index of the character been analyzed</param>
-    /// <returns>an {@link ArrayList} of features for the specified sentence string
+    /// <returns>a list of features for the specified sentence string
     ///         at the specified index.</returns>
     protected virtual IList<string> CreateContext(string sentence, int index)
     {

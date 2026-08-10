@@ -28,7 +28,7 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 
 /// <summary>
 /// </summary>
-/// <remarks>@seeDictionaryFeatureGenerator</remarks>
+/// <seealso cref="DictionaryFeatureGenerator"/>
 public class DictionaryFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
     public DictionaryFeatureGeneratorFactory() : base()

@@ -37,9 +37,9 @@ public abstract class BeamSearch
 /// Ratnaparkhi (1998), PhD diss, Univ. of Pennsylvania.
 /// </summary>
 /// <remarks>
-/// @seeSequence
-/// @seeSequenceValidator
-/// @seeBeamSearchContextGenerator
+/// <seealso cref="Sequence"/>
+/// <seealso cref="ISequenceValidator{T}"/>
+/// <seealso cref="IBeamSearchContextGenerator{T}"/>
 /// </remarks>
 public class BeamSearch<T> : BeamSearch, ISequenceClassificationModel<T>
 {

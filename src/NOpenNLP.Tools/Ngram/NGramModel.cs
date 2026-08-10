@@ -25,9 +25,9 @@ using System.Collections.Generic;
 namespace NOpenNLP.Tools.Ngram;
 
 /// <summary>
-/// The {@link NGramModel} can be used to crate ngrams and character ngrams.
+/// The <see cref="NGramModel"/> can be used to crate ngrams and character ngrams.
 /// </summary>
-/// <remarks>@seeStringList</remarks>
+/// <seealso cref="StringList"/>
 public class NGramModel : IEnumerable<StringList>
 {
     protected static readonly string COUNT = "count";
@@ -181,7 +181,7 @@ public class NGramModel : IEnumerable<StringList>
     }
 
     /// <summary>
-    /// Retrieves the number of {@link StringList} entries in the current instance.
+    /// Retrieves the number of <see cref="StringList"/> entries in the current instance.
     /// </summary>
     /// <returns>number of different grams</returns>
     public virtual int Size()
@@ -190,7 +190,7 @@ public class NGramModel : IEnumerable<StringList>
     }
 
     /// <summary>
-    /// Retrieves an {@link Iterator} over all {@link StringList} entries.
+    /// Retrieves an <see cref="System.Collections.Generic.IEnumerator{T}"/> over all <see cref="StringList"/> entries.
     /// </summary>
     /// <returns>iterator over all grams</returns>
     public virtual IEnumerator<StringList> Iterator()
@@ -240,12 +240,12 @@ public class NGramModel : IEnumerable<StringList>
     }
 
     /// <summary>
-    /// Creates a dictionary which contain all {@link StringList} which
-    /// are in the current {@link NGramModel}.
+    /// Creates a dictionary which contain all <see cref="StringList"/> which
+    /// are in the current <see cref="NGramModel"/>.
     ///
     /// Entries which are only different in the case are merged into one.
     ///
-    /// Calling this method is the same as calling {@link #toDictionary(boolean)} with true.
+    /// Calling this method is the same as calling <c>ToDictionary(bool)</c> with true.
     /// </summary>
     /// <returns>a dictionary of the ngrams</returns>
     public virtual NOpenNLP.Tools.Dictionary.Dictionary ToDictionary()
@@ -254,8 +254,8 @@ public class NGramModel : IEnumerable<StringList>
     }
 
     /// <summary>
-    /// Creates a dictionary which contains all {@link StringList}s which
-    /// are in the current {@link NGramModel}.
+    /// Creates a dictionary which contains all <see cref="StringList"/>s which
+    /// are in the current <see cref="NGramModel"/>.
     /// </summary>
     /// <param name="caseSensitive">Specifies whether case distinctions should be kept
     ///                      in the creation of the dictionary.</param>
@@ -271,11 +271,11 @@ public class NGramModel : IEnumerable<StringList>
         return dict;
     }
 
-    /// <summary>
-    /// Writes the ngram instance to the given {@link OutputStream}.
-    /// </summary>
-    /// <param name="out"></param>
-    /// <exception cref="IOException">if an I/O Error during writing occurs</exception>
+    ///// <summary>
+    ///// Writes the ngram instance to the given <see cref="System.IO.Stream"/>.
+    ///// </summary>
+    ///// <param name="out"></param>
+    ///// <exception cref="System.IO.IOException">if an I/O Error during writing occurs</exception>
     //public virtual void Serialize(System.IO.Stream @out)
     //{
     //    IEnumerator<Entry> entryIterator = new AnonymousIEnumerator(this);

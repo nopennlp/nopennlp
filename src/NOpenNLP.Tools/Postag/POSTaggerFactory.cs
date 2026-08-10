@@ -46,7 +46,7 @@ public class POSTaggerFactory : BaseToolFactory
     protected ITagDictionary posDictionary;
 
     /// <summary>
-    /// Creates a {@link POSTaggerFactory} that provides the default implementation
+    /// Creates a <see cref="POSTaggerFactory"/> that provides the default implementation
     /// of the resources.
     /// </summary>
     public POSTaggerFactory()
@@ -54,13 +54,13 @@ public class POSTaggerFactory : BaseToolFactory
     }
 
     /// <summary>
-    /// Creates a {@link POSTaggerFactory}. Use this constructor to
+    /// Creates a <see cref="POSTaggerFactory"/>. Use this constructor to
     /// programmatically create a factory.
     /// </summary>
     /// <param name="ngramDictionary"></param>
     /// <param name="posDictionary"></param>
     /// <remarks>
-    /// @deprecatedthis constructor is here for backward compatibility and
+    /// Deprecated: This constructor is here for backward compatibility and
     ///             is not functional anymore in the training of 1.8.x series models
     /// </remarks>
     public POSTaggerFactory(NOpenNLP.Tools.Dictionary.Dictionary ngramDictionary, ITagDictionary posDictionary)
@@ -118,8 +118,8 @@ public class POSTaggerFactory : BaseToolFactory
     }
 
     /// <summary>
-    /// Creates the {@link IAdaptiveFeatureGenerator}. Usually this
-    /// is a set of generators contained in the {@link AggregatedFeatureGenerator}.
+    /// Creates the <see cref="IAdaptiveFeatureGenerator"/>. Usually this
+    /// is a set of generators contained in the <see cref="AggregatedFeatureGenerator"/>.
     ///
     /// Note:
     /// The generators are created on every call to this method.
@@ -237,7 +237,7 @@ public class POSTaggerFactory : BaseToolFactory
 
     /// <summary>
     /// </summary>
-    /// <remarks>@deprecatedthis will be reduced in visibility and later removed</remarks>
+    /// <remarks>Deprecated: This will be reduced in visibility and later removed</remarks>
     public virtual NOpenNLP.Tools.Dictionary.Dictionary GetDictionary()
     {
         if (this.ngramDictionary == null && artifactProvider != null)

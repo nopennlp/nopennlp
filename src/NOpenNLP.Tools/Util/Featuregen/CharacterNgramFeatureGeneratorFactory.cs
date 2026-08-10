@@ -26,7 +26,7 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 
 /// <summary>
 /// </summary>
-/// <remarks>@seeCharacterNgramFeatureGenerator</remarks>
+/// <seealso cref="CharacterNgramFeatureGenerator"/>
 public class CharacterNgramFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
     public CharacterNgramFeatureGeneratorFactory() : base()

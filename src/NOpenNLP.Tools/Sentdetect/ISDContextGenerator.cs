@@ -21,7 +21,7 @@
 namespace NOpenNLP.Tools.Sentdetect;
 
 /// <summary>
-/// Interface for {@link SentenceDetectorME} context generators.
+/// Interface for <see cref="SentenceDetectorME"/> context generators.
 /// </summary>
 public interface ISDContextGenerator
 {
@@ -29,7 +29,7 @@ public interface ISDContextGenerator
     /// Returns an array of contextual features for the potential sentence boundary at the
     /// specified position within the specified string buffer.
     /// </summary>
-    /// <param name="s">The {@link String} for which sentences are being determined.</param>
+    /// <param name="s">The <see cref="string"/> for which sentences are being determined.</param>
     /// <param name="position">An index into the specified string buffer when a sentence boundary may occur.</param>
     /// <returns>an array of contextual features for the potential sentence boundary at the
     /// specified position within the specified string buffer.</returns>

@@ -42,7 +42,7 @@ public class SentenceDetectorFactory : BaseToolFactory
     private const string TOKEN_END_PROPERTY = "useTokenEnd";
 
     /// <summary>
-    /// Creates a {@link SentenceDetectorFactory} that provides the default
+    /// Creates a <see cref="SentenceDetectorFactory"/> that provides the default
     /// implementation of the resources.
     /// </summary>
     public SentenceDetectorFactory()
@@ -50,7 +50,7 @@ public class SentenceDetectorFactory : BaseToolFactory
     }
 
     /// <summary>
-    /// Creates a {@link SentenceDetectorFactory}. Use this constructor to
+    /// Creates a <see cref="SentenceDetectorFactory"/>. Use this constructor to
     /// programmatically create a factory.
     /// </summary>
     /// <param name="languageCode"></param>

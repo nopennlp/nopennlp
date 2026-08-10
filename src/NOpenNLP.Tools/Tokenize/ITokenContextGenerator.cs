@@ -21,7 +21,7 @@
 namespace NOpenNLP.Tools.Tokenize;
 
 /// <summary>
-/// Interface for {@link TokenizerME} context generators.
+/// Interface for <see cref="TokenizerME"/> context generators.
 /// </summary>
 public interface ITokenContextGenerator
 {

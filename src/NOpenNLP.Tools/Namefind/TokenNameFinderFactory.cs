@@ -39,7 +39,7 @@ public class TokenNameFinderFactory : BaseToolFactory
     private ISequenceCodec<string> seqCodec;
 
     /// <summary>
-    /// Creates a {@link TokenNameFinderFactory} that provides the default implementation
+    /// Creates a <see cref="TokenNameFinderFactory"/> that provides the default implementation
     /// of the resources.
     /// </summary>
     public TokenNameFinderFactory()
@@ -157,8 +157,8 @@ public class TokenNameFinderFactory : BaseToolFactory
     }
 
     /// <summary>
-    /// Creates the {@link IAdaptiveFeatureGenerator}. Usually this
-    /// is a set of generators contained in the {@link AggregatedFeatureGenerator}.
+    /// Creates the <see cref="IAdaptiveFeatureGenerator"/>. Usually this
+    /// is a set of generators contained in the <see cref="AggregatedFeatureGenerator"/>.
     ///
     /// Note:
     /// The generators are created on every call to this method.

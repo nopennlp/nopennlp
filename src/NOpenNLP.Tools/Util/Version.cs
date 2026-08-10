@@ -25,8 +25,8 @@ using NOpenNLP.Tools.Support;
 namespace NOpenNLP.Tools.Util;
 
 /// <summary>
-/// The {@link Version} class represents the OpenNlp Tools library version.
-/// <p>
+/// The <see cref="Version"/> class represents the OpenNlp Tools library version.
+/// <para/>
 /// The version has three parts:
 /// <ul>
 /// <li>Major: OpenNlp Tools libraries with a different major version are not interchangeable.</li>
@@ -111,8 +111,8 @@ public class Version
     /// <summary>
     /// Retrieves the version string.
     ///
-    /// The {@link #parse(String)} method can create an instance
-    /// of {@link Version} with the returned version value string.
+    /// The <see cref="Parse(string)"/> method can create an instance
+    /// of <see cref="Version"/> with the returned version value string.
     /// </summary>
     /// <returns>the version value string</returns>
     public override string ToString()
@@ -142,8 +142,8 @@ public class Version
     }
 
     /// <summary>
-    /// Return a new {@link Version} initialized to the value
-    /// represented by the specified {@link String}
+    /// Return a new <see cref="Version"/> initialized to the value
+    /// represented by the specified <see cref="string"/>
     /// </summary>
     /// <param name="version">the string to be parsed</param>
     /// <returns>the version represented by the string value</returns>

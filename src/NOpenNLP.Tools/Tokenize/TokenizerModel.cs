@@ -29,10 +29,10 @@ using System.Collections.Generic;
 namespace NOpenNLP.Tools.Tokenize;
 
 /// <summary>
-/// The {@link TokenizerModel} is the model used
-/// by a learnable {@link ITokenizer}.
+/// The <see cref="TokenizerModel"/> is the model used
+/// by a learnable <see cref="ITokenizer"/>.
 /// </summary>
-/// <remarks>@seeTokenizerME</remarks>
+/// <seealso cref="TokenizerME"/>
 public sealed class TokenizerModel : BaseModel
 {
     private const string COMPONENT_NAME = "TokenizerME";

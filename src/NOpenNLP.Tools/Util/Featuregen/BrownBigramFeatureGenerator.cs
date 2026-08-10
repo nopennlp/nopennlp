@@ -32,7 +32,7 @@ public class BrownBigramFeatureGenerator : IAdaptiveFeatureGenerator
     /// <summary>
     /// Creates a new Brown Cluster bigram feature generator.
     /// </summary>
-    /// <param name="brownCluster">A {@link BrownCluster}.</param>
+    /// <param name="brownCluster">A <see cref="BrownCluster"/>.</param>
     public BrownBigramFeatureGenerator(BrownCluster brownCluster)
     {
         this.brownCluster = brownCluster;

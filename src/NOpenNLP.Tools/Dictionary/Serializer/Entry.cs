@@ -22,14 +22,14 @@ using NOpenNLP.Tools.Util;
 namespace NOpenNLP.Tools.Dictionary.Serializer;
 
 /// <summary>
-/// An {@link Entry} is a {@link StringList} which can
+/// An <see cref="Entry"/> is a <see cref="StringList"/> which can
 /// optionally be mapped to attributes.
 ///
-/// {@link Entry}s is a read and written by the {@link DictionaryEntryPersistor}.
+/// <see cref="Entry"/>s is a read and written by the <see cref="DictionaryEntryPersistor"/>.
 /// </summary>
 /// <remarks>
-/// @seeDictionaryEntryPersistor
-/// @seeAttributes
+/// <seealso cref="DictionaryEntryPersistor"/>
+/// <seealso cref="Attributes"/>
 /// </remarks>
 public class Entry
 {
@@ -58,9 +58,9 @@ public class Entry
     }
 
     /// <summary>
-    /// Retrieves the {@link Attributes}.
+    /// Retrieves the <see cref="Attributes"/>.
     /// </summary>
-    /// <returns>the {@link Attributes}</returns>
+    /// <returns>the <see cref="Attributes"/></returns>
     public virtual Attributes GetAttributes()
     {
         return attributes;

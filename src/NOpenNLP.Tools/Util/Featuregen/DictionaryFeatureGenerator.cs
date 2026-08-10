@@ -24,13 +24,13 @@ using System.Collections.Generic;
 namespace NOpenNLP.Tools.Util.Featuregen;
 
 /// <summary>
-/// The {@link DictionaryFeatureGenerator} uses the {@link DictionaryNameFinder}
-/// to generated features for detected names based on the {@link InSpanGenerator}.
+/// The <see cref="DictionaryFeatureGenerator"/> uses the <see cref="DictionaryNameFinder"/>
+/// to generated features for detected names based on the <see cref="InSpanGenerator"/>.
 /// </summary>
 /// <remarks>
-/// @seeDictionary
-/// @seeDictionaryNameFinder
-/// @seeInSpanGenerator
+/// <seealso cref="NOpenNLP.Tools.Dictionary.Dictionary"/>
+/// <seealso cref="DictionaryNameFinder"/>
+/// <seealso cref="InSpanGenerator"/>
 /// </remarks>
 public class DictionaryFeatureGenerator : IAdaptiveFeatureGenerator
 {

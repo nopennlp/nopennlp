@@ -28,7 +28,7 @@ namespace NOpenNLP.Tools.Lemmatizer;
 /// Lemmatize by simple dictionary lookup into a hashmap built from a file
 /// containing, for each line, word\tabpostag\tablemma.
 /// </summary>
-/// <remarks>@version2014-07-08</remarks>
+/// <remarks>Version 2014-07-08.</remarks>
 public class DictionaryLemmatizer : ILemmatizer
 {
     /// <summary>

@@ -27,7 +27,7 @@ namespace NOpenNLP.Tools.Chunker;
 public class ChunkerFactory : BaseToolFactory
 {
     /// <summary>
-    /// Creates a {@link ChunkerFactory} that provides the default implementation
+    /// Creates a <see cref="ChunkerFactory"/> that provides the default implementation
     /// of the resources.
     /// </summary>
     public ChunkerFactory()

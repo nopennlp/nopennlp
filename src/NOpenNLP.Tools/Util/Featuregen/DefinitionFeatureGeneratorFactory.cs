@@ -25,7 +25,7 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 
 /// <summary>
 /// </summary>
-/// <remarks>@seeDefinitionFeatureGeneratorFactory</remarks>
+/// <seealso cref="DefinitionFeatureGeneratorFactory"/>
 public class DefinitionFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
     private static readonly string ELEMENT_NAME = "definition";

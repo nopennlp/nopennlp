@@ -25,7 +25,7 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 
 /// <summary>
 /// </summary>
-/// <remarks>@seePrefixFeatureGenerator</remarks>
+/// <seealso cref="PrefixFeatureGenerator"/>
 public class PrefixFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
     public PrefixFeatureGeneratorFactory() : base()

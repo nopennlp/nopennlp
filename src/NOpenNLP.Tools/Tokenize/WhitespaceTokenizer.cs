@@ -32,12 +32,12 @@ public class WhitespaceTokenizer : AbstractTokenizer
 {
     /// <summary>
     /// Use this static reference to retrieve an instance of the
-    /// {@link WhitespaceTokenizer}.
+    /// <see cref="WhitespaceTokenizer"/>.
     /// </summary>
     public static readonly WhitespaceTokenizer INSTANCE = new WhitespaceTokenizer();
 
     /// <summary>
-    /// Use the {@link WhitespaceTokenizer#INSTANCE} field to retrieve an instance.
+    /// Use the <see cref="WhitespaceTokenizer.INSTANCE"/> field to retrieve an instance.
     /// </summary>
     private WhitespaceTokenizer()
     {

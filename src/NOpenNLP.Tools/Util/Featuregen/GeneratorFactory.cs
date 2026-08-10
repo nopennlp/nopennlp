@@ -35,7 +35,7 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// Creates a set of feature generators based on a provided XML descriptor.
 ///
 /// Example of an XML descriptor:
-/// <p>
+/// <para/>
 /// &lt;featureGenerators name="namefind"&gt;
 ///     &lt;generator class="opennlp.tools.util.featuregen.CachedFeatureGeneratorFactory"&gt;
 ///         &lt;generator class="opennlp.tools.util.featuregen.WindowFeatureGeneratorFactory"&gt;
@@ -57,42 +57,42 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 ///         &lt;/generator&gt;
 ///     &lt;/generator&gt;
 /// &lt;/featureGenerators&gt;
-/// </p>
 ///
-/// Each XML element is mapped to a {@link GeneratorFactory.IXmlFeatureGeneratorFactory} which
+///
+/// Each XML element is mapped to a <see cref="GeneratorFactory.IXmlFeatureGeneratorFactory"/> which
 /// is responsible to process the element and create the specified
-/// {@link IAdaptiveFeatureGenerator}. Elements can contain other
+/// <see cref="IAdaptiveFeatureGenerator"/>. Elements can contain other
 /// elements in this case it is the responsibility of the mapped factory to process
 /// the child elements correctly. In some factories this leads to recursive
 /// calls the
-/// {@link GeneratorFactory.IXmlFeatureGeneratorFactory#create(Element, FeatureGeneratorResourceProvider)}
+/// <c>GeneratorFactory.IXmlFeatureGeneratorFactory.Create</c>
 /// method.
 ///
 /// In the example above the generators element is mapped to the
-/// {@link AggregatedFeatureGeneratorFactory} which then
-/// creates all the aggregated {@link IAdaptiveFeatureGenerator}s to
+/// <see cref="AggregatedFeatureGeneratorFactory"/> which then
+/// creates all the aggregated <see cref="IAdaptiveFeatureGenerator"/>s to
 /// accomplish this it evaluates the mapping with the same mechanism
 /// and gives the child element to the corresponding factories. All
 /// created generators are added to a new instance of the
-/// {@link AggregatedFeatureGenerator} which is then returned.
+/// <see cref="AggregatedFeatureGenerator"/> which is then returned.
 /// </summary>
 public class GeneratorFactory
 {
     /// <summary>
-    /// The {@link IXmlFeatureGeneratorFactory} is responsible to construct
-    /// an {@link IAdaptiveFeatureGenerator} from an given XML {@link Element}
+    /// The <see cref="IXmlFeatureGeneratorFactory"/> is responsible to construct
+    /// an <see cref="IAdaptiveFeatureGenerator"/> from an given XML <see cref="System.Xml.Linq.XElement"/>
     /// which contains all necessary configuration if any.
     /// </summary>
     internal interface IXmlFeatureGeneratorFactory
     {
         /// <summary>
-        /// Creates an {@link IAdaptiveFeatureGenerator} from a the describing
+        /// Creates an <see cref="IAdaptiveFeatureGenerator"/> from a the describing
         /// XML element.
         /// </summary>
         /// <param name="generatorElement">the element which contains the configuration</param>
         /// <param name="resourceManager">the resource manager which could be used
         ///     to access referenced resources</param>
-        /// <returns>the configured {@link IAdaptiveFeatureGenerator}</returns>
+        /// <returns>the configured <see cref="IAdaptiveFeatureGenerator"/></returns>
         IAdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager);
     }
 
@@ -380,7 +380,7 @@ public class GeneratorFactory
 
         /// <summary>
         /// </summary>
-        /// <returns>null if the subclass uses {@link #resourceManager} to instantiate</returns>
+        /// <returns>null if the subclass uses <c>resourceManager</c> to instantiate</returns>
         /// <exception cref="InvalidFormatException"></exception>
         public abstract IAdaptiveFeatureGenerator Create();
     }
@@ -459,7 +459,7 @@ public class GeneratorFactory
     }
 
     /// <summary>
-    /// Creates a {@link IAdaptiveFeatureGenerator} for the provided element.
+    /// Creates a <see cref="IAdaptiveFeatureGenerator"/> for the provided element.
     /// To accomplish this it looks up the corresponding factory by the
     /// element tag name. The factory is then responsible for the creation
     /// of the generator from the element.
@@ -539,7 +539,7 @@ public class GeneratorFactory
     }
 
     /// <summary>
-    /// Creates a {@link IAdaptiveFeatureGenerator} for the provided element.
+    /// Creates a <see cref="IAdaptiveFeatureGenerator"/> for the provided element.
     /// To accomplish this it looks up the corresponding factory by the
     /// element tag name. The factory is then responsible for the creation
     /// of the generator from the element.
@@ -616,19 +616,19 @@ public class GeneratorFactory
     }
 
     /// <summary>
-    /// Creates an {@link IAdaptiveFeatureGenerator} from an provided XML descriptor.
+    /// Creates an <see cref="IAdaptiveFeatureGenerator"/> from an provided XML descriptor.
     ///
     /// Usually this XML descriptor contains a set of nested feature generators
     /// which are then used to generate the features by one of the opennlp
     /// components.
     /// </summary>
-    /// <param name="xmlDescriptorIn">the {@link InputStream} from which the descriptor
+    /// <param name="xmlDescriptorIn">the <see cref="System.IO.Stream"/> from which the descriptor
     ///     is read, the stream remains open and must be closed by the caller.</param>
     /// <param name="resourceManager">the resource manager which is used to resolve resources
     ///     referenced by a key in the descriptor</param>
     /// <returns>created feature generators</returns>
     /// <exception cref="IOException">if an error occurs during reading from the descriptor
-    ///     {@link InputStream}</exception>
+    ///     <see cref="System.IO.Stream"/></exception>
     public static IAdaptiveFeatureGenerator Create(Stream xmlDescriptorIn, FeatureGeneratorResourceProvider resourceManager)
     {
         XmlDocument xmlDescriptorDOM = CreateDOM(xmlDescriptorIn);

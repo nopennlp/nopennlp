@@ -23,7 +23,7 @@ using System.Collections.Generic;
 namespace NOpenNLP.Tools.Util.Featuregen;
 
 /// <summary>
-/// Generates previous and next features for a given {@link IAdaptiveFeatureGenerator}.
+/// Generates previous and next features for a given <see cref="IAdaptiveFeatureGenerator"/>.
 /// The window size can be specified.
 ///
 /// Features:

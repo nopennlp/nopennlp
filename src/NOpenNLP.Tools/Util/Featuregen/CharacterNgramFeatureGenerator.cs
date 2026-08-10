@@ -24,7 +24,7 @@ using System.Collections.Generic;
 namespace NOpenNLP.Tools.Util.Featuregen;
 
 /// <summary>
-/// The {@link CharacterNgramFeatureGenerator} uses character ngrams to
+/// The <see cref="CharacterNgramFeatureGenerator"/> uses character ngrams to
 /// generate features about each token.
 /// The minimum and maximum length can be specified.
 /// </summary>

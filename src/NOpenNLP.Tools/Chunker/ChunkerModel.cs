@@ -31,10 +31,10 @@ using InvalidFormatException = NOpenNLP.Tools.Util.InvalidFormatException;
 namespace NOpenNLP.Tools.Chunker;
 
 /// <summary>
-/// The {@link ChunkerModel} is the model used
-/// by a learnable {@link IChunker}.
+/// The <see cref="ChunkerModel"/> is the model used
+/// by a learnable <see cref="IChunker"/>.
 /// </summary>
-/// <remarks>@seeChunkerME</remarks>
+/// <seealso cref="ChunkerME"/>
 public class ChunkerModel : BaseModel
 {
     private const string COMPONENT_NAME = "ChunkerME";
@@ -100,7 +100,7 @@ public class ChunkerModel : BaseModel
 
     /// <summary>
     /// </summary>
-    /// <remarks>@deprecateduse getChunkerSequenceModel instead. This method will be removed soon.</remarks>
+    /// <remarks>Deprecated: Use getChunkerSequenceModel instead. This method will be removed soon.</remarks>
     public virtual IMaxentModel GetChunkerModel()
     {
         if (artifactMap[CHUNKER_MODEL_ENTRY_NAME] is IMaxentModel)

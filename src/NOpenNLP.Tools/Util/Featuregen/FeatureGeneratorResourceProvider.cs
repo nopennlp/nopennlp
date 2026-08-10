@@ -21,12 +21,12 @@
 namespace NOpenNLP.Tools.Util.Featuregen;
 
 /// <summary>
-/// The {@link FeatureGeneratorResourceProvider} provides access to the resources
+/// The <see cref="FeatureGeneratorResourceProvider"/> provides access to the resources
 /// provided in the model. Inside the model resources are identified by a
 /// name.
-/// <p>
-/// <b>Note:</b><br>
-/// This class is not be intended to be implemented by users.<br>
+/// <para/>
+/// <b>Note:</b><br/>
+/// This class is not be intended to be implemented by users.<br/>
 /// All implementing classes must be thread safe.
 /// </summary>
 /// <param name="resourceIdentifier">the identifier which names the resource.</param>

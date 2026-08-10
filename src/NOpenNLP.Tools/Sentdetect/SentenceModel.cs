@@ -29,10 +29,10 @@ using System.Collections.Generic;
 namespace NOpenNLP.Tools.Sentdetect;
 
 /// <summary>
-/// The {@link SentenceModel} is the model used
-/// by a learnable {@link ISentenceDetector}.
+/// The <see cref="SentenceModel"/> is the model used
+/// by a learnable <see cref="ISentenceDetector"/>.
 /// </summary>
-/// <remarks>@seeSentenceDetectorME</remarks>
+/// <seealso cref="SentenceDetectorME"/>
 public class SentenceModel : BaseModel
 {
     private const string COMPONENT_NAME = "SentenceDetectorME";
@@ -49,9 +49,9 @@ public class SentenceModel : BaseModel
     /// TODO: was added in 1.5.3 -&gt; remove
     /// </summary>
     /// <remarks>
-    /// @deprecatedUse
-    ///             {@link #SentenceModel(String, IMaxentModel, Map, SentenceDetectorFactory)}
-    ///             instead and pass in a {@link SentenceDetectorFactory}
+    /// Deprecated: Use
+    ///             <c>SentenceModel</c>
+    ///             instead and pass in a <see cref="SentenceDetectorFactory"/>
     /// </remarks>
     public SentenceModel(string languageCode, IMaxentModel sentModel, bool useTokenEnd, NOpenNLP.Tools.Dictionary.Dictionary abbreviations, char[] eosCharacters, Dictionary<string, string> manifestInfoEntries)
         : this(languageCode, sentModel, manifestInfoEntries, new SentenceDetectorFactory(languageCode, useTokenEnd, abbreviations, eosCharacters))
@@ -62,9 +62,9 @@ public class SentenceModel : BaseModel
     /// TODO: was added in 1.5.3 -&gt; remove
     /// </summary>
     /// <remarks>
-    /// @deprecatedUse
-    ///             {@link #SentenceModel(String, IMaxentModel, Map, SentenceDetectorFactory)}
-    ///             instead and pass in a {@link SentenceDetectorFactory}
+    /// Deprecated: Use
+    ///             <c>SentenceModel</c>
+    ///             instead and pass in a <see cref="SentenceDetectorFactory"/>
     /// </remarks>
     public SentenceModel(string languageCode, IMaxentModel sentModel, bool useTokenEnd, NOpenNLP.Tools.Dictionary.Dictionary abbreviations, char[] eosCharacters)
         : this(languageCode, sentModel, useTokenEnd, abbreviations, eosCharacters, null)

@@ -27,9 +27,9 @@ namespace NOpenNLP.Tools.Sentdetect;
 /// Scans Strings, StringBuffers, and char[] arrays for the offsets of
 /// sentence ending characters.
 ///
-/// <p>Implementations of this interface can use regular expressions,
+/// <para/>Implementations of this interface can use regular expressions,
 /// hand-coded DFAs, and other scanning techniques to locate end of
-/// sentence offsets.</p>
+/// sentence offsets.
 /// </summary>
 public interface IEndOfSentenceScanner
 {

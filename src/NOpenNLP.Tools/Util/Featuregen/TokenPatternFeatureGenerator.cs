@@ -35,7 +35,7 @@ public class TokenPatternFeatureGenerator : IAdaptiveFeatureGenerator
 
     /// <summary>
     /// Initializes a new instance.
-    /// For tokinization the {@link SimpleTokenizer} is used.
+    /// For tokinization the <see cref="SimpleTokenizer"/> is used.
     /// </summary>
     public TokenPatternFeatureGenerator() : this(SimpleTokenizer.INSTANCE)
     {

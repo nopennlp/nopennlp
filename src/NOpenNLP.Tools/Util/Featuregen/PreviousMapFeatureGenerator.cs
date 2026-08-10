@@ -24,7 +24,7 @@ using System.Collections.Generic;
 namespace NOpenNLP.Tools.Util.Featuregen;
 
 /// <summary>
-/// This {@link IAdaptiveFeatureGenerator} generates features indicating the
+/// This <see cref="IAdaptiveFeatureGenerator"/> generates features indicating the
 /// outcome associated with a previously occuring word.
 /// </summary>
 public class PreviousMapFeatureGenerator : IAdaptiveFeatureGenerator

@@ -26,7 +26,7 @@ using System.IO;
 namespace NOpenNLP.Tools.Util.Model;
 
 /// <summary>
-/// Utility class for handling of {@link IMaxentModel}s.
+/// Utility class for handling of <see cref="IMaxentModel"/>s.
 /// </summary>
 public sealed class ModelUtil
 {
@@ -94,13 +94,13 @@ public sealed class ModelUtil
     }
 
     /// <summary>
-    /// Writes the provided {@link InputStream} into a byte array
+    /// Writes the provided <see cref="System.IO.Stream"/> into a byte array
     /// which is returned
     /// </summary>
     /// <param name="in">stream to read data for the byte array from</param>
     /// <returns>byte array with the contents of the stream</returns>
     /// <exception cref="IOException">if an exception is thrown while reading
-    ///     from the provided {@link InputStream}</exception>
+    ///     from the provided <see cref="System.IO.Stream"/></exception>
     public static byte[] Read(Stream @in)
     {
         ByteArrayOutputStream byteArrayOut = new ByteArrayOutputStream();

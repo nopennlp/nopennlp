@@ -39,16 +39,16 @@ public class POSDictionary : IEnumerable<string>, IMutableTagDictionary, ISerial
     private bool caseSensitive = true;
 
     /// <summary>
-    /// Initializes an empty case sensitive {@link POSDictionary}.
+    /// Initializes an empty case sensitive <see cref="POSDictionary"/>.
     /// </summary>
     public POSDictionary() : this(true)
     {
     }
 
     /// <summary>
-    /// Initializes an empty {@link POSDictionary}.
+    /// Initializes an empty <see cref="POSDictionary"/>.
     /// </summary>
-    /// <param name="caseSensitive">the {@link POSDictionary} case sensitivity</param>
+    /// <param name="caseSensitive">the <see cref="POSDictionary"/> case sensitivity</param>
     public POSDictionary(bool caseSensitive)
     {
         dictionary = new Dictionary<string, string[]>();
@@ -82,7 +82,7 @@ public class POSDictionary : IEnumerable<string>, IMutableTagDictionary, ISerial
     // ///          The word to be added to the dictionary.</param>
     // /// <param name="tags">
     // ///          The set of tags associated with the specified word.</param>
-    // /// <remarks>@deprecatedUse {@link #put(String, String[])} instead</remarks>
+    // /// <remarks>Deprecated: Use <c>Put(string, string[])</c> instead.</remarks>
     // // NOpenNLP: upstream is package-private and its varargs signature collides
     // // with Put(string, string[]) in C#; it is deprecated in favor of Put anyway.
     // internal virtual void AddTags(string word, params string[] tags)
@@ -118,16 +118,16 @@ public class POSDictionary : IEnumerable<string>, IMutableTagDictionary, ISerial
         return tagString.ToString();
     }
 
-    /// <summary>
-    /// Writes the {@link POSDictionary} to the given {@link Stream};
-    ///
-    /// After the serialization is finished the provided
-    /// {@link Stream} remains open.
-    /// </summary>
-    /// <param name="out">
-    ///            the {@link Stream} to write the dictionary into.</param>
-    /// <exception cref="IOException">
-    ///             if writing to the {@link Stream} fails</exception>
+    ///// <summary>
+    ///// Writes the <see cref="POSDictionary"/> to the given <see cref="System.IO.Stream"/>;
+    ///// <para/>
+    ///// After the serialization is finished the provided
+    ///// <see cref="System.IO.Stream"/> remains open.
+    ///// </summary>
+    ///// <param name="out">
+    /////            the <see cref="System.IO.Stream"/> to write the dictionary into.</param>
+    ///// <exception cref="System.IO.IOException">
+    /////             if writing to the <see cref="System.IO.Stream"/> fails</exception>
     // public virtual void Serialize(Stream @out)
     // {
     //     IEnumerator<Entry> entries = new AnonymousIEnumerator(this);
@@ -214,9 +214,9 @@ public class POSDictionary : IEnumerable<string>, IMutableTagDictionary, ISerial
     }
 
     /// <summary>
-    /// Creates a new {@link POSDictionary} from a provided {@link Stream}.
+    /// Creates a new <see cref="POSDictionary"/> from a provided <see cref="System.IO.Stream"/>.
     ///
-    /// After creation is finished the provided {@link Stream} is closed.
+    /// After creation is finished the provided <see cref="System.IO.Stream"/> is closed.
     /// </summary>
     /// <param name="in"></param>
     /// <returns>the pos dictionary</returns>

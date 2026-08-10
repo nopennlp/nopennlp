@@ -176,15 +176,15 @@ public abstract class AbstractModel : IMaxentModel
     /// information.  This method will usually only be needed by
     /// GISModelWriters.  The following values are held in the Object array
     /// which is returned by this method:
-    /// <ul>
-    /// <li>index 0: opennlp.tools.ml.maxent.Context[] containing the model
-    ///            parameters
-    /// <li>index 1: java.util.Map containing the mapping of model predicates
-    ///            to unique integers
-    /// <li>index 2: java.lang.String[] containing the names of the outcomes,
+    /// <list type="bullet">
+    /// <item><description>index 0: <see cref="Context"/>[] containing the model
+    ///            parameters</description></item>
+    /// <item><description>index 1: a dictionary containing the mapping of model predicates
+    ///            to unique integers</description></item>
+    /// <item><description>index 2: <see cref="string"/>[] containing the names of the outcomes,
     ///            stored in the index of the array which represents their
-    ///            unique ids in the model.
-    /// </ul>
+    ///            unique ids in the model.</description></item>
+    /// </list>
     /// </summary>
     /// <returns>An Object[] with the values as described above.</returns>
     public object[] GetDataStructures()

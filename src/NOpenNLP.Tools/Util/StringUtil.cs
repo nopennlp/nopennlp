@@ -33,8 +33,8 @@ public class StringUtil
     /// of the following conditions is meet:
     ///
     /// <ul>
-    /// <li>Its a {@link Character#isWhitespace(int)} whitespace.</li>
-    /// <li>Its a part of the Unicode Zs category ({@link Character#SPACE_SEPARATOR}).</li>
+    /// <li>Its a <c>char.IsWhiteSpace(char)</c> whitespace.</li>
+    /// <li>Its a part of the Unicode Zs category (<see cref="System.Globalization.UnicodeCategory.SpaceSeparator"/>).</li>
     /// </ul>
     ///
     /// <code>Character.isWhitespace(int)</code> does not include no-break spaces.
@@ -54,8 +54,8 @@ public class StringUtil
     /// of the following conditions is meet:
     ///
     /// <ul>
-    /// <li>Its a {@link Character#isWhitespace(int)} whitespace.</li>
-    /// <li>Its a part of the Unicode Zs category ({@link Character#SPACE_SEPARATOR}).</li>
+    /// <li>Its a <c>char.IsWhiteSpace(char)</c> whitespace.</li>
+    /// <li>Its a part of the Unicode Zs category (<see cref="System.Globalization.UnicodeCategory.SpaceSeparator"/>).</li>
     /// </ul>
     ///
     /// <code>Character.isWhitespace(int)</code> does not include no-break spaces.
@@ -70,7 +70,7 @@ public class StringUtil
 
     /// <summary>
     /// Converts to lower case independent of the current locale via
-    /// {@link Character#toLowerCase(char)} which uses mapping information
+    /// <c>char.ToLowerInvariant(char)</c> which uses mapping information
     /// from the UnicodeData file.
     /// </summary>
     /// <param name="string"></param>
@@ -88,7 +88,7 @@ public class StringUtil
 
     /// <summary>
     /// Converts to upper case independent of the current locale via
-    /// {@link Character#toUpperCase(char)} which uses mapping information
+    /// <c>char.ToUpperInvariant(char)</c> which uses mapping information
     /// from the UnicodeData file.
     /// </summary>
     /// <param name="string"></param>
@@ -105,12 +105,12 @@ public class StringUtil
     }
 
     /// <summary>
-    /// Returns {@code true} if {@link CharSequence#length()} is
-    /// {@code 0} or {@code null}.
+    /// Returns <c>true</c> if <see cref="string.Length"/> is
+    /// <c>0</c> or <c>null</c>.
     /// </summary>
-    /// <returns>{@code true} if {@link CharSequence#length()} is {@code 0}, otherwise
-    ///         {@code false}</returns>
-    /// <remarks>@since1.5.1</remarks>
+    /// <returns><c>true</c> if <see cref="string.Length"/> is <c>0</c>, otherwise
+    ///         <c>false</c></returns>
+    /// <remarks>Since 1.5.1.</remarks>
     public static bool IsEmpty(string theString)
     {
         return theString.Length == 0;

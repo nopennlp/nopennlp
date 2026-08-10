@@ -21,7 +21,7 @@
 namespace NOpenNLP.Tools.Postag;
 
 /// <summary>
-/// Interface that allows {@link ITagDictionary} entries to be added and removed.
+/// Interface that allows <see cref="ITagDictionary"/> entries to be added and removed.
 /// This can be used to induce the dictionary from training data.
 /// </summary>
 public interface IMutableTagDictionary : ITagDictionary

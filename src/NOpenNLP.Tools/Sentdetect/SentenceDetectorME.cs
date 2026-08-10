@@ -29,7 +29,7 @@ namespace NOpenNLP.Tools.Sentdetect;
 
 /// <summary>
 /// A sentence detector for splitting up raw text into sentences.
-/// <p>
+/// <para/>
 /// A maximum entropy model is used to evaluate end-of-sentence characters in a
 /// string to determine if they signify the end of a sentence.
 /// </summary>
@@ -56,7 +56,7 @@ public class SentenceDetectorME : ISentenceDetector
     private readonly ISDContextGenerator cgen;
 
     /// <summary>
-    /// The {@link IEndOfSentenceScanner} to use when scanning for end of sentence offsets.
+    /// The <see cref="IEndOfSentenceScanner"/> to use when scanning for end of sentence offsets.
     /// </summary>
     private readonly IEndOfSentenceScanner scanner;
 
@@ -69,7 +69,7 @@ public class SentenceDetectorME : ISentenceDetector
     /// <summary>
     /// Initializes the current instance.
     /// </summary>
-    /// <param name="model">the {@link SentenceModel}</param>
+    /// <param name="model">the <see cref="SentenceModel"/></param>
     public SentenceDetectorME(SentenceModel model)
     {
         SentenceDetectorFactory sdFactory = model.GetFactory();
@@ -82,7 +82,7 @@ public class SentenceDetectorME : ISentenceDetector
     /// <summary>
     /// </summary>
     /// <remarks>
-    /// @deprecatedUse a {@link SentenceDetectorFactory} to extend
+    /// Deprecated: Use a <see cref="SentenceDetectorFactory"/> to extend
     ///             ISentenceDetector functionality.
     /// </remarks>
     public SentenceDetectorME(SentenceModel model, Factory factory)
@@ -308,8 +308,8 @@ public class SentenceDetectorME : ISentenceDetector
     /// trained) model from flagging obvious non-breaks as breaks based
     /// on some boolean determination of a break's acceptability.
     ///
-    /// <p>The implementation here always returns true, which means
-    /// that the IMaxentModel's outcome is taken as is.</p>
+    /// <para/>The implementation here always returns true, which means
+    /// that the IMaxentModel's outcome is taken as is.
     /// </summary>
     /// <param name="s">the string in which the break occurred.</param>
     /// <param name="fromIndex">the start of the segment currently being evaluated</param>
@@ -323,9 +323,8 @@ public class SentenceDetectorME : ISentenceDetector
     // /// <summary>
     // /// </summary>
     // /// <remarks>
-    // /// @deprecatedUse
-    // ///             {@link #train(String, ObjectStream, SentenceDetectorFactory, TrainingParameters)}
-    // ///             and pass in af {@link SentenceDetectorFactory}.
+    // /// Deprecated: Use <c>Train(string, ObjectStream, SentenceDetectorFactory, TrainingParameters)</c>
+    // ///             and pass in a <see cref="SentenceDetectorFactory"/>.
     // /// </remarks>
     // public static SentenceModel Train(string languageCode, ObjectStream<SentenceSample> samples, bool useTokenEnd, NOpenNLP.Tools.Dictionary.Dictionary abbreviations, TrainingParameters mlParams)
     // {
@@ -347,9 +346,8 @@ public class SentenceDetectorME : ISentenceDetector
     // /// <summary>
     // /// </summary>
     // /// <remarks>
-    // /// @deprecatedUse
-    // ///             {@link #train(String, ObjectStream, SentenceDetectorFactory, TrainingParameters)}
-    // ///             and pass in af {@link SentenceDetectorFactory}.
+    // /// Deprecated: Use <c>Train(string, ObjectStream, SentenceDetectorFactory, TrainingParameters)</c>
+    // ///             and pass in a <see cref="SentenceDetectorFactory"/>.
     // /// </remarks>
     // public static SentenceModel Train(string languageCode, ObjectStream<SentenceSample> samples, bool useTokenEnd, NOpenNLP.Tools.Dictionary.Dictionary abbreviations)
     // {

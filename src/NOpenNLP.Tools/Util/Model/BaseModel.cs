@@ -65,8 +65,8 @@ public abstract class BaseModel : IArtifactProvider
 
     /// <summary>
     /// Initializes the current instance. The sub-class constructor should call the
-    /// method {@link #checkArtifactMap()} to check the artifact map is OK.
-    /// <p>
+    /// method <c>CheckArtifactMap()</c> to check the artifact map is OK.
+    /// <para/>
     /// Sub-classes will have access to custom artifacts and serializers provided
     /// by the factory.
     /// </summary>
@@ -129,7 +129,7 @@ public abstract class BaseModel : IArtifactProvider
 
     /// <summary>
     /// Initializes the current instance. The sub-class constructor should call the
-    /// method {@link #checkArtifactMap()} to check the artifact map is OK.
+    /// method <c>CheckArtifactMap()</c> to check the artifact map is OK.
     /// </summary>
     /// <param name="componentName">
     ///          the component name</param>
@@ -246,7 +246,7 @@ public abstract class BaseModel : IArtifactProvider
     /// Sub-classes should override this method if their module has a default
     /// BaseToolFactory sub-class.
     /// </summary>
-    /// <returns>the default {@link BaseToolFactory} for the module, or null if none.</returns>
+    /// <returns>the default <see cref="BaseToolFactory"/> for the module, or null if none.</returns>
     protected virtual Type? GetDefaultFactory()
     {
         return null;
@@ -337,11 +337,11 @@ public abstract class BaseModel : IArtifactProvider
     }
 
     /// <summary>
-    /// Registers all {@link IArtifactSerializer} for their artifact file name extensions.
-    /// The registered {@link IArtifactSerializer} are used to create and serialize
+    /// Registers all <see cref="IArtifactSerializer"/> for their artifact file name extensions.
+    /// The registered <see cref="IArtifactSerializer"/> are used to create and serialize
     /// resources in the model package.
     ///
-    /// Override this method to register custom {@link IArtifactSerializer}s.
+    /// Override this method to register custom <see cref="IArtifactSerializer"/>s.
     ///
     /// Note:
     /// Subclasses should generally invoke super.createArtifactSerializers at the beginning
@@ -350,7 +350,7 @@ public abstract class BaseModel : IArtifactProvider
     /// This method is called during construction.
     /// </summary>
     /// <param name="serializers">the key of the map is the file extension used to lookup
-    ///     the {@link IArtifactSerializer}.</param>
+    ///     the <see cref="IArtifactSerializer"/>.</param>
     public virtual void CreateArtifactSerializers(Dictionary<string, IArtifactSerializer> serializers)
     {
         if (this.toolFactory != null)
@@ -364,7 +364,7 @@ public abstract class BaseModel : IArtifactProvider
 
     /// <summary>
     /// Validates the parsed artifacts. If something is not
-    /// valid subclasses should throw an {@link InvalidFormatException}.
+    /// valid subclasses should throw an <see cref="InvalidFormatException"/>.
     ///
     /// Note:
     /// Subclasses should generally invoke super.validateArtifactMap at the beginning

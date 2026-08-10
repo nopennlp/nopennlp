@@ -30,10 +30,10 @@ using System.Collections.Generic;
 namespace NOpenNLP.Tools.Postag;
 
 /// <summary>
-/// The {@link POSModel} is the model used
-/// by a learnable {@link IPOSTagger}.
+/// The <see cref="POSModel"/> is the model used
+/// by a learnable <see cref="IPOSTagger"/>.
 /// </summary>
-/// <remarks>@seePOSTaggerME</remarks>
+/// <seealso cref="POSTaggerME"/>
 public sealed class POSModel : BaseModel, ISerializableArtifact
 {
     private const string COMPONENT_NAME = "POSTaggerME";
@@ -110,7 +110,7 @@ public sealed class POSModel : BaseModel, ISerializableArtifact
     /// <summary>
     /// </summary>
     /// <remarks>
-    /// @deprecateduse getPosSequenceModel instead. This method will be removed soon.
+    /// Deprecated: Use getPosSequenceModel instead. This method will be removed soon.
     /// Only required for Parser 1.5.x backward compatibility. Newer models don't need this anymore.
     /// </remarks>
     public IMaxentModel GetPosModel()

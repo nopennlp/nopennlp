@@ -24,7 +24,7 @@ using System.Collections.Generic;
 namespace NOpenNLP.Tools.Util.Featuregen;
 
 /// <summary>
-/// Caches features of the aggregated {@link IAdaptiveFeatureGenerator}s.
+/// Caches features of the aggregated <see cref="IAdaptiveFeatureGenerator"/>s.
 /// </summary>
 public class CachedFeatureGenerator : IAdaptiveFeatureGenerator
 {

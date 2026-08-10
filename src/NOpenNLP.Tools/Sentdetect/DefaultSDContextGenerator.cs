@@ -88,9 +88,7 @@ public class DefaultSDContextGenerator : ISDContextGenerator
         return new string ([c]);
     }
 
-    /* (non-Javadoc)
-     * @see opennlp.tools.sentdetect.ISDContextGenerator#getContext(java.lang.StringBuffer, int)
-     */
+    /// <inheritdoc/>
     public virtual string[] GetContext(string sb, int position)
     {
         /*
@@ -124,7 +122,7 @@ public class DefaultSDContextGenerator : ISDContextGenerator
         int c = position;
         {
 
-            ///assign prefix, stop if you run into a period though otherwise stop at space
+            // assign prefix, stop if you run into a period though otherwise stop at space
             while (--c > prefixStart)
             {
                 if (eosCharacters.Contains(sb[c]))
@@ -178,7 +176,7 @@ public class DefaultSDContextGenerator : ISDContextGenerator
     /// <param name="suffix">String following the eos character in the eos token.</param>
     /// <param name="previous">Space delimited token preceding token containing eos character.</param>
     /// <param name="next">Space delimited token following token containing eos character.</param>
-    /// <remarks>@deprecateduse {@link #collectFeatures(String, String, String, String, char)} instead.</remarks>
+    /// <remarks>Deprecated: Use <c>CollectFeatures</c> instead.</remarks>
     protected virtual void CollectFeatures(string prefix, string suffix, string previous, string next)
     {
         CollectFeatures(prefix, suffix, previous, next, (char?)null);

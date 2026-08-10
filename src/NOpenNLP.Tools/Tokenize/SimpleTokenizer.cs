@@ -56,7 +56,7 @@ public class SimpleTokenizer : AbstractTokenizer
     /// <summary>
     /// </summary>
     /// <remarks>
-    /// @deprecatedUse INSTANCE field instead to obtain an instance, constructor
+    /// Deprecated: Use INSTANCE field instead to obtain an instance, constructor
     ///     will be made private in the future.
     /// </remarks>
     public SimpleTokenizer()

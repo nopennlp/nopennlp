@@ -25,7 +25,7 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 
 /// <summary>
 /// </summary>
-/// <remarks>@seePreviousMapFeatureGenerator</remarks>
+/// <seealso cref="PreviousMapFeatureGenerator"/>
 public class PreviousMapFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
     public PreviousMapFeatureGeneratorFactory() : base()

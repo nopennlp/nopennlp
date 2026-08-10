@@ -30,10 +30,10 @@ using NOpenNLP.Tools.Support;
 namespace NOpenNLP.Tools.Lemmatizer;
 
 /// <summary>
-/// The {@link LemmatizerModel} is the model used
-/// by a learnable {@link ILemmatizer}.
+/// The <see cref="LemmatizerModel"/> is the model used
+/// by a learnable <see cref="ILemmatizer"/>.
 /// </summary>
-/// <remarks>@seeLemmatizerME</remarks>
+/// <seealso cref="LemmatizerME"/>
 public class LemmatizerModel : BaseModel
 {
     private const string COMPONENT_NAME = "StatisticalLemmatizer";

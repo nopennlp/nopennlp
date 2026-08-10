@@ -24,7 +24,7 @@ using System.Text;
 namespace NOpenNLP.Tools.Sentdetect;
 
 /// <summary>
-/// Default implementation of the {@link IEndOfSentenceScanner}.
+/// Default implementation of the <see cref="IEndOfSentenceScanner"/>.
 /// It uses an character array with possible end of sentence chars
 /// to identify potential sentence endings.
 /// </summary>

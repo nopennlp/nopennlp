@@ -26,7 +26,7 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 
 /// <summary>
 /// </summary>
-/// <remarks>@seeCachedFeatureGenerator</remarks>
+/// <seealso cref="CachedFeatureGenerator"/>
 public class CachedFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
     public CachedFeatureGeneratorFactory() : base()

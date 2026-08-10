@@ -25,8 +25,8 @@ using System.Security;
 namespace NOpenNLP.Tools.Util.Ext;
 
 /// <summary>
-/// The {@link ExtensionLoader} is responsible to load extensions to the OpenNLP library.
-/// <p>
+/// The <see cref="ExtensionLoader"/> is responsible to load extensions to the OpenNLP library.
+/// <para/>
 /// <b>Note:</b> Do not use this class, internal use only!
 /// </summary>
 public class ExtensionLoader
@@ -106,10 +106,10 @@ public class ExtensionLoader
     // Pass in the type (interface) of the class to load
     /// <summary>
     /// Instantiates an user provided extension to OpenNLP.
-    /// <p>
+    /// <para/>
     /// The extension is either loaded from the class path or if running
     /// inside an OSGi environment via an OSGi service.
-    /// <p>
+    /// <para/>
     /// Initially it tries using the public default
     /// constructor. If it is not found, it will check if the class follows the singleton
     /// pattern: a static field named <code>INSTANCE</code> that returns an object of the type

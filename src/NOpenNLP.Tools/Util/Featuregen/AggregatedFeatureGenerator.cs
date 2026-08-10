@@ -25,13 +25,13 @@ using J2N.Collections.Generic.Extensions;
 namespace NOpenNLP.Tools.Util.Featuregen;
 
 /// <summary>
-/// The {@link AggregatedFeatureGenerator} aggregates a set of
-/// {@link IAdaptiveFeatureGenerator}s and calls them to generate the features.
+/// The <see cref="AggregatedFeatureGenerator"/> aggregates a set of
+/// <see cref="IAdaptiveFeatureGenerator"/>s and calls them to generate the features.
 /// </summary>
 public class AggregatedFeatureGenerator : IAdaptiveFeatureGenerator
 {
     /// <summary>
-    /// Contains all aggregated {@link IAdaptiveFeatureGenerator}s.
+    /// Contains all aggregated <see cref="IAdaptiveFeatureGenerator"/>s.
     /// </summary>
     private readonly ICollection<IAdaptiveFeatureGenerator> generators; // NOpenNLP: made readonly
 
@@ -59,8 +59,8 @@ public class AggregatedFeatureGenerator : IAdaptiveFeatureGenerator
     }
 
     /// <summary>
-    /// Calls the {@link IAdaptiveFeatureGenerator#clearAdaptiveData()} method
-    /// on all aggregated {@link IAdaptiveFeatureGenerator}s.
+    /// Calls the <see cref="IAdaptiveFeatureGenerator.ClearAdaptiveData()"/> method
+    /// on all aggregated <see cref="IAdaptiveFeatureGenerator"/>s.
     /// </summary>
     public virtual void ClearAdaptiveData()
     {
@@ -71,8 +71,8 @@ public class AggregatedFeatureGenerator : IAdaptiveFeatureGenerator
     }
 
     /// <summary>
-    /// Calls the {@link IAdaptiveFeatureGenerator#createFeatures(List, String[], int, String[])}
-    /// method on all aggregated {@link IAdaptiveFeatureGenerator}s.
+    /// Calls the <see cref="IAdaptiveFeatureGenerator.CreateFeatures(System.Collections.Generic.IList{string}, string[], int, string[])"/>
+    /// method on all aggregated <see cref="IAdaptiveFeatureGenerator"/>s.
     /// </summary>
     public virtual void CreateFeatures(IList<string> features, string[] tokens, int index, string[] previousOutcomes)
     {
@@ -83,8 +83,8 @@ public class AggregatedFeatureGenerator : IAdaptiveFeatureGenerator
     }
 
     /// <summary>
-    /// Calls the {@link IAdaptiveFeatureGenerator#updateAdaptiveData(String[], String[])}
-    /// method on all aggregated {@link IAdaptiveFeatureGenerator}s.
+    /// Calls the <see cref="IAdaptiveFeatureGenerator.UpdateAdaptiveData(string[], string[])"/>
+    /// method on all aggregated <see cref="IAdaptiveFeatureGenerator"/>s.
     /// </summary>
     public virtual void UpdateAdaptiveData(string[] tokens, string[] outcomes)
     {
@@ -95,8 +95,8 @@ public class AggregatedFeatureGenerator : IAdaptiveFeatureGenerator
     }
 
     /// <summary>
-    /// Retrieves a {@link Collections} of all aggregated
-    /// {@link IAdaptiveFeatureGenerator}s.
+    /// Retrieves a collection of all aggregated
+    /// <see cref="IAdaptiveFeatureGenerator"/>s.
     /// </summary>
     /// <returns>all aggregated generators</returns>
     public virtual ICollection<IAdaptiveFeatureGenerator> GetGenerators()

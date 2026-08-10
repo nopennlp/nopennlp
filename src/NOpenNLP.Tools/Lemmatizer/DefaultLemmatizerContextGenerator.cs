@@ -30,7 +30,7 @@ namespace NOpenNLP.Tools.Lemmatizer;
 /// Architecture for Lexical Functional Grammar Parsing. PhD dissertation,
 /// Dublin City University
 /// </summary>
-/// <remarks>@version2016-02-15</remarks>
+/// <remarks>Version 2016-02-15.</remarks>
 public class DefaultLemmatizerContextGenerator : ILemmatizerContextGenerator
 {
     private const int PREFIX_LENGTH = 5;

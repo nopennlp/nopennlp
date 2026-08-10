@@ -254,7 +254,7 @@ public class NameFinderME : ITokenNameFinder
     /// <summary>
     /// Removes spans with are intersecting or crossing in anyway.
     ///
-    /// <p>
+    /// <para/>
     /// The following rules are used to remove the spans:<br/>
     /// Identical spans: The first span in the array after sorting it remains<br/>
     /// Intersecting spans: The first span after sorting remains<br/>

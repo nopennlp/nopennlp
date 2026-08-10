@@ -24,14 +24,14 @@ using System.IO;
 namespace NOpenNLP.Tools.Util.Model;
 
 /// <summary>
-/// Responsible to create an artifact from an {@link InputStream}.
+/// Responsible to create an artifact from an <see cref="System.IO.Stream"/>.
 /// </summary>
 public interface IArtifactSerializer<T> : IArtifactSerializer
 {
     /// <summary>
-    /// Creates the artifact from the provided {@link InputStream}.
+    /// Creates the artifact from the provided <see cref="System.IO.Stream"/>.
     ///
-    /// The {@link InputStream} remains open.
+    /// The <see cref="System.IO.Stream"/> remains open.
     /// </summary>
     /// <returns>the artifact</returns>
     T Create(Stream @in);

@@ -25,7 +25,7 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 
 /// <summary>
 /// </summary>
-/// <remarks>@seeSentenceFeatureGenerator</remarks>
+/// <seealso cref="SentenceFeatureGenerator"/>
 public class SentenceFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
     public SentenceFeatureGeneratorFactory() : base()

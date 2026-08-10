@@ -25,7 +25,7 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 
 /// <summary>
 /// </summary>
-/// <remarks>@seeTokenPatternFeatureGenerator</remarks>
+/// <seealso cref="TokenPatternFeatureGenerator"/>
 public class TokenPatternFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
     public TokenPatternFeatureGeneratorFactory() : base()

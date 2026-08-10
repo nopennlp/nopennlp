@@ -25,7 +25,7 @@ using System.Collections.Generic;
 namespace NOpenNLP.Tools.Dictionary.Serializer;
 
 /// <summary>
-/// The {@link Attributes} class stores name value pairs.
+/// The <see cref="Attributes"/> class stores name value pairs.
 ///
 /// Problem: The HashMap for storing the name value pairs has a very high
 /// memory footprint, replace it.
@@ -67,7 +67,7 @@ public class Attributes : IEnumerable<string>
     /// <summary>
     /// Iterates over the keys.
     /// </summary>
-    /// <returns>key-{@link Iterator}</returns>
+    /// <returns>key-<see cref="System.Collections.Generic.IEnumerator{T}"/></returns>
     public virtual IEnumerator<string> GetEnumerator()
     {
         return mNameValueMap.Keys.GetEnumerator();

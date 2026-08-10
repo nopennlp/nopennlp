@@ -25,7 +25,7 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 
 /// <summary>
 /// </summary>
-/// <remarks>@seeSuffixFeatureGenerator</remarks>
+/// <seealso cref="SuffixFeatureGenerator"/>
 public class SuffixFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
     public SuffixFeatureGeneratorFactory() : base()

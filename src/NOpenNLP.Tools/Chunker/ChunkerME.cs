@@ -47,12 +47,12 @@ public class ChunkerME : IChunker
     /// </summary>
     /// <param name="model">The model for this chunker.</param>
     /// <param name="beamSize">The size of the beam that should be used when decoding sequences.</param>
-    /// <param name="sequenceValidator">The {@link ISequenceValidator} to determines whether the outcome
+    /// <param name="sequenceValidator">The <see cref="ISequenceValidator{T}"/> to determines whether the outcome
     ///        is valid for the preceding sequence. This can be used to implement constraints
     ///        on what sequences are valid.</param>
     /// <remarks>
-    /// @deprecatedUse {@link #ChunkerME(ChunkerModel, int)} instead and use the {@link ChunkerFactory}
-    ///     to configure the {@link ISequenceValidator} and {@link IChunkerContextGenerator}.
+    /// Deprecated: Use <c>ChunkerME(ChunkerModel, int)</c> instead and use the <see cref="ChunkerFactory"/>
+    ///     to configure the <see cref="ISequenceValidator{T}"/> and <see cref="IChunkerContextGenerator"/>.
     /// </remarks>
     private ChunkerME(ChunkerModel model, int beamSize, ISequenceValidator<TokenTag> sequenceValidator, IChunkerContextGenerator contextGenerator)
     {
@@ -74,7 +74,7 @@ public class ChunkerME : IChunker
     /// </summary>
     /// <param name="model">The model for this chunker.</param>
     /// <param name="beamSize">The size of the beam that should be used when decoding sequences.</param>
-    /// <remarks>@deprecatedbeam size is now stored inside the model</remarks>
+    /// <remarks>Deprecated: Beam size is now stored inside the model</remarks>
     private ChunkerME(ChunkerModel model, int beamSize)
     {
         contextGenerator = model.GetFactory().GetContextGenerator();

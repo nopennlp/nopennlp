@@ -29,9 +29,9 @@ using System.Collections.Generic;
 namespace NOpenNLP.Tools.Tokenize;
 
 /// <summary>
-/// The factory that provides {@link ITokenizer} default implementations and
+/// The factory that provides <see cref="ITokenizer"/> default implementations and
 /// resources. Users can extend this class if their application requires
-/// overriding the {@link ITokenContextGenerator}, {@link NOpenNLP.Tools.Dictionary.Dictionary} etc.
+/// overriding the <see cref="ITokenContextGenerator"/>, <see cref="NOpenNLP.Tools.Dictionary.Dictionary"/> etc.
 /// </summary>
 public class TokenizerFactory : BaseToolFactory
 {
@@ -44,7 +44,7 @@ public class TokenizerFactory : BaseToolFactory
     private const string ALPHA_NUMERIC_PATTERN = "alphaNumericPattern";
 
     /// <summary>
-    /// Creates a {@link TokenizerFactory} that provides the default implementation
+    /// Creates a <see cref="TokenizerFactory"/> that provides the default implementation
     /// of the resources.
     /// </summary>
     public TokenizerFactory()
@@ -52,7 +52,7 @@ public class TokenizerFactory : BaseToolFactory
     }
 
     /// <summary>
-    /// Creates a {@link TokenizerFactory}. Use this constructor to
+    /// Creates a <see cref="TokenizerFactory"/>. Use this constructor to
     /// programmatically create a factory.
     /// </summary>
     /// <param name="languageCode">
@@ -63,7 +63,7 @@ public class TokenizerFactory : BaseToolFactory
     ///          if true alpha numerics are skipped</param>
     /// <param name="alphaNumericPattern">
     ///          null or a custom alphanumeric pattern (default is:
-    ///          "^[A-Za-z0-9]+$", provided by {@link Factory#DEFAULT_ALPHANUMERIC}</param>
+    ///          "^[A-Za-z0-9]+$", provided by <see cref="Lang.Factory.DEFAULT_ALPHANUMERIC"/></param>
     public TokenizerFactory(string languageCode, NOpenNLP.Tools.Dictionary.Dictionary abbreviationDictionary, bool useAlphaNumericOptimization, Regex alphaNumericPattern)
     {
         this.Init(languageCode, abbreviationDictionary, useAlphaNumericOptimization, alphaNumericPattern);
@@ -116,9 +116,9 @@ public class TokenizerFactory : BaseToolFactory
     }
 
     /// <summary>
-    /// Factory method the framework uses create a new {@link TokenizerFactory}.
+    /// Factory method the framework uses create a new <see cref="TokenizerFactory"/>.
     /// </summary>
-    /// <param name="subclassName">the name of the class implementing the {@link TokenizerFactory}</param>
+    /// <param name="subclassName">the name of the class implementing the <see cref="TokenizerFactory"/></param>
     /// <param name="languageCode">the language code the tokenizer should use</param>
     /// <param name="abbreviationDictionary">an optional dictionary containing abbreviations, or null if not present</param>
     /// <param name="useAlphaNumericOptimization">indicate if the alpha numeric optimization

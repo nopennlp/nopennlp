@@ -28,7 +28,7 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 
 /// <summary>
 /// </summary>
-/// <remarks>@seePOSTaggerNameFeatureGenerator</remarks>
+/// <seealso cref="POSTaggerNameFeatureGenerator"/>
 public class POSTaggerNameFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
     public POSTaggerNameFeatureGeneratorFactory() : base()

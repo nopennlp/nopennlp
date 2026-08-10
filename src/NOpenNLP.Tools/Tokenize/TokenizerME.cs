@@ -32,37 +32,37 @@ namespace NOpenNLP.Tools.Tokenize;
 /// based off of Jeff Reynar's UPenn thesis "Topic Segmentation:
 /// Algorithms and Applications.", which is available from his
 /// homepage: <a href="http://www.cis.upenn.edu/~jcreynar">http://www.cis.upenn.edu/~jcreynar</a>.
-/// <p>
+/// <para/>
 /// This tokenizer needs a statistical model to tokenize a text which reproduces
 /// the tokenization observed in the training data used to create the model.
-/// The {@link TokenizerModel} class encapsulates the model and provides
+/// The <see cref="TokenizerModel"/> class encapsulates the model and provides
 /// methods to create it from the binary representation.
-/// <p>
+/// <para/>
 /// A tokenizer instance is not thread safe. For each thread one tokenizer
 /// must be instantiated which can share one <code>TokenizerModel</code> instance
 /// to safe memory.
-/// <p>
-/// To train a new model {{@link #train(ObjectStream, TokenizerFactory, TrainingParameters)} method
+/// <para/>
+/// To train a new model {<c>Train</c> method
 /// can be used.
-/// <p>
+/// <para/>
 /// Sample usage:
-/// <p>
+/// <para/>
 /// <code>
-/// Stream modelIn;<br>
-/// <br>
-/// ...<br>
-/// <br>
-/// TokenizerModel model = TokenizerModel(modelIn);<br>
-/// <br>
-/// ITokenizer tokenizer = new TokenizerME(model);<br>
-/// <br>
+/// Stream modelIn;<br/>
+/// <br/>
+/// ...<br/>
+/// <br/>
+/// TokenizerModel model = TokenizerModel(modelIn);<br/>
+/// <br/>
+/// ITokenizer tokenizer = new TokenizerME(model);<br/>
+/// <br/>
 /// String tokens[] = tokenizer.tokenize("A sentence to be tokenized.");
 /// </code>
 /// </summary>
 /// <remarks>
-/// @seeTokenizer
-/// @seeTokenizerModel
-/// @seeTokenSample
+/// <seealso cref="ITokenizer"/>
+/// <seealso cref="TokenizerModel"/>
+/// See <c>TokenSample</c>.
 /// </remarks>
 public class TokenizerME : AbstractTokenizer
 {
@@ -79,7 +79,7 @@ public class TokenizerME : AbstractTokenizer
     /// <summary>
     /// Alpha-Numeric Regex
     /// </summary>
-    /// <remarks>@deprecatedAs of release 1.5.2, replaced by {@link Factory#getAlphanumeric(String)}</remarks>
+    /// <remarks>Deprecated: As of release 1.5.2, replaced by <see cref="Lang.Factory.GetAlphanumeric(string)"/></remarks>
     public static readonly Regex alphaNumeric = new Regex(Factory.DEFAULT_ALPHANUMERIC);
 
     private readonly Regex alphanumeric;
@@ -122,7 +122,7 @@ public class TokenizerME : AbstractTokenizer
     /// <summary>
     /// </summary>
     /// <remarks>
-    /// @deprecateduse {@link TokenizerFactory} to extend the ITokenizer
+    /// Deprecated: Use <see cref="TokenizerFactory"/> to extend the ITokenizer
     ///             functionality
     /// </remarks>
     public TokenizerME(TokenizerModel model, Factory factory)
@@ -148,7 +148,7 @@ public class TokenizerME : AbstractTokenizer
 
     /// <summary>
     /// Returns the probabilities associated with the most recent
-    /// calls to {@link TokenizerME#tokenize(String)} or {@link TokenizerME#tokenizePos(String)}.
+    /// calls to <see cref="AbstractTokenizer.Tokenize(string)"/> or <see cref="TokenizerME.TokenizePos(string)"/>.
     /// </summary>
     /// <returns>probability for each token returned for the most recent
     ///     call to tokenize.  If not applicable an empty array is returned.</returns>

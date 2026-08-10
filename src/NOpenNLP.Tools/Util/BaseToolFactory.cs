@@ -28,13 +28,13 @@ namespace NOpenNLP.Tools.Util;
 /// Base class for all tool factories.
 ///
 /// Extensions of this class should:
-/// <ul>
-///  <li>implement an empty constructor (TODO is it necessary?)
-///  <li>implement a constructor that takes the {@link IArtifactProvider} and
-///      calls {@code BaseToolFactory(Map)}
-///  <li>override {@link #createArtifactMap()} and
-///      {@link #createArtifactSerializersMap()} methods if necessary.
-/// </ul>
+/// <list type="bullet">
+///  <item><description>implement an empty constructor (TODO is it necessary?)</description></item>
+///  <item><description>implement a constructor that takes the <see cref="IArtifactProvider"/> and
+///      calls <c>BaseToolFactory(Map)</c></description></item>
+///  <item><description>override <see cref="CreateArtifactMap()"/> and
+///      <see cref="CreateArtifactSerializersMap()"/> methods if necessary.</description></item>
+/// </list>
 /// </summary>
 public abstract class BaseToolFactory
 {
@@ -55,11 +55,11 @@ public abstract class BaseToolFactory
     }
 
     /// <summary>
-    /// Creates a {@link Map} with pairs of keys and {@link IArtifactSerializer}.
+    /// Creates an <see cref="IDictionary{TKey, TValue}"/> with pairs of keys and <see cref="IArtifactSerializer"/>.
     /// The models implementation should call this method from
-    /// {@code BaseModel#createArtifactSerializersMap}
-    /// <p>
-    /// The base implementation will return a {@link HashMap} that should be
+    /// <c>BaseModel.CreateArtifactSerializersMap</c>
+    /// <para/>
+    /// The base implementation will return a <see cref="Dictionary{TKey, TValue}"/> that should be
     /// populated by sub-classes.
     /// </summary>
     public virtual Dictionary<string, IArtifactSerializer> CreateArtifactSerializersMap()
@@ -68,11 +68,11 @@ public abstract class BaseToolFactory
     }
 
     /// <summary>
-    /// Creates a {@link Map} with pairs of keys and objects. The models
+    /// Creates an <see cref="IDictionary{TKey, TValue}"/> with pairs of keys and objects. The models
     /// implementation should call this constructor that creates a model
     /// programmatically.
-    /// <p>
-    /// The base implementation will return a {@link HashMap} that should be
+    /// <para/>
+    /// The base implementation will return a <see cref="Dictionary{TKey, TValue}"/> that should be
     /// populated by sub-classes.
     /// </summary>
     public virtual Dictionary<string, object> CreateArtifactMap()
@@ -91,7 +91,7 @@ public abstract class BaseToolFactory
 
     /// <summary>
     /// Validates the parsed artifacts. If something is not
-    /// valid subclasses should throw an {@link InvalidFormatException}.
+    /// valid subclasses should throw an <see cref="InvalidFormatException"/>.
     ///
     /// Note:
     /// Subclasses should generally invoke super.validateArtifactMap at the beginning

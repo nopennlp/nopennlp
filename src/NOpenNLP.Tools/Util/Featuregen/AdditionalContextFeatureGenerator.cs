@@ -23,7 +23,7 @@ using System.Collections.Generic;
 namespace NOpenNLP.Tools.Util.Featuregen;
 
 /// <summary>
-/// The {@link AdditionalContextFeatureGenerator} generates the context from the passed
+/// The <see cref="AdditionalContextFeatureGenerator"/> generates the context from the passed
 /// in additional context.
 /// </summary>
 public class AdditionalContextFeatureGenerator : IAdaptiveFeatureGenerator
