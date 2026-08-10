@@ -1,0 +1,19 @@
+NOpenNLP
+Copyright 2026 NOpenNLP Contributors
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+This product contains a modified C# port of Apache OpenNLP 1.9.1
+(https://opennlp.apache.org/), specifically the opennlp-tools module.
+The original Java source is:
+
+    Apache OpenNLP
+    Copyright 2017 The Apache Software Foundation
+
+The ported source has been modified from the original: translated from
+Java to C#, renamed to the NOpenNLP.Tools namespace, and adapted to .NET
+idioms and APIs.
+
+NOpenNLP is not affiliated with, endorsed by, or a product of
+The Apache Software Foundation.

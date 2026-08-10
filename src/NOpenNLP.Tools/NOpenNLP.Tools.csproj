@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net10.0;net8.0;netstandard2.0</TargetFrameworks>
+    <LangVersion>12.0</LangVersion>
+    <RootNamespace>NOpenNLP.Tools</RootNamespace>
+    <AssemblyName>NOpenNLP.Tools</AssemblyName>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- 1591/1573: the ported Java doc comments do not cover every member or param. -->
+    <NoWarn>$(NoWarn);1591;1573</NoWarn>
+    <NeutralLanguage>en</NeutralLanguage>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Packaging">
+    <PackageId>NOpenNLP.Tools</PackageId>
+    <Version>1.9.1-alpha.1</Version>
+    <Authors>NOpenNLP Contributors</Authors>
+    <Description>A C# port of the Apache OpenNLP 1.9.1 inference APIs (opennlp-tools). This product includes software developed at The Apache Software Foundation. Not affiliated with or endorsed by the Apache Software Foundation.</Description>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageTags>nlp;opennlp;tokenizer;pos;lemmatizer;chunker;ner;maxent</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="J2N" Version="2.1.0" />
+  </ItemGroup>
+
+  <!-- System.HashCode is not part of netstandard2.0. -->
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <PackageReference Include="Microsoft.Bcl.HashCode" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Util\opennlp.version" />
+    <EmbeddedResource Include="Util\opennlp.version" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\NOTICE" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>
