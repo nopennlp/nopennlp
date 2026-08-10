@@ -14,8 +14,15 @@
   </PropertyGroup>
 
   <PropertyGroup Label="Packaging">
+    <!--
+      No version properties are set here on purpose. Nerdbank.GitVersioning
+      derives Version, PackageVersion, AssemblyVersion, FileVersion and
+      AssemblyInformationalVersion from version.json plus the git height, and
+      overwrites any value set here without warning. VersionPrefix and
+      VersionSuffix are worse: nbgv never reads or clears them, so a stale value
+      would silently survive. Set the version in version.json instead.
+    -->
     <PackageId>NOpenNLP.Tools</PackageId>
-    <Version>1.9.1-alpha.1</Version>
     <Authors>NOpenNLP Contributors</Authors>
     <Description>A C# port of the Apache OpenNLP 1.9.1 inference APIs (opennlp-tools). This product includes software developed at The Apache Software Foundation. Not affiliated with or endorsed by the Apache Software Foundation.</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
