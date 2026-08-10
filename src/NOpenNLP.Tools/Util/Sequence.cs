@@ -83,7 +83,14 @@ public class Sequence : IComparable<Sequence>
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(outcomes, probs, score);
+        // NOpenNLP: Java's Objects.hash delegates to List.hashCode, which is
+        // element-wise, so equal sequences hash equally. Hashing the IList
+        // references directly would use reference hash codes and break the
+        // Equals/GetHashCode contract.
+        return HashCode.Combine(
+            JCG.ListEqualityComparer<string>.Default.GetHashCode(outcomes),
+            JCG.ListEqualityComparer<double>.Default.GetHashCode(probs),
+            score);
     }
 
     public override bool Equals(object obj)

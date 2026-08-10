@@ -4,5 +4,6 @@
   </Configurations>
   <Folder Name="/src/">
     <Project Path="src/NOpenNLP.Tools/NOpenNLP.Tools.csproj" />
+    <Project Path="src/NOpenNLP.Tools.Tests/NOpenNLP.Tools.Tests.csproj" />
   </Folder>
 </Solution>
