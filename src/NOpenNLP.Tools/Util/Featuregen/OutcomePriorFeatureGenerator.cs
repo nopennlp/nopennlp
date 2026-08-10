@@ -25,7 +25,7 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// <summary>
 /// The definition feature maps the underlying distribution of outcomes.
 /// </summary>
-public class OutcomePriorFeatureGenerator : AdaptiveFeatureGenerator
+public class OutcomePriorFeatureGenerator : IAdaptiveFeatureGenerator
 {
     private static readonly string OUTCOME_PRIOR_FEATURE = "def";
     public virtual void CreateFeatures(IList<string> features, string[] tokens, int index, string[] previousOutcomes)
@@ -33,7 +33,7 @@ public class OutcomePriorFeatureGenerator : AdaptiveFeatureGenerator
         features.Add(OUTCOME_PRIOR_FEATURE);
     }
 
-    // NOpenNLP: AdaptiveFeatureGenerator declares these as Java 8 default
+    // NOpenNLP: IAdaptiveFeatureGenerator declares these as Java 8 default
     // methods; C# default interface implementations are unavailable on
     // netstandard2.0/net462, so the empty bodies are supplied here.
     public virtual void UpdateAdaptiveData(string[] tokens, string[] outcomes)

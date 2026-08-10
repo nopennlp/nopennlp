@@ -30,9 +30,10 @@ namespace NOpenNLP.Tools.Util;
 public class Sequence : IComparable<Sequence>
 {
     private double score;
-    private IList<string> outcomes;
-    private IList<double> probs;
-    private static readonly double ONE = 1;
+    private readonly IList<string> outcomes; // NOpenNLP: made readonly
+    private readonly IList<double> probs; // NOpenNLP: made readonly
+    private const double ONE = 1;
+
     /// <summary>
     /// Creates a new sequence of outcomes.
     /// </summary>

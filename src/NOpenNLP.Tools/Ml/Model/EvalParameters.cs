@@ -27,28 +27,24 @@ namespace NOpenNLP.Tools.Ml.Model;
 /// This class encapsulates the varibales used in producing probabilities from a model
 /// and facilitaes passing these variables to the eval method.
 /// </summary>
-public class EvalParameters
+public class EvalParameters(Context[] @params, int numOutcomes)
 {
     /// <summary>
     /// Mapping between outcomes and parameter values for each context.
     /// The integer representation of the context can be found using <code>pmap</code>.
     /// </summary>
-    private Context[] @params;
+    private readonly Context[] @params = @params; // NOpenNLP: made readonly
+
     /// <summary>
     /// The number of outcomes being predicted.
     /// </summary>
-    private readonly int numOutcomes;
+    private readonly int numOutcomes = numOutcomes;
+
     /// <summary>
     /// The maximum number of features fired in an event. Usually referred to as C.
     /// This is used to normalize the number of features which occur in an event.
     /// </summary>
     private double correctionConstant;
-
-    public EvalParameters(Context[] @params, int numOutcomes)
-    {
-        this.@params = @params;
-        this.numOutcomes = numOutcomes;
-    }
 
     public virtual Context[] GetParams()
     {

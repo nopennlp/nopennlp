@@ -20,7 +20,6 @@
 
 using J2N;
 using NOpenNLP.Tools.Ml.Model;
-using System;
 using System.Collections.Generic;
 
 namespace NOpenNLP.Tools.Ml.Naivebayes;
@@ -30,16 +29,17 @@ namespace NOpenNLP.Tools.Ml.Naivebayes;
 /// </summary>
 public class NaiveBayesModel : AbstractModel
 {
-    protected double[] outcomeTotals;
+    protected readonly double[] outcomeTotals; // NOpenNLP: made readonly
     protected long vocabulary;
-    NaiveBayesModel(Context[] @params, String[] predLabels, Dictionary<string, Context> pmap, String[] outcomeNames) : base(@params, predLabels, pmap, outcomeNames)
+
+    NaiveBayesModel(Context[] @params, string[] predLabels, Dictionary<string, Context> pmap, string[] outcomeNames) : base(@params, predLabels, pmap, outcomeNames)
     {
         outcomeTotals = InitOutcomeTotals(outcomeNames, @params);
         this.evalParams = new NaiveBayesEvalParameters(@params, outcomeNames.Length, outcomeTotals, predLabels.Length);
         modelType = ModelType.NaiveBayes;
     }
 
-    public NaiveBayesModel(Context[] @params, String[] predLabels, String[] outcomeNames) : base(@params, predLabels, outcomeNames)
+    public NaiveBayesModel(Context[] @params, string[] predLabels, string[] outcomeNames) : base(@params, predLabels, outcomeNames)
     {
         outcomeTotals = InitOutcomeTotals(outcomeNames, @params);
         this.evalParams = new NaiveBayesEvalParameters(@params, outcomeNames.Length, outcomeTotals, predLabels.Length);
@@ -163,7 +163,7 @@ public class NaiveBayesModel : AbstractModel
     {
         if (isSmoothed)
             return GetSmoothedProbability(numerator, denominator, vocabulary);
-        else if (denominator == 0 || denominator < Double.MinValue)
+        else if (denominator is 0 or < double.MinValue)
             return 0;
         else
             return 1 * numerator / denominator;
@@ -171,7 +171,7 @@ public class NaiveBayesModel : AbstractModel
 
     private static double GetSmoothedProbability(double numerator, double denominator, double vocabulary)
     {
-        double delta = 0.05; // Lidstone smoothing
+        const double delta = 0.05; // Lidstone smoothing
         return 1 * (numerator + delta) / (denominator + delta * vocabulary);
     }
 }

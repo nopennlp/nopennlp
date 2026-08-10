@@ -20,29 +20,28 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 using J2N.Collections.Generic.Extensions;
 
 namespace NOpenNLP.Tools.Util.Featuregen;
 
 /// <summary>
 /// The {@link AggregatedFeatureGenerator} aggregates a set of
-/// {@link AdaptiveFeatureGenerator}s and calls them to generate the features.
+/// {@link IAdaptiveFeatureGenerator}s and calls them to generate the features.
 /// </summary>
-public class AggregatedFeatureGenerator : AdaptiveFeatureGenerator
+public class AggregatedFeatureGenerator : IAdaptiveFeatureGenerator
 {
     /// <summary>
-    /// Contains all aggregated {@link AdaptiveFeatureGenerator}s.
+    /// Contains all aggregated {@link IAdaptiveFeatureGenerator}s.
     /// </summary>
-    private ICollection<AdaptiveFeatureGenerator> generators;
+    private readonly ICollection<IAdaptiveFeatureGenerator> generators; // NOpenNLP: made readonly
+
     /// <summary>
     /// Initializes the current instance.
     /// </summary>
     /// <param name="generators">array of generators, null values are not permitted</param>
-    public AggregatedFeatureGenerator(params AdaptiveFeatureGenerator[] generators)
+    public AggregatedFeatureGenerator(params IAdaptiveFeatureGenerator[] generators)
     {
-        foreach (AdaptiveFeatureGenerator generator in generators)
+        foreach (IAdaptiveFeatureGenerator generator in generators)
         {
             // NOpenNLP: ArgumentNullException.ThrowIfNull is net6.0+.
             if (generator is null)
@@ -51,45 +50,45 @@ public class AggregatedFeatureGenerator : AdaptiveFeatureGenerator
             }
         }
 
-        this.generators = new List<AdaptiveFeatureGenerator>(generators);
+        this.generators = new List<IAdaptiveFeatureGenerator>(generators);
         this.generators = this.generators.AsReadOnly();
     }
 
-    public AggregatedFeatureGenerator(ICollection<AdaptiveFeatureGenerator> generators) : this(generators.ToArray())
+    public AggregatedFeatureGenerator(ICollection<IAdaptiveFeatureGenerator> generators) : this([.. generators])
     {
     }
 
     /// <summary>
-    /// Calls the {@link AdaptiveFeatureGenerator#clearAdaptiveData()} method
-    /// on all aggregated {@link AdaptiveFeatureGenerator}s.
+    /// Calls the {@link IAdaptiveFeatureGenerator#clearAdaptiveData()} method
+    /// on all aggregated {@link IAdaptiveFeatureGenerator}s.
     /// </summary>
     public virtual void ClearAdaptiveData()
     {
-        foreach (AdaptiveFeatureGenerator generator in generators)
+        foreach (IAdaptiveFeatureGenerator generator in generators)
         {
             generator.ClearAdaptiveData();
         }
     }
 
     /// <summary>
-    /// Calls the {@link AdaptiveFeatureGenerator#createFeatures(List, String[], int, String[])}
-    /// method on all aggregated {@link AdaptiveFeatureGenerator}s.
+    /// Calls the {@link IAdaptiveFeatureGenerator#createFeatures(List, String[], int, String[])}
+    /// method on all aggregated {@link IAdaptiveFeatureGenerator}s.
     /// </summary>
     public virtual void CreateFeatures(IList<string> features, string[] tokens, int index, string[] previousOutcomes)
     {
-        foreach (AdaptiveFeatureGenerator generator in generators)
+        foreach (IAdaptiveFeatureGenerator generator in generators)
         {
             generator.CreateFeatures(features, tokens, index, previousOutcomes);
         }
     }
 
     /// <summary>
-    /// Calls the {@link AdaptiveFeatureGenerator#updateAdaptiveData(String[], String[])}
-    /// method on all aggregated {@link AdaptiveFeatureGenerator}s.
+    /// Calls the {@link IAdaptiveFeatureGenerator#updateAdaptiveData(String[], String[])}
+    /// method on all aggregated {@link IAdaptiveFeatureGenerator}s.
     /// </summary>
     public virtual void UpdateAdaptiveData(string[] tokens, string[] outcomes)
     {
-        foreach (AdaptiveFeatureGenerator generator in generators)
+        foreach (IAdaptiveFeatureGenerator generator in generators)
         {
             generator.UpdateAdaptiveData(tokens, outcomes);
         }
@@ -97,10 +96,10 @@ public class AggregatedFeatureGenerator : AdaptiveFeatureGenerator
 
     /// <summary>
     /// Retrieves a {@link Collections} of all aggregated
-    /// {@link AdaptiveFeatureGenerator}s.
+    /// {@link IAdaptiveFeatureGenerator}s.
     /// </summary>
     /// <returns>all aggregated generators</returns>
-    public virtual ICollection<AdaptiveFeatureGenerator> GetGenerators()
+    public virtual ICollection<IAdaptiveFeatureGenerator> GetGenerators()
     {
         return generators;
     }

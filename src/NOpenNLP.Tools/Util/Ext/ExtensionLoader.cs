@@ -32,6 +32,7 @@ namespace NOpenNLP.Tools.Util.Ext;
 public class ExtensionLoader
 {
     private static bool isOsgiAvailable = false;
+
     private ExtensionLoader()
     {
     }

@@ -17,27 +17,38 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using NOpenNLP.Tools.Util;
-using System;
+
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
-namespace NOpenNLP.Tools.Postag;
+namespace NOpenNLP.Tools.Util;
 
-/// <summary>
-/// The interface for part of speech taggers.
-/// </summary>
-public interface POSTagger
+public interface ISequenceCodec<T>
 {
     /// <summary>
-    /// Assigns the sentence of tokens pos tags.
+    /// Decodes a sequence T objects into Span objects.
     /// </summary>
-    /// <param name="sentence">The sentece of tokens to be tagged.</param>
-    /// <returns>an array of pos tags for each token provided in sentence.</returns>
-    String[] Tag(String[] sentence);
-    String[] Tag(String[] sentence, Object[] additionaContext);
-    Sequence[] TopKSequences(String[] sentence);
-    Sequence[] TopKSequences(String[] sentence, Object[] additionaContext);
+    /// <param name="c"></param>
+    /// <returns></returns>
+    Span[] Decode(IList<T> c);
+
+    /// <summary>
+    /// Encodes Span objects into a sequence of T objects.
+    /// </summary>
+    /// <param name="names"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    T[] Encode(Span[] names, int length);
+
+    /// <summary>
+    /// Creates a sequence validator which can validate a sequence of outcomes.
+    /// </summary>
+    /// <returns></returns>
+    ISequenceValidator<T> CreateSequenceValidator();
+
+    /// <summary>
+    /// Checks if the outcomes of the model are compatible with the codec.
+    /// </summary>
+    /// <param name="outcomes">all possible model outcomes</param>
+    /// <returns></returns>
+    bool AreOutcomesCompatible(string[] outcomes);
 }

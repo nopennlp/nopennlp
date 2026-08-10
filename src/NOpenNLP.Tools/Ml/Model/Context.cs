@@ -33,11 +33,13 @@ public class Context
     /// <summary>
     /// The real valued parameters or expected values for this context.
     /// </summary>
-    protected double[] parameters;
+    protected readonly double[] parameters;
+
     /// <summary>
     /// The outcomes which occur with this context.
     /// </summary>
-    protected int[] outcomes;
+    protected readonly int[] outcomes;
+
     /// <summary>
     /// Creates a new parameters object with the specified parameters associated with the specified
     /// outcome pattern.
@@ -73,7 +75,7 @@ public class Context
         return HashCode.Combine(Arrays.GetHashCode(parameters), Arrays.GetHashCode(outcomes));
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (obj == this)
         {

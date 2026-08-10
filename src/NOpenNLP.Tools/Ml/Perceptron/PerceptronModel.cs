@@ -26,7 +26,8 @@ namespace NOpenNLP.Tools.Ml.Perceptron;
 
 public class PerceptronModel : AbstractModel
 {
-    public PerceptronModel(Context[] @params, String[] predLabels, String[] outcomeNames) : base(@params, predLabels, outcomeNames)
+    public PerceptronModel(Context[] @params, string[] predLabels, string[] outcomeNames)
+        : base(@params, predLabels, outcomeNames)
     {
         modelType = ModelType.Perceptron;
     }

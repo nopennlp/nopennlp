@@ -18,12 +18,8 @@
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using NOpenNLP.Tools.Tokenize;
-using NOpenNLP.Tools.Util;
-using System;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Text;
 
 namespace NOpenNLP.Tools.Util.Featuregen;
@@ -32,10 +28,11 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// Partitions tokens into sub-tokens based on character classes and generates
 /// class features for each of the sub-tokens and combinations of those sub-tokens.
 /// </summary>
-public class TokenPatternFeatureGenerator : AdaptiveFeatureGenerator
+public class TokenPatternFeatureGenerator : IAdaptiveFeatureGenerator
 {
-    private Regex noLetters = new Regex("[^a-zA-Z]");
-    private Tokenizer tokenizer;
+    private readonly Regex noLetters = new Regex("[^a-zA-Z]"); // NOpenNLP: made readonly
+    private readonly ITokenizer tokenizer; // NOpenNLP: made readonly
+
     /// <summary>
     /// Initializes a new instance.
     /// For tokinization the {@link SimpleTokenizer} is used.
@@ -48,7 +45,7 @@ public class TokenPatternFeatureGenerator : AdaptiveFeatureGenerator
     /// Initializes a new instance.
     /// </summary>
     /// <param name="supportTokenizer"></param>
-    public TokenPatternFeatureGenerator(Tokenizer supportTokenizer)
+    public TokenPatternFeatureGenerator(ITokenizer supportTokenizer)
     {
         tokenizer = supportTokenizer;
     }
@@ -86,7 +83,7 @@ public class TokenPatternFeatureGenerator : AdaptiveFeatureGenerator
         feats.Add("pta=" + pattern.ToString());
     }
 
-    // NOpenNLP: AdaptiveFeatureGenerator declares these as Java 8 default
+    // NOpenNLP: IAdaptiveFeatureGenerator declares these as Java 8 default
     // methods; C# default interface implementations are unavailable on
     // netstandard2.0/net462, so the empty bodies are supplied here.
     public virtual void UpdateAdaptiveData(string[] tokens, string[] outcomes)

@@ -18,26 +18,21 @@
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using NOpenNLP.Tools.Support;
-using NOpenNLP.Tools.Util;
-using System;
 using System.Xml;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Util.Featuregen;
 
 /// <summary>
 /// </summary>
 /// <remarks>@seeSuffixFeatureGenerator</remarks>
-public class SuffixFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.XmlFeatureGeneratorFactory
+public class SuffixFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
     public SuffixFeatureGeneratorFactory() : base()
     {
     }
 
-    public virtual AdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
+    public virtual IAdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
     {
         string attribute = generatorElement.GetAttribute("length");
         int suffixLength = SuffixFeatureGenerator.DEFAULT_MAX_LENGTH;
@@ -49,12 +44,12 @@ public class SuffixFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeature
         return new SuffixFeatureGenerator(suffixLength);
     }
 
-    internal static void Register(IDictionary<string, GeneratorFactory.XmlFeatureGeneratorFactory> factoryMap)
+    internal static void Register(IDictionary<string, GeneratorFactory.IXmlFeatureGeneratorFactory> factoryMap)
     {
         factoryMap.Put("suffix", new SuffixFeatureGeneratorFactory());
     }
 
-    public override AdaptiveFeatureGenerator Create()
+    public override IAdaptiveFeatureGenerator Create()
     {
         return new SuffixFeatureGenerator(GetInt("length", SuffixFeatureGenerator.DEFAULT_MAX_LENGTH));
     }

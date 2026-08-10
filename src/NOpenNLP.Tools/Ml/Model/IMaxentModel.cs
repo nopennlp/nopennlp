@@ -23,7 +23,7 @@ namespace NOpenNLP.Tools.Ml.Model;
 /// <summary>
 /// Interface for maximum entropy models.
 /// </summary>
-public interface MaxentModel
+public interface IMaxentModel
 {
     /// <summary>
     /// Evaluates a context.
@@ -33,6 +33,7 @@ public interface MaxentModel
     /// <returns>an array of the probabilities for each of the different
     ///         outcomes, all of which sum to 1.</returns>
     double[] Eval(string[] context);
+
     /// <summary>
     /// Evaluates a context.
     /// </summary>
@@ -42,6 +43,7 @@ public interface MaxentModel
     ///         outcomes, all of which sum to 1.</param>
     /// <returns>an array of the probabilities for each of the different outcomes, all of which sum to 1.</returns>
     double[] Eval(string[] context, double[] probs);
+
     /// <summary>
     /// Evaluates a contexts with the specified context values.
     /// </summary>
@@ -50,6 +52,7 @@ public interface MaxentModel
     /// <param name="values">The values associated with each context.</param>
     /// <returns>an array of the probabilities for each of the different outcomes, all of which sum to 1.</returns>
     double[] Eval(string[] context, float[] values);
+
     /// <summary>
     /// Simple function to return the outcome associated with the index
     /// containing the highest probability in the double[].
@@ -59,6 +62,7 @@ public interface MaxentModel
     ///            method.</param>
     /// <returns>the String name of the best outcome</returns>
     string GetBestOutcome(double[] outcomes);
+
     /// <summary>
     /// Return a string matching all the outcome names with all the
     /// probabilities produced by the <code>eval(String[]
@@ -72,6 +76,7 @@ public interface MaxentModel
     ///            for each one.</returns>
     // TODO: This should be removed, can't be used anyway without format spec
     string GetAllOutcomes(double[] outcomes);
+
     /// <summary>
     /// Gets the String name of the outcome associated with the index
     /// i.
@@ -80,6 +85,7 @@ public interface MaxentModel
     ///          desired.</param>
     /// <returns>the String name of the outcome</returns>
     string GetOutcome(int i);
+
     /// <summary>
     /// Gets the index associated with the String name of the given
     /// outcome.
@@ -89,10 +95,12 @@ public interface MaxentModel
     /// <returns>the index if the given outcome label exists for this
     ///     model, -1 if it does not.</returns>
     int GetIndex(string outcome);
+
     /*
      * Returns the data structures relevant to storing the model.
      **/
     // public Object[] getDataStructures();
+
     /// <summary>
     /// Returns the number of outcomes for this model.
     /// </summary>

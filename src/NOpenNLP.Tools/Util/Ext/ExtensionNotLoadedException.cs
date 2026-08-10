@@ -27,6 +27,7 @@ namespace NOpenNLP.Tools.Util.Ext;
 public class ExtensionNotLoadedException : Exception
 {
     private readonly bool isOSGiEnvironment;
+
     public ExtensionNotLoadedException(string message) : base(message)
     {
         isOSGiEnvironment = ExtensionLoader.IsOSGiAvailable();

@@ -17,30 +17,28 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using NOpenNLP.Tools.Support;
+
 using NOpenNLP.Tools.Util;
 using NOpenNLP.Tools.Util.Featuregen;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Postag;
 
 /// <summary>
 /// A context generator for the POS Tagger.
 /// </summary>
-public class ConfigurablePOSContextGenerator : POSContextGenerator
+public class ConfigurablePOSContextGenerator : IPOSContextGenerator
 {
-    private Cache<String, String[]> contextsCache;
+    private readonly Cache<string, string[]> contextsCache; // NOpenNLP: made readonly
     private object wordsKey;
-    private readonly AdaptiveFeatureGenerator featureGenerator;
+    private readonly IAdaptiveFeatureGenerator featureGenerator;
+
     /// <summary>
     /// Initializes the current instance.
     /// </summary>
     /// <param name="cacheSize"></param>
-    public ConfigurablePOSContextGenerator(int cacheSize, AdaptiveFeatureGenerator featureGenerator)
+    public ConfigurablePOSContextGenerator(int cacheSize, IAdaptiveFeatureGenerator featureGenerator)
     {
         this.featureGenerator = featureGenerator ?? throw new ArgumentNullException(nameof(featureGenerator));
         if (cacheSize > 0)
@@ -52,7 +50,7 @@ public class ConfigurablePOSContextGenerator : POSContextGenerator
     /// <summary>
     /// Initializes the current instance.
     /// </summary>
-    public ConfigurablePOSContextGenerator(AdaptiveFeatureGenerator featureGenerator) : this(0, featureGenerator)
+    public ConfigurablePOSContextGenerator(IAdaptiveFeatureGenerator featureGenerator) : this(0, featureGenerator)
     {
     }
 
@@ -65,10 +63,10 @@ public class ConfigurablePOSContextGenerator : POSContextGenerator
     /// <param name="tags">The tags assigned to the previous words in the sentence.</param>
     /// <returns>The context for making a pos tag decision at the specified token index
     ///     given the specified tokens and previous tags.</returns>
-    public virtual String[] GetContext(int index, string[] tokens, string[] tags, object[] additionalContext)
+    public virtual string[] GetContext(int index, string[] tokens, string[] tags, object[] additionalContext)
     {
-        string tagprev = null;
-        string tagprevprev = null;
+        string? tagprev = null;
+        string? tagprevprev = null;
         if (index - 1 >= 0)
         {
             tagprev = tags[index - 1];
@@ -98,7 +96,7 @@ public class ConfigurablePOSContextGenerator : POSContextGenerator
 
         IList<string> e = new List<string>();
         featureGenerator.CreateFeatures(e, tokens, index, tags);
-        string[] contexts = e.ToArray();
+        string[] contexts = [.. e];
         if (contextsCache != null)
         {
             contextsCache.Put(cacheKey, contexts);

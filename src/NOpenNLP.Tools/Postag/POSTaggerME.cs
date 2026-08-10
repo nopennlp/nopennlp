@@ -17,19 +17,12 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using NOpenNLP.Tools.Dictionary;
+
 using NOpenNLP.Tools.Ml;
 using NOpenNLP.Tools.Ml.Model;
-using NOpenNLP.Tools.Ngram;
-using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Util;
-using NOpenNLP.Tools.Util.Featuregen;
 using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Postag;
 
@@ -38,18 +31,19 @@ namespace NOpenNLP.Tools.Postag;
 /// words are nouns, verbs, or any of 70 other POS tags depending on their
 /// surrounding context.
 /// </summary>
-public class POSTaggerME : POSTagger
+public class POSTaggerME : IPOSTagger
 {
-    public static readonly int DEFAULT_BEAM_SIZE = 3;
-    private POSModel modelPackage;
+    // NOpenNLP: made various fields const/readonly
+    public const int DEFAULT_BEAM_SIZE = 3;
+    private readonly POSModel modelPackage;
     /// <summary>
     /// The feature context generator.
     /// </summary>
-    protected POSContextGenerator contextGen;
+    protected readonly IPOSContextGenerator contextGen;
     /// <summary>
     /// Tag dictionary used for restricting words to a fixed set of tags.
     /// </summary>
-    protected TagDictionary tagDictionary;
+    protected ITagDictionary tagDictionary;
     protected NOpenNLP.Tools.Dictionary.Dictionary ngramDictionary;
     /// <summary>
     /// Says whether a filter should be used to check whether a tag assignment
@@ -59,10 +53,11 @@ public class POSTaggerME : POSTagger
     /// <summary>
     /// The size of the beam to be used in determining the best sequence of pos tags.
     /// </summary>
-    protected int size;
+    protected readonly int size;
     private Sequence bestSequence;
-    private SequenceClassificationModel<string> model;
-    private SequenceValidator<string> sequenceValidator;
+    private readonly ISequenceClassificationModel<string> model;
+    private readonly ISequenceValidator<string> sequenceValidator;
+
     /// <summary>
     /// Initializes the current instance with the provided model.
     /// </summary>
@@ -97,21 +92,21 @@ public class POSTaggerME : POSTagger
     /// tagger.
     /// </summary>
     /// <returns>String[]</returns>
-    public virtual String[] GetAllPosTags()
+    public virtual string[] GetAllPosTags()
     {
         return model.GetOutcomes();
     }
 
-    public virtual String[] Tag(string[] sentence)
+    public virtual string[] Tag(string[] sentence)
     {
         return this.Tag(sentence, null);
     }
 
-    public virtual String[] Tag(string[] sentence, object[] additionaContext)
+    public virtual string[] Tag(string[] sentence, object[] additionaContext)
     {
         bestSequence = model.BestSequence(sentence, additionaContext, contextGen, sequenceValidator);
         IList<string> t = bestSequence.GetOutcomes();
-        return t.ToArray();
+        return [.. t];
     }
 
     /// <summary>
@@ -120,14 +115,14 @@ public class POSTaggerME : POSTagger
     /// <param name="numTaggings">The number of tagging to be returned.</param>
     /// <param name="sentence">An array of tokens which make up a sentence.</param>
     /// <returns>At most the specified number of taggings for the specified sentence.</returns>
-    public virtual String[][] Tag(int numTaggings, string[] sentence)
+    public virtual string[][] Tag(int numTaggings, string[] sentence)
     {
         Sequence[] bestSequences = model.BestSequences(numTaggings, sentence, null, contextGen, sequenceValidator);
         string[][] tags = new string[bestSequences.Length][];
         for (int si = 0; si < tags.Length; si++)
         {
             IList<string> t = bestSequences[si].GetOutcomes();
-            tags[si] = t.ToArray();
+            tags[si] = [.. t];
         }
 
         return tags;
@@ -161,17 +156,17 @@ public class POSTaggerME : POSTagger
         return bestSequence.GetProbs();
     }
 
-    public virtual String[] GetOrderedTags(IList<string> words, IList<string> tags, int index)
+    public virtual string[] GetOrderedTags(IList<string> words, IList<string> tags, int index)
     {
         return GetOrderedTags(words, tags, index, null);
     }
 
-    public virtual String[] GetOrderedTags(IList<string> words, IList<string> tags, int index, double[] tprobs)
+    public virtual string[] GetOrderedTags(IList<string> words, IList<string> tags, int index, double[] tprobs)
     {
         if (modelPackage.GetPosModel() != null)
         {
-            MaxentModel posModel = modelPackage.GetPosModel();
-            double[] probs = posModel.Eval(contextGen.GetContext(index, words.ToArray(), tags.ToArray(), null));
+            IMaxentModel posModel = modelPackage.GetPosModel();
+            double[] probs = posModel.Eval(contextGen.GetContext(index, [.. words], [.. tags], null));
             string[] orderedTags = new string[probs.Length];
             for (int i = 0; i < probs.Length; i++)
             {
@@ -204,11 +199,11 @@ public class POSTaggerME : POSTagger
     // public static POSModel Train(string languageCode, ObjectStream<POSSample> samples, TrainingParameters trainParams, POSTaggerFactory posFactory)
     // {
     //     int beamSize = trainParams.GetIntParameter(BeamSearch.BEAM_SIZE_PARAMETER, POSTaggerME.DEFAULT_BEAM_SIZE);
-    //     POSContextGenerator contextGenerator = posFactory.GetPOSContextGenerator();
+    //     IPOSContextGenerator contextGenerator = posFactory.GetPOSContextGenerator();
     //     Dictionary<string, string> manifestInfoEntries = new Dictionary<string, string>();
     //     TrainerType trainerType = TrainerFactory.GetTrainerType(trainParams);
-    //     MaxentModel posModel = null;
-    //     SequenceClassificationModel<string> seqPosModel = null;
+    //     IMaxentModel posModel = null;
+    //     ISequenceClassificationModel<string> seqPosModel = null;
     //     if (TrainerType.EVENT_MODEL_TRAINER.Equals(trainerType))
     //     {
     //         ObjectStream<Event> es = new POSSampleEventStream(samples, contextGenerator);
@@ -224,7 +219,7 @@ public class POSTaggerME : POSTagger
     //     else if (TrainerType.SEQUENCE_TRAINER.Equals(trainerType))
     //     {
     //         SequenceTrainer trainer = TrainerFactory.GetSequenceModelTrainer(trainParams, manifestInfoEntries);
-// 
+//
     //         // TODO: This will probably cause issue, since the feature generator uses the outcomes array
     //         POSSampleSequenceStream ss = new POSSampleSequenceStream(samples, contextGenerator);
     //         seqPosModel = trainer.Train(ss);
@@ -233,7 +228,7 @@ public class POSTaggerME : POSTagger
     //     {
     //         throw new ArgumentException("Trainer type is not supported: " + trainerType);
     //     }
-// 
+//
     //     if (posModel != null)
     //     {
     //         return new POSModel(languageCode, posModel, beamSize, manifestInfoEntries, posFactory);
@@ -254,16 +249,16 @@ public class POSTaggerME : POSTagger
     //         if (words.Length > 0)
     //             ngramModel.Add(new StringList(words), 1, 1);
     //     }
-// 
+//
     //     ngramModel.Cutoff(cutoff, int.MaxValue);
     //     return ngramModel.ToDictionary(true);
     // }
 
-    // public static void PopulatePOSDictionary(ObjectStream<POSSample> samples, MutableTagDictionary dict, int cutoff)
+    // public static void PopulatePOSDictionary(ObjectStream<POSSample> samples, IMutableTagDictionary dict, int cutoff)
     // {
     //     System.@out.Println("Expanding POS NOpenNLP.Tools.Dictionary.Dictionary ...");
     //     long start = System.NanoTime();
-// 
+//
     //     // the data structure will store the word, the tag, and the number of
     //     // occurrences
     //     Dictionary<string, Dictionary<string, AtomicInteger>> newEntries = new Dictionary<string, string>();
@@ -274,7 +269,7 @@ public class POSTaggerME : POSTagger
     //         string[] tags = sample.GetTags();
     //         for (int i = 0; i < words.Length; i++)
     //         {
-// 
+//
     //             // only store words
     //             if (!StringPattern.Recognize(words[i]).ContainsDigit())
     //             {
@@ -287,18 +282,18 @@ public class POSTaggerME : POSTagger
     //                 {
     //                     word = StringUtil.ToLowerCase(words[i]);
     //                 }
-// 
+//
     //                 if (!newEntries.ContainsKey(word))
     //                 {
     //                     newEntries.Put(word, new Dictionary<string, string>());
     //                 }
-// 
+//
     //                 string[] dictTags = dict.GetTags(word);
     //                 if (dictTags != null)
     //                 {
     //                     foreach (string tag in dictTags)
     //                     {
-// 
+//
     //                         // for this tags we start with the cutoff
     //                         Dictionary<string, AtomicInteger> value = newEntries[word];
     //                         if (!value.ContainsKey(tag))
@@ -307,7 +302,7 @@ public class POSTaggerME : POSTagger
     //                         }
     //                     }
     //                 }
-// 
+//
     //                 if (!newEntries[word].ContainsKey(tags[i]))
     //                 {
     //                     newEntries[word].Put(tags[i], new AtomicInteger(1));
@@ -319,8 +314,8 @@ public class POSTaggerME : POSTagger
     //             }
     //         }
     //     }
-// 
-// 
+//
+//
     //     // now we check if the word + tag pairs have enough occurrences, if yes we
     //     // add it to the dictionary
     //     foreach (Entry<string, Dictionary<string, AtomicInteger>> wordEntry in newEntries.EntrySet())
@@ -333,13 +328,13 @@ public class POSTaggerME : POSTagger
     //                 tagsForWord.Add(entry.GetKey());
     //             }
     //         }
-// 
+//
     //         if (tagsForWord.Count > 0)
     //         {
     //             dict.Put(wordEntry.GetKey(), tagsForWord.ToArray());
     //         }
     //     }
-// 
+//
     //     System.@out.Println("... finished expanding POS Dictionary. [" + (System.NanoTime() - start) / 1000000 + "ms]");
     // }
 }

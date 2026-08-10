@@ -17,30 +17,30 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using System;
+
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Text;
 
 namespace NOpenNLP.Tools.Sentdetect;
 
 /// <summary>
-/// Default implementation of the {@link EndOfSentenceScanner}.
+/// Default implementation of the {@link IEndOfSentenceScanner}.
 /// It uses an character array with possible end of sentence chars
 /// to identify potential sentence endings.
 /// </summary>
-public class DefaultEndOfSentenceScanner : EndOfSentenceScanner
+public class DefaultEndOfSentenceScanner : IEndOfSentenceScanner
 {
-    private HashSet<char> eosCharacters;
-    private char[] eosChars;
+    // NOpenNLP: made readonly
+    private readonly HashSet<char> eosCharacters;
+    private readonly char[] eosChars;
+
     /// <summary>
     /// Initializes the current instance.
     /// </summary>
     /// <param name="eosCharacters"></param>
     public DefaultEndOfSentenceScanner(char[] eosCharacters)
     {
-        this.eosCharacters = new HashSet<char>();
+        this.eosCharacters = [];
         foreach (char eosChar in eosCharacters)
         {
             this.eosCharacters.Add(eosChar);

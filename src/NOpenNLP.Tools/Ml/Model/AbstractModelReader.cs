@@ -30,7 +30,8 @@ public abstract class AbstractModelReader
     /// The number of predicates contained in the model.
     /// </summary>
     protected int NUM_PREDS;
-    protected DataReader dataReader;
+    protected readonly IDataReader dataReader; // NOpenNLP: made readonly
+
     public AbstractModelReader(FileInfo f)
     {
         string filename = f.Name;
@@ -40,7 +41,7 @@ public abstract class AbstractModelReader
         if (filename.EndsWith(".gz", StringComparison.Ordinal))
         {
             input = new GZipStream(f.OpenRead(), CompressionMode.Decompress);
-            filename = filename.Substring(0, filename.Length - 3);
+            filename = filename[..^3];
         }
         else
         {
@@ -61,7 +62,7 @@ public abstract class AbstractModelReader
         }
     }
 
-    public AbstractModelReader(DataReader dataReader) : base()
+    public AbstractModelReader(IDataReader dataReader) : base()
     {
         this.dataReader = dataReader;
     }
@@ -71,7 +72,7 @@ public abstract class AbstractModelReader
     /// </summary>
     public virtual int ReadInt()
     {
-        return dataReader.ReadInt();
+        return dataReader.ReadInt32();
     }
 
     /// <summary>
@@ -97,8 +98,10 @@ public abstract class AbstractModelReader
     }
 
     public abstract void CheckModelType();
+
     public abstract AbstractModel ConstructModel();
-    protected virtual String[] GetOutcomes()
+
+    protected virtual string[] GetOutcomes()
     {
         int numOutcomes = ReadInt();
         string[] outcomeLabels = new string[numOutcomes];

@@ -22,15 +22,13 @@ using NOpenNLP.Tools.Util.Model;
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Text;
 
 namespace NOpenNLP.Tools.Util.Featuregen;
 
-public class WordClusterDictionary : SerializableArtifact
+public class WordClusterDictionary : ISerializableArtifact
 {
-    public class WordClusterDictionarySerializer : ArtifactSerializer<WordClusterDictionary>
+    public class WordClusterDictionarySerializer : IArtifactSerializer<WordClusterDictionary>
     {
         public virtual WordClusterDictionary Create(Stream @in)
         {
@@ -43,12 +41,13 @@ public class WordClusterDictionary : SerializableArtifact
         //     artifact.Serialize(@out);
         // }
         // NOpenNLP: upstream relies on a default interface implementation to
-        // bridge the non-generic ArtifactSerializer; DIMs are unavailable on
+        // bridge the non-generic IArtifactSerializer; DIMs are unavailable on
         // netstandard2.0/net462, so the bridge is explicit here.
-        object ArtifactSerializer.Create(Stream @in) => Create(@in);
+        object IArtifactSerializer.Create(Stream @in) => Create(@in);
     }
 
-    private Dictionary<string, string> tokenToClusterMap = new Dictionary<string, string>();
+    private readonly Dictionary<string, string> tokenToClusterMap = new Dictionary<string, string>(); // NOpenNLP: made readonly
+
     /// <summary>
     /// Read word2vec and clark clustering style lexicons.
     /// </summary>

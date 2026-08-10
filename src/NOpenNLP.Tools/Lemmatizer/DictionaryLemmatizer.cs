@@ -19,10 +19,8 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using NOpenNLP.Tools.Support;
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace NOpenNLP.Tools.Lemmatizer;
 
@@ -31,7 +29,7 @@ namespace NOpenNLP.Tools.Lemmatizer;
 /// containing, for each line, word\tabpostag\tablemma.
 /// </summary>
 /// <remarks>@version2014-07-08</remarks>
-public class DictionaryLemmatizer : Lemmatizer
+public class DictionaryLemmatizer : ILemmatizer
 {
     /// <summary>
     /// The hashmap containing the dictionary.
@@ -40,7 +38,8 @@ public class DictionaryLemmatizer : Lemmatizer
     // a .NET Dictionary would use reference equality for IList<string> keys and never
     // find a match. J2N's ListEqualityComparer restores the Java semantics.
     private readonly Dictionary<IList<string>, IList<string>> dictMap =
-        new Dictionary<IList<string>, IList<string>>(J2N.Collections.Generic.ListEqualityComparer<string>.Default);
+        new(J2N.Collections.Generic.ListEqualityComparer<string>.Default);
+
     /// <summary>
     /// Construct a hashmap from the input tab separated dictionary.
     ///
@@ -57,10 +56,8 @@ public class DictionaryLemmatizer : Lemmatizer
 
     public DictionaryLemmatizer(FileInfo dictionaryFile)
     {
-        using (var @in = dictionaryFile.OpenRead())
-        {
-            Init(@in);
-        }
+        using var @in = dictionaryFile.OpenRead();
+        Init(@in);
     }
 
     public DictionaryLemmatizer(string dictionaryFile) : this(new FileInfo(dictionaryFile))
@@ -74,7 +71,7 @@ public class DictionaryLemmatizer : Lemmatizer
         {
             string[] elems = line.Split('\t');
             string[] lemmas = elems[2].Split('#');
-            this.dictMap.Put(new List<string> { elems[0], elems[1] }, lemmas);
+            dictMap.Put(new List<string> { elems[0], elems[1] }, lemmas);
         }
     }
 
@@ -84,7 +81,7 @@ public class DictionaryLemmatizer : Lemmatizer
     /// <returns>dictMap the Map</returns>
     public virtual Dictionary<IList<string>, IList<string>> GetDictMap()
     {
-        return this.dictMap;
+        return dictMap;
     }
 
     /// <summary>
@@ -97,20 +94,20 @@ public class DictionaryLemmatizer : Lemmatizer
     /// <returns>returns the dictionary keys</returns>
     private IList<string> GetDictKeys(string word, string postag)
     {
-        IList<string> keys = new List<string>();
-        keys.AddRange(new List<string>() { word.ToLower(), postag });
+        var keys = new List<string>();
+        keys.AddRange([word.ToLower(), postag]);
         return keys;
     }
 
     public virtual string[] Lemmatize(string[] tokens, string[] postags)
     {
-        IList<string> lemmas = new List<string>();
+        var lemmas = new List<string>();
         for (int i = 0; i < tokens.Length; i++)
         {
-            lemmas.Add(this.Lemmatize(tokens[i], postags[i]));
+            lemmas.Add(Lemmatize(tokens[i], postags[i]));
         }
 
-        return lemmas.ToArray();
+        return [.. lemmas];
     }
 
     public virtual IList<IList<string>> Lemmatize(IList<string> tokens, IList<string> posTags)
@@ -118,7 +115,7 @@ public class DictionaryLemmatizer : Lemmatizer
         IList<IList<string>> allLemmas = new List<IList<string>>();
         for (int i = 0; i < tokens.Count; i++)
         {
-            allLemmas.Add(this.GetAllLemmas(tokens[i], posTags[i]));
+            allLemmas.Add(GetAllLemmas(tokens[i], posTags[i]));
         }
 
         return allLemmas;
@@ -135,11 +132,11 @@ public class DictionaryLemmatizer : Lemmatizer
     private string Lemmatize(string word, string postag)
     {
         string lemma;
-        IList<string> keys = this.GetDictKeys(word, postag);
+        var keys = GetDictKeys(word, postag);
 
         // lookup lemma as value of the map
-        this.dictMap.TryGetValue(keys, out IList<string> keyValues);
-        if (keyValues != null && keyValues.Count > 0)
+        dictMap.TryGetValue(keys, out var keyValues);
+        if (keyValues is { Count: > 0 })
         {
             lemma = keyValues[0];
         }
@@ -160,14 +157,15 @@ public class DictionaryLemmatizer : Lemmatizer
     /// <param name="postag">
     ///          the postag</param>
     /// <returns>every lemma</returns>
-    private IList<string> GetAllLemmas(string word, string postag)
+    // NOpenNLP: changed to concrete type for performance
+    private List<string> GetAllLemmas(string word, string postag)
     {
-        IList<string> lemmasList = new List<string>();
-        IList<string> keys = this.GetDictKeys(word, postag);
+        var lemmasList = new List<string>();
+        var keys = GetDictKeys(word, postag);
 
         // lookup lemma as value of the map
-        this.dictMap.TryGetValue(keys, out IList<string> keyValues);
-        if (keyValues != null && keyValues.Count > 0)
+        dictMap.TryGetValue(keys, out var keyValues);
+        if (keyValues is { Count: > 0 })
         {
             lemmasList.AddRange(keyValues);
         }

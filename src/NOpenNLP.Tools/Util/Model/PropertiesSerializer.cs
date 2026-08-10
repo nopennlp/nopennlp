@@ -24,7 +24,7 @@ using NOpenNLP.Tools.Support;
 
 namespace NOpenNLP.Tools.Util.Model;
 
-internal class PropertiesSerializer : ArtifactSerializer<Properties>
+internal class PropertiesSerializer : IArtifactSerializer<Properties>
 {
     public virtual Properties Create(Stream @in)
     {
@@ -38,13 +38,13 @@ internal class PropertiesSerializer : ArtifactSerializer<Properties>
     //     properties.Store(@out, "");
     // }
 
-    public static void Register(Dictionary<string, ArtifactSerializer> factories)
+    public static void Register(Dictionary<string, IArtifactSerializer> factories)
     {
         factories.Put("properties", new PropertiesSerializer());
     }
 
     // NOpenNLP: upstream relies on a default interface implementation to
-    // bridge the non-generic ArtifactSerializer; DIMs are unavailable on
+    // bridge the non-generic IArtifactSerializer; DIMs are unavailable on
     // netstandard2.0/net462, so the bridge is explicit here.
-    object ArtifactSerializer.Create(Stream @in) => Create(@in);
+    object IArtifactSerializer.Create(Stream @in) => Create(@in);
 }

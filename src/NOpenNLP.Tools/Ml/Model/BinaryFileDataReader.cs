@@ -25,9 +25,10 @@ using J2N.IO;
 
 namespace NOpenNLP.Tools.Ml.Model;
 
-public class BinaryFileDataReader : DataReader
+public class BinaryFileDataReader : IDataReader
 {
-    private DataInputStream input;
+    private readonly DataInputStream input; // NOpenNLP: made readonly
+
     public BinaryFileDataReader(FileInfo f)
     {
         if (f.Name.EndsWith(".gz", StringComparison.Ordinal))
@@ -55,7 +56,7 @@ public class BinaryFileDataReader : DataReader
         return input.ReadDouble();
     }
 
-    public virtual int ReadInt()
+    public virtual int ReadInt32()
     {
         return input.ReadInt32();
     }

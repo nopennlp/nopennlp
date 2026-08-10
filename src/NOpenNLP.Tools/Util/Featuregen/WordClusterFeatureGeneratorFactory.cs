@@ -18,15 +18,10 @@
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using NOpenNLP.Tools.Support;
-using NOpenNLP.Tools.Util;
 using NOpenNLP.Tools.Util.Model;
 using JCG = J2N.Collections.Generic;
-using System;
 using System.Xml;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Util.Featuregen;
 
@@ -35,13 +30,13 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// 'w2vwordcluster' as a tag name; these clusters are typically produced by
 /// word2vec or clark pos induction systems.
 /// </summary>
-public class WordClusterFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.XmlFeatureGeneratorFactory
+public class WordClusterFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
     public WordClusterFeatureGeneratorFactory() : base()
     {
     }
 
-    public virtual AdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
+    public virtual IAdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
     {
         string dictResourceKey = generatorElement.GetAttribute("dict");
         bool lowerCaseDictionary = "true".Equals(generatorElement.GetAttribute("lowerCase"));
@@ -54,12 +49,12 @@ public class WordClusterFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFe
         return new WordClusterFeatureGenerator((WordClusterDictionary)dictResource, dictResourceKey, lowerCaseDictionary);
     }
 
-    internal static void Register(IDictionary<string, GeneratorFactory.XmlFeatureGeneratorFactory> factoryMap)
+    internal static void Register(IDictionary<string, GeneratorFactory.IXmlFeatureGeneratorFactory> factoryMap)
     {
         factoryMap.Put("wordcluster", new WordClusterFeatureGeneratorFactory());
     }
 
-    public override AdaptiveFeatureGenerator Create()
+    public override IAdaptiveFeatureGenerator Create()
     {
 
         // if resourceManager is null, we don't instantiate
@@ -76,9 +71,9 @@ public class WordClusterFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFe
         return new WordClusterFeatureGenerator((WordClusterDictionary)dictResource, dictResourceKey, lowerCaseDictionary);
     }
 
-    public override JCG.Dictionary<string, ArtifactSerializer> GetArtifactSerializerMapping()
+    public override JCG.Dictionary<string, IArtifactSerializer> GetArtifactSerializerMapping()
     {
-        JCG.Dictionary<string, ArtifactSerializer> mapping = new JCG.Dictionary<string, ArtifactSerializer>();
+        JCG.Dictionary<string, IArtifactSerializer> mapping = new JCG.Dictionary<string, IArtifactSerializer>();
         mapping.Put(GetStr("dict"), new WordClusterDictionary.WordClusterDictionarySerializer());
         return mapping;
     }

@@ -19,9 +19,6 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Util.Featuregen;
 
@@ -31,13 +28,13 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// </summary>
 public class BrownTokenClasses
 {
-    public static readonly int[] pathLengths = new[]
-    {
+    public static readonly int[] pathLengths =
+    [
         4,
         6,
         10,
         20
-    };
+    ];
     /// <summary>
     /// It provides a list containing the pathLengths for a token if found
     /// in the Map:token,BrownClass.

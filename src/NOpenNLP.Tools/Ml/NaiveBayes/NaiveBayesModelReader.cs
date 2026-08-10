@@ -33,7 +33,7 @@ public class NaiveBayesModelReader : AbstractModelReader
     {
     }
 
-    public NaiveBayesModelReader(DataReader dataReader) : base(dataReader)
+    public NaiveBayesModelReader(IDataReader dataReader) : base(dataReader)
     {
     }
 
@@ -41,17 +41,17 @@ public class NaiveBayesModelReader : AbstractModelReader
     /// Retrieve a model from disk. It assumes that models are saved in the
     /// following sequence:
     ///
-    /// <br>NaiveBayes (model type identifier)
-    /// <br>1. # of parameters (int)
-    /// <br>2. # of outcomes (int)
-    /// <br>  * list of outcome names (String)
-    /// <br>3. # of different types of outcome patterns (int)
-    /// <br>   * list of (int int[])
-    /// <br>   [# of predicates for which outcome pattern is true] [outcome pattern]
-    /// <br>4. # of predicates (int)
-    /// <br>   * list of predicate names (String)
+    /// <br/>NaiveBayes (model type identifier)
+    /// <br/>1. # of parameters (int)
+    /// <br/>2. # of outcomes (int)
+    /// <br/>  * list of outcome names (String)
+    /// <br/>3. # of different types of outcome patterns (int)
+    /// <br/>   * list of (int int[])
+    /// <br/>   [# of predicates for which outcome pattern is true] [outcome pattern]
+    /// <br/>4. # of predicates (int)
+    /// <br/>   * list of predicate names (String)
     ///
-    /// <p>If you are creating a reader for a format which won't work with this
+    /// <para/>If you are creating a reader for a format which won't work with this
     /// (perhaps a database or xml file), override this method and ignore the
     /// other methods provided in this abstract class.
     /// </summary>
@@ -70,6 +70,6 @@ public class NaiveBayesModelReader : AbstractModelReader
     {
         string modelType = ReadUTF();
         if (!modelType.Equals("NaiveBayes"))
-            Console.WriteLine("Error: attempting to load a " + modelType + " model as a NaiveBayes model." + " You should expect problems.");
+            Console.WriteLine($"Error: attempting to load a {modelType} model as a NaiveBayes model. You should expect problems.");
     }
 }

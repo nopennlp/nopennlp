@@ -38,7 +38,6 @@ public class LemmatizerFactory : BaseToolFactory
     {
         if (subclassName == null)
         {
-
             // will create the default factory
             return new LemmatizerFactory();
         }
@@ -60,12 +59,12 @@ public class LemmatizerFactory : BaseToolFactory
     {
     }
 
-    public virtual SequenceValidator<string> GetSequenceValidator()
+    public virtual ISequenceValidator<string> GetSequenceValidator()
     {
         return new DefaultLemmatizerSequenceValidator();
     }
 
-    public virtual LemmatizerContextGenerator GetContextGenerator()
+    public virtual ILemmatizerContextGenerator GetContextGenerator()
     {
         return new DefaultLemmatizerContextGenerator();
     }

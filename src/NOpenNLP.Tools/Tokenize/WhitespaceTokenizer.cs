@@ -18,17 +18,13 @@
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using NOpenNLP.Tools.Util;
-using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Tokenize;
 
 /// <summary>
 /// This tokenizer uses white spaces to tokenize the input text.
-/// 
+///
 /// To obtain an instance of this tokenizer use the static final
 /// <code>INSTANCE</code> field.
 /// </summary>
@@ -39,6 +35,7 @@ public class WhitespaceTokenizer : AbstractTokenizer
     /// {@link WhitespaceTokenizer}.
     /// </summary>
     public static readonly WhitespaceTokenizer INSTANCE = new WhitespaceTokenizer();
+
     /// <summary>
     /// Use the {@link WhitespaceTokenizer#INSTANCE} field to retrieve an instance.
     /// </summary>
@@ -80,6 +77,6 @@ public class WhitespaceTokenizer : AbstractTokenizer
             tokens.Add(new Span(tokStart, end));
         }
 
-        return tokens.ToArray();
+        return [.. tokens];
     }
 }

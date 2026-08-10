@@ -24,7 +24,7 @@ using System.Collections.Generic;
 namespace NOpenNLP.Tools.Util.Featuregen;
 
 [Obsolete("Obsolete")]
-public abstract class CustomFeatureGenerator : AdaptiveFeatureGenerator
+public abstract class CustomFeatureGenerator : IAdaptiveFeatureGenerator
 {
     /// <summary>
     /// Initialized the Custom Feature Generator with defined properties and loaded resources.
@@ -35,7 +35,7 @@ public abstract class CustomFeatureGenerator : AdaptiveFeatureGenerator
 
     public abstract void CreateFeatures(IList<string> features, string[] tokens, int index, string[] previousOutcomes);
 
-    // NOpenNLP: AdaptiveFeatureGenerator declares these as Java 8 default
+    // NOpenNLP: IAdaptiveFeatureGenerator declares these as Java 8 default
     // methods; C# default interface implementations are unavailable on
     // netstandard2.0/net462, so the empty bodies are supplied here.
     public virtual void UpdateAdaptiveData(string[] tokens, string[] outcomes)

@@ -18,26 +18,21 @@
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using NOpenNLP.Tools.Support;
-using NOpenNLP.Tools.Util;
-using System;
 using System.Xml;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Util.Featuregen;
 
 /// <summary>
 /// </summary>
 /// <remarks>@seeSentenceFeatureGenerator</remarks>
-public class SentenceFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.XmlFeatureGeneratorFactory
+public class SentenceFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
     public SentenceFeatureGeneratorFactory() : base()
     {
     }
 
-    public virtual AdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
+    public virtual IAdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
     {
         string beginFeatureString = generatorElement.GetAttribute("begin");
         bool beginFeature = true;
@@ -50,12 +45,12 @@ public class SentenceFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatu
         return new SentenceFeatureGenerator(beginFeature, endFeature);
     }
 
-    internal static void Register(IDictionary<string, GeneratorFactory.XmlFeatureGeneratorFactory> factoryMap)
+    internal static void Register(IDictionary<string, GeneratorFactory.IXmlFeatureGeneratorFactory> factoryMap)
     {
         factoryMap.Put("sentence", new SentenceFeatureGeneratorFactory());
     }
 
-    public override AdaptiveFeatureGenerator Create()
+    public override IAdaptiveFeatureGenerator Create()
     {
         string beginFeatureString = generatorElement.GetAttribute("begin");
         return new SentenceFeatureGenerator(GetBool("begin", true), GetBool("end", true));

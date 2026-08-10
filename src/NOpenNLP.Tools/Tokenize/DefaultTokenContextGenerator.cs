@@ -18,20 +18,17 @@
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using NOpenNLP.Tools.Util;
-using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Tokenize;
 
 /// <summary>
 /// Generate events for maxent decisions for tokenization.
 /// </summary>
-public class DefaultTokenContextGenerator : TokenContextGenerator
+public class DefaultTokenContextGenerator : ITokenContextGenerator
 {
-    protected ISet<string> inducedAbbreviations;
+    protected readonly ISet<string> inducedAbbreviations; // NOpenNLP: made readonly
+
     /// <summary>
     /// Creates a default context generator for tokenizer.
     /// </summary>
@@ -49,18 +46,18 @@ public class DefaultTokenContextGenerator : TokenContextGenerator
     }
 
     /* (non-Javadoc)
-     * @see opennlp.tools.tokenize.TokenContextGenerator#getContext(java.lang.String, int)
+     * @see opennlp.tools.tokenize.ITokenContextGenerator#getContext(java.lang.String, int)
      */
-    public virtual String[] GetContext(string sentence, int index)
+    public virtual string[] GetContext(string sentence, int index)
     {
         IList<string> preds = CreateContext(sentence, index);
-        return preds.ToArray();
+        return [.. preds];
     }
 
     /// <summary>
     /// Returns an {@link ArrayList} of features for the specified sentence string
     /// at the specified index. Extensions of this class can override this method
-    /// to create a customized {@link TokenContextGenerator}
+    /// to create a customized {@link ITokenContextGenerator}
     /// </summary>
     /// <param name="sentence">
     ///          the token been analyzed</param>

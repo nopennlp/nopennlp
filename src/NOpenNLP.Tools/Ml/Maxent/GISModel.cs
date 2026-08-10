@@ -39,7 +39,8 @@ public sealed class GISModel : AbstractModel
     ///          The names of the predicates used in this model.</param>
     /// <param name="outcomeNames">
     ///          The names of the outcomes this model predicts.</param>
-    public GISModel(Context[] @params, String[] predLabels, String[] outcomeNames) : this(@params, predLabels, outcomeNames, new UniformPrior())
+    public GISModel(Context[] @params, string[] predLabels, string[] outcomeNames)
+        : this(@params, predLabels, outcomeNames, new UniformPrior())
     {
     }
 
@@ -55,7 +56,8 @@ public sealed class GISModel : AbstractModel
     ///          The names of the outcomes this model predicts.</param>
     /// <param name="prior">
     ///          The prior to be used with this model.</param>
-    public GISModel(Context[] @params, String[] predLabels, String[] outcomeNames, Prior prior) : base(@params, predLabels, outcomeNames)
+    public GISModel(Context[] @params, string[] predLabels, string[] outcomeNames, IPrior prior)
+        : base(@params, predLabels, outcomeNames)
     {
         this.prior = prior;
         prior.SetLabels(outcomeNames, predLabels);
@@ -75,12 +77,12 @@ public sealed class GISModel : AbstractModel
     ///         method getOutcome(int i).</returns>
     public override double[] Eval(string[] context)
     {
-        return (Eval(context, new double[evalParams.GetNumOutcomes()]));
+        return Eval(context, new double[evalParams.GetNumOutcomes()]);
     }
 
     public override double[] Eval(string[] context, float[] values)
     {
-        return (Eval(context, values, new double[evalParams.GetNumOutcomes()]));
+        return Eval(context, values, new double[evalParams.GetNumOutcomes()]);
     }
 
     public override double[] Eval(string[] context, double[] outsums)
@@ -160,7 +162,7 @@ public sealed class GISModel : AbstractModel
             scontexts[i] = model.GetParams()[context[i]];
         }
 
-        return GISModel.Eval(scontexts, values, prior, model);
+        return Eval(scontexts, values, prior, model);
     }
 
     /// <summary>

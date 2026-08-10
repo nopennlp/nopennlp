@@ -18,18 +18,13 @@
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using NOpenNLP.Tools.Util;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Chunker;
 
 /// <summary>
 /// The interface for chunkers which provide chunk tags for a sequence of tokens.
 /// </summary>
-public interface Chunker
+public interface IChunker
 {
     /// <summary>
     /// Generates chunk tags for the given sequence returning the result in an array.
@@ -38,6 +33,7 @@ public interface Chunker
     /// <param name="tags">an array of the pos tags of the sequence.</param>
     /// <returns>an array of chunk tags for each token in the sequence.</returns>
     string[] Chunk(string[] toks, string[] tags);
+
     /// <summary>
     /// Generates tagged chunk spans for the given sequence returning the result in a span array.
     /// </summary>
@@ -45,6 +41,7 @@ public interface Chunker
     /// <param name="tags">an array of the pos tags of the sequence.</param>
     /// <returns>an array of spans with chunk tags for each chunk in the sequence.</returns>
     Span[] ChunkAsSpans(string[] toks, string[] tags);
+
     /// <summary>
     /// Returns the top k chunk sequences for the specified sentence with the specified pos-tags
     /// </summary>
@@ -52,6 +49,7 @@ public interface Chunker
     /// <param name="tags">The pos-tags for the specified sentence.</param>
     /// <returns>the top k chunk sequences for the specified sentence.</returns>
     Sequence[] TopKSequences(string[] sentence, string[] tags);
+
     /// <summary>
     /// Returns the top k chunk sequences for the specified sentence with the specified pos-tags
     /// </summary>

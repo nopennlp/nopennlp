@@ -21,9 +21,7 @@
 using NOpenNLP.Tools.Ml;
 using NOpenNLP.Tools.Ml.Model;
 using NOpenNLP.Tools.Util;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace NOpenNLP.Tools.Lemmatizer;
 
@@ -34,15 +32,18 @@ namespace NOpenNLP.Tools.Lemmatizer;
 /// for Lexical Functional Grammar Parsing. PhD dissertation, Dublin City University.
 /// http://grzegorz.chrupala.me/papers/phd-single.pdf
 /// </summary>
-public class LemmatizerME : Lemmatizer
+public class LemmatizerME : ILemmatizer
 {
-    public static readonly int LEMMA_NUMBER = 29;
-    public static readonly int DEFAULT_BEAM_SIZE = 3;
-    protected int beamSize;
+    public const int LEMMA_NUMBER = 29;
+    public const int DEFAULT_BEAM_SIZE = 3;
+    protected readonly int beamSize; // NOpenNLP: made readonly
     private Sequence bestSequence;
-    private SequenceClassificationModel<string> model;
-    private LemmatizerContextGenerator contextGenerator;
-    private SequenceValidator<string> sequenceValidator;
+
+    // NOpenNLP: made readonly
+    private readonly ISequenceClassificationModel<string> model;
+    private readonly ILemmatizerContextGenerator contextGenerator;
+    private readonly ISequenceValidator<string> sequenceValidator;
+
     /// <summary>
     /// Initializes the current instance with the provided model
     /// and the default beam size of 3.
@@ -50,8 +51,8 @@ public class LemmatizerME : Lemmatizer
     /// <param name="model">the model</param>
     public LemmatizerME(LemmatizerModel model)
     {
-        LemmatizerFactory factory = model.GetFactory();
-        int defaultBeamSize = LemmatizerME.DEFAULT_BEAM_SIZE;
+        var factory = model.GetFactory();
+        int defaultBeamSize = DEFAULT_BEAM_SIZE;
         string beamSizeString = model.GetManifestProperty(BeamSearch.BEAM_SIZE_PARAMETER);
         if (beamSizeString != null)
         {
@@ -67,7 +68,7 @@ public class LemmatizerME : Lemmatizer
         }
         else
         {
-            this.model = new BeamSearch<string>(beamSize, (MaxentModel)model.GetLemmatizerSequenceModel(), 0);
+            this.model = new BeamSearch<string>(beamSize, (IMaxentModel)model.GetLemmatizerSequenceModel(), 0);
         }
     }
 
@@ -80,8 +81,8 @@ public class LemmatizerME : Lemmatizer
 
     public virtual IList<IList<string>> Lemmatize(IList<string> toks, IList<string> tags)
     {
-        string[] tokens = toks.ToArray();
-        string[] posTags = tags.ToArray();
+        string[] tokens = [.. toks];
+        string[] posTags = [.. tags];
         string[][] allLemmas = PredictLemmas(LEMMA_NUMBER, tokens, posTags);
         IList<IList<string>> predictedLemmas = new List<IList<string>>();
         for (int i = 0; i < allLemmas.Length; i++)
@@ -98,11 +99,11 @@ public class LemmatizerME : Lemmatizer
     /// <param name="toks">the array of tokens</param>
     /// <param name="tags">the array of pos tags</param>
     /// <returns>an array containing the lemma classes</returns>
-    public virtual String[] PredictSES(string[] toks, string[] tags)
+    public virtual string[] PredictSES(string[] toks, string[] tags)
     {
-        bestSequence = model.BestSequence(toks, new object[] { tags }, contextGenerator, sequenceValidator);
+        bestSequence = model.BestSequence(toks, [tags], contextGenerator, sequenceValidator);
         IList<string> ses = bestSequence.GetOutcomes();
-        return ses.ToArray();
+        return [.. ses];
     }
 
     /// <summary>
@@ -114,12 +115,12 @@ public class LemmatizerME : Lemmatizer
     /// <returns>a double array containing all posible lemmas for each token and postag pair</returns>
     public virtual string[][] PredictLemmas(int numLemmas, string[] toks, string[] tags)
     {
-        Sequence[] bestSequences = model.BestSequences(numLemmas, toks, new object[] { tags }, contextGenerator, sequenceValidator);
+        Sequence[] bestSequences = model.BestSequences(numLemmas, toks, [tags], contextGenerator, sequenceValidator);
         string[][] allLemmas = new string[bestSequences.Length][];
         for (int i = 0; i < allLemmas.Length; i++)
         {
             IList<string> ses = bestSequences[i].GetOutcomes();
-            string[] sesArray = ses.ToArray();
+            string[] sesArray = [.. ses];
             allLemmas[i] = DecodeLemmas(toks, sesArray);
         }
 
@@ -146,10 +147,10 @@ public class LemmatizerME : Lemmatizer
             lemmas.Add(lemma);
         }
 
-        return lemmas.ToArray();
+        return [.. lemmas];
     }
 
-    public static String[] EncodeLemmas(string[] toks, string[] lemmas)
+    public static string[] EncodeLemmas(string[] toks, string[] lemmas)
     {
         IList<string> sesList = new List<string>();
         for (int i = 0; i < toks.Length; i++)
@@ -163,17 +164,17 @@ public class LemmatizerME : Lemmatizer
             sesList.Add(ses);
         }
 
-        return sesList.ToArray();
+        return [.. sesList];
     }
 
     public virtual Sequence[] TopKSequences(string[] sentence, string[] tags)
     {
-        return model.BestSequences(DEFAULT_BEAM_SIZE, sentence, new object[] { tags }, contextGenerator, sequenceValidator);
+        return model.BestSequences(DEFAULT_BEAM_SIZE, sentence, [tags], contextGenerator, sequenceValidator);
     }
 
     public virtual Sequence[] TopKSequences(string[] sentence, string[] tags, double minSequenceScore)
     {
-        return model.BestSequences(DEFAULT_BEAM_SIZE, sentence, new object[] { tags }, minSequenceScore, contextGenerator, sequenceValidator);
+        return model.BestSequences(DEFAULT_BEAM_SIZE, sentence, [tags], minSequenceScore, contextGenerator, sequenceValidator);
     }
 
     /// <summary>
@@ -202,11 +203,11 @@ public class LemmatizerME : Lemmatizer
     // public static LemmatizerModel Train(string languageCode, ObjectStream<LemmaSample> samples, TrainingParameters trainParams, LemmatizerFactory posFactory)
     // {
     //     int beamSize = trainParams.GetIntParameter(BeamSearch.BEAM_SIZE_PARAMETER, LemmatizerME.DEFAULT_BEAM_SIZE);
-    //     LemmatizerContextGenerator contextGenerator = posFactory.GetContextGenerator();
+    //     ILemmatizerContextGenerator contextGenerator = posFactory.GetContextGenerator();
     //     Dictionary<string, string> manifestInfoEntries = new HashMap();
     //     TrainerType trainerType = TrainerFactory.GetTrainerType(trainParams);
-    //     MaxentModel lemmatizerModel = null;
-    //     SequenceClassificationModel<string> seqLemmatizerModel = null;
+    //     IMaxentModel lemmatizerModel = null;
+    //     ISequenceClassificationModel<string> seqLemmatizerModel = null;
     //     if (TrainerType.EVENT_MODEL_TRAINER.Equals(trainerType))
     //     {
     //         ObjectStream<Event> es = new LemmaSampleEventStream(samples, contextGenerator);
@@ -244,11 +245,11 @@ public class LemmatizerME : Lemmatizer
 
     public virtual Sequence[] TopKLemmaClasses(string[] sentence, string[] tags)
     {
-        return model.BestSequences(DEFAULT_BEAM_SIZE, sentence, new object[] { tags }, contextGenerator, sequenceValidator);
+        return model.BestSequences(DEFAULT_BEAM_SIZE, sentence, [tags], contextGenerator, sequenceValidator);
     }
 
     public virtual Sequence[] TopKLemmaClasses(string[] sentence, string[] tags, double minSequenceScore)
     {
-        return model.BestSequences(DEFAULT_BEAM_SIZE, sentence, new object[] { tags }, minSequenceScore, contextGenerator, sequenceValidator);
+        return model.BestSequences(DEFAULT_BEAM_SIZE, sentence, [tags], minSequenceScore, contextGenerator, sequenceValidator);
     }
 }

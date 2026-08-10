@@ -17,7 +17,7 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using NOpenNLP.Tools.Dictionary;
+
 using NOpenNLP.Tools.Ml;
 using NOpenNLP.Tools.Ml.Model;
 using NOpenNLP.Tools.Util;
@@ -26,25 +26,23 @@ using NOpenNLP.Tools.Support;
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Postag;
 
 /// <summary>
 /// The {@link POSModel} is the model used
-/// by a learnable {@link POSTagger}.
+/// by a learnable {@link IPOSTagger}.
 /// </summary>
 /// <remarks>@seePOSTaggerME</remarks>
-public sealed class POSModel : BaseModel, SerializableArtifact
+public sealed class POSModel : BaseModel, ISerializableArtifact
 {
-    private static readonly string COMPONENT_NAME = "POSTaggerME";
+    private const string COMPONENT_NAME = "POSTaggerME";
     internal const string POS_MODEL_ENTRY_NAME = "pos.model";
     internal const string GENERATOR_DESCRIPTOR_ENTRY_NAME = "generator.featuregen";
+
     // NOpenNLP: these constructors are only used when training a new model,
     // which is not supported; we only support inference of existing models.
-    // public POSModel(string languageCode, SequenceClassificationModel<string> posModel, Dictionary<string, string> manifestInfoEntries, POSTaggerFactory posFactory) : base(COMPONENT_NAME, languageCode, manifestInfoEntries, posFactory)
+    // public POSModel(string languageCode, ISequenceClassificationModel<string> posModel, Dictionary<string, string> manifestInfoEntries, POSTaggerFactory posFactory) : base(COMPONENT_NAME, languageCode, manifestInfoEntries, posFactory)
     // {
     //     artifactMap.Put(POS_MODEL_ENTRY_NAME, posModel ?? throw new ArgumentNullException(nameof(posModel)));
     //     artifactMap.Put(GENERATOR_DESCRIPTOR_ENTRY_NAME, posFactory.GetFeatureGenerator());
@@ -55,17 +53,17 @@ public sealed class POSModel : BaseModel, SerializableArtifact
     //     // checkArtifactMap();
     // }
 
-    // public POSModel(string languageCode, MaxentModel posModel, Dictionary<string, string> manifestInfoEntries, POSTaggerFactory posFactory) : this(languageCode, posModel, POSTaggerME.DEFAULT_BEAM_SIZE, manifestInfoEntries, posFactory)
+    // public POSModel(string languageCode, IMaxentModel posModel, Dictionary<string, string> manifestInfoEntries, POSTaggerFactory posFactory) : this(languageCode, posModel, POSTaggerME.DEFAULT_BEAM_SIZE, manifestInfoEntries, posFactory)
     // {
     // }
 
-    // public POSModel(string languageCode, MaxentModel posModel, int beamSize, Dictionary<string, string> manifestInfoEntries, POSTaggerFactory posFactory) : base(COMPONENT_NAME, languageCode, manifestInfoEntries, posFactory)
+    // public POSModel(string languageCode, IMaxentModel posModel, int beamSize, Dictionary<string, string> manifestInfoEntries, POSTaggerFactory posFactory) : base(COMPONENT_NAME, languageCode, manifestInfoEntries, posFactory)
     // {
     //     if (posModel is null)
     //     {
     //         throw new ArgumentNullException(nameof(posModel));
     //     }
-// 
+//
     //     Properties manifest = (Properties)artifactMap[MANIFEST_ENTRY];
     //     manifest.SetProperty(BeamSearch.BEAM_SIZE_PARAMETER, Convert.ToString(beamSize));
     //     artifactMap.Put(POS_MODEL_ENTRY_NAME, posModel);
@@ -74,7 +72,7 @@ public sealed class POSModel : BaseModel, SerializableArtifact
     //     {
     //         artifactMap.Put(resource.GetKey(), resource.GetValue());
     //     }
-// 
+//
     //     CheckArtifactMap();
     // }
 
@@ -103,7 +101,7 @@ public sealed class POSModel : BaseModel, SerializableArtifact
     protected override void ValidateArtifactMap()
     {
         base.ValidateArtifactMap();
-        if (!(artifactMap[POS_MODEL_ENTRY_NAME] is MaxentModel))
+        if (!(artifactMap[POS_MODEL_ENTRY_NAME] is IMaxentModel))
         {
             throw new InvalidFormatException("POS model is incomplete!");
         }
@@ -115,11 +113,11 @@ public sealed class POSModel : BaseModel, SerializableArtifact
     /// @deprecateduse getPosSequenceModel instead. This method will be removed soon.
     /// Only required for Parser 1.5.x backward compatibility. Newer models don't need this anymore.
     /// </remarks>
-    public MaxentModel GetPosModel()
+    public IMaxentModel GetPosModel()
     {
-        if (artifactMap[POS_MODEL_ENTRY_NAME] is MaxentModel)
+        if (artifactMap[POS_MODEL_ENTRY_NAME] is IMaxentModel)
         {
-            return (MaxentModel)artifactMap[POS_MODEL_ENTRY_NAME];
+            return (IMaxentModel)artifactMap[POS_MODEL_ENTRY_NAME];
         }
         else
         {
@@ -127,10 +125,10 @@ public sealed class POSModel : BaseModel, SerializableArtifact
         }
     }
 
-    public SequenceClassificationModel<string> GetPosSequenceModel()
+    public ISequenceClassificationModel<string> GetPosSequenceModel()
     {
         Properties manifest = (Properties)artifactMap[MANIFEST_ENTRY];
-        if (artifactMap[POS_MODEL_ENTRY_NAME] is MaxentModel)
+        if (artifactMap[POS_MODEL_ENTRY_NAME] is IMaxentModel)
         {
             string beamSizeString = manifest.GetProperty(BeamSearch.BEAM_SIZE_PARAMETER);
             int beamSize = POSTaggerME.DEFAULT_BEAM_SIZE;
@@ -139,11 +137,11 @@ public sealed class POSModel : BaseModel, SerializableArtifact
                 beamSize = int.Parse(beamSizeString);
             }
 
-            return new BeamSearch<string>(beamSize, (MaxentModel)artifactMap[POS_MODEL_ENTRY_NAME]);
+            return new BeamSearch<string>(beamSize, (IMaxentModel)artifactMap[POS_MODEL_ENTRY_NAME]);
         }
-        else if (artifactMap[POS_MODEL_ENTRY_NAME] is SequenceClassificationModel<string>)
+        else if (artifactMap[POS_MODEL_ENTRY_NAME] is ISequenceClassificationModel<string>)
         {
-            return (SequenceClassificationModel<string>)artifactMap[POS_MODEL_ENTRY_NAME];
+            return (ISequenceClassificationModel<string>)artifactMap[POS_MODEL_ENTRY_NAME];
         }
         else
         {
@@ -156,7 +154,7 @@ public sealed class POSModel : BaseModel, SerializableArtifact
         return (POSTaggerFactory)this.toolFactory;
     }
 
-    public override void CreateArtifactSerializers(Dictionary<string, ArtifactSerializer> serializers)
+    public override void CreateArtifactSerializers(Dictionary<string, IArtifactSerializer> serializers)
     {
         base.CreateArtifactSerializers(serializers);
         serializers.Put("featuregen", new ByteArraySerializer());

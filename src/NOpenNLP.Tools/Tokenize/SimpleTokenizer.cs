@@ -18,11 +18,7 @@
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using NOpenNLP.Tools.Util;
-using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Tokenize;
 
@@ -37,7 +33,8 @@ public class SimpleTokenizer : AbstractTokenizer
         internal static readonly CharacterEnum ALPHABETIC = new CharacterEnum("alphabetic");
         internal static readonly CharacterEnum NUMERIC = new CharacterEnum("numeric");
         internal static readonly CharacterEnum OTHER = new CharacterEnum("other");
-        private string name;
+        private readonly string name; // NOpenNLP: made readonly
+
         internal CharacterEnum(string name)
         {
             this.name = name;
@@ -50,6 +47,7 @@ public class SimpleTokenizer : AbstractTokenizer
     }
 
     public static readonly SimpleTokenizer INSTANCE;
+
     static SimpleTokenizer()
     {
         INSTANCE = new SimpleTokenizer();
@@ -118,6 +116,6 @@ public class SimpleTokenizer : AbstractTokenizer
             tokens.Add(new Span(start, sl));
         }
 
-        return tokens.ToArray();
+        return [.. tokens];
     }
 }

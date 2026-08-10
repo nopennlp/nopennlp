@@ -21,7 +21,6 @@ using NOpenNLP.Tools.Ml;
 using NOpenNLP.Tools.Ml.Model;
 using NOpenNLP.Tools.Util;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace NOpenNLP.Tools.Chunker;
 
@@ -29,30 +28,33 @@ namespace NOpenNLP.Tools.Chunker;
 /// The class represents a maximum-entropy-based chunker.  Such a chunker can be used to
 /// find flat structures based on sequence inputs such as noun phrases or named entities.
 /// </summary>
-public class ChunkerME : Chunker
+public class ChunkerME : IChunker
 {
-    public static readonly int DEFAULT_BEAM_SIZE = 10;
+    public const int DEFAULT_BEAM_SIZE = 10;
+
     private Sequence bestSequence;
+
     /// <summary>
     /// The model used to assign chunk tags to a sequence of tokens.
     /// </summary>
-    protected SequenceClassificationModel<TokenTag> model;
-    private ChunkerContextGenerator contextGenerator;
-    private SequenceValidator<TokenTag> sequenceValidator;
+    protected readonly ISequenceClassificationModel<TokenTag> model; // NOpenNLP: made readonly
+    private readonly IChunkerContextGenerator contextGenerator; // NOpenNLP: made readonly
+    private readonly ISequenceValidator<TokenTag> sequenceValidator; // NOpenNLP: made readonly
+
     /// <summary>
     /// Initializes the current instance with the specified model and
     /// the specified beam size.
     /// </summary>
     /// <param name="model">The model for this chunker.</param>
     /// <param name="beamSize">The size of the beam that should be used when decoding sequences.</param>
-    /// <param name="sequenceValidator">The {@link SequenceValidator} to determines whether the outcome
+    /// <param name="sequenceValidator">The {@link ISequenceValidator} to determines whether the outcome
     ///        is valid for the preceding sequence. This can be used to implement constraints
     ///        on what sequences are valid.</param>
     /// <remarks>
     /// @deprecatedUse {@link #ChunkerME(ChunkerModel, int)} instead and use the {@link ChunkerFactory}
-    ///     to configure the {@link SequenceValidator} and {@link ChunkerContextGenerator}.
+    ///     to configure the {@link ISequenceValidator} and {@link IChunkerContextGenerator}.
     /// </remarks>
-    private ChunkerME(ChunkerModel model, int beamSize, SequenceValidator<TokenTag> sequenceValidator, ChunkerContextGenerator contextGenerator)
+    private ChunkerME(ChunkerModel model, int beamSize, ISequenceValidator<TokenTag> sequenceValidator, IChunkerContextGenerator contextGenerator)
     {
         this.sequenceValidator = sequenceValidator;
         this.contextGenerator = contextGenerator;
@@ -99,9 +101,9 @@ public class ChunkerME : Chunker
     public virtual string[] Chunk(string[] toks, string[] tags)
     {
         TokenTag[] tuples = TokenTag.Create(toks, tags);
-        bestSequence = model.BestSequence(tuples, new object[] { }, contextGenerator, sequenceValidator);
+        bestSequence = model.BestSequence(tuples, [], contextGenerator, sequenceValidator);
         IList<string> c = bestSequence.GetOutcomes();
-        return c.ToArray();
+        return [.. c];
     }
 
     public virtual Span[] ChunkAsSpans(string[] toks, string[] tags)
@@ -113,13 +115,13 @@ public class ChunkerME : Chunker
     public virtual Sequence[] TopKSequences(string[] sentence, string[] tags)
     {
         TokenTag[] tuples = TokenTag.Create(sentence, tags);
-        return model.BestSequences(DEFAULT_BEAM_SIZE, tuples, new object[] { }, contextGenerator, sequenceValidator);
+        return model.BestSequences(DEFAULT_BEAM_SIZE, tuples, [], contextGenerator, sequenceValidator);
     }
 
     public virtual Sequence[] TopKSequences(string[] sentence, string[] tags, double minSequenceScore)
     {
         TokenTag[] tuples = TokenTag.Create(sentence, tags);
-        return model.BestSequences(DEFAULT_BEAM_SIZE, tuples, new object[] { }, minSequenceScore, contextGenerator, sequenceValidator);
+        return model.BestSequences(DEFAULT_BEAM_SIZE, tuples, [], minSequenceScore, contextGenerator, sequenceValidator);
     }
 
     /// <summary>
@@ -150,8 +152,8 @@ public class ChunkerME : Chunker
     //     int beamSize = mlParams.GetIntParameter(BeamSearch.BEAM_SIZE_PARAMETER, ChunkerME.DEFAULT_BEAM_SIZE);
     //     Dictionary<string, string> manifestInfoEntries = new Dictionary<string, string>();
     //     TrainerType trainerType = TrainerFactory.GetTrainerType(mlParams);
-    //     MaxentModel chunkerModel = null;
-    //     SequenceClassificationModel<string> seqChunkerModel = null;
+    //     IMaxentModel chunkerModel = null;
+    //     ISequenceClassificationModel<string> seqChunkerModel = null;
     //     if (TrainerType.EVENT_MODEL_TRAINER.Equals(trainerType))
     //     {
     //         ObjectStream<Event> es = new ChunkerEventStream(@in, factory.GetContextGenerator());

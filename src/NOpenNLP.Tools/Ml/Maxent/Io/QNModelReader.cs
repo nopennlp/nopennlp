@@ -27,7 +27,7 @@ namespace NOpenNLP.Tools.Ml.Maxent.Io;
 
 public class QNModelReader : GISModelReader
 {
-    public QNModelReader(DataReader dataReader) : base(dataReader)
+    public QNModelReader(IDataReader dataReader) : base(dataReader)
     {
     }
 
@@ -39,7 +39,7 @@ public class QNModelReader : GISModelReader
     {
         string modelType = ReadUTF();
         if (!modelType.Equals("QN"))
-            Console.WriteLine("Error: attempting to load a " + modelType + " model as a MAXENT_QN model." + " You should expect problems.");
+            Console.WriteLine($"Error: attempting to load a {modelType} model as a MAXENT_QN model. You should expect problems.");
     }
 
     // NOpenNLP: upstream returns the covariant QNModel, but covariant return

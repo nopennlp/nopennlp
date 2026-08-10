@@ -18,9 +18,6 @@
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Text;
 
 namespace NOpenNLP.Tools.Ml.Model;
@@ -29,33 +26,23 @@ namespace NOpenNLP.Tools.Ml.Model;
 /// The context of a decision point during training.  This includes
 /// contextual predicates and an outcome.
 /// </summary>
-public class Event
+// NOpenNLP: used optional parameter instead of ctor overload
+public class Event(string outcome, string[] context, float[]? values = null)
 {
-    private readonly string outcome;
-    private readonly string[] context;
-    private readonly float[] values;
-    public Event(string outcome, String[] context) : this(outcome, context, null)
-    {
-    }
-
-    public Event(string outcome, String[] context, float[] values)
-    {
-        this.outcome = outcome ?? throw new ArgumentNullException(nameof(outcome));
-        this.context = context ?? throw new ArgumentNullException(nameof(context));
-        this.values = values;
-    }
+    private readonly string outcome = outcome ?? throw new ArgumentNullException(nameof(outcome));
+    private readonly string[] context = context ?? throw new ArgumentNullException(nameof(context));
 
     public virtual string GetOutcome()
     {
         return outcome;
     }
 
-    public virtual String[] GetContext()
+    public virtual string[] GetContext()
     {
         return context;
     }
 
-    public virtual float[] GetValues()
+    public virtual float[]? GetValues()
     {
         return values;
     }
@@ -69,20 +56,20 @@ public class Event
             sb.Append(context[0]);
             if (values != null)
             {
-                sb.Append("=").Append(values[0]);
+                sb.Append('=').Append(values[0]);
             }
         }
 
         for (int ci = 1; ci < context.Length; ci++)
         {
-            sb.Append(" ").Append(context[ci]);
+            sb.Append(' ').Append(context[ci]);
             if (values != null)
             {
-                sb.Append("=").Append(values[ci]);
+                sb.Append('=').Append(values[ci]);
             }
         }
 
-        sb.Append("]");
+        sb.Append(']');
         return sb.ToString();
     }
 }

@@ -22,9 +22,10 @@ using NOpenNLP.Tools.Util;
 
 namespace NOpenNLP.Tools.Chunker;
 
-public class DefaultChunkerSequenceValidator : SequenceValidator<TokenTag>
+public class DefaultChunkerSequenceValidator : ISequenceValidator<TokenTag>
 {
-    private bool ValidOutcome(string outcome, string prevOutcome)
+    // NOpenNLP-specific: made static
+    private static bool ValidOutcome(string outcome, string prevOutcome)
     {
         if (outcome.StartsWith("I-", StringComparison.Ordinal))
         {
@@ -39,7 +40,7 @@ public class DefaultChunkerSequenceValidator : SequenceValidator<TokenTag>
                     return false;
                 }
 
-                if (!prevOutcome.Substring(2).Equals(outcome.Substring(2)))
+                if (!prevOutcome[2..].Equals(outcome[2..]))
                 {
                     return false;
                 }
@@ -54,7 +55,7 @@ public class DefaultChunkerSequenceValidator : SequenceValidator<TokenTag>
         string prevOutcome = null;
         if (sequence.Length > 0)
         {
-            prevOutcome = sequence[sequence.Length - 1];
+            prevOutcome = sequence[^1];
         }
 
         return ValidOutcome(outcome, prevOutcome);

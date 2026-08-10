@@ -17,25 +17,20 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using NOpenNLP.Tools.Util;
-using System;
 
-namespace NOpenNLP.Tools.Lemmatizer;
+namespace NOpenNLP.Tools.Tokenize;
 
 /// <summary>
-/// Interface for the context generator used for probabilistic lemmatizer.
+/// Interface for {@link TokenizerME} context generators.
 /// </summary>
-public interface LemmatizerContextGenerator : BeamSearchContextGenerator<string>
+public interface ITokenContextGenerator
 {
     /// <summary>
-    /// Returns the contexts for lemmatizing of the specified index.
+    /// Returns an array of features for the specified sentence string at the specified index.
     /// </summary>
-    /// <param name="i">The index of the token in the specified toks array for which the context should be constructed.</param>
-    /// <param name="toks">The tokens of the sentence.  The <code>toString</code> methods of
-    ///             these objects should return the token text.</param>
-    /// <param name="tags">The POS tags for the the specified tokens.</param>
-    /// <param name="lemmas">The previous decisions made in the tagging of this sequence.
-    ///               Only indices less than i will be examined.</param>
-    /// <returns>An array of predictive contexts on which a model basis its decisions.</returns>
-    string[] GetContext(int i, string[] toks, string[] tags, string[] lemmas);
+    /// <param name="sentence">The string for a sentence.</param>
+    /// <param name="index">The index to consider splitting as a token.</param>
+    /// <returns>an array of features for the specified sentence string at the
+    ///   specified index.</returns>
+    string[] GetContext(string sentence, int index);
 }

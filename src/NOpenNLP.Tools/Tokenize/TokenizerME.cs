@@ -17,23 +17,17 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using NOpenNLP.Tools.Dictionary;
-using NOpenNLP.Tools.Ml;
+
 using NOpenNLP.Tools.Ml.Model;
 using NOpenNLP.Tools.Tokenize.Lang;
 using NOpenNLP.Tools.Util;
-using System;
 using System.Text.RegularExpressions;
-using System.IO;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Tokenize;
 
 /// <summary>
-/// A Tokenizer for converting raw text into separated tokens.  It uses
+/// A ITokenizer for converting raw text into separated tokens.  It uses
 /// Maximum Entropy to make its decisions.  The features are loosely
 /// based off of Jeff Reynar's UPenn thesis "Topic Segmentation:
 /// Algorithms and Applications.", which is available from his
@@ -60,7 +54,7 @@ namespace NOpenNLP.Tools.Tokenize;
 /// <br>
 /// TokenizerModel model = TokenizerModel(modelIn);<br>
 /// <br>
-/// Tokenizer tokenizer = new TokenizerME(model);<br>
+/// ITokenizer tokenizer = new TokenizerME(model);<br>
 /// <br>
 /// String tokens[] = tokenizer.tokenize("A sentence to be tokenized.");
 /// </code>
@@ -75,36 +69,45 @@ public class TokenizerME : AbstractTokenizer
     /// <summary>
     /// Constant indicates a token split.
     /// </summary>
-    public static readonly string SPLIT = "T";
+    public const string SPLIT = "T";
+
     /// <summary>
     /// Constant indicates no token split.
     /// </summary>
-    public static readonly string NO_SPLIT = "F";
+    public const string NO_SPLIT = "F";
+
     /// <summary>
     /// Alpha-Numeric Regex
     /// </summary>
     /// <remarks>@deprecatedAs of release 1.5.2, replaced by {@link Factory#getAlphanumeric(String)}</remarks>
     public static readonly Regex alphaNumeric = new Regex(Factory.DEFAULT_ALPHANUMERIC);
+
     private readonly Regex alphanumeric;
+
     /// <summary>
     /// The maximum entropy model to use to evaluate contexts.
     /// </summary>
-    private MaxentModel model;
+    private readonly IMaxentModel model; // NOpenNLP: made readonly
+
     /// <summary>
     /// The context generator.
     /// </summary>
-    private readonly TokenContextGenerator cg;
+    private readonly ITokenContextGenerator cg;
+
     /// <summary>
     /// Optimization flag to skip alpha numeric tokens for further
     /// tokenization
     /// </summary>
-    private bool useAlphaNumericOptimization;
+    private readonly bool useAlphaNumericOptimization; // NOpenNLP: made readonly
+
     /// <summary>
     /// List of probabilities for each token returned from a call to
     /// <code>tokenize</code> or <code>tokenizePos</code>.
     /// </summary>
-    private IList<Double> tokProbs;
-    private IList<Span> newTokens;
+    private readonly IList<double> tokProbs; // NOpenNLP: made readonly
+
+    private readonly IList<Span> newTokens; // NOpenNLP: made readonly
+
     public TokenizerME(TokenizerModel model)
     {
         TokenizerFactory factory = model.GetFactory();
@@ -119,7 +122,7 @@ public class TokenizerME : AbstractTokenizer
     /// <summary>
     /// </summary>
     /// <remarks>
-    /// @deprecateduse {@link TokenizerFactory} to extend the Tokenizer
+    /// @deprecateduse {@link TokenizerFactory} to extend the ITokenizer
     ///             functionality
     /// </remarks>
     public TokenizerME(TokenizerModel model, Factory factory)
@@ -137,10 +140,10 @@ public class TokenizerME : AbstractTokenizer
     {
         if (abbreviations == null)
         {
-            return new HashSet<string>();
+            return [];
         }
 
-        return new HashSet<string>(abbreviations.AsStringSet());
+        return [.. abbreviations.AsStringSet()];
     }
 
     /// <summary>
@@ -211,30 +214,30 @@ public class TokenizerME : AbstractTokenizer
             }
         }
 
-        return newTokens.ToArray();
+        return [.. newTokens];
     }
 
-    /// <summary>
-    /// Trains a model for the {@link TokenizerME}.
-    /// </summary>
-    /// <param name="samples">
-    ///          the samples used for the training.</param>
-    /// <param name="factory">
-    ///          a {@link TokenizerFactory} to get resources from</param>
-    /// <param name="mlParams">
-    ///          the machine learning train parameters</param>
-    /// <returns>the trained {@link TokenizerModel}</returns>
-    /// <exception cref="IOException">
-    ///           it throws an {@link IOException} if an {@link IOException} is
-    ///           thrown during IO operations on a temp file which is created
-    ///           during training. Or if reading from the {@link ObjectStream}
-    ///           fails.</exception>
+    // /// <summary>
+    // /// Trains a model for the {@link TokenizerME}.
+    // /// </summary>
+    // /// <param name="samples">
+    // ///          the samples used for the training.</param>
+    // /// <param name="factory">
+    // ///          a {@link TokenizerFactory} to get resources from</param>
+    // /// <param name="mlParams">
+    // ///          the machine learning train parameters</param>
+    // /// <returns>the trained {@link TokenizerModel}</returns>
+    // /// <exception cref="IOException">
+    // ///           it throws an {@link IOException} if an {@link IOException} is
+    // ///           thrown during IO operations on a temp file which is created
+    // ///           during training. Or if reading from the {@link ObjectStream}
+    // ///           fails.</exception>
     // public static TokenizerModel Train(ObjectStream<TokenSample> samples, TokenizerFactory factory, TrainingParameters mlParams)
     // {
     //     Dictionary<string, string> manifestInfoEntries = new Dictionary<string, string>();
     //     ObjectStream<Event> eventStream = new TokSpanEventStream(samples, factory.IsUseAlphaNumericOptmization(), factory.GetAlphaNumericPattern(), factory.GetContextGenerator());
     //     EventTrainer trainer = TrainerFactory.GetEventTrainer(mlParams, manifestInfoEntries);
-    //     MaxentModel maxentModel = trainer.Train(eventStream);
+    //     IMaxentModel maxentModel = trainer.Train(eventStream);
     //     return new TokenizerModel(maxentModel, manifestInfoEntries, factory);
     // }
 

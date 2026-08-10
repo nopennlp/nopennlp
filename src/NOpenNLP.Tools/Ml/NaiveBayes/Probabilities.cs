@@ -21,20 +21,20 @@
 using NOpenNLP.Tools.Support;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace NOpenNLP.Tools.Ml.Naivebayes;
 
 /// <summary>
 /// Class implementing the probability distribution over labels returned by a classifier.
 /// </summary>
-/// <param name="<T>">the label (category) class</param>
+/// <typeparam name="T">the label (category) class</typeparam>
 public abstract class Probabilities<T>
 {
-    protected Dictionary<T, double?> map = new Dictionary<T, double?>();
+    protected readonly Dictionary<T, double?> map = new Dictionary<T, double?>(); // NOpenNLP: made readonly
     protected bool isNormalised = false;
     protected Dictionary<T, double?> normalised;
     protected double confidence = 0;
+
     /// <summary>
     /// Assigns a probability to a label, discarding any previously assigned probability.
     /// </summary>
@@ -131,7 +131,7 @@ public abstract class Probabilities<T>
     public virtual HashSet<T> GetKeys()
     {
         // NOpenNLP: Enumerable.ToHashSet is netstandard2.1+.
-        return new HashSet<T>(map.Keys);
+        return [.. map.Keys];
     }
 
     /// <summary>

@@ -24,22 +24,23 @@ using System.Collections.Generic;
 namespace NOpenNLP.Tools.Util.Featuregen;
 
 /// <summary>
-/// Caches features of the aggregated {@link AdaptiveFeatureGenerator}s.
+/// Caches features of the aggregated {@link IAdaptiveFeatureGenerator}s.
 /// </summary>
-public class CachedFeatureGenerator : AdaptiveFeatureGenerator
+public class CachedFeatureGenerator : IAdaptiveFeatureGenerator
 {
-    private readonly AdaptiveFeatureGenerator generator;
+    private readonly IAdaptiveFeatureGenerator generator;
     private string[] prevTokens;
-    private Cache<int, IList<string>> contextsCache;
+    private readonly Cache<int, IList<string>> contextsCache; // NOpenNLP: made readonly
     private long numberOfCacheHits;
     private long numberOfCacheMisses;
-    public CachedFeatureGenerator(params AdaptiveFeatureGenerator[] generators)
+
+    public CachedFeatureGenerator(params IAdaptiveFeatureGenerator[] generators)
     {
         this.generator = new AggregatedFeatureGenerator(generators);
         contextsCache = new Cache<int, IList<string>>(100);
     }
 
-    public CachedFeatureGenerator(AdaptiveFeatureGenerator generator)
+    public CachedFeatureGenerator(IAdaptiveFeatureGenerator generator)
     {
         this.generator = generator;
         contextsCache = new Cache<int, IList<string>>(100);
@@ -104,7 +105,7 @@ public class CachedFeatureGenerator : AdaptiveFeatureGenerator
         return base.ToString() + ": hits=" + numberOfCacheHits + " misses=" + numberOfCacheMisses + " hit%" + (numberOfCacheHits > 0 ? (double)numberOfCacheHits / (numberOfCacheMisses + numberOfCacheHits) : 0);
     }
 
-    public virtual AdaptiveFeatureGenerator GetCachedFeatureGenerator()
+    public virtual IAdaptiveFeatureGenerator GetCachedFeatureGenerator()
     {
         return generator;
     }

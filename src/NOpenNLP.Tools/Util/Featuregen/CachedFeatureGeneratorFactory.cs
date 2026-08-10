@@ -27,13 +27,13 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// <summary>
 /// </summary>
 /// <remarks>@seeCachedFeatureGenerator</remarks>
-public class CachedFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.XmlFeatureGeneratorFactory
+public class CachedFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
     public CachedFeatureGeneratorFactory() : base()
     {
     }
 
-    public virtual AdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
+    public virtual IAdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
     {
         XmlElement cachedGeneratorElement = null;
         XmlNodeList kids = generatorElement.ChildNodes;
@@ -52,18 +52,18 @@ public class CachedFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeature
             throw new InvalidFormatException("Could not find containing generator element!");
         }
 
-        AdaptiveFeatureGenerator cachedGenerator = GeneratorFactory.CreateGenerator(cachedGeneratorElement, resourceManager);
+        IAdaptiveFeatureGenerator cachedGenerator = GeneratorFactory.CreateGenerator(cachedGeneratorElement, resourceManager);
         return new CachedFeatureGenerator(cachedGenerator);
     }
 
-    internal static void Register(IDictionary<string, GeneratorFactory.XmlFeatureGeneratorFactory> factoryMap)
+    internal static void Register(IDictionary<string, GeneratorFactory.IXmlFeatureGeneratorFactory> factoryMap)
     {
         factoryMap.Put("cache", new CachedFeatureGeneratorFactory());
     }
 
-    public override AdaptiveFeatureGenerator Create()
+    public override IAdaptiveFeatureGenerator Create()
     {
-        AdaptiveFeatureGenerator generator = (AdaptiveFeatureGenerator)args["generator#0"];
+        IAdaptiveFeatureGenerator generator = (IAdaptiveFeatureGenerator)args["generator#0"];
         if (generator == null)
         {
             throw new InvalidFormatException("Could not find containing generator element!");

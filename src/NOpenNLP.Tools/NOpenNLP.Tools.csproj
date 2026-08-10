@@ -5,7 +5,7 @@
     <LangVersion>12.0</LangVersion>
     <RootNamespace>NOpenNLP.Tools</RootNamespace>
     <AssemblyName>NOpenNLP.Tools</AssemblyName>
-    <Nullable>disable</Nullable>
+    <Nullable>enable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <!-- 1591/1573: the ported Java doc comments do not cover every member or param. -->
@@ -46,9 +46,11 @@
     </PackageReference>
   </ItemGroup>
 
-  <!-- System.HashCode is not part of netstandard2.0. -->
+  <!-- Functionality not part of netstandard2.0. -->
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
     <PackageReference Include="Microsoft.Bcl.HashCode" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Bcl.Memory" Version="10.0.10" />
+    <PackageReference Include="PolySharp" Version="1.16.0" />
   </ItemGroup>
 
   <ItemGroup>

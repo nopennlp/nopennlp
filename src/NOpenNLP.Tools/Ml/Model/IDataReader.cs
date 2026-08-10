@@ -17,23 +17,14 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
-namespace NOpenNLP.Tools.Util.Model;
+namespace NOpenNLP.Tools.Ml.Model;
 
-public interface SerializableArtifact
+public interface IDataReader
 {
-    /// <summary>
-    /// Retrieves the class which can serialize and recreate this artifact.
-    /// <br>
-    /// Note:
-    /// The serializer class must have a public zero argument constructor or
-    /// an exception is thrown during model serialization/loading.
-    /// </summary>
-    /// <returns>the corresponding ArtifactSerializer class.</returns>
-    Type GetArtifactSerializerClass();
+    double ReadDouble();
+
+    int ReadInt32();
+
+    string ReadUTF();
 }

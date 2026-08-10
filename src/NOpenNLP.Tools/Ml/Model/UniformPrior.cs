@@ -25,10 +25,11 @@ namespace NOpenNLP.Tools.Ml.Model;
 /// <summary>
 /// Provide a maximum entropy model with a uniform prior.
 /// </summary>
-public class UniformPrior : Prior
+public class UniformPrior : IPrior
 {
     private int numOutcomes;
     private double r;
+
     public virtual void LogPrior(double[] dist, int[] context, float[] values)
     {
         for (int oi = 0; oi < numOutcomes; oi++)
@@ -60,16 +61,15 @@ public class UniformPrior : Prior
         return HashCode.Combine(numOutcomes, r);
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (obj == this)
         {
             return true;
         }
 
-        if (obj is UniformPrior)
+        if (obj is UniformPrior prior)
         {
-            UniformPrior prior = (UniformPrior)obj;
             return numOutcomes == prior.numOutcomes && r == prior.r;
         }
 

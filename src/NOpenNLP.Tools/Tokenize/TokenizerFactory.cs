@@ -17,25 +17,21 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using NOpenNLP.Tools.Dictionary;
+
 using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Tokenize.Lang;
 using NOpenNLP.Tools.Util;
 using NOpenNLP.Tools.Util.Ext;
-using J2N.Text;
 using System;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Tokenize;
 
 /// <summary>
-/// The factory that provides {@link Tokenizer} default implementations and
+/// The factory that provides {@link ITokenizer} default implementations and
 /// resources. Users can extend this class if their application requires
-/// overriding the {@link TokenContextGenerator}, {@link NOpenNLP.Tools.Dictionary.Dictionary} etc.
+/// overriding the {@link ITokenContextGenerator}, {@link NOpenNLP.Tools.Dictionary.Dictionary} etc.
 /// </summary>
 public class TokenizerFactory : BaseToolFactory
 {
@@ -43,9 +39,10 @@ public class TokenizerFactory : BaseToolFactory
     private NOpenNLP.Tools.Dictionary.Dictionary abbreviationDictionary;
     private bool useAlphaNumericOptimization = false;
     private Regex alphaNumericPattern;
-    private static readonly string ABBREVIATIONS_ENTRY_NAME = "abbreviations.dictionary";
-    private static readonly string USE_ALPHA_NUMERIC_OPTIMIZATION = "useAlphaNumericOptimization";
-    private static readonly string ALPHA_NUMERIC_PATTERN = "alphaNumericPattern";
+    private const string ABBREVIATIONS_ENTRY_NAME = "abbreviations.dictionary";
+    private const string USE_ALPHA_NUMERIC_OPTIMIZATION = "useAlphaNumericOptimization";
+    private const string ALPHA_NUMERIC_PATTERN = "alphaNumericPattern";
+
     /// <summary>
     /// Creates a {@link TokenizerFactory} that provides the default implementation
     /// of the resources.
@@ -127,7 +124,7 @@ public class TokenizerFactory : BaseToolFactory
     /// <param name="useAlphaNumericOptimization">indicate if the alpha numeric optimization
     ///     should be enabled or disabled</param>
     /// <param name="alphaNumericPattern">the pattern the alpha numeric optimization should use</param>
-    /// <returns>the instance of the Tokenizer Factory</returns>
+    /// <returns>the instance of the ITokenizer Factory</returns>
     /// <exception cref="InvalidFormatException">if once of the input parameters doesn't comply if the expected format</exception>
     public static TokenizerFactory Create(string subclassName, string languageCode, NOpenNLP.Tools.Dictionary.Dictionary abbreviationDictionary, bool useAlphaNumericOptimization, Regex alphaNumericPattern)
     {
@@ -229,7 +226,7 @@ public class TokenizerFactory : BaseToolFactory
     /// Gets the context generator
     /// </summary>
     /// <returns>a new instance of the context generator</returns>
-    public virtual TokenContextGenerator GetContextGenerator()
+    public virtual ITokenContextGenerator GetContextGenerator()
     {
         Factory f = new Factory();
         ISet<string> abbs;

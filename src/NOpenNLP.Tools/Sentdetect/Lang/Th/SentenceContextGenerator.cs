@@ -17,28 +17,21 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using NOpenNLP.Tools.Sentdetect;
+
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Sentdetect.Lang.Th;
 
 /// <summary>
 /// Creates contexts/features for end-of-sentence detection in Thai text.
 /// </summary>
-public class SentenceContextGenerator : DefaultSDContextGenerator
+public class SentenceContextGenerator() : DefaultSDContextGenerator(eosCharacters)
 {
-    public static readonly char[] eosCharacters = new[]
-    {
+    public static readonly char[] eosCharacters =
+    [
         ' ',
         '\n'
-    };
-    public SentenceContextGenerator() : base(eosCharacters)
-    {
-    }
+    ];
 
     protected override void CollectFeatures(string prefix, string suffix, string previous, string next)
     {

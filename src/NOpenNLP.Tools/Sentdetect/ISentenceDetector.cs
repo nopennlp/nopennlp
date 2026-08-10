@@ -17,25 +17,29 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
+using NOpenNLP.Tools.Util;
 
-namespace NOpenNLP.Tools.Tokenize;
+namespace NOpenNLP.Tools.Sentdetect;
 
 /// <summary>
-/// Interface for {@link TokenizerME} context generators.
+/// The interface for sentence detectors, which find the sentence boundaries in
+/// a text.
 /// </summary>
-public interface TokenContextGenerator
+public interface ISentenceDetector
 {
     /// <summary>
-    /// Returns an array of features for the specified sentence string at the specified index.
+    /// Sentence detect a string.
     /// </summary>
-    /// <param name="sentence">The string for a sentence.</param>
-    /// <param name="index">The index to consider splitting as a token.</param>
-    /// <returns>an array of features for the specified sentence string at the
-    ///   specified index.</returns>
-    String[] GetContext(string sentence, int index);
+    /// <param name="s">The string to be sentence detected.</param>
+    /// <returns> The String[] with the individual sentences as the array
+    ///          elements.</returns>
+    string[] SentDetect(string s);
+
+    /// <summary>
+    /// Sentence detect a string.
+    /// </summary>
+    /// <param name="s">The string to be sentence detected.</param>
+    /// <returns>The Span[] with the spans (offsets into s) for each
+    /// detected sentence as the individuals array elements.</returns>
+    Span[] SentPosDetect(string s);
 }

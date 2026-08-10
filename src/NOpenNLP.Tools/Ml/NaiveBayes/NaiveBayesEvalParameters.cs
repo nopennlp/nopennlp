@@ -24,16 +24,12 @@ namespace NOpenNLP.Tools.Ml.Naivebayes;
 /// <summary>
 /// Parameters for the evalution of a naive bayes classifier
 /// </summary>
-public class NaiveBayesEvalParameters : EvalParameters
+public class NaiveBayesEvalParameters(Context[] @params, int numOutcomes, double[] outcomeTotals, long vocabulary)
+    : EvalParameters(@params, numOutcomes)
 {
-    protected double[] outcomeTotals;
-    protected long vocabulary;
-
-    public NaiveBayesEvalParameters(Context[] @params, int numOutcomes, double[] outcomeTotals, long vocabulary) : base(@params, numOutcomes)
-    {
-        this.outcomeTotals = outcomeTotals;
-        this.vocabulary = vocabulary;
-    }
+    // NOpenNLP: made readonly
+    protected readonly double[] outcomeTotals = outcomeTotals;
+    protected readonly long vocabulary = vocabulary;
 
     public virtual double[] GetOutcomeTotals()
     {

@@ -25,15 +25,15 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// <summary>
 /// An interface for generating features for name entity identification and for
 /// updating document level contexts.
-/// <p>
+/// <para/>
 ///
-/// <b>Note:</b><br>
+/// <b>Note:</b><br/>
 /// Feature generation is not thread safe and a instance of a feature generator
 /// must only be called from one thread. The resources used by a feature
 /// generator are typically shared between man instances of features generators
 /// which are called from many threads and have to be thread safe.
 /// </summary>
-public interface AdaptiveFeatureGenerator
+public interface IAdaptiveFeatureGenerator
 {
     /// <summary>
     /// Adds the appropriate features for the token at the specified index with the
@@ -44,6 +44,7 @@ public interface AdaptiveFeatureGenerator
     /// <param name="index">The index of the token which is currently being processed.</param>
     /// <param name="previousOutcomes">The outcomes for the tokens prior to the specified index.</param>
     void CreateFeatures(IList<string> features, string[] tokens, int index, string[] previousOutcomes);
+
     /// <summary>
     /// Informs the feature generator that the specified tokens have been classified with the
     /// corresponding set of specified outcomes.

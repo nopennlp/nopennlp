@@ -20,7 +20,6 @@
 using System;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
-using Version = NOpenNLP.Tools.Util.Version;
 
 namespace NOpenNLP.Tools.Util;
 

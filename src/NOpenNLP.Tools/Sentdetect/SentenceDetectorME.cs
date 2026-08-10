@@ -17,18 +17,12 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using NOpenNLP.Tools.Dictionary;
-using NOpenNLP.Tools.Ml;
+
 using NOpenNLP.Tools.Ml.Model;
 using NOpenNLP.Tools.Sentdetect.Lang;
 using NOpenNLP.Tools.Util;
-using NOpenNLP.Tools.Util.Model;
 using J2N.Text;
-using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Text;
 
 namespace NOpenNLP.Tools.Sentdetect;
@@ -39,33 +33,39 @@ namespace NOpenNLP.Tools.Sentdetect;
 /// A maximum entropy model is used to evaluate end-of-sentence characters in a
 /// string to determine if they signify the end of a sentence.
 /// </summary>
-public class SentenceDetectorME : SentenceDetector
+public class SentenceDetectorME : ISentenceDetector
 {
     /// <summary>
     /// Constant indicates a sentence split.
     /// </summary>
-    public static readonly string SPLIT = "s";
+    public const string SPLIT = "s";
+
     /// <summary>
     /// Constant indicates no sentence split.
     /// </summary>
-    public static readonly string NO_SPLIT = "n";
+    public const string NO_SPLIT = "n";
+
     /// <summary>
     /// The maximum entropy model to use to evaluate contexts.
     /// </summary>
-    private MaxentModel model;
+    private readonly IMaxentModel model; // NOpenNLP: made readonly
+
     /// <summary>
     /// The feature context generator.
     /// </summary>
-    private readonly SDContextGenerator cgen;
+    private readonly ISDContextGenerator cgen;
+
     /// <summary>
-    /// The {@link EndOfSentenceScanner} to use when scanning for end of sentence offsets.
+    /// The {@link IEndOfSentenceScanner} to use when scanning for end of sentence offsets.
     /// </summary>
-    private readonly EndOfSentenceScanner scanner;
+    private readonly IEndOfSentenceScanner scanner;
+
     /// <summary>
     /// The list of probabilities associated with each decision.
     /// </summary>
-    private IList<double> sentProbs = new List<double>();
-    protected bool useTokenEnd;
+    private readonly IList<double> sentProbs = new List<double>(); // NOpenNLP: made readonly
+    protected readonly bool useTokenEnd; // NOpenNLP: made readonly
+
     /// <summary>
     /// Initializes the current instance.
     /// </summary>
@@ -83,7 +83,7 @@ public class SentenceDetectorME : SentenceDetector
     /// </summary>
     /// <remarks>
     /// @deprecatedUse a {@link SentenceDetectorFactory} to extend
-    ///             SentenceDetector functionality.
+    ///             ISentenceDetector functionality.
     /// </remarks>
     public SentenceDetectorME(SentenceModel model, Factory factory)
     {
@@ -106,14 +106,14 @@ public class SentenceDetectorME : SentenceDetector
         useTokenEnd = model.UseTokenEnd();
     }
 
-    private static HashSet<string> GetAbbreviations(NOpenNLP.Tools.Dictionary.Dictionary abbreviations)
+    private static HashSet<string> GetAbbreviations(NOpenNLP.Tools.Dictionary.Dictionary? abbreviations)
     {
         if (abbreviations == null)
         {
-            return new HashSet<string>();
+            return [];
         }
 
-        return new HashSet<string>(abbreviations.AsStringSet());
+        return [.. abbreviations.AsStringSet()];
     }
 
     /// <summary>
@@ -121,7 +121,7 @@ public class SentenceDetectorME : SentenceDetector
     /// </summary>
     /// <param name="s">The string to be processed.</param>
     /// <returns>  A string array containing individual sentences as elements.</returns>
-    public virtual String[] SentDetect(string s)
+    public virtual string[] SentDetect(string s)
     {
         Span[] spans = SentPosDetect(s);
         string[] sentences;
@@ -135,9 +135,9 @@ public class SentenceDetectorME : SentenceDetector
         }
         else
         {
-            sentences = new string[]
-            {
-            };
+            sentences =
+            [
+            ];
         }
 
         return sentences;
@@ -225,13 +225,13 @@ public class SentenceDetectorME : SentenceDetector
             if (end - start > 0)
             {
                 sentProbs.Add(1);
-                return new Span[]
-                {
+                return
+                [
                     new Span(start, end)
-                };
+                ];
             }
             else
-                return new Span[0];
+                return [];
         }
 
 
@@ -307,9 +307,9 @@ public class SentenceDetectorME : SentenceDetector
     /// Allows subclasses to check an overzealous (read: poorly
     /// trained) model from flagging obvious non-breaks as breaks based
     /// on some boolean determination of a break's acceptability.
-    /// 
+    ///
     /// <p>The implementation here always returns true, which means
-    /// that the MaxentModel's outcome is taken as is.</p>
+    /// that the IMaxentModel's outcome is taken as is.</p>
     /// </summary>
     /// <param name="s">the string in which the break occurred.</param>
     /// <param name="fromIndex">the start of the segment currently being evaluated</param>
@@ -320,37 +320,37 @@ public class SentenceDetectorME : SentenceDetector
         return true;
     }
 
-    /// <summary>
-    /// </summary>
-    /// <remarks>
-    /// @deprecatedUse
-    ///             {@link #train(String, ObjectStream, SentenceDetectorFactory, TrainingParameters)}
-    ///             and pass in af {@link SentenceDetectorFactory}.
-    /// </remarks>
+    // /// <summary>
+    // /// </summary>
+    // /// <remarks>
+    // /// @deprecatedUse
+    // ///             {@link #train(String, ObjectStream, SentenceDetectorFactory, TrainingParameters)}
+    // ///             and pass in af {@link SentenceDetectorFactory}.
+    // /// </remarks>
     // public static SentenceModel Train(string languageCode, ObjectStream<SentenceSample> samples, bool useTokenEnd, NOpenNLP.Tools.Dictionary.Dictionary abbreviations, TrainingParameters mlParams)
     // {
     //     SentenceDetectorFactory sdFactory = new SentenceDetectorFactory(languageCode, useTokenEnd, abbreviations, null);
     //     return Train(languageCode, samples, sdFactory, mlParams);
     // }
-
+    //
     // public static SentenceModel Train(string languageCode, ObjectStream<SentenceSample> samples, SentenceDetectorFactory sdFactory, TrainingParameters mlParams)
     // {
     //     Dictionary<string, string> manifestInfoEntries = new Dictionary<string, string>();
-// 
+    //
     //     // TODO: Fix the EventStream to throw exceptions when training goes wrong
     //     ObjectStream<Event> eventStream = new SDEventStream(samples, sdFactory.GetSDContextGenerator(), sdFactory.GetEndOfSentenceScanner());
     //     EventTrainer trainer = TrainerFactory.GetEventTrainer(mlParams, manifestInfoEntries);
-    //     MaxentModel sentModel = trainer.Train(eventStream);
+    //     IMaxentModel sentModel = trainer.Train(eventStream);
     //     return new SentenceModel(languageCode, sentModel, manifestInfoEntries, sdFactory);
     // }
-
-    /// <summary>
-    /// </summary>
-    /// <remarks>
-    /// @deprecatedUse
-    ///             {@link #train(String, ObjectStream, SentenceDetectorFactory, TrainingParameters)}
-    ///             and pass in af {@link SentenceDetectorFactory}.
-    /// </remarks>
+    //
+    // /// <summary>
+    // /// </summary>
+    // /// <remarks>
+    // /// @deprecatedUse
+    // ///             {@link #train(String, ObjectStream, SentenceDetectorFactory, TrainingParameters)}
+    // ///             and pass in af {@link SentenceDetectorFactory}.
+    // /// </remarks>
     // public static SentenceModel Train(string languageCode, ObjectStream<SentenceSample> samples, bool useTokenEnd, NOpenNLP.Tools.Dictionary.Dictionary abbreviations)
     // {
     //     return Train(languageCode, samples, useTokenEnd, abbreviations, ModelUtil.CreateDefaultTrainingParameters());

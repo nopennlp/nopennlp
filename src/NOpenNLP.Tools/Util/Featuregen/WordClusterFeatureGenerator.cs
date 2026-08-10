@@ -17,46 +17,33 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using NOpenNLP.Tools.Util;
-using System;
+
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Util.Featuregen;
 
-public class WordClusterFeatureGenerator : AdaptiveFeatureGenerator
+public class WordClusterFeatureGenerator(WordClusterDictionary dict, string dictResourceKey, bool lowerCaseDictionary)
+    : IAdaptiveFeatureGenerator
 {
-    private WordClusterDictionary tokenDictionary;
-    private string resourceName;
-    private bool lowerCaseDictionary;
-    public WordClusterFeatureGenerator(WordClusterDictionary dict, string dictResourceKey, bool lowerCaseDictionary)
-    {
-        tokenDictionary = dict;
-        resourceName = dictResourceKey;
-        this.lowerCaseDictionary = lowerCaseDictionary;
-    }
-
     public virtual void CreateFeatures(IList<string> features, string[] tokens, int index, string[] previousOutcomes)
     {
         string clusterId;
         if (lowerCaseDictionary)
         {
-            clusterId = tokenDictionary.LookupToken(StringUtil.ToLowerCase(tokens[index]));
+            clusterId = dict.LookupToken(StringUtil.ToLowerCase(tokens[index]));
         }
         else
         {
-            clusterId = tokenDictionary.LookupToken(tokens[index]);
+            clusterId = dict.LookupToken(tokens[index]);
         }
 
         if (clusterId != null)
         {
-            features.Add(resourceName + clusterId);
+            features.Add(dictResourceKey + clusterId);
         }
     }
 
-    // NOpenNLP: AdaptiveFeatureGenerator declares these as Java 8 default
+    // NOpenNLP: IAdaptiveFeatureGenerator declares these as Java 8 default
     // methods; C# default interface implementations are unavailable on
     // netstandard2.0/net462, so the empty bodies are supplied here.
     public virtual void UpdateAdaptiveData(string[] tokens, string[] outcomes)

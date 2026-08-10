@@ -21,7 +21,6 @@
 using NOpenNLP.Tools.Util.Featuregen;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace NOpenNLP.Tools.Namefind;
 
@@ -29,22 +28,22 @@ namespace NOpenNLP.Tools.Namefind;
 /// Class for determining contextual features for a tag/chunk style
 /// named-entity recognizer.
 /// </summary>
-public class DefaultNameContextGenerator : NameContextGenerator
+public class DefaultNameContextGenerator : INameContextGenerator
 {
-    protected AdaptiveFeatureGenerator[] featureGenerators;
-    private static AdaptiveFeatureGenerator windowFeatures = new CachedFeatureGenerator(new WindowFeatureGenerator(new TokenFeatureGenerator(), 2, 2), new WindowFeatureGenerator(new TokenClassFeatureGenerator(true), 2, 2), new OutcomePriorFeatureGenerator(), new PreviousMapFeatureGenerator(), new BigramNameFeatureGenerator());
-    /// <summary>
-    /// Creates a name context generator.
-    /// </summary>
-    /// <remarks>@deprecateduse the other constructor and always provide the feature generators</remarks>
-    public DefaultNameContextGenerator() : this((AdaptiveFeatureGenerator[])null)
-    {
-    }
+    protected IAdaptiveFeatureGenerator[] featureGenerators;
+
+    // NOpenNLP: made readonly
+    private static readonly IAdaptiveFeatureGenerator windowFeatures = new CachedFeatureGenerator(
+        new WindowFeatureGenerator(new TokenFeatureGenerator(), 2, 2),
+        new WindowFeatureGenerator(new TokenClassFeatureGenerator(true), 2, 2),
+        new OutcomePriorFeatureGenerator(),
+        new PreviousMapFeatureGenerator(),
+        new BigramNameFeatureGenerator());
 
     /// <summary>
     /// Creates a name context generator with the specified cache size.
     /// </summary>
-    public DefaultNameContextGenerator(params AdaptiveFeatureGenerator[] featureGenerators)
+    public DefaultNameContextGenerator(params IAdaptiveFeatureGenerator[]? featureGenerators)
     {
         if (featureGenerators != null)
         {
@@ -52,22 +51,21 @@ public class DefaultNameContextGenerator : NameContextGenerator
         }
         else
         {
-
             // use defaults
-            this.featureGenerators = new AdaptiveFeatureGenerator[]
-            {
+            this.featureGenerators =
+            [
                 windowFeatures,
                 new PreviousMapFeatureGenerator()
-            };
+            ];
         }
     }
 
-    public virtual void AddFeatureGenerator(AdaptiveFeatureGenerator generator)
+    public virtual void AddFeatureGenerator(IAdaptiveFeatureGenerator generator)
     {
-        AdaptiveFeatureGenerator[] generators = featureGenerators;
-        featureGenerators = new AdaptiveFeatureGenerator[featureGenerators.Length + 1];
+        IAdaptiveFeatureGenerator[] generators = featureGenerators;
+        featureGenerators = new IAdaptiveFeatureGenerator[featureGenerators.Length + 1];
         Array.Copy(generators, 0, featureGenerators, 0, generators.Length);
-        featureGenerators[featureGenerators.Length - 1] = generator;
+        featureGenerators[^1] = generator;
     }
 
     public virtual void UpdateAdaptiveData(string[] tokens, string[] outcomes)
@@ -77,7 +75,7 @@ public class DefaultNameContextGenerator : NameContextGenerator
             throw new ArgumentException("The tokens and outcome arrays MUST have the same size!");
         }
 
-        foreach (AdaptiveFeatureGenerator featureGenerator in featureGenerators)
+        foreach (var featureGenerator in featureGenerators)
         {
             featureGenerator.UpdateAdaptiveData(tokens, outcomes);
         }
@@ -85,7 +83,7 @@ public class DefaultNameContextGenerator : NameContextGenerator
 
     public virtual void ClearAdaptiveData()
     {
-        foreach (AdaptiveFeatureGenerator featureGenerator in featureGenerators)
+        foreach (var featureGenerator in featureGenerators)
         {
             featureGenerator.ClearAdaptiveData();
         }
@@ -102,10 +100,10 @@ public class DefaultNameContextGenerator : NameContextGenerator
     ///              Only indices less than i will be examined.</param>
     /// <param name="additionalContext">Addition features which may be based on a context outside of the sentence.</param>
     /// <returns>the context for finding names at the specified index.</returns>
-    public virtual String[] GetContext(int index, string[] tokens, string[] preds, object[] additionalContext)
+    public virtual string[] GetContext(int index, string[] tokens, string[] preds, object[] additionalContext)
     {
         IList<string> features = new List<string>();
-        foreach (AdaptiveFeatureGenerator featureGenerator in featureGenerators)
+        foreach (var featureGenerator in featureGenerators)
         {
             featureGenerator.CreateFeatures(features, tokens, index, preds);
         }
@@ -134,6 +132,6 @@ public class DefaultNameContextGenerator : NameContextGenerator
             features.Add("ppo=" + ppo);
         }
 
-        return features.ToArray();
+        return [.. features];
     }
 }

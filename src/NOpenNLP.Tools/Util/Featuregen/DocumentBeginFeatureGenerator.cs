@@ -17,15 +17,12 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using System;
+
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Util.Featuregen;
 
-public class DocumentBeginFeatureGenerator : AdaptiveFeatureGenerator
+public class DocumentBeginFeatureGenerator : IAdaptiveFeatureGenerator
 {
     private string[] firstSentence;
     public virtual void CreateFeatures(IList<string> features, string[] tokens, int index, string[] previousOutcomes)
@@ -46,7 +43,7 @@ public class DocumentBeginFeatureGenerator : AdaptiveFeatureGenerator
         firstSentence = null;
     }
 
-    // NOpenNLP: see AdaptiveFeatureGenerator; the default method body is
+    // NOpenNLP: see IAdaptiveFeatureGenerator; the default method body is
     // supplied here because default interface implementations are unavailable
     // on netstandard2.0/net462.
     public virtual void UpdateAdaptiveData(string[] tokens, string[] outcomes)

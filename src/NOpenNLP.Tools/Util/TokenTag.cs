@@ -28,7 +28,7 @@ public class TokenTag
     private readonly string token;
     private readonly string tag;
     private readonly string[] addtionalData;
-    public TokenTag(string token, string tag, String[] addtionalData)
+    public TokenTag(string token, string tag, string[] addtionalData)
     {
         this.token = token;
         this.tag = tag;
@@ -52,12 +52,12 @@ public class TokenTag
         return tag;
     }
 
-    public virtual String[] GetAddtionalData()
+    public virtual string[] GetAddtionalData()
     {
         return addtionalData;
     }
 
-    public static String[] ExtractTokens(TokenTag[] tuples)
+    public static string[] ExtractTokens(TokenTag[] tuples)
     {
         string[] tokens = new string[tuples.Length];
         for (int i = 0; i < tuples.Length; i++)
@@ -68,7 +68,7 @@ public class TokenTag
         return tokens;
     }
 
-    public static String[] ExtractTags(TokenTag[] tuples)
+    public static string[] ExtractTags(TokenTag[] tuples)
     {
         string[] tags = new string[tuples.Length];
         for (int i = 0; i < tuples.Length; i++)

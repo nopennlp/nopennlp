@@ -19,27 +19,24 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Postag;
-using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Util.Featuregen;
 
 /// <summary>
 /// Adds the token POS Tag as feature. Requires a POS Tag model.
 /// </summary>
-public class POSTaggerNameFeatureGenerator : AdaptiveFeatureGenerator
+public class POSTaggerNameFeatureGenerator : IAdaptiveFeatureGenerator
 {
-    private POSTagger posTagger;
+    private readonly IPOSTagger posTagger; // NOpenNLP: made readonly
     private string[] cachedTokens;
     private string[] cachedTags;
+
     /// <summary>
     /// Initializes a new instance.
     /// </summary>
-    /// <param name="aPosTagger">a POSTagger implementation.</param>
-    public POSTaggerNameFeatureGenerator(POSTagger aPosTagger)
+    /// <param name="aPosTagger">a IPOSTagger implementation.</param>
+    public POSTaggerNameFeatureGenerator(IPOSTagger aPosTagger)
     {
         this.posTagger = aPosTagger;
     }
@@ -47,7 +44,7 @@ public class POSTaggerNameFeatureGenerator : AdaptiveFeatureGenerator
     /// <summary>
     /// Initializes a new instance.
     /// </summary>
-    /// <param name="aPosModel">a POSTagger model.</param>
+    /// <param name="aPosModel">a IPOSTagger model.</param>
     public POSTaggerNameFeatureGenerator(POSModel aPosModel)
     {
         this.posTagger = new POSTaggerME(aPosModel);
@@ -64,7 +61,7 @@ public class POSTaggerNameFeatureGenerator : AdaptiveFeatureGenerator
         feats.Add("pos=" + this.cachedTags[index]);
     }
 
-    // NOpenNLP: AdaptiveFeatureGenerator declares these as Java 8 default
+    // NOpenNLP: IAdaptiveFeatureGenerator declares these as Java 8 default
     // methods; C# default interface implementations are unavailable on
     // netstandard2.0/net462, so the empty bodies are supplied here.
     public virtual void UpdateAdaptiveData(string[] tokens, string[] outcomes)

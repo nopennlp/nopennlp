@@ -17,7 +17,7 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using NOpenNLP.Tools.Dictionary;
+
 using NOpenNLP.Tools.Ml.Model;
 using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Util;
@@ -25,22 +25,21 @@ using NOpenNLP.Tools.Util.Model;
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Sentdetect;
 
 /// <summary>
 /// The {@link SentenceModel} is the model used
-/// by a learnable {@link SentenceDetector}.
+/// by a learnable {@link ISentenceDetector}.
 /// </summary>
 /// <remarks>@seeSentenceDetectorME</remarks>
 public class SentenceModel : BaseModel
 {
-    private static readonly string COMPONENT_NAME = "SentenceDetectorME";
-    private static readonly string MAXENT_MODEL_ENTRY_NAME = "sent.model";
-    public SentenceModel(string languageCode, MaxentModel sentModel, Dictionary<string, string> manifestInfoEntries, SentenceDetectorFactory sdFactory) : base(COMPONENT_NAME, languageCode, manifestInfoEntries, sdFactory)
+    private const string COMPONENT_NAME = "SentenceDetectorME";
+    private const string MAXENT_MODEL_ENTRY_NAME = "sent.model";
+
+    public SentenceModel(string languageCode, IMaxentModel sentModel, Dictionary<string, string> manifestInfoEntries, SentenceDetectorFactory sdFactory)
+        : base(COMPONENT_NAME, languageCode, manifestInfoEntries, sdFactory)
     {
         artifactMap.Put(MAXENT_MODEL_ENTRY_NAME, sentModel);
         CheckArtifactMap();
@@ -51,10 +50,11 @@ public class SentenceModel : BaseModel
     /// </summary>
     /// <remarks>
     /// @deprecatedUse
-    ///             {@link #SentenceModel(String, MaxentModel, Map, SentenceDetectorFactory)}
+    ///             {@link #SentenceModel(String, IMaxentModel, Map, SentenceDetectorFactory)}
     ///             instead and pass in a {@link SentenceDetectorFactory}
     /// </remarks>
-    public SentenceModel(string languageCode, MaxentModel sentModel, bool useTokenEnd, NOpenNLP.Tools.Dictionary.Dictionary abbreviations, char[] eosCharacters, Dictionary<string, string> manifestInfoEntries) : this(languageCode, sentModel, manifestInfoEntries, new SentenceDetectorFactory(languageCode, useTokenEnd, abbreviations, eosCharacters))
+    public SentenceModel(string languageCode, IMaxentModel sentModel, bool useTokenEnd, NOpenNLP.Tools.Dictionary.Dictionary abbreviations, char[] eosCharacters, Dictionary<string, string> manifestInfoEntries)
+        : this(languageCode, sentModel, manifestInfoEntries, new SentenceDetectorFactory(languageCode, useTokenEnd, abbreviations, eosCharacters))
     {
     }
 
@@ -63,18 +63,21 @@ public class SentenceModel : BaseModel
     /// </summary>
     /// <remarks>
     /// @deprecatedUse
-    ///             {@link #SentenceModel(String, MaxentModel, Map, SentenceDetectorFactory)}
+    ///             {@link #SentenceModel(String, IMaxentModel, Map, SentenceDetectorFactory)}
     ///             instead and pass in a {@link SentenceDetectorFactory}
     /// </remarks>
-    public SentenceModel(string languageCode, MaxentModel sentModel, bool useTokenEnd, NOpenNLP.Tools.Dictionary.Dictionary abbreviations, char[] eosCharacters) : this(languageCode, sentModel, useTokenEnd, abbreviations, eosCharacters, null)
+    public SentenceModel(string languageCode, IMaxentModel sentModel, bool useTokenEnd, NOpenNLP.Tools.Dictionary.Dictionary abbreviations, char[] eosCharacters)
+        : this(languageCode, sentModel, useTokenEnd, abbreviations, eosCharacters, null)
     {
     }
 
-    public SentenceModel(string languageCode, MaxentModel sentModel, bool useTokenEnd, NOpenNLP.Tools.Dictionary.Dictionary abbreviations, Dictionary<string, string> manifestInfoEntries) : this(languageCode, sentModel, useTokenEnd, abbreviations, null, manifestInfoEntries)
+    public SentenceModel(string languageCode, IMaxentModel sentModel, bool useTokenEnd, NOpenNLP.Tools.Dictionary.Dictionary abbreviations, Dictionary<string, string> manifestInfoEntries)
+        : this(languageCode, sentModel, useTokenEnd, abbreviations, null, manifestInfoEntries)
     {
     }
 
-    public SentenceModel(string languageCode, MaxentModel sentModel, bool useTokenEnd, NOpenNLP.Tools.Dictionary.Dictionary abbreviations) : this(languageCode, sentModel, useTokenEnd, abbreviations, null, null)
+    public SentenceModel(string languageCode, IMaxentModel sentModel, bool useTokenEnd, NOpenNLP.Tools.Dictionary.Dictionary abbreviations)
+        : this(languageCode, sentModel, useTokenEnd, abbreviations, null, null)
     {
     }
 
@@ -98,7 +101,7 @@ public class SentenceModel : BaseModel
     protected override void ValidateArtifactMap()
     {
         base.ValidateArtifactMap();
-        if (!(artifactMap[MAXENT_MODEL_ENTRY_NAME] is MaxentModel))
+        if (!(artifactMap[MAXENT_MODEL_ENTRY_NAME] is IMaxentModel))
         {
             throw new InvalidFormatException("Unable to find " + MAXENT_MODEL_ENTRY_NAME + " maxent model!");
         }
@@ -119,9 +122,9 @@ public class SentenceModel : BaseModel
         return typeof(SentenceDetectorFactory);
     }
 
-    public virtual MaxentModel GetMaxentModel()
+    public virtual IMaxentModel GetMaxentModel()
     {
-        return (MaxentModel)artifactMap[MAXENT_MODEL_ENTRY_NAME];
+        return (IMaxentModel)artifactMap[MAXENT_MODEL_ENTRY_NAME];
     }
 
     public virtual NOpenNLP.Tools.Dictionary.Dictionary GetAbbreviations()

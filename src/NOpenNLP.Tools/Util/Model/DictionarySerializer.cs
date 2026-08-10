@@ -19,13 +19,12 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using NOpenNLP.Tools.Support;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 
 namespace NOpenNLP.Tools.Util.Model;
 
-public class DictionarySerializer : ArtifactSerializer<NOpenNLP.Tools.Dictionary.Dictionary>
+public class DictionarySerializer : IArtifactSerializer<NOpenNLP.Tools.Dictionary.Dictionary>
 {
     // NOpenNLP: upstream serializes opennlp.tools.dictionary.Dictionary, not a
     // java.util.Dictionary; the converter had mapped this to IDictionary/Hashtable.
@@ -39,13 +38,13 @@ public class DictionarySerializer : ArtifactSerializer<NOpenNLP.Tools.Dictionary
     //     dictionary.Serialize(@out);
     // }
 
-    public static void Register(Dictionary<string, ArtifactSerializer> factories)
+    public static void Register(Dictionary<string, IArtifactSerializer> factories)
     {
         factories.Put("dictionary", new DictionarySerializer());
     }
 
     // NOpenNLP: upstream relies on a default interface implementation to
-    // bridge the non-generic ArtifactSerializer; DIMs are unavailable on
+    // bridge the non-generic IArtifactSerializer; DIMs are unavailable on
     // netstandard2.0/net462, so the bridge is explicit here.
-    object ArtifactSerializer.Create(Stream @in) => Create(@in);
+    object IArtifactSerializer.Create(Stream @in) => Create(@in);
 }

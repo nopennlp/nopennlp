@@ -32,24 +32,28 @@ namespace NOpenNLP.Tools.Chunker;
 
 /// <summary>
 /// The {@link ChunkerModel} is the model used
-/// by a learnable {@link Chunker}.
+/// by a learnable {@link IChunker}.
 /// </summary>
 /// <remarks>@seeChunkerME</remarks>
 public class ChunkerModel : BaseModel
 {
-    private static readonly string COMPONENT_NAME = "ChunkerME";
-    private static readonly string CHUNKER_MODEL_ENTRY_NAME = "chunker.model";
-    public ChunkerModel(string languageCode, SequenceClassificationModel<string> chunkerModel, Dictionary<string, string> manifestInfoEntries, ChunkerFactory factory) : base(COMPONENT_NAME, languageCode, manifestInfoEntries, factory)
+    private const string COMPONENT_NAME = "ChunkerME";
+    private const string CHUNKER_MODEL_ENTRY_NAME = "chunker.model";
+
+    public ChunkerModel(string languageCode, ISequenceClassificationModel<string> chunkerModel, Dictionary<string, string> manifestInfoEntries, ChunkerFactory factory)
+        : base(COMPONENT_NAME, languageCode, manifestInfoEntries, factory)
     {
         artifactMap.Put(CHUNKER_MODEL_ENTRY_NAME, chunkerModel);
         CheckArtifactMap();
     }
 
-    public ChunkerModel(string languageCode, MaxentModel chunkerModel, Dictionary<string, string> manifestInfoEntries, ChunkerFactory factory) : this(languageCode, chunkerModel, ChunkerME.DEFAULT_BEAM_SIZE, manifestInfoEntries, factory)
+    public ChunkerModel(string languageCode, IMaxentModel chunkerModel, Dictionary<string, string> manifestInfoEntries, ChunkerFactory factory)
+        : this(languageCode, chunkerModel, ChunkerME.DEFAULT_BEAM_SIZE, manifestInfoEntries, factory)
     {
     }
 
-    public ChunkerModel(string languageCode, MaxentModel chunkerModel, int beamSize, Dictionary<string, string> manifestInfoEntries, ChunkerFactory factory) : base(COMPONENT_NAME, languageCode, manifestInfoEntries, factory)
+    public ChunkerModel(string languageCode, IMaxentModel chunkerModel, int beamSize, Dictionary<string, string> manifestInfoEntries, ChunkerFactory factory)
+        : base(COMPONENT_NAME, languageCode, manifestInfoEntries, factory)
     {
         artifactMap.Put(CHUNKER_MODEL_ENTRY_NAME, chunkerModel);
         Properties manifest = (Properties)artifactMap[MANIFEST_ENTRY];
@@ -57,7 +61,7 @@ public class ChunkerModel : BaseModel
         CheckArtifactMap();
     }
 
-    public ChunkerModel(string languageCode, MaxentModel chunkerModel, ChunkerFactory factory) : this(languageCode, chunkerModel, null, factory)
+    public ChunkerModel(string languageCode, IMaxentModel chunkerModel, ChunkerFactory factory) : this(languageCode, chunkerModel, null, factory)
     {
     }
 
@@ -82,7 +86,7 @@ public class ChunkerModel : BaseModel
         base.ValidateArtifactMap();
         if (!(artifactMap[CHUNKER_MODEL_ENTRY_NAME] is AbstractModel))
         {
-            throw new InvalidFormatException("Chunker model is incomplete!");
+            throw new InvalidFormatException("IChunker model is incomplete!");
         }
 
 
@@ -90,18 +94,18 @@ public class ChunkerModel : BaseModel
         // declares a not default factory, and if yes, check if it was created before 1.8
         if ((GetManifestProperty(FACTORY_NAME) != null && !GetManifestProperty(FACTORY_NAME).Equals("opennlp.tools.chunker.ChunkerFactory")) && this.GetVersion().GetMajor() <= 1 && this.GetVersion().GetMinor() < 8)
         {
-            throw new InvalidFormatException("The Chunker factory '" + GetManifestProperty(FACTORY_NAME) + "' is no longer compatible. Please update it to match the latest ChunkerFactory.");
+            throw new InvalidFormatException("The IChunker factory '" + GetManifestProperty(FACTORY_NAME) + "' is no longer compatible. Please update it to match the latest ChunkerFactory.");
         }
     }
 
     /// <summary>
     /// </summary>
     /// <remarks>@deprecateduse getChunkerSequenceModel instead. This method will be removed soon.</remarks>
-    public virtual MaxentModel GetChunkerModel()
+    public virtual IMaxentModel GetChunkerModel()
     {
-        if (artifactMap[CHUNKER_MODEL_ENTRY_NAME] is MaxentModel)
+        if (artifactMap[CHUNKER_MODEL_ENTRY_NAME] is IMaxentModel)
         {
-            return (MaxentModel)artifactMap[CHUNKER_MODEL_ENTRY_NAME];
+            return (IMaxentModel)artifactMap[CHUNKER_MODEL_ENTRY_NAME];
         }
         else
         {
@@ -109,10 +113,10 @@ public class ChunkerModel : BaseModel
         }
     }
 
-    public virtual SequenceClassificationModel<TokenTag> GetChunkerSequenceModel()
+    public virtual ISequenceClassificationModel<TokenTag> GetChunkerSequenceModel()
     {
         Properties manifest = (Properties)artifactMap[MANIFEST_ENTRY];
-        if (artifactMap[CHUNKER_MODEL_ENTRY_NAME] is MaxentModel)
+        if (artifactMap[CHUNKER_MODEL_ENTRY_NAME] is IMaxentModel)
         {
             string beamSizeString = manifest.GetProperty(BeamSearch.BEAM_SIZE_PARAMETER);
             int beamSize = ChunkerME.DEFAULT_BEAM_SIZE;
@@ -121,11 +125,11 @@ public class ChunkerModel : BaseModel
                 beamSize = int.Parse(beamSizeString);
             }
 
-            return new BeamSearch<TokenTag>(beamSize, (MaxentModel)artifactMap[CHUNKER_MODEL_ENTRY_NAME]);
+            return new BeamSearch<TokenTag>(beamSize, (IMaxentModel)artifactMap[CHUNKER_MODEL_ENTRY_NAME]);
         }
-        else if (artifactMap[CHUNKER_MODEL_ENTRY_NAME] is SequenceClassificationModel<TokenTag>)
+        else if (artifactMap[CHUNKER_MODEL_ENTRY_NAME] is ISequenceClassificationModel<TokenTag>)
         {
-            return (SequenceClassificationModel<TokenTag>)artifactMap[CHUNKER_MODEL_ENTRY_NAME];
+            return (ISequenceClassificationModel<TokenTag>)artifactMap[CHUNKER_MODEL_ENTRY_NAME];
         }
         else
         {

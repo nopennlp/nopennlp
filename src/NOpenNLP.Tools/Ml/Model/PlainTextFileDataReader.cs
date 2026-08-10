@@ -24,9 +24,10 @@ using System.IO.Compression;
 
 namespace NOpenNLP.Tools.Ml.Model;
 
-public class PlainTextFileDataReader : DataReader
+public class PlainTextFileDataReader : IDataReader
 {
-    private StreamReader input;
+    private readonly StreamReader input; // NOpenNLP: made readonly
+
     public PlainTextFileDataReader(FileInfo f)
     {
         if (f.Name.EndsWith(".gz", StringComparison.Ordinal))
@@ -51,10 +52,10 @@ public class PlainTextFileDataReader : DataReader
 
     public virtual double ReadDouble()
     {
-        return Double.Parse(input.ReadLine());
+        return double.Parse(input.ReadLine());
     }
 
-    public virtual int ReadInt()
+    public virtual int ReadInt32()
     {
         return int.Parse(input.ReadLine());
     }

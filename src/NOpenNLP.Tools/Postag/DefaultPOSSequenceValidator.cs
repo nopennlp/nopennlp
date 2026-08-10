@@ -18,22 +18,12 @@
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using NOpenNLP.Tools.Util;
-using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Postag;
 
-public class DefaultPOSSequenceValidator : SequenceValidator<string>
+public class DefaultPOSSequenceValidator(ITagDictionary? tagDictionary) : ISequenceValidator<string>
 {
-    private TagDictionary tagDictionary;
-    public DefaultPOSSequenceValidator(TagDictionary tagDictionary)
-    {
-        this.tagDictionary = tagDictionary;
-    }
-
     public virtual bool ValidSequence(int i, string[] inputSequence, string[] outcomesSequence, string outcome)
     {
         if (tagDictionary == null)

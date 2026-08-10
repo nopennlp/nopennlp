@@ -25,11 +25,10 @@ namespace NOpenNLP.Tools.Namefind;
 /// <summary>
 /// This class is created by the {@link BioCodec}.
 /// </summary>
-public class NameFinderSequenceValidator : SequenceValidator<string>
+public class NameFinderSequenceValidator : ISequenceValidator<string>
 {
     public virtual bool ValidSequence(int i, string[] inputSequence, string[] outcomesSequence, string outcome)
     {
-
         // outcome is formatted like "cont" or "sometype-cont", so we
         // can check if it ends with "cont".
         if (outcome.EndsWith(BioCodec.CONTINUE, StringComparison.Ordinal))

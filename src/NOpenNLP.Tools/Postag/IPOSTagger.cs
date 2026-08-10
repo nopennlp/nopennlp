@@ -18,27 +18,24 @@
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using NOpenNLP.Tools.Util;
-using System;
 
-namespace NOpenNLP.Tools.Namefind;
+namespace NOpenNLP.Tools.Postag;
 
 /// <summary>
-/// The interface for name finders which provide name tags for a sequence of tokens.
+/// The interface for part of speech taggers.
 /// </summary>
-public interface TokenNameFinder
+public interface IPOSTagger
 {
     /// <summary>
-    /// Generates name tags for the given sequence, typically a sentence,
-    /// returning token spans for any identified names.
+    /// Assigns the sentence of tokens pos tags.
     /// </summary>
-    /// <param name="tokens">an array of the tokens or words of the sequence, typically a sentence.</param>
-    /// <returns>an array of spans for each of the names identified.</returns>
-    Span[] Find(string[] tokens);
-    /// <summary>
-    /// Forgets all adaptive data which was collected during previous
-    /// calls to one of the find methods.
-    ///
-    /// This method is typical called at the end of a document.
-    /// </summary>
-    void ClearAdaptiveData();
+    /// <param name="sentence">The sentece of tokens to be tagged.</param>
+    /// <returns>an array of pos tags for each token provided in sentence.</returns>
+    string[] Tag(string[] sentence);
+
+    string[] Tag(string[] sentence, object[] additionaContext);
+
+    Sequence[] TopKSequences(string[] sentence);
+
+    Sequence[] TopKSequences(string[] sentence, object[] additionaContext);
 }

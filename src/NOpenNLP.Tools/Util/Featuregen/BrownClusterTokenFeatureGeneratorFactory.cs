@@ -18,28 +18,23 @@
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using NOpenNLP.Tools.Support;
-using NOpenNLP.Tools.Util;
 using NOpenNLP.Tools.Util.Model;
 using JCG = J2N.Collections.Generic;
-using System;
 using System.Xml;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Util.Featuregen;
 
 /// <summary>
 /// Generates Brown clustering features for current token.
 /// </summary>
-public class BrownClusterTokenFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.XmlFeatureGeneratorFactory
+public class BrownClusterTokenFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
     public BrownClusterTokenFeatureGeneratorFactory() : base()
     {
     }
 
-    public virtual AdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
+    public virtual IAdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
     {
         string dictResourceKey = generatorElement.GetAttribute("dict");
         object dictResource = resourceManager(dictResourceKey);
@@ -51,12 +46,12 @@ public class BrownClusterTokenFeatureGeneratorFactory : GeneratorFactory.Abstrac
         return new BrownTokenFeatureGenerator((BrownCluster)dictResource);
     }
 
-    internal static void Register(IDictionary<string, GeneratorFactory.XmlFeatureGeneratorFactory> factoryMap)
+    internal static void Register(IDictionary<string, GeneratorFactory.IXmlFeatureGeneratorFactory> factoryMap)
     {
         factoryMap.Put("brownclustertoken", new BrownClusterTokenFeatureGeneratorFactory());
     }
 
-    public override AdaptiveFeatureGenerator Create()
+    public override IAdaptiveFeatureGenerator Create()
     {
 
         // if resourceManager is null, we don't instantiate
@@ -72,9 +67,9 @@ public class BrownClusterTokenFeatureGeneratorFactory : GeneratorFactory.Abstrac
         return new BrownTokenFeatureGenerator((BrownCluster)dictResource);
     }
 
-    public override JCG.Dictionary<string, ArtifactSerializer> GetArtifactSerializerMapping()
+    public override JCG.Dictionary<string, IArtifactSerializer> GetArtifactSerializerMapping()
     {
-        JCG.Dictionary<string, ArtifactSerializer> mapping = new JCG.Dictionary<string, ArtifactSerializer>();
+        JCG.Dictionary<string, IArtifactSerializer> mapping = new JCG.Dictionary<string, IArtifactSerializer>();
         mapping.Put(GetStr("dict"), new BrownCluster.BrownClusterSerializer());
         return mapping;
     }

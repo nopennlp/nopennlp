@@ -18,13 +18,10 @@
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
-using NOpenNLP.Tools.Ml;
 using NOpenNLP.Tools.Ml.Model;
 using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Util;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 using NOpenNLP.Tools.Util.Featuregen;
 
@@ -33,20 +30,26 @@ namespace NOpenNLP.Tools.Namefind;
 /// <summary>
 /// Class for creating a maximum-entropy-based name finder.
 /// </summary>
-public class NameFinderME : TokenNameFinder
+public class NameFinderME : ITokenNameFinder
 {
-    private static string[][] EMPTY = new string[0][];
-    public static readonly int DEFAULT_BEAM_SIZE = 3;
+    // NOpenNLP: made various fields readonly/const
+    private static readonly string[][] EMPTY = [];
+
+    public const int DEFAULT_BEAM_SIZE = 3;
+
     private static readonly Regex typedOutcomePattern = new Regex("(.+)-\\w+", RegexOptions.Compiled);
-    public static readonly string START = "start";
-    public static readonly string CONTINUE = "cont";
-    public static readonly string OTHER = "other";
-    private SequenceCodec<string> seqCodec = new BioCodec();
-    protected SequenceClassificationModel<string> model;
-    protected NameContextGenerator contextGenerator;
+
+    public const string START = "start";
+    public const string CONTINUE = "cont";
+    public const string OTHER = "other";
+
+    private readonly ISequenceCodec<string> seqCodec = new BioCodec();
+    protected readonly ISequenceClassificationModel<string> model;
+    protected readonly INameContextGenerator contextGenerator;
     private Sequence bestSequence;
-    private AdditionalContextFeatureGenerator additionalContextFeatureGenerator = new AdditionalContextFeatureGenerator();
-    private SequenceValidator<string> sequenceValidator;
+    private readonly AdditionalContextFeatureGenerator additionalContextFeatureGenerator = new AdditionalContextFeatureGenerator();
+    private readonly ISequenceValidator<string> sequenceValidator;
+
     public NameFinderME(TokenNameFinderModel model)
     {
         TokenNameFinderFactory factory = model.GetFactory();
@@ -59,9 +62,9 @@ public class NameFinderME : TokenNameFinder
         contextGenerator.AddFeatureGenerator(new WindowFeatureGenerator(additionalContextFeatureGenerator, 8, 8));
     }
 
-    private static AdaptiveFeatureGenerator CreateFeatureGenerator(byte[] generatorDescriptor, Dictionary<string, object> resources)
+    private static IAdaptiveFeatureGenerator? CreateFeatureGenerator(byte[]? generatorDescriptor, Dictionary<string, object>? resources)
     {
-        AdaptiveFeatureGenerator featureGenerator;
+        IAdaptiveFeatureGenerator featureGenerator;
         if (generatorDescriptor != null)
         {
             featureGenerator = GeneratorFactory.Create(new System.IO.MemoryStream(generatorDescriptor), (key) =>
@@ -100,7 +103,7 @@ public class NameFinderME : TokenNameFinder
         additionalContextFeatureGenerator.SetCurrentContext(additionalContext);
         bestSequence = model.BestSequence(tokens, additionalContext, contextGenerator, sequenceValidator);
         IList<string> c = bestSequence.GetOutcomes();
-        contextGenerator.UpdateAdaptiveData(tokens, c.ToArray());
+        contextGenerator.UpdateAdaptiveData(tokens, [.. c]);
         Span[] spans = seqCodec.Decode(c);
         spans = SetProbs(spans);
         return spans;
@@ -194,8 +197,8 @@ public class NameFinderME : TokenNameFinder
     //     trainParams.PutIfAbsent(TrainingParameters.ITERATIONS_PARAM, 300);
     //     int beamSize = trainParams.GetIntParameter(BeamSearch.BEAM_SIZE_PARAMETER, NameFinderME.DEFAULT_BEAM_SIZE);
     //     Dictionary<string, string> manifestInfoEntries = new Dictionary<string, string>();
-    //     MaxentModel nameFinderModel = null;
-    //     SequenceClassificationModel<string> seqModel = null;
+    //     IMaxentModel nameFinderModel = null;
+    //     ISequenceClassificationModel<string> seqModel = null;
     //     TrainerType trainerType = TrainerFactory.GetTrainerType(trainParams);
     //     if (TrainerType.EVENT_MODEL_TRAINER.Equals(trainerType))
     //     {
@@ -221,7 +224,7 @@ public class NameFinderME : TokenNameFinder
     //     {
     //         throw new InvalidOperationException("Unexpected trainer type!");
     //     }
-// 
+//
     //     if (seqModel != null)
     //     {
     //         return new TokenNameFinderModel(languageCode, seqModel, factory.GetFeatureGenerator(), factory.GetResources(), manifestInfoEntries, factory.GetSequenceCodec(), factory);
@@ -237,7 +240,7 @@ public class NameFinderME : TokenNameFinder
     /// </summary>
     /// <param name="outcome">the outcome</param>
     /// <returns>the name type, or null if not set</returns>
-    internal static string ExtractNameType(string outcome)
+    internal static string? ExtractNameType(string outcome)
     {
         var matcher = typedOutcomePattern.Match(outcome);
         if (matcher.Success)
@@ -252,10 +255,10 @@ public class NameFinderME : TokenNameFinder
     /// Removes spans with are intersecting or crossing in anyway.
     ///
     /// <p>
-    /// The following rules are used to remove the spans:<br>
-    /// Identical spans: The first span in the array after sorting it remains<br>
-    /// Intersecting spans: The first span after sorting remains<br>
-    /// Contained spans: All spans which are contained by another are removed<br>
+    /// The following rules are used to remove the spans:<br/>
+    /// Identical spans: The first span in the array after sorting it remains<br/>
+    /// Intersecting spans: The first span after sorting remains<br/>
+    /// Contained spans: All spans which are contained by another are removed<br/>
     /// </summary>
     /// <param name="spans"></param>
     /// <returns>non-overlapping spans</returns>
@@ -267,7 +270,7 @@ public class NameFinderME : TokenNameFinder
         // NOpenNLP: upstream uses Iterator.remove() to delete from the backing
         // list mid-traversal, which .NET enumerators do not support. An index-based
         // loop that steps back on removal preserves the same semantics.
-        Span lastSpan = null;
+        Span? lastSpan = null;
         for (int i = 0; i < sortedSpans.Count; i++)
         {
             Span span = sortedSpans[i];
@@ -284,6 +287,6 @@ public class NameFinderME : TokenNameFinder
             lastSpan = span;
         }
 
-        return sortedSpans.ToArray();
+        return [.. sortedSpans];
     }
 }

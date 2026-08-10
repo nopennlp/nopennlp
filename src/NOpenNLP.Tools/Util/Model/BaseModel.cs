@@ -24,7 +24,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Threading.Tasks;
 using NOpenNLP.Tools.Support;
 
 namespace NOpenNLP.Tools.Util.Model;
@@ -36,26 +35,28 @@ namespace NOpenNLP.Tools.Util.Model;
 /// TODO:
 /// Provide sub classes access to serializers already in constructor
 /// </summary>
-public abstract class BaseModel : ArtifactProvider
+public abstract class BaseModel : IArtifactProvider
 {
-    protected static readonly string MANIFEST_ENTRY = "manifest.properties";
-    protected static readonly string FACTORY_NAME = "factory";
-    private static readonly string MANIFEST_VERSION_PROPERTY = "Manifest-Version";
-    private static readonly string COMPONENT_NAME_PROPERTY = "Component-Name";
-    private static readonly string VERSION_PROPERTY = "OpenNLP-Version";
-    private static readonly string TIMESTAMP_PROPERTY = "Timestamp";
-    private static readonly string LANGUAGE_PROPERTY = "Language";
-    public static readonly string TRAINING_CUTOFF_PROPERTY = "Training-Cutoff";
-    public static readonly string TRAINING_ITERATIONS_PROPERTY = "Training-Iterations";
-    public static readonly string TRAINING_EVENTHASH_PROPERTY = "Training-Eventhash";
-    private static string SERIALIZER_CLASS_NAME_PREFIX = "serializer-class-";
-    private Dictionary<string, ArtifactSerializer> artifactSerializers = new Dictionary<string, ArtifactSerializer>();
-    protected Dictionary<string, object> artifactMap = new Dictionary<string, object>();
+    // NOpenNLP: made various fields const/readonly
+    protected const string MANIFEST_ENTRY = "manifest.properties";
+    protected const string FACTORY_NAME = "factory";
+    private const string MANIFEST_VERSION_PROPERTY = "Manifest-Version";
+    private const string COMPONENT_NAME_PROPERTY = "Component-Name";
+    private const string VERSION_PROPERTY = "OpenNLP-Version";
+    private const string TIMESTAMP_PROPERTY = "Timestamp";
+    private const string LANGUAGE_PROPERTY = "Language";
+    public const string TRAINING_CUTOFF_PROPERTY = "Training-Cutoff";
+    public const string TRAINING_ITERATIONS_PROPERTY = "Training-Iterations";
+    public const string TRAINING_EVENTHASH_PROPERTY = "Training-Eventhash";
+    private const string SERIALIZER_CLASS_NAME_PREFIX = "serializer-class-";
+    private readonly Dictionary<string, IArtifactSerializer> artifactSerializers = new Dictionary<string, IArtifactSerializer>();
+    protected readonly Dictionary<string, object> artifactMap = new Dictionary<string, object>();
     public BaseToolFactory toolFactory;
-    private string componentName;
+    private readonly string componentName;
     private bool subclassSerializersInitiated = false;
     private bool finishedLoadingArtifacts = false;
-    private bool isLoadedFromSerialized;
+    private readonly bool isLoadedFromSerialized;
+
     private BaseModel(string componentName, bool isLoadedFromSerialized)
     {
         this.isLoadedFromSerialized = isLoadedFromSerialized;
@@ -195,7 +196,7 @@ public abstract class BaseModel : ArtifactProvider
             {
 
                 // TODO: Probably better to use the serializer here directly!
-                ArtifactSerializer factory = artifactSerializers["properties"];
+                IArtifactSerializer factory = artifactSerializers["properties"];
                 using (var entryStream = entry.Open())
                 {
                     artifactMap.Put(entry.Name, factory.Create(entryStream));
@@ -274,11 +275,11 @@ public abstract class BaseModel : ArtifactProvider
             // there should be no need to prevent that.
             string entryName = entry.Name;
             string extension = GetEntryExtension(entryName);
-            ArtifactSerializer factory = artifactSerializers[extension];
+            IArtifactSerializer factory = artifactSerializers[extension];
             string? artifactSerializerClazzName = GetManifestProperty(SERIALIZER_CLASS_NAME_PREFIX + entryName);
             if (artifactSerializerClazzName != null)
             {
-                factory = ExtensionLoader.InstantiateExtension<ArtifactSerializer>(artifactSerializerClazzName);
+                factory = ExtensionLoader.InstantiateExtension<IArtifactSerializer>(artifactSerializerClazzName);
             }
 
             if (factory != null)
@@ -312,7 +313,7 @@ public abstract class BaseModel : ArtifactProvider
         return entry.Substring(extensionIndex);
     }
 
-    public virtual ArtifactSerializer GetArtifactSerializer(string resourceName)
+    public virtual IArtifactSerializer GetArtifactSerializer(string resourceName)
     {
         try
         {
@@ -324,9 +325,9 @@ public abstract class BaseModel : ArtifactProvider
         }
     }
 
-    public static Dictionary<string, ArtifactSerializer> CreateArtifactSerializers()
+    public static Dictionary<string, IArtifactSerializer> CreateArtifactSerializers()
     {
-        Dictionary<string, ArtifactSerializer> serializers = new Dictionary<string, ArtifactSerializer>();
+        Dictionary<string, IArtifactSerializer> serializers = new Dictionary<string, IArtifactSerializer>();
         GenericModelSerializer.Register(serializers);
         PropertiesSerializer.Register(serializers);
         DictionarySerializer.Register(serializers);
@@ -336,11 +337,11 @@ public abstract class BaseModel : ArtifactProvider
     }
 
     /// <summary>
-    /// Registers all {@link ArtifactSerializer} for their artifact file name extensions.
-    /// The registered {@link ArtifactSerializer} are used to create and serialize
+    /// Registers all {@link IArtifactSerializer} for their artifact file name extensions.
+    /// The registered {@link IArtifactSerializer} are used to create and serialize
     /// resources in the model package.
     ///
-    /// Override this method to register custom {@link ArtifactSerializer}s.
+    /// Override this method to register custom {@link IArtifactSerializer}s.
     ///
     /// Note:
     /// Subclasses should generally invoke super.createArtifactSerializers at the beginning
@@ -349,14 +350,14 @@ public abstract class BaseModel : ArtifactProvider
     /// This method is called during construction.
     /// </summary>
     /// <param name="serializers">the key of the map is the file extension used to lookup
-    ///     the {@link ArtifactSerializer}.</param>
-    public virtual void CreateArtifactSerializers(Dictionary<string, ArtifactSerializer> serializers)
+    ///     the {@link IArtifactSerializer}.</param>
+    public virtual void CreateArtifactSerializers(Dictionary<string, IArtifactSerializer> serializers)
     {
         if (this.toolFactory != null)
             serializers.PutAll(this.toolFactory.CreateArtifactSerializersMap());
     }
 
-    private void CreateBaseArtifactSerializers(Dictionary<string, ArtifactSerializer> serializers)
+    private void CreateBaseArtifactSerializers(Dictionary<string, IArtifactSerializer> serializers)
     {
         serializers.PutAll(CreateArtifactSerializers());
     }
@@ -449,10 +450,10 @@ public abstract class BaseModel : ArtifactProvider
 
     /// <summary>
     /// Checks the artifact map.
-    /// <p>
+    /// <para />
     /// A subclass should call this method from a constructor which accepts the individual
     /// artifact map items, to validate that these items form a valid model.
-    /// <p>
+    /// <para />
     /// If the artifacts are not valid an IllegalArgumentException will be thrown.
     /// </summary>
     protected virtual void CheckArtifactMap()
@@ -530,9 +531,9 @@ public abstract class BaseModel : ArtifactProvider
     //     {
     //         string name = entry.Key;
     //         object artifact = entry.Value;
-    //         if (artifact is SerializableArtifact)
+    //         if (artifact is ISerializableArtifact)
     //         {
-    //             SerializableArtifact serializableArtifact = (SerializableArtifact)artifact;
+    //             ISerializableArtifact serializableArtifact = (ISerializableArtifact)artifact;
     //             string artifactSerializerName = serializableArtifact.GetArtifactSerializerClass().GetName();
     //             SetManifestProperty(SERIALIZER_CLASS_NAME_PREFIX + name, artifactSerializerName);
     //         }
@@ -544,14 +545,14 @@ public abstract class BaseModel : ArtifactProvider
     //         string name = entry.Key;
     //         var zipEntry = zip.CreateEntry(name);
     //         object artifact = entry.Value;
-    //         ArtifactSerializer serializer = GetArtifactSerializer(name);
+    //         IArtifactSerializer serializer = GetArtifactSerializer(name);
     //
     //         // If model is serialize-able always use the provided serializer
-    //         if (artifact is SerializableArtifact)
+    //         if (artifact is ISerializableArtifact)
     //         {
-    //             SerializableArtifact serializableArtifact = (SerializableArtifact)artifact;
+    //             ISerializableArtifact serializableArtifact = (ISerializableArtifact)artifact;
     //             string artifactSerializerName = serializableArtifact.GetArtifactSerializerClass().GetName();
-    //             serializer = ExtensionLoader.InstantiateExtension<ArtifactSerializer>(artifactSerializerName);
+    //             serializer = ExtensionLoader.InstantiateExtension<IArtifactSerializer>(artifactSerializerName);
     //         }
     //
     //         if (serializer == null)
@@ -608,7 +609,7 @@ public abstract class BaseModel : ArtifactProvider
     // private async Task ReadObject(Stream @in)
     // {
     //     isLoadedFromSerialized = true;
-    //     artifactSerializers = new Dictionary<string, ArtifactSerializer>();
+    //     artifactSerializers = new Dictionary<string, IArtifactSerializer>();
     //     artifactMap = new Dictionary<string, object>();
     //     componentName = await @in.ReadUTFAsync();
     //     this.LoadModel(@in);

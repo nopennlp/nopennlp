@@ -23,24 +23,23 @@ using System;
 using System.Text.RegularExpressions;
 using System.IO;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Text;
 
 namespace NOpenNLP.Tools.Util.Featuregen;
 
 /// <summary>
-/// 
+///
 /// Class to load a Brown cluster document: word\tword_class\tprob
 /// http://metaoptimize.com/projects/wordreprs/
-/// 
+///
 /// The file containing the clustering lexicon has to be passed as the
 /// value of the dict attribute of each BrownCluster feature generator.
 /// </summary>
-public class BrownCluster : SerializableArtifact
+public class BrownCluster : ISerializableArtifact
 {
     private static readonly Regex tabPattern = new Regex("\t");
-    public class BrownClusterSerializer : ArtifactSerializer<BrownCluster>
+
+    public class BrownClusterSerializer : IArtifactSerializer<BrownCluster>
     {
         public virtual BrownCluster Create(Stream @in)
         {
@@ -53,12 +52,13 @@ public class BrownCluster : SerializableArtifact
         //     artifact.Serialize(@out);
         // }
         // NOpenNLP: upstream relies on a default interface implementation to
-        // bridge the non-generic ArtifactSerializer; DIMs are unavailable on
+        // bridge the non-generic IArtifactSerializer; DIMs are unavailable on
         // netstandard2.0/net462, so the bridge is explicit here.
-        object ArtifactSerializer.Create(Stream @in) => Create(@in);
+        object IArtifactSerializer.Create(Stream @in) => Create(@in);
     }
 
-    private Dictionary<string, string> tokenToClusterMap = new Dictionary<string, string>();
+    private readonly Dictionary<string, string> tokenToClusterMap = new Dictionary<string, string>(); // NOpenNLP: made readonly
+
     /// <summary>
     /// Generates the token to cluster map from Brown cluster input file.
     /// NOTE: we only add those tokens with frequency bigger than 5.
@@ -68,8 +68,8 @@ public class BrownCluster : SerializableArtifact
     public BrownCluster(Stream @in)
     {
         var breader = new StreamReader(@in, Encoding.UTF8);
-        string line;
-        while ((line = breader.ReadLine()) != null)
+
+        while (breader.ReadLine() is { } line)
         {
             string[] lineArray = tabPattern.Split(line);
             if (lineArray.Length == 3)

@@ -17,9 +17,7 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using NOpenNLP.Tools.Dictionary;
-using NOpenNLP.Tools.Dictionary.Serializer;
-using NOpenNLP.Tools.Support;
+
 using NOpenNLP.Tools.Util;
 using System;
 using System.Collections.Generic;
@@ -33,7 +31,8 @@ namespace NOpenNLP.Tools.Ngram;
 public class NGramModel : IEnumerable<StringList>
 {
     protected static readonly string COUNT = "count";
-    private Dictionary<StringList, int> mNGrams = new Dictionary<StringList, int>();
+    private readonly Dictionary<StringList, int> mNGrams = new Dictionary<StringList, int>(); // NOpenNLP: made readonly
+
     /// <summary>
     /// Initializes an empty instance.
     /// </summary>
@@ -41,11 +40,11 @@ public class NGramModel : IEnumerable<StringList>
     {
     }
 
-    /// <summary>
-    /// Initializes the current instance.
-    /// </summary>
-    /// <param name="in">the serialized model stream</param>
-    /// <exception cref="IOException"></exception>
+    // /// <summary>
+    // /// Initializes the current instance.
+    // /// </summary>
+    // /// <param name="in">the serialized model stream</param>
+    // /// <exception cref="IOException"></exception>
     //public NGramModel(System.IO.Stream @in)
     //{
     //    DictionaryEntryPersistor.Create(@in, (entry) =>
@@ -157,7 +156,7 @@ public class NGramModel : IEnumerable<StringList>
             for (int textIndex = 0; textIndex + lengthIndex - 1 < chars.Length; textIndex++)
             {
                 string gram = StringUtil.ToLowerCase(chars.Substring(textIndex, lengthIndex));
-                Add(new StringList(new string[] { gram }));
+                Add(new StringList([gram]));
             }
         }
     }
@@ -337,16 +336,15 @@ public class NGramModel : IEnumerable<StringList>
         return GetEnumerator();
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         bool result;
         if (obj == this)
         {
             result = true;
         }
-        else if (obj is NGramModel)
+        else if (obj is NGramModel model)
         {
-            NGramModel model = (NGramModel)obj;
             result = mNGrams.Equals(model.mNGrams);
         }
         else
@@ -357,10 +355,7 @@ public class NGramModel : IEnumerable<StringList>
         return result;
     }
 
-    public override string ToString()
-    {
-        return "Size: " + Size();
-    }
+    public override string ToString() => $"Size: {Size()}";
 
     public override int GetHashCode()
     {

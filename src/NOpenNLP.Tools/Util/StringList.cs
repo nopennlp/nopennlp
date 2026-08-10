@@ -18,6 +18,7 @@
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
@@ -28,26 +29,26 @@ namespace NOpenNLP.Tools.Util;
 /// </summary>
 public class StringList : IEnumerable<string>
 {
-    private string[] tokens;
+    private readonly string[] tokens;
     /// <summary>
     /// Initializes the current instance.
     ///
-    /// Note: <br>
+    /// Note: <br/>
     /// Token String will be replaced by identical internal String object.
     /// </summary>
     /// <param name="singleToken">one single token</param>
     public StringList(string singleToken)
     {
-        tokens = new string[]
-        {
+        tokens =
+        [
             string.Intern(singleToken)
-        };
+        ];
     }
 
     /// <summary>
     /// Initializes the current instance.
     ///
-    /// Note: <br>
+    /// Note: <br/>
     /// Token Strings will be replaced by identical internal String object.
     /// </summary>
     /// <param name="tokens">the string parts of the new {@link StringList}, an empty
@@ -108,19 +109,13 @@ public class StringList : IEnumerable<string>
         return Iterator();
     }
 
-    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+    IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
     }
 
-    private sealed class AnonymousIEnumerator : IEnumerator<string>
+    private sealed class AnonymousIEnumerator(StringList parent) : IEnumerator<string>
     {
-        public AnonymousIEnumerator(StringList parent)
-        {
-            this.parent = parent;
-        }
-
-        private readonly StringList parent;
         private int index = -1;
 
         public string Current
@@ -135,7 +130,7 @@ public class StringList : IEnumerable<string>
             }
         }
 
-        object System.Collections.IEnumerator.Current => Current;
+        object IEnumerator.Current => Current;
 
         public bool MoveNext()
         {

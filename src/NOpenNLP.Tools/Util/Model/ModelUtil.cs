@@ -19,16 +19,14 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using NOpenNLP.Tools.Support;
-using System;
 using NOpenNLP.Tools.Ml.Model;
 using System.Collections.Generic;
 using System.IO;
-using J2N.IO;
 
 namespace NOpenNLP.Tools.Util.Model;
 
 /// <summary>
-/// Utility class for handling of {@link MaxentModel}s.
+/// Utility class for handling of {@link IMaxentModel}s.
 /// </summary>
 public sealed class ModelUtil
 {
@@ -43,7 +41,7 @@ public sealed class ModelUtil
     // /// </summary>
     // /// <param name="model">the model to be written</param>
     // /// <param name="out">the stream the model should be written to</param>
-    // public static void WriteModel(MaxentModel model, Stream @out)
+    // public static void WriteModel(IMaxentModel model, Stream @out)
     // {
     //     ArgumentNullException.ThrowIfNull(model);
     //     ArgumentNullException.ThrowIfNull(@out);
@@ -71,7 +69,7 @@ public sealed class ModelUtil
     /// <param name="model"></param>
     /// <param name="expectedOutcomes"></param>
     /// <returns>true if all expected outcomes are the only outcomes of the model.</returns>
-    public static bool ValidateOutcomes(MaxentModel model, params string[] expectedOutcomes)
+    public static bool ValidateOutcomes(IMaxentModel model, params string[] expectedOutcomes)
     {
         bool result = true;
         if (expectedOutcomes.Length == model.GetNumOutcomes())

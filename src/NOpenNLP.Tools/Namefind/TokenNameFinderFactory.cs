@@ -36,7 +36,8 @@ public class TokenNameFinderFactory : BaseToolFactory
 {
     private byte[] featureGeneratorBytes;
     private Dictionary<string, object> resources;
-    private SequenceCodec<string> seqCodec;
+    private ISequenceCodec<string> seqCodec;
+
     /// <summary>
     /// Creates a {@link TokenNameFinderFactory} that provides the default implementation
     /// of the resources.
@@ -46,12 +47,12 @@ public class TokenNameFinderFactory : BaseToolFactory
         this.seqCodec = new BioCodec();
     }
 
-    public TokenNameFinderFactory(byte[] featureGeneratorBytes, Dictionary<string, object> resources, SequenceCodec<string> seqCodec)
+    public TokenNameFinderFactory(byte[] featureGeneratorBytes, Dictionary<string, object> resources, ISequenceCodec<string> seqCodec)
     {
         Init(featureGeneratorBytes, resources, seqCodec);
     }
 
-    public virtual void Init(byte[] featureGeneratorBytes, Dictionary<string, object> resources, SequenceCodec<string> seqCodec)
+    public virtual void Init(byte[] featureGeneratorBytes, Dictionary<string, object> resources, ISequenceCodec<string> seqCodec)
     {
         this.featureGeneratorBytes = featureGeneratorBytes;
         this.resources = resources;
@@ -63,19 +64,18 @@ public class TokenNameFinderFactory : BaseToolFactory
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         try
         {
-            using (Stream @in = typeof(TokenNameFinderFactory).FindAndGetManifestResourceStream("/opennlp/tools/namefind/ner-default-features.xml"))
-            {
-                if (@in == null)
-                {
-                    throw new InvalidOperationException("Classpath must contain ner-default-features.xml file!");
-                }
+            using var @in = typeof(TokenNameFinderFactory).FindAndGetManifestResourceStream("/opennlp/tools/namefind/ner-default-features.xml");
 
-                byte[] buf = new byte[1024];
-                int len;
-                while ((len = @in.Read(buf, 0, buf.Length)) > 0)
-                {
-                    bytes.Write(buf, 0, len);
-                }
+            if (@in == null)
+            {
+                throw new InvalidOperationException("Classpath must contain ner-default-features.xml file!");
+            }
+
+            byte[] buf = new byte[1024];
+            int len;
+            while ((len = @in.Read(buf, 0, buf.Length)) > 0)
+            {
+                bytes.Write(buf, 0, len);
             }
         }
         catch (IOException e)
@@ -86,7 +86,7 @@ public class TokenNameFinderFactory : BaseToolFactory
         return bytes.ToArray();
     }
 
-    public virtual SequenceCodec<string> GetSequenceCodec()
+    public virtual ISequenceCodec<string> GetSequenceCodec()
     {
         return seqCodec;
     }
@@ -101,12 +101,11 @@ public class TokenNameFinderFactory : BaseToolFactory
         return featureGeneratorBytes;
     }
 
-    public static TokenNameFinderFactory Create(string subclassName, byte[] featureGeneratorBytes, Dictionary<string, object> resources, SequenceCodec<string> seqCodec)
+    public static TokenNameFinderFactory Create(string? subclassName, byte[] featureGeneratorBytes, Dictionary<string, object> resources, ISequenceCodec<string> seqCodec)
     {
         TokenNameFinderFactory theFactory;
         if (subclassName == null)
         {
-
             // will create the default factory
             theFactory = new TokenNameFinderFactory();
         }
@@ -118,7 +117,7 @@ public class TokenNameFinderFactory : BaseToolFactory
             }
             catch (Exception e)
             {
-                string msg = "Could not instantiate the " + subclassName + ". The initialization throw an exception.";
+                string msg = $"Could not instantiate the {subclassName}. The initialization throw an exception.";
                 Console.Error.WriteLine(msg);
                 e.PrintStackTrace();
                 throw new InvalidFormatException(msg, e);
@@ -133,7 +132,7 @@ public class TokenNameFinderFactory : BaseToolFactory
     {
     }
 
-    public virtual SequenceCodec<string> CreateSequenceCodec()
+    public virtual ISequenceCodec<string> CreateSequenceCodec()
     {
         if (artifactProvider != null)
         {
@@ -146,9 +145,9 @@ public class TokenNameFinderFactory : BaseToolFactory
         }
     }
 
-    public virtual NameContextGenerator CreateContextGenerator()
+    public virtual INameContextGenerator CreateContextGenerator()
     {
-        AdaptiveFeatureGenerator featureGenerator = CreateFeatureGenerators();
+        IAdaptiveFeatureGenerator featureGenerator = CreateFeatureGenerators();
         if (featureGenerator == null)
         {
             featureGenerator = new CachedFeatureGenerator(new WindowFeatureGenerator(new TokenFeatureGenerator(), 2, 2), new WindowFeatureGenerator(new TokenClassFeatureGenerator(true), 2, 2), new OutcomePriorFeatureGenerator(), new PreviousMapFeatureGenerator(), new BigramNameFeatureGenerator(), new SentenceFeatureGenerator(true, false));
@@ -158,14 +157,14 @@ public class TokenNameFinderFactory : BaseToolFactory
     }
 
     /// <summary>
-    /// Creates the {@link AdaptiveFeatureGenerator}. Usually this
+    /// Creates the {@link IAdaptiveFeatureGenerator}. Usually this
     /// is a set of generators contained in the {@link AggregatedFeatureGenerator}.
     ///
     /// Note:
     /// The generators are created on every call to this method.
     /// </summary>
     /// <returns>the feature generator or null if there is no descriptor in the model</returns>
-    public virtual AdaptiveFeatureGenerator CreateFeatureGenerators()
+    public virtual IAdaptiveFeatureGenerator CreateFeatureGenerators()
     {
         if (featureGeneratorBytes == null && artifactProvider != null)
         {
@@ -178,14 +177,14 @@ public class TokenNameFinderFactory : BaseToolFactory
         }
 
         var descriptorIn = new MemoryStream(featureGeneratorBytes);
-        AdaptiveFeatureGenerator generator;
+        IAdaptiveFeatureGenerator generator;
         try
         {
             generator = GeneratorFactory.Create(descriptorIn, (key) =>
             {
                 if (artifactProvider != null)
                 {
-                    return artifactProvider.GetArtifact<AdaptiveFeatureGenerator>(key);
+                    return artifactProvider.GetArtifact<IAdaptiveFeatureGenerator>(key);
                 }
                 else
                 {
@@ -214,11 +213,11 @@ public class TokenNameFinderFactory : BaseToolFactory
         return generator;
     }
 
-    public static SequenceCodec<string> InstantiateSequenceCodec(string sequenceCodecImplName)
+    public static ISequenceCodec<string> InstantiateSequenceCodec(string sequenceCodecImplName)
     {
         if (sequenceCodecImplName != null)
         {
-            return ExtensionLoader.InstantiateExtension<SequenceCodec<string>>(sequenceCodecImplName);
+            return ExtensionLoader.InstantiateExtension<ISequenceCodec<string>>(sequenceCodecImplName);
         }
         else
         {

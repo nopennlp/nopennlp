@@ -17,26 +17,28 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
+using NOpenNLP.Tools.Util;
 
-namespace NOpenNLP.Tools.Sentdetect;
+namespace NOpenNLP.Tools.Namefind;
 
 /// <summary>
-/// Interface for {@link SentenceDetectorME} context generators.
+/// The interface for name finders which provide name tags for a sequence of tokens.
 /// </summary>
-public interface SDContextGenerator
+public interface ITokenNameFinder
 {
     /// <summary>
-    /// Returns an array of contextual features for the potential sentence boundary at the
-    /// specified position within the specified string buffer.
+    /// Generates name tags for the given sequence, typically a sentence,
+    /// returning token spans for any identified names.
     /// </summary>
-    /// <param name="s">The {@link String} for which sentences are being determined.</param>
-    /// <param name="position">An index into the specified string buffer when a sentence boundary may occur.</param>
-    /// <returns>an array of contextual features for the potential sentence boundary at the
-    /// specified position within the specified string buffer.</returns>
-    String[] GetContext(string s, int position);
+    /// <param name="tokens">an array of the tokens or words of the sequence, typically a sentence.</param>
+    /// <returns>an array of spans for each of the names identified.</returns>
+    Span[] Find(string[] tokens);
+
+    /// <summary>
+    /// Forgets all adaptive data which was collected during previous
+    /// calls to one of the find methods.
+    ///
+    /// This method is typical called at the end of a document.
+    /// </summary>
+    void ClearAdaptiveData();
 }

@@ -21,7 +21,7 @@ using NOpenNLP.Tools.Util;
 
 namespace NOpenNLP.Tools.Lemmatizer;
 
-public class DefaultLemmatizerSequenceValidator : SequenceValidator<string>
+public class DefaultLemmatizerSequenceValidator : ISequenceValidator<string>
 {
     //TODO implement this
     public virtual bool ValidSequence(int i, string[] sequence, string[] s, string outcome)

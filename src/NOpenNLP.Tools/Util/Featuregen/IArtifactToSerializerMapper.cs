@@ -23,7 +23,7 @@ using System.Collections.Generic;
 
 namespace NOpenNLP.Tools.Util.Featuregen;
 
-public interface ArtifactToSerializerMapper
+public interface IArtifactToSerializerMapper
 {
-    IDictionary<string, ArtifactSerializer> GetArtifactSerializerMapping();
+    IDictionary<string, IArtifactSerializer> GetArtifactSerializerMapping();
 }

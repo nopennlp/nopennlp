@@ -17,20 +17,16 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using NOpenNLP.Tools.Sentdetect;
+
 using NOpenNLP.Tools.Sentdetect.Lang.Th;
-using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Sentdetect.Lang;
 
 public class Factory
 {
-    public static readonly char[] ptEosCharacters = new char[]
-    {
+    public static readonly char[] ptEosCharacters =
+    [
         '.',
         '?',
         '!',
@@ -42,35 +38,39 @@ public class Factory
         '»',
         '\'',
         '"'
-    };
-    public static readonly char[] defaultEosCharacters = new char[]
-    {
+    ];
+
+    public static readonly char[] defaultEosCharacters =
+    [
         '.',
         '!',
         '?'
-    };
-    public static readonly char[] thEosCharacters = new char[]
-    {
+    ];
+
+    public static readonly char[] thEosCharacters =
+    [
         ' ',
         '\n'
-    };
-    public static readonly char[] jpnEosCharacters = new char[]
-    {
+    ];
+
+    public static readonly char[] jpnEosCharacters =
+    [
         '。',
         '！',
         '？'
-    };
-    public virtual EndOfSentenceScanner CreateEndOfSentenceScanner(string languageCode)
+    ];
+
+    public virtual IEndOfSentenceScanner CreateEndOfSentenceScanner(string languageCode)
     {
         return new DefaultEndOfSentenceScanner(GetEOSCharacters(languageCode));
     }
 
-    public virtual EndOfSentenceScanner CreateEndOfSentenceScanner(char[] customEOSCharacters)
+    public virtual IEndOfSentenceScanner CreateEndOfSentenceScanner(char[] customEOSCharacters)
     {
         return new DefaultEndOfSentenceScanner(customEOSCharacters);
     }
 
-    public virtual SDContextGenerator CreateSentenceContextGenerator(string languageCode, ISet<string> abbreviations)
+    public virtual ISDContextGenerator CreateSentenceContextGenerator(string languageCode, ISet<string> abbreviations)
     {
         if ("th".Equals(languageCode) || "tha".Equals(languageCode))
         {
@@ -84,12 +84,12 @@ public class Factory
         return new DefaultSDContextGenerator(abbreviations, defaultEosCharacters);
     }
 
-    public virtual SDContextGenerator CreateSentenceContextGenerator(ISet<string> abbreviations, char[] customEOSCharacters)
+    public virtual ISDContextGenerator CreateSentenceContextGenerator(ISet<string> abbreviations, char[] customEOSCharacters)
     {
         return new DefaultSDContextGenerator(abbreviations, customEOSCharacters);
     }
 
-    public virtual SDContextGenerator CreateSentenceContextGenerator(string languageCode)
+    public virtual ISDContextGenerator CreateSentenceContextGenerator(string languageCode)
     {
         return CreateSentenceContextGenerator(languageCode, new HashSet<string>());
     }

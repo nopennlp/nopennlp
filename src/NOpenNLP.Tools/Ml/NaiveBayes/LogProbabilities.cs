@@ -30,7 +30,7 @@ namespace NOpenNLP.Tools.Ml.Naivebayes;
 /// This is necessary because floating point precision in Java does not allow for high-accuracy
 /// representation of very low probabilities such as would occur in a text categorizer.
 /// </summary>
-/// <param name="<T>">the label (category) class</param>
+/// <typeparam name="T">the label (category) class</typeparam>
 public class LogProbabilities<T> : Probabilities<T>
 {
     /// <summary>
@@ -183,7 +183,7 @@ public class LogProbabilities<T> : Probabilities<T>
     public override void DiscardCountsBelow(double i)
     {
         i = Math.Log(i);
-        List<T> labelsToRemove = new List<T>();
+        List<T> labelsToRemove = [];
         foreach (KeyValuePair<T, double?> entry in map)
         {
             T label = entry.Key;

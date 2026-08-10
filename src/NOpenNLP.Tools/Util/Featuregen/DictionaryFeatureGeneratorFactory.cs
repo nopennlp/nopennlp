@@ -17,30 +17,25 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using NOpenNLP.Tools.Dictionary;
+
 using NOpenNLP.Tools.Support;
-using NOpenNLP.Tools.Util;
 using NOpenNLP.Tools.Util.Model;
 using JCG = J2N.Collections.Generic;
-using System;
 using System.Xml;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Util.Featuregen;
 
 /// <summary>
 /// </summary>
 /// <remarks>@seeDictionaryFeatureGenerator</remarks>
-public class DictionaryFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.XmlFeatureGeneratorFactory
+public class DictionaryFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
     public DictionaryFeatureGeneratorFactory() : base()
     {
     }
 
-    public virtual AdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
+    public virtual IAdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
     {
         string dictResourceKey = generatorElement.GetAttribute("dict");
         object dictResource = resourceManager(dictResourceKey);
@@ -53,12 +48,12 @@ public class DictionaryFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFea
         return new DictionaryFeatureGenerator(prefix, (NOpenNLP.Tools.Dictionary.Dictionary)dictResource);
     }
 
-    internal static void Register(IDictionary<string, GeneratorFactory.XmlFeatureGeneratorFactory> factoryMap)
+    internal static void Register(IDictionary<string, GeneratorFactory.IXmlFeatureGeneratorFactory> factoryMap)
     {
         factoryMap.Put("dictionary", new DictionaryFeatureGeneratorFactory());
     }
 
-    public override AdaptiveFeatureGenerator Create()
+    public override IAdaptiveFeatureGenerator Create()
     {
 
         // if resourceManager is null, we don't instantiate
@@ -74,9 +69,9 @@ public class DictionaryFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFea
         return new DictionaryFeatureGenerator(GetStr("prefix"), (NOpenNLP.Tools.Dictionary.Dictionary)dictResource);
     }
 
-    public override JCG.Dictionary<string, ArtifactSerializer> GetArtifactSerializerMapping()
+    public override JCG.Dictionary<string, IArtifactSerializer> GetArtifactSerializerMapping()
     {
-        JCG.Dictionary<string, ArtifactSerializer> mapping = new JCG.Dictionary<string, ArtifactSerializer>();
+        JCG.Dictionary<string, IArtifactSerializer> mapping = new JCG.Dictionary<string, IArtifactSerializer>();
         mapping.Put(GetStr("dict"), new DictionarySerializer());
         return mapping;
     }

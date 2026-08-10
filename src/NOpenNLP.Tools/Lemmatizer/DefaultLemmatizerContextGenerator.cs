@@ -20,7 +20,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace NOpenNLP.Tools.Lemmatizer;
@@ -32,15 +31,14 @@ namespace NOpenNLP.Tools.Lemmatizer;
 /// Dublin City University
 /// </summary>
 /// <remarks>@version2016-02-15</remarks>
-public class DefaultLemmatizerContextGenerator : LemmatizerContextGenerator
+public class DefaultLemmatizerContextGenerator : ILemmatizerContextGenerator
 {
-    private static readonly int PREFIX_LENGTH = 5;
-    private static readonly int SUFFIX_LENGTH = 7;
-    private static Regex hasCap = new Regex("[A-Z]", RegexOptions.Compiled);
-    private static Regex hasNum = new Regex("[0-9]", RegexOptions.Compiled);
-    public DefaultLemmatizerContextGenerator()
-    {
-    }
+    private const int PREFIX_LENGTH = 5;
+    private const int SUFFIX_LENGTH = 7;
+
+    // NOpenNLP: made readonly
+    private static readonly Regex hasCap = new Regex("[A-Z]", RegexOptions.Compiled);
+    private static readonly Regex hasNum = new Regex("[0-9]", RegexOptions.Compiled);
 
     /// <summary>
     /// NOpenNLP: Java renders a null reference as the literal "null" when it is
@@ -55,7 +53,7 @@ public class DefaultLemmatizerContextGenerator : LemmatizerContextGenerator
         string[] prefs = new string[PREFIX_LENGTH];
         for (int li = 1; li < PREFIX_LENGTH; li++)
         {
-            prefs[li] = lex.Substring(0, Math.Min(li + 1, lex.Length));
+            prefs[li] = lex[..Math.Min(li + 1, lex.Length)];
         }
 
         return prefs;
@@ -66,7 +64,7 @@ public class DefaultLemmatizerContextGenerator : LemmatizerContextGenerator
         string[] suffs = new string[SUFFIX_LENGTH];
         for (int li = 1; li < SUFFIX_LENGTH; li++)
         {
-            suffs[li] = lex.Substring(Math.Max(lex.Length - li - 1, 0));
+            suffs[li] = lex[Math.Max(lex.Length - li - 1, 0)..];
         }
 
         return suffs;
@@ -74,12 +72,11 @@ public class DefaultLemmatizerContextGenerator : LemmatizerContextGenerator
 
     public virtual string[] GetContext(int index, string[] sequence, string[] priorDecisions, object[] additionalContext)
     {
-        return GetContext(index, sequence, (String[])additionalContext[0], priorDecisions);
+        return GetContext(index, sequence, (string[])additionalContext[0], priorDecisions);
     }
 
     public virtual string[] GetContext(int index, string[] toks, string[] tags, string[] preds)
     {
-
         // Word
         string w0;
 
@@ -100,12 +97,14 @@ public class DefaultLemmatizerContextGenerator : LemmatizerContextGenerator
 
         w0 = "w0=" + toks[index];
         t0 = "t0=" + tags[index];
-        IList<string> features = new List<string>();
-        features.Add(w0);
-        features.Add(t0);
-        features.Add(p_1);
-        features.Add(p_1 + t0);
-        features.Add(p_1 + w0);
+        var features = new List<string>
+        {
+            w0,
+            t0,
+            p_1,
+            p_1 + t0,
+            p_1 + w0
+        };
 
         // do some basic suffix analysis
         string[] suffs = GetSuffixes(lex);
@@ -119,7 +118,6 @@ public class DefaultLemmatizerContextGenerator : LemmatizerContextGenerator
         {
             features.Add("pre=" + ToJavaString(prefs[i]));
         }
-
 
         // see if the word has any special characters
         if (lex.IndexOf('-') != -1)
@@ -137,6 +135,6 @@ public class DefaultLemmatizerContextGenerator : LemmatizerContextGenerator
             features.Add("d");
         }
 
-        return features.ToArray();
+        return [..features];
     }
 }

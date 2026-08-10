@@ -21,7 +21,6 @@
 using NOpenNLP.Tools.Support;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Xml;
 
 namespace NOpenNLP.Tools.Util.Featuregen;
@@ -29,15 +28,15 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// <summary>
 /// </summary>
 /// <remarks>@seeAggregatedFeatureGenerator</remarks>
-public class AggregatedFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.XmlFeatureGeneratorFactory
+public class AggregatedFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
     public AggregatedFeatureGeneratorFactory() : base()
     {
     }
 
-    public virtual AdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
+    public virtual IAdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
     {
-        ICollection<AdaptiveFeatureGenerator> aggregatedGenerators = new LinkedList<AdaptiveFeatureGenerator>();
+        ICollection<IAdaptiveFeatureGenerator> aggregatedGenerators = new LinkedList<IAdaptiveFeatureGenerator>();
         XmlNodeList childNodes = generatorElement.ChildNodes;
         for (int i = 0; i < childNodes.Count; i++)
         {
@@ -49,25 +48,25 @@ public class AggregatedFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFea
             }
         }
 
-        return new AggregatedFeatureGenerator(aggregatedGenerators.ToArray());
+        return new AggregatedFeatureGenerator([.. aggregatedGenerators]);
     }
 
-    internal static void Register(IDictionary<string, GeneratorFactory.XmlFeatureGeneratorFactory> factoryMap)
+    internal static void Register(IDictionary<string, GeneratorFactory.IXmlFeatureGeneratorFactory> factoryMap)
     {
         factoryMap.Put("generators", new AggregatedFeatureGeneratorFactory());
     }
 
-    public override AdaptiveFeatureGenerator Create()
+    public override IAdaptiveFeatureGenerator Create()
     {
-        IList<AdaptiveFeatureGenerator> aggregatedGenerators = new List<AdaptiveFeatureGenerator>();
+        IList<IAdaptiveFeatureGenerator> aggregatedGenerators = new List<IAdaptiveFeatureGenerator>();
         foreach (KeyValuePair<string, object> arg in args)
         {
             if (arg.Key.StartsWith("generator#", StringComparison.Ordinal))
             {
-                aggregatedGenerators.Add((AdaptiveFeatureGenerator)arg.Value);
+                aggregatedGenerators.Add((IAdaptiveFeatureGenerator)arg.Value);
             }
         }
 
-        return new AggregatedFeatureGenerator(aggregatedGenerators.ToArray());
+        return new AggregatedFeatureGenerator([.. aggregatedGenerators]);
     }
 }

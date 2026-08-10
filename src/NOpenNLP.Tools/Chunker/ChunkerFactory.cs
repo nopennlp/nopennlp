@@ -49,7 +49,7 @@ public class ChunkerFactory : BaseToolFactory
         }
         catch (Exception e)
         {
-            string msg = "Could not instantiate the " + subclassName + ". The initialization throw an exception.";
+            string msg = $"Could not instantiate the {subclassName}. The initialization throw an exception.";
             Console.WriteLine(msg);
             e.PrintStackTrace();
             throw new InvalidFormatException(msg, e);
@@ -60,12 +60,12 @@ public class ChunkerFactory : BaseToolFactory
     {
     }
 
-    public virtual SequenceValidator<TokenTag> GetSequenceValidator()
+    public virtual ISequenceValidator<TokenTag> GetSequenceValidator()
     {
         return new DefaultChunkerSequenceValidator();
     }
 
-    public virtual ChunkerContextGenerator GetContextGenerator()
+    public virtual IChunkerContextGenerator GetContextGenerator()
     {
         return new DefaultChunkerContextGenerator();
     }

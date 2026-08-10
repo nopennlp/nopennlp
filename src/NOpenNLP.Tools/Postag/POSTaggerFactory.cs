@@ -17,7 +17,7 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using NOpenNLP.Tools.Dictionary;
+
 using NOpenNLP.Tools.Ml.Model;
 using NOpenNLP.Tools.Namefind;
 using NOpenNLP.Tools.Util;
@@ -29,8 +29,6 @@ using J2N;
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Text;
 
 namespace NOpenNLP.Tools.Postag;
@@ -40,12 +38,13 @@ namespace NOpenNLP.Tools.Postag;
 /// </summary>
 public class POSTaggerFactory : BaseToolFactory
 {
-    private static readonly string TAG_DICTIONARY_ENTRY_NAME = "tags.tagdict";
-    private static readonly string NGRAM_DICTIONARY_ENTRY_NAME = "ngram.dictionary";
+    private const string TAG_DICTIONARY_ENTRY_NAME = "tags.tagdict";
+    private const string NGRAM_DICTIONARY_ENTRY_NAME = "ngram.dictionary";
     protected NOpenNLP.Tools.Dictionary.Dictionary ngramDictionary;
     private byte[] featureGeneratorBytes;
     private Dictionary<string, object> resources;
-    protected TagDictionary posDictionary;
+    protected ITagDictionary posDictionary;
+
     /// <summary>
     /// Creates a {@link POSTaggerFactory} that provides the default implementation
     /// of the resources.
@@ -64,31 +63,27 @@ public class POSTaggerFactory : BaseToolFactory
     /// @deprecatedthis constructor is here for backward compatibility and
     ///             is not functional anymore in the training of 1.8.x series models
     /// </remarks>
-    public POSTaggerFactory(NOpenNLP.Tools.Dictionary.Dictionary ngramDictionary, TagDictionary posDictionary)
+    public POSTaggerFactory(NOpenNLP.Tools.Dictionary.Dictionary ngramDictionary, ITagDictionary posDictionary)
     {
         this.Init(ngramDictionary, posDictionary); // TODO: This could be made functional by creating some default feature generation
         // which uses the dictionary ...
     }
 
-    public POSTaggerFactory(byte[] featureGeneratorBytes, Dictionary<string, object> resources, TagDictionary posDictionary)
+    public POSTaggerFactory(byte[]? featureGeneratorBytes, Dictionary<string, object> resources, ITagDictionary posDictionary)
     {
-        this.featureGeneratorBytes = featureGeneratorBytes;
-        if (this.featureGeneratorBytes == null)
-        {
-            this.featureGeneratorBytes = LoadDefaultFeatureGeneratorBytes();
-        }
+        this.featureGeneratorBytes = featureGeneratorBytes ?? LoadDefaultFeatureGeneratorBytes();
 
         this.resources = resources;
         this.posDictionary = posDictionary;
     }
 
-    protected virtual void Init(NOpenNLP.Tools.Dictionary.Dictionary ngramDictionary, TagDictionary posDictionary)
+    protected virtual void Init(NOpenNLP.Tools.Dictionary.Dictionary ngramDictionary, ITagDictionary posDictionary)
     {
         this.ngramDictionary = ngramDictionary;
         this.posDictionary = posDictionary;
     }
 
-    protected virtual void Init(byte[] featureGeneratorBytes, Dictionary<string, object> resources, TagDictionary posDictionary)
+    protected virtual void Init(byte[] featureGeneratorBytes, Dictionary<string, object> resources, ITagDictionary posDictionary)
     {
         this.featureGeneratorBytes = featureGeneratorBytes;
         this.resources = resources;
@@ -100,19 +95,18 @@ public class POSTaggerFactory : BaseToolFactory
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         try
         {
-            using (Stream @in = typeof(TokenNameFinderFactory).FindAndGetManifestResourceStream("/opennlp/tools/postag/pos-default-features.xml"))
-            {
-                if (@in == null)
-                {
-                    throw new InvalidOperationException("Classpath must contain pos-default-features.xml file!");
-                }
+            using var @in = typeof(TokenNameFinderFactory).FindAndGetManifestResourceStream("/opennlp/tools/postag/pos-default-features.xml");
 
-                byte[] buf = new byte[1024];
-                int len;
-                while ((len = @in.Read(buf, 0, buf.Length)) > 0)
-                {
-                    bytes.Write(buf, 0, len);
-                }
+            if (@in == null)
+            {
+                throw new InvalidOperationException("Classpath must contain pos-default-features.xml file!");
+            }
+
+            byte[] buf = new byte[1024];
+            int len;
+            while ((len = @in.Read(buf, 0, buf.Length)) > 0)
+            {
+                bytes.Write(buf, 0, len);
             }
         }
         catch (IOException e)
@@ -124,14 +118,14 @@ public class POSTaggerFactory : BaseToolFactory
     }
 
     /// <summary>
-    /// Creates the {@link AdaptiveFeatureGenerator}. Usually this
+    /// Creates the {@link IAdaptiveFeatureGenerator}. Usually this
     /// is a set of generators contained in the {@link AggregatedFeatureGenerator}.
-    /// 
+    ///
     /// Note:
     /// The generators are created on every call to this method.
     /// </summary>
     /// <returns>the feature generator or null if there is no descriptor in the model</returns>
-    public virtual AdaptiveFeatureGenerator CreateFeatureGenerators()
+    public virtual IAdaptiveFeatureGenerator CreateFeatureGenerators()
     {
         if (featureGeneratorBytes == null && artifactProvider != null)
         {
@@ -144,7 +138,7 @@ public class POSTaggerFactory : BaseToolFactory
         }
 
         Stream descriptorIn = new MemoryStream(featureGeneratorBytes);
-        AdaptiveFeatureGenerator generator;
+        IAdaptiveFeatureGenerator generator;
         try
         {
             generator = GeneratorFactory.Create(descriptorIn, (key) =>
@@ -180,9 +174,9 @@ public class POSTaggerFactory : BaseToolFactory
         return generator;
     }
 
-    public override Dictionary<string, ArtifactSerializer> CreateArtifactSerializersMap()
+    public override Dictionary<string, IArtifactSerializer> CreateArtifactSerializersMap()
     {
-        Dictionary<string, ArtifactSerializer> serializers = base.CreateArtifactSerializersMap();
+        Dictionary<string, IArtifactSerializer> serializers = base.CreateArtifactSerializersMap();
 
         // NOTE: This is only needed for old models and this if can be removed if support is dropped
         POSDictionarySerializer.Register(serializers);
@@ -199,17 +193,17 @@ public class POSTaggerFactory : BaseToolFactory
         return artifactMap;
     }
 
-    public virtual TagDictionary CreateTagDictionary(FileInfo dictionary)
+    public virtual ITagDictionary CreateTagDictionary(FileInfo dictionary)
     {
         return CreateTagDictionary(dictionary.OpenRead());
     }
 
-    public virtual TagDictionary CreateTagDictionary(Stream @in)
+    public virtual ITagDictionary CreateTagDictionary(Stream @in)
     {
         return POSDictionary.Create(@in);
     }
 
-    public virtual void SetTagDictionary(TagDictionary dictionary)
+    public virtual void SetTagDictionary(ITagDictionary dictionary)
     {
         if (artifactProvider != null)
         {
@@ -234,10 +228,10 @@ public class POSTaggerFactory : BaseToolFactory
         return featureGeneratorBytes;
     }
 
-    public virtual TagDictionary GetTagDictionary()
+    public virtual ITagDictionary GetTagDictionary()
     {
         if (this.posDictionary == null && artifactProvider != null)
-            this.posDictionary = artifactProvider.GetArtifact<TagDictionary>(TAG_DICTIONARY_ENTRY_NAME);
+            this.posDictionary = artifactProvider.GetArtifact<ITagDictionary>(TAG_DICTIONARY_ENTRY_NAME);
         return this.posDictionary;
     }
 
@@ -261,12 +255,12 @@ public class POSTaggerFactory : BaseToolFactory
         this.ngramDictionary = ngramDict;
     }
 
-    public virtual POSContextGenerator GetPOSContextGenerator()
+    public virtual IPOSContextGenerator GetPOSContextGenerator()
     {
         return GetPOSContextGenerator(0);
     }
 
-    public virtual POSContextGenerator GetPOSContextGenerator(int cacheSize)
+    public virtual IPOSContextGenerator GetPOSContextGenerator(int cacheSize)
     {
         if (artifactProvider != null)
         {
@@ -281,14 +275,14 @@ public class POSTaggerFactory : BaseToolFactory
         return new ConfigurablePOSContextGenerator(cacheSize, CreateFeatureGenerators());
     }
 
-    public virtual SequenceValidator<string> GetSequenceValidator()
+    public virtual ISequenceValidator<string> GetSequenceValidator()
     {
         return new DefaultPOSSequenceValidator(GetTagDictionary());
     }
 
     // TODO: This should not be done anymore for 8 models, they can just
-    // use the SerializableArtifact interface
-    public class POSDictionarySerializer : ArtifactSerializer<POSDictionary>
+    // use the ISerializableArtifact interface
+    public class POSDictionarySerializer : IArtifactSerializer<POSDictionary>
     {
         public virtual POSDictionary Create(Stream @in)
         {
@@ -301,25 +295,25 @@ public class POSTaggerFactory : BaseToolFactory
         //     artifact.Serialize(@out);
         // }
 
-        internal static void Register(Dictionary<string, ArtifactSerializer> factories)
+        internal static void Register(Dictionary<string, IArtifactSerializer> factories)
         {
             factories.Put("tagdict", new POSDictionarySerializer());
         }
         // NOpenNLP: upstream relies on a default interface implementation to
-        // bridge the non-generic ArtifactSerializer; DIMs are unavailable on
+        // bridge the non-generic IArtifactSerializer; DIMs are unavailable on
         // netstandard2.0/net462, so the bridge is explicit here.
-        object ArtifactSerializer.Create(Stream @in) => Create(@in);
+        object IArtifactSerializer.Create(Stream @in) => Create(@in);
     }
 
     protected virtual void ValidatePOSDictionary(POSDictionary posDict, AbstractModel posModel)
     {
-        HashSet<string> dictTags = new HashSet<string>();
+        HashSet<string> dictTags = [];
         foreach (string word in posDict)
         {
             dictTags.UnionWith(posDict.GetTags(word));
         }
 
-        HashSet<string> modelTags = new HashSet<string>();
+        HashSet<string> modelTags = [];
         for (int i = 0; i < posModel.GetNumOutcomes(); i++)
         {
             modelTags.Add(posModel.GetOutcome(i));
@@ -369,7 +363,7 @@ public class POSTaggerFactory : BaseToolFactory
         }
     }
 
-    public static POSTaggerFactory Create(string subclassName, NOpenNLP.Tools.Dictionary.Dictionary ngramDictionary, TagDictionary posDictionary)
+    public static POSTaggerFactory Create(string subclassName, NOpenNLP.Tools.Dictionary.Dictionary ngramDictionary, ITagDictionary posDictionary)
     {
         if (subclassName == null)
         {
@@ -391,7 +385,7 @@ public class POSTaggerFactory : BaseToolFactory
         }
     }
 
-    public static POSTaggerFactory Create(string subclassName, byte[] featureGeneratorBytes, Dictionary<string, object> resources, TagDictionary posDictionary)
+    public static POSTaggerFactory Create(string subclassName, byte[] featureGeneratorBytes, Dictionary<string, object> resources, ITagDictionary posDictionary)
     {
         POSTaggerFactory theFactory;
         if (subclassName == null)
@@ -417,7 +411,7 @@ public class POSTaggerFactory : BaseToolFactory
         return theFactory;
     }
 
-    public virtual TagDictionary CreateEmptyTagDictionary()
+    public virtual ITagDictionary CreateEmptyTagDictionary()
     {
         this.posDictionary = new POSDictionary(true);
         return this.posDictionary;

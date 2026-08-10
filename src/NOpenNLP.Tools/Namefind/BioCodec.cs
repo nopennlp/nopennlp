@@ -21,18 +21,18 @@
 using NOpenNLP.Tools.Util;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace NOpenNLP.Tools.Namefind;
 
-public class BioCodec : SequenceCodec<string>
+public class BioCodec : ISequenceCodec<string>
 {
-    public static readonly string START = "start";
-    public static readonly string CONTINUE = "cont";
-    public static readonly string OTHER = "other";
+    public const string START = "start";
+    public const string CONTINUE = "cont";
+    public const string OTHER = "other";
     private static readonly Regex typedOutcomePattern = new Regex("(.+)-\\w+", RegexOptions.Compiled);
-    static string ExtractNameType(string outcome)
+
+    static string? ExtractNameType(string outcome)
     {
         var matcher = typedOutcomePattern.Match(outcome);
         if (matcher.Success)
@@ -47,11 +47,11 @@ public class BioCodec : SequenceCodec<string>
     {
         int start = -1;
         int end = -1;
-        IList<Span> spans = new List<Span>(c.Count);
+        IList<Span?> spans = new List<Span?>(c.Count);
         for (int li = 0; li < c.Count; li++)
         {
             string chunkTag = c[li];
-            if (chunkTag.EndsWith(BioCodec.START, StringComparison.Ordinal))
+            if (chunkTag.EndsWith(START, StringComparison.Ordinal))
             {
                 if (start != -1)
                 {
@@ -61,11 +61,11 @@ public class BioCodec : SequenceCodec<string>
                 start = li;
                 end = li + 1;
             }
-            else if (chunkTag.EndsWith(BioCodec.CONTINUE, StringComparison.Ordinal))
+            else if (chunkTag.EndsWith(CONTINUE, StringComparison.Ordinal))
             {
                 end = li + 1;
             }
-            else if (chunkTag.EndsWith(BioCodec.OTHER, StringComparison.Ordinal))
+            else if (chunkTag.EndsWith(OTHER, StringComparison.Ordinal))
             {
                 if (start != -1)
                 {
@@ -81,10 +81,10 @@ public class BioCodec : SequenceCodec<string>
             spans.Add(new Span(start, end, ExtractNameType(c[c.Count - 1])));
         }
 
-        return spans.ToArray();
+        return [.. spans];
     }
 
-    public virtual String[] Encode(Span[] names, int length)
+    public virtual string[] Encode(Span[] names, int length)
     {
         string[] outcomes = new string[length];
         for (int i = 0; i < outcomes.Length; i++)
@@ -121,7 +121,7 @@ public class BioCodec : SequenceCodec<string>
         return outcomes;
     }
 
-    public virtual SequenceValidator<string> CreateSequenceValidator()
+    public virtual ISequenceValidator<string> CreateSequenceValidator()
     {
         return new NameFinderSequenceValidator();
     }
@@ -139,17 +139,16 @@ public class BioCodec : SequenceCodec<string>
         for (int i = 0; i < outcomes.Length; i++)
         {
             string outcome = outcomes[i];
-            if (outcome.EndsWith(BioCodec.START, StringComparison.Ordinal))
+            if (outcome.EndsWith(START, StringComparison.Ordinal))
             {
-                start.Add(outcome.Substring(0, outcome.Length - BioCodec.START.Length));
+                start.Add(outcome[..^START.Length]);
             }
-            else if (outcome.EndsWith(BioCodec.CONTINUE, StringComparison.Ordinal))
+            else if (outcome.EndsWith(CONTINUE, StringComparison.Ordinal))
             {
-                cont.Add(outcome.Substring(0, outcome.Length - BioCodec.CONTINUE.Length));
+                cont.Add(outcome[..^CONTINUE.Length]);
             }
-            else if (!outcome.Equals(BioCodec.OTHER))
+            else if (!outcome.Equals(OTHER))
             {
-
                 // got unexpected outcome
                 return false;
             }

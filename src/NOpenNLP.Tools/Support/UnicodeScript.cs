@@ -58,8 +58,8 @@ internal enum UnicodeScript
 internal static class UnicodeScriptResolver
 {
     /// <summary>Inclusive start code point of each range, ascending.</summary>
-    private static readonly int[] ScriptStarts = new int[]
-    {
+    private static readonly int[] ScriptStarts =
+    [
         0x0000, 0x0041, 0x005B, 0x0061, 0x007B, 0x00AA, 0x00AB, 0x00BA, 0x00BB, 0x00C0, 0x00D7,
         0x00D8, 0x00F7, 0x00F8, 0x02B9, 0x02E0, 0x02E5, 0x02EA, 0x02EC, 0x0300, 0x0374, 0x0375,
         0x037E, 0x037F, 0x0385, 0x0386, 0x0387, 0x0388, 0x0589, 0x058A, 0x060C, 0x060D, 0x061B,
@@ -97,11 +97,11 @@ internal static class UnicodeScriptResolver
         0x1F53E, 0x1F540, 0x1F544, 0x1F550, 0x1F568, 0x1F5FB, 0x1F641, 0x1F645, 0x1F650,
         0x1F680, 0x1F6C6, 0x1F700, 0x1F774, 0x20000, 0x2A6D7, 0x2A700, 0x2B735, 0x2B740,
         0x2B81E, 0x2B820, 0x2CEA2, 0x2F800, 0x2FA1E, 0xE0001, 0xE0002, 0xE0020, 0xE0080
-    };
+    ];
 
     /// <summary>Script of the range beginning at the same index in <see cref="ScriptStarts"/>.</summary>
-    private static readonly UnicodeScript[] Scripts = new UnicodeScript[]
-    {
+    private static readonly UnicodeScript[] Scripts =
+    [
         UnicodeScript.Common, UnicodeScript.Latin, UnicodeScript.Common, UnicodeScript.Latin,
         UnicodeScript.Common, UnicodeScript.Latin, UnicodeScript.Common, UnicodeScript.Latin,
         UnicodeScript.Common, UnicodeScript.Latin, UnicodeScript.Common, UnicodeScript.Latin,
@@ -197,7 +197,7 @@ internal static class UnicodeScriptResolver
         UnicodeScript.Han, UnicodeScript.Other, UnicodeScript.Han, UnicodeScript.Other,
         UnicodeScript.Han, UnicodeScript.Other, UnicodeScript.Common, UnicodeScript.Other,
         UnicodeScript.Common, UnicodeScript.Other
-    };
+    ];
 
     /// <summary>
     /// Returns the script of <paramref name="codePoint"/>.

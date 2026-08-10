@@ -28,9 +28,10 @@ namespace NOpenNLP.Tools.Dictionary.Serializer;
 /// <summary>
 /// This class is used by for reading and writing dictionaries of all kinds.
 /// </summary>
-public class DictionaryEntryPersistor
+public static class DictionaryEntryPersistor // NOpenNLP-specific: made static
 {
-    private const string CHARSET = "UTF-8";
+    // NOpenNLP: unused
+    // private const string CHARSET = "UTF-8";
 
     private const string DICTIONARY_ELEMENT = "dictionary";
     private const string ENTRY_ELEMENT = "entry";
@@ -143,7 +144,7 @@ public class DictionaryEntryPersistor
 
     private static void InsertEntry(EntryInserter inserter, List<string> tokenList, Attributes attributes)
     {
-        string[] tokens = tokenList.ToArray();
+        string[] tokens = [.. tokenList];
 
         Entry entry = new Entry(new StringList(tokens), attributes);
 

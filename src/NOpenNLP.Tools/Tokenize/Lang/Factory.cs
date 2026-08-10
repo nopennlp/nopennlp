@@ -17,19 +17,16 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using NOpenNLP.Tools.Tokenize;
-using System;
+
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Tokenize.Lang;
 
 public class Factory
 {
-    public static readonly string DEFAULT_ALPHANUMERIC = "^[A-Za-z0-9]+$";
+    public const string DEFAULT_ALPHANUMERIC = "^[A-Za-z0-9]+$";
+
     /// <summary>
     /// Gets the alpha numeric pattern for the language. Please save the value
     /// locally because this call is expensive.
@@ -48,7 +45,7 @@ public class Factory
         return new Regex(DEFAULT_ALPHANUMERIC);
     }
 
-    public virtual TokenContextGenerator CreateTokenContextGenerator(string languageCode, ISet<string> abbreviations)
+    public virtual ITokenContextGenerator CreateTokenContextGenerator(string languageCode, ISet<string> abbreviations)
     {
         return new DefaultTokenContextGenerator(abbreviations);
     }

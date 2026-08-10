@@ -17,7 +17,7 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using NOpenNLP.Tools.Dictionary;
+
 using NOpenNLP.Tools.Ml.Model;
 using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Util;
@@ -25,28 +25,27 @@ using NOpenNLP.Tools.Util.Model;
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Tokenize;
 
 /// <summary>
 /// The {@link TokenizerModel} is the model used
-/// by a learnable {@link Tokenizer}.
+/// by a learnable {@link ITokenizer}.
 /// </summary>
 /// <remarks>@seeTokenizerME</remarks>
 public sealed class TokenizerModel : BaseModel
 {
-    private static readonly string COMPONENT_NAME = "TokenizerME";
-    private static readonly string TOKENIZER_MODEL_ENTRY = "token.model";
+    private const string COMPONENT_NAME = "TokenizerME";
+    private const string TOKENIZER_MODEL_ENTRY = "token.model";
+
     /// <summary>
     /// Initializes the current instance.
     /// </summary>
     /// <param name="tokenizerModel">the model</param>
     /// <param name="manifestInfoEntries">the manifest</param>
     /// <param name="tokenizerFactory">the factory</param>
-    public TokenizerModel(MaxentModel tokenizerModel, Dictionary<string, string> manifestInfoEntries, TokenizerFactory tokenizerFactory) : base(COMPONENT_NAME, tokenizerFactory.GetLanguageCode(), manifestInfoEntries, tokenizerFactory)
+    public TokenizerModel(IMaxentModel tokenizerModel, Dictionary<string, string> manifestInfoEntries, TokenizerFactory tokenizerFactory)
+        : base(COMPONENT_NAME, tokenizerFactory.GetLanguageCode(), manifestInfoEntries, tokenizerFactory)
     {
         artifactMap.Put(TOKENIZER_MODEL_ENTRY, tokenizerModel);
         CheckArtifactMap();
@@ -76,11 +75,11 @@ public sealed class TokenizerModel : BaseModel
     // {
     // }
 
-    /// <summary>
-    /// Initializes the current instance.
-    /// </summary>
-    /// <param name="modelURL">the URL pointing to the tokenizer model</param>
-    /// <exception cref="IOException">if reading from the stream fails in anyway</exception>
+    // /// <summary>
+    // /// Initializes the current instance.
+    // /// </summary>
+    // /// <param name="modelURL">the URL pointing to the tokenizer model</param>
+    // /// <exception cref="IOException">if reading from the stream fails in anyway</exception>
     // public TokenizerModel(URL modelURL) : base(COMPONENT_NAME, modelURL)
     // {
     // }
@@ -90,7 +89,7 @@ public sealed class TokenizerModel : BaseModel
     /// </summary>
     /// <param name="model"></param>
     /// <returns></returns>
-    private static bool IsModelCompatible(MaxentModel model)
+    private static bool IsModelCompatible(IMaxentModel model)
     {
         return ModelUtil.ValidateOutcomes(model, TokenizerME.SPLIT, TokenizerME.NO_SPLIT);
     }
@@ -119,9 +118,9 @@ public sealed class TokenizerModel : BaseModel
         return typeof(TokenizerFactory);
     }
 
-    public MaxentModel GetMaxentModel()
+    public IMaxentModel GetMaxentModel()
     {
-        return (MaxentModel)artifactMap[TOKENIZER_MODEL_ENTRY];
+        return (IMaxentModel)artifactMap[TOKENIZER_MODEL_ENTRY];
     }
 
     public NOpenNLP.Tools.Dictionary.Dictionary GetAbbreviations()

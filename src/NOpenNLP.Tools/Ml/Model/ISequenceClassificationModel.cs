@@ -24,8 +24,7 @@ namespace NOpenNLP.Tools.Ml.Model;
 /// <summary>
 /// A classification model that can label an input sequence.
 /// </summary>
-/// <param name="<T>"></param>
-public interface SequenceClassificationModel<T>
+public interface ISequenceClassificationModel<T>
 {
     /// <summary>
     /// Finds the sequence with the highest probability.
@@ -35,7 +34,8 @@ public interface SequenceClassificationModel<T>
     /// <param name="cg"></param>
     /// <param name="validator"></param>
     /// <returns></returns>
-    Sequence BestSequence(T[] sequence, object[] additionalContext, BeamSearchContextGenerator<T> cg, SequenceValidator<T> validator);
+    Sequence BestSequence(T[] sequence, object[] additionalContext, IBeamSearchContextGenerator<T> cg, ISequenceValidator<T> validator);
+
     /// <summary>
     /// Finds the n most probable sequences.
     /// </summary>
@@ -44,7 +44,8 @@ public interface SequenceClassificationModel<T>
     /// <param name="cg"></param>
     /// <param name="validator"></param>
     /// <returns></returns>
-    Sequence[] BestSequences(int numSequences, T[] sequence, object[] additionalContext, double minSequenceScore, BeamSearchContextGenerator<T> cg, SequenceValidator<T> validator);
+    Sequence[] BestSequences(int numSequences, T[] sequence, object[] additionalContext, double minSequenceScore, IBeamSearchContextGenerator<T> cg, ISequenceValidator<T> validator);
+
     /// <summary>
     /// Finds the n most probable sequences.
     /// </summary>
@@ -53,7 +54,8 @@ public interface SequenceClassificationModel<T>
     /// <param name="cg"></param>
     /// <param name="validator"></param>
     /// <returns></returns>
-    Sequence[] BestSequences(int numSequences, T[] sequence, object[] additionalContext, BeamSearchContextGenerator<T> cg, SequenceValidator<T> validator);
+    Sequence[] BestSequences(int numSequences, T[] sequence, object[] additionalContext, IBeamSearchContextGenerator<T> cg, ISequenceValidator<T> validator);
+
     /// <summary>
     /// Returns all possible outcomes.
     /// </summary>

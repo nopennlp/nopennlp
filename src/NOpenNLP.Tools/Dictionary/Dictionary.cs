@@ -18,10 +18,9 @@
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using NOpenNLP.Tools.Dictionary.Serializer;
-using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Util;
-using NOpenNLP.Tools.Util.Model;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 
@@ -30,7 +29,7 @@ namespace NOpenNLP.Tools.Dictionary;
 /// <summary>
 /// This class is a dictionary.
 /// </summary>
-public class Dictionary : IEnumerable<StringList> //, SerializableArtifact
+public class Dictionary : IEnumerable<StringList> //, ISerializableArtifact
 {
     private class StringListWrapper
     {
@@ -91,10 +90,11 @@ public class Dictionary : IEnumerable<StringList> //, SerializableArtifact
         }
     }
 
-    private HashSet<StringListWrapper> entrySet = new HashSet<StringListWrapper>();
+    private readonly HashSet<StringListWrapper> entrySet = []; // NOpenNLP: made readonly
     private readonly bool isCaseSensitive;
     private int minTokenCount = 99999;
     private int maxTokenCount = 0;
+
     /// <summary>
     /// Initializes an empty {@link Dictionary}.
     /// </summary>
@@ -170,13 +170,13 @@ public class Dictionary : IEnumerable<StringList> //, SerializableArtifact
     {
         // NOpenNLP: upstream returns an anonymous Iterator; a C# iterator
         // block expresses the same traversal.
-        foreach (StringListWrapper entry in entrySet)
+        foreach (var entry in entrySet)
         {
             yield return entry.GetStringList();
         }
     }
 
-    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     /// <summary>
     /// Retrieves the number of tokens in the current instance.
@@ -231,9 +231,8 @@ public class Dictionary : IEnumerable<StringList> //, SerializableArtifact
         {
             result = true;
         }
-        else if (obj is Dictionary)
+        else if (obj is Dictionary dictionary)
         {
-            Dictionary dictionary = (Dictionary)obj;
             result = entrySet.Equals(dictionary.entrySet);
         }
         else
@@ -266,10 +265,9 @@ public class Dictionary : IEnumerable<StringList> //, SerializableArtifact
         // NOpenNLP: Java's Reader/BufferedReader map to TextReader, and
         // StringTokenizer to a whitespace split that drops empty entries.
         Dictionary dictionary = new Dictionary();
-        string line;
-        while ((line = @in.ReadLine()) != null)
+        while (@in.ReadLine() is { } line)
         {
-            string[] tokens = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] tokens = line.Split([' '], StringSplitOptions.RemoveEmptyEntries);
             if (tokens.Length > 0)
             {
                 dictionary.Put(new StringList(tokens));
@@ -308,13 +306,13 @@ public class Dictionary : IEnumerable<StringList> //, SerializableArtifact
 
         public IEnumerator<string> GetEnumerator()
         {
-            foreach (StringListWrapper entry in entrySet)
+            foreach (var entry in entrySet)
             {
                 yield return entry.GetStringList().GetToken(0);
             }
         }
 
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public int Count => entrySet.Count;
 
@@ -368,10 +366,10 @@ public class Dictionary : IEnumerable<StringList> //, SerializableArtifact
         public bool SetEquals(IEnumerable<string> other) => throw new NotSupportedException();
     }
 
-    /// <summary>
-    /// Gets the Serializer Class for {@link Dictionary}
-    /// </summary>
-    /// <returns>{@link DictionarySerializer}</returns>
+    ///// <summary>
+    ///// Gets the Serializer Class for {@link Dictionary}
+    ///// </summary>
+    ///// <returns>{@link DictionarySerializer}</returns>
     //public virtual Class<TWildcardTodo> GetArtifactSerializerClass()
     //{
     //    return typeof(DictionarySerializer);

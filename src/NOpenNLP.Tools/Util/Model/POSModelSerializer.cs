@@ -19,18 +19,11 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using NOpenNLP.Tools.Ml;
 using NOpenNLP.Tools.Postag;
-using NOpenNLP.Tools.Support;
-using NOpenNLP.Tools.Util;
-using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Util.Model;
 
-public class POSModelSerializer : ArtifactSerializer<POSModel>
+public class POSModelSerializer : IArtifactSerializer<POSModel>
 {
     public virtual POSModel Create(Stream @in)
     {
@@ -65,7 +58,7 @@ public class POSModelSerializer : ArtifactSerializer<POSModel>
     // }
 
     // NOpenNLP: upstream relies on a default interface implementation to
-    // bridge the non-generic ArtifactSerializer; DIMs are unavailable on
+    // bridge the non-generic IArtifactSerializer; DIMs are unavailable on
     // netstandard2.0/net462, so the bridge is explicit here.
-    object ArtifactSerializer.Create(Stream @in) => Create(@in);
+    object IArtifactSerializer.Create(Stream @in) => Create(@in);
 }

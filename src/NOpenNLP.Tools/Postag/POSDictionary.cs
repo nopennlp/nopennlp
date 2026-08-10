@@ -22,10 +22,9 @@ using NOpenNLP.Tools.Dictionary.Serializer;
 using NOpenNLP.Tools.Util;
 using NOpenNLP.Tools.Util.Model;
 using System;
+using System.Collections;
 using System.IO;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Text;
 
 namespace NOpenNLP.Tools.Postag;
@@ -34,10 +33,11 @@ namespace NOpenNLP.Tools.Postag;
 /// Provides a means of determining which tags are valid for a particular word
 /// based on a tag dictionary read from a file.
 /// </summary>
-public class POSDictionary : IEnumerable<string>, MutableTagDictionary, SerializableArtifact
+public class POSDictionary : IEnumerable<string>, IMutableTagDictionary, ISerializableArtifact
 {
     private Dictionary<string, string[]> dictionary;
     private bool caseSensitive = true;
+
     /// <summary>
     /// Initializes an empty case sensitive {@link POSDictionary}.
     /// </summary>
@@ -61,7 +61,7 @@ public class POSDictionary : IEnumerable<string>, MutableTagDictionary, Serializ
     /// <param name="word">The word.</param>
     /// <returns>A list of valid tags for the specified word or
     ///     null if no information is available for that word.</returns>
-    public virtual String[] GetTags(string word)
+    public virtual string[] GetTags(string word)
     {
         if (caseSensitive)
         {
@@ -73,18 +73,18 @@ public class POSDictionary : IEnumerable<string>, MutableTagDictionary, Serializ
         }
     }
 
-    /// <summary>
-    /// Associates the specified tags with the specified word. If the dictionary
-    /// previously contained the word, the old tags are replaced by the specified
-    /// ones.
-    /// </summary>
-    /// <param name="word">
-    ///          The word to be added to the dictionary.</param>
-    /// <param name="tags">
-    ///          The set of tags associated with the specified word.</param>
-    /// <remarks>@deprecatedUse {@link #put(String, String[])} instead</remarks>
-    // NOpenNLP: upstream is package-private and its varargs signature collides
-    // with Put(string, string[]) in C#; it is deprecated in favor of Put anyway.
+    // /// <summary>
+    // /// Associates the specified tags with the specified word. If the dictionary
+    // /// previously contained the word, the old tags are replaced by the specified
+    // /// ones.
+    // /// </summary>
+    // /// <param name="word">
+    // ///          The word to be added to the dictionary.</param>
+    // /// <param name="tags">
+    // ///          The set of tags associated with the specified word.</param>
+    // /// <remarks>@deprecatedUse {@link #put(String, String[])} instead</remarks>
+    // // NOpenNLP: upstream is package-private and its varargs signature collides
+    // // with Put(string, string[]) in C#; it is deprecated in favor of Put anyway.
     // internal virtual void AddTags(string word, params string[] tags)
     // {
     //     Put(word, tags);
@@ -98,7 +98,7 @@ public class POSDictionary : IEnumerable<string>, MutableTagDictionary, Serializ
         return dictionary.Keys.GetEnumerator();
     }
 
-    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     private static string TagsToString(string[] tags)
     {
@@ -108,7 +108,6 @@ public class POSDictionary : IEnumerable<string>, MutableTagDictionary, Serializ
             tagString.Append(tag);
             tagString.Append(' ');
         }
-
 
         // remove last space
         if (tagString.Length > 0)
@@ -121,7 +120,7 @@ public class POSDictionary : IEnumerable<string>, MutableTagDictionary, Serializ
 
     /// <summary>
     /// Writes the {@link POSDictionary} to the given {@link Stream};
-    /// 
+    ///
     /// After the serialization is finished the provided
     /// {@link Stream} remains open.
     /// </summary>
@@ -141,14 +140,14 @@ public class POSDictionary : IEnumerable<string>, MutableTagDictionary, Serializ
     //     {
     //         this.parent = parent;
     //     }
-// 
+//
     //     private readonly POSDictionary parent;
     //     IEnumerator<string> iterator = dictionary.KeySet().Iterator();
     //     public bool HasNext()
     //     {
     //         return iterator.HasNext();
     //     }
-// 
+//
     //     public Entry Next()
     //     {
     //         string word = iterator.Next();
@@ -156,7 +155,7 @@ public class POSDictionary : IEnumerable<string>, MutableTagDictionary, Serializ
     //         tagAttribute.SetValue("tags", TagsToString(GetTags(word)));
     //         return new Entry(new StringList(word), tagAttribute);
     //     }
-// 
+//
     //     public void Remove()
     //     {
     //         throw new NotSupportedException();
@@ -180,16 +179,15 @@ public class POSDictionary : IEnumerable<string>, MutableTagDictionary, Serializ
         return HashCode.Combine(Arrays.GetHashCode(keyHashes), Arrays.GetHashCode(valueHashes));
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (obj == this)
         {
             return true;
         }
 
-        if (obj is POSDictionary)
+        if (obj is POSDictionary posDictionary)
         {
-            POSDictionary posDictionary = (POSDictionary)obj;
             if (this.dictionary.Count == posDictionary.dictionary.Count)
             {
                 foreach (string word in this)
@@ -209,16 +207,15 @@ public class POSDictionary : IEnumerable<string>, MutableTagDictionary, Serializ
 
     public override string ToString()
     {
-
         // it is time consuming to output the dictionary entries.
         // will output something meaningful for debugging, like
         // POSDictionary{size=100, caseSensitive=true}
-        return "POSDictionary{size=" + dictionary.Count + ", caseSensitive=" + this.caseSensitive + "}";
+        return $"POSDictionary{{size={dictionary.Count}, caseSensitive={this.caseSensitive}}}";
     }
 
     /// <summary>
     /// Creates a new {@link POSDictionary} from a provided {@link Stream}.
-    /// 
+    ///
     /// After creation is finished the provided {@link Stream} is closed.
     /// </summary>
     /// <param name="in"></param>

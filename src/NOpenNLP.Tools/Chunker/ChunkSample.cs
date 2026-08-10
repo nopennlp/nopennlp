@@ -21,7 +21,6 @@
 using NOpenNLP.Tools.Util;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using NOpenNLP.Tools.Support;
 
@@ -35,6 +34,7 @@ public class ChunkSample
     private readonly IList<string> sentence;
     private readonly IList<string> tags;
     private readonly IList<string> preds;
+
     /// <summary>
     /// Initializes the current instance.
     /// </summary>
@@ -74,7 +74,7 @@ public class ChunkSample
     /// </summary>
     public virtual string[] GetSentence()
     {
-        return sentence.ToArray();
+        return [.. sentence];
     }
 
     /// <summary>
@@ -82,7 +82,7 @@ public class ChunkSample
     /// </summary>
     public virtual string[] GetTags()
     {
-        return tags.ToArray();
+        return [.. tags];
     }
 
     /// <summary>
@@ -90,7 +90,7 @@ public class ChunkSample
     /// </summary>
     public virtual string[] GetPreds()
     {
-        return preds.ToArray();
+        return [.. preds];
     }
 
     /// <summary>
@@ -158,7 +158,7 @@ public class ChunkSample
             phrases.Add(new Span(startIndex, aPreds.Length, startTag));
         }
 
-        return phrases.ToArray();
+        return [.. phrases];
     }
 
     private static void ValidateArguments(int sentenceSize, int tagsSize, int predsSize)
@@ -168,7 +168,7 @@ public class ChunkSample
     }
 
     /// <summary>
-    /// Creates a nice to read string for the phrases formatted as following: <br>
+    /// Creates a nice to read string for the phrases formatted as following: <br/>
     /// <code>
     /// [NP Rockwell_NNP ] [VP said_VBD ] [NP the_DT agreement_NN ] [VP calls_VBZ ] [SBAR for_IN ]
     /// [NP it_PRP ] [VP to_TO supply_VB ] [NP 200_CD additional_JJ so-called_JJ shipsets_NNS ]

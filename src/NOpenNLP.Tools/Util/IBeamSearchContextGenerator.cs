@@ -17,21 +17,22 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using System;
 
 namespace NOpenNLP.Tools.Util;
 
-public interface SequenceValidator<T>
+/// <summary>
+/// Interface for context generators used with a sequence beam search.
+/// </summary>
+public interface IBeamSearchContextGenerator<T>
 {
     /// <summary>
-    /// Determines whether a particular continuation of a sequence is valid.
-    /// This is used to restrict invalid sequences such as those used in start/continue tag-based chunking
-    /// or could be used to implement tag dictionary restrictions.
+    /// Returns the context for the specified position in the specified sequence (list).
     /// </summary>
-    /// <param name="i">The index in the input sequence for which the new outcome is being proposed.</param>
-    /// <param name="inputSequence">The input sequence.</param>
-    /// <param name="outcomesSequence">The outcomes so far in this sequence.</param>
-    /// <param name="outcome">The next proposed outcome for the outcomes sequence.</param>
-    /// <returns>true is the sequence would still be valid with the new outcome, false otherwise.</returns>
-    bool ValidSequence(int i, T[] inputSequence, string[] outcomesSequence, string outcome);
+    /// <param name="index">The index of the sequence.</param>
+    /// <param name="sequence">The sequence of items over which the beam search is performed.</param>
+    /// <param name="priorDecisions">The sequence of decisions made prior to the context for
+    ///     which this decision is being made.</param>
+    /// <param name="additionalContext">Any addition context specific to a class implementing this interface.</param>
+    /// <returns>the context for the specified position in the specified sequence.</returns>
+    string[] GetContext(int index, T[] sequence, string[] priorDecisions, object[] additionalContext);
 }

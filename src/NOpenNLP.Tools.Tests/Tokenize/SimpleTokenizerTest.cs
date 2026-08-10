@@ -28,7 +28,7 @@ namespace NOpenNLP.Tools.Tokenize;
 public class SimpleTokenizerTest
 {
     // The SimpleTokenizer is thread safe
-    private SimpleTokenizer mTokenizer = SimpleTokenizer.INSTANCE;
+    private readonly SimpleTokenizer mTokenizer = SimpleTokenizer.INSTANCE; // NOpenNLP: made readonly
 
     /// <summary>
     /// Tests if it can tokenize whitespace separated tokens.
@@ -36,7 +36,7 @@ public class SimpleTokenizerTest
     [Test]
     public void TestWhitespaceTokenization()
     {
-        string text = "a b c  d     e                f    ";
+        const string text = "a b c  d     e                f    ";
 
         string[] tokenizedText = mTokenizer.Tokenize(text);
 
@@ -56,7 +56,7 @@ public class SimpleTokenizerTest
     [Test]
     public void TestWordDotTokenization()
     {
-        string text = "a.";
+        const string text = "a.";
 
         string[] tokenizedText = mTokenizer.Tokenize(text);
 
@@ -71,7 +71,7 @@ public class SimpleTokenizerTest
     [Test]
     public void TestWordNumericTokeniztation()
     {
-        string text = "305KW";
+        const string text = "305KW";
 
         string[] tokenizedText = mTokenizer.Tokenize(text);
 
@@ -83,7 +83,7 @@ public class SimpleTokenizerTest
     [Test]
     public void TestWordWithOtherTokenization()
     {
-        string text = "rebecca.sleep()";
+        const string text = "rebecca.sleep()";
 
         string[] tokenizedText = mTokenizer.Tokenize(text);
 

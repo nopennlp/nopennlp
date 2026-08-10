@@ -17,23 +17,30 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using System;
 
-namespace NOpenNLP.Tools.Util;
+using System.Collections.Generic;
+
+namespace NOpenNLP.Tools.Lemmatizer;
 
 /// <summary>
-/// Interface for context generators used with a sequence beam search.
+/// The interface for lemmatizers.
 /// </summary>
-public interface BeamSearchContextGenerator<T>
+public interface ILemmatizer
 {
     /// <summary>
-    /// Returns the context for the specified position in the specified sequence (list).
+    /// Generates lemmas for the word and postag returning the result in an array.
     /// </summary>
-    /// <param name="index">The index of the sequence.</param>
-    /// <param name="sequence">The sequence of items over which the beam search is performed.</param>
-    /// <param name="priorDecisions">The sequence of decisions made prior to the context for
-    ///     which this decision is being made.</param>
-    /// <param name="additionalContext">Any addition context specific to a class implementing this interface.</param>
-    /// <returns>the context for the specified position in the specified sequence.</returns>
-    string[] GetContext(int index, T[] sequence, string[] priorDecisions, object[] additionalContext);
+    /// <param name="toks">an array of the tokens</param>
+    /// <param name="tags">an array of the pos tags</param>
+    /// <returns>an array of possible lemmas for each token in the sequence.</returns>
+    string[] Lemmatize(string[] toks, string[] tags);
+
+    /// <summary>
+    /// Generates a lemma tags for the word and postag returning the result in a list
+    /// of every possible lemma for each token and postag.
+    /// </summary>
+    /// <param name="toks">an array of the tokens</param>
+    /// <param name="tags">an array of the pos tags</param>
+    /// <returns>a list of every possible lemma for each token in the sequence.</returns>
+    IList<IList<string>> Lemmatize(IList<string> toks, IList<string> tags);
 }

@@ -17,7 +17,6 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using System;
 
 namespace NOpenNLP.Tools.Ml.Model;
 
@@ -25,31 +24,34 @@ namespace NOpenNLP.Tools.Ml.Model;
 /// This interface allows one to implement a prior distribution for use in
 /// maximum entropy model training.
 /// </summary>
-public interface Prior
+public interface IPrior
 {
     /// <summary>
-    /// Populates the specified array with the the log of the distribution for the specified context.
+    /// Populates the specified array with the log of the distribution for the specified context.
     /// The returned array will be overwritten and needs to be re-initialized with every call to this method.
     /// </summary>
     /// <param name="dist">An array to be populated with the log of the prior distribution.</param>
     /// <param name="context">The indices of the contextual predicates for an event.</param>
     void LogPrior(double[] dist, int[] context);
+
     /// <summary>
-    /// Populates the specified array with the the log of the distribution for the specified context.
+    /// Populates the specified array with the log of the distribution for the specified context.
     /// The returned array will be overwritten and needs to be re-initialized with every call to this method.
     /// </summary>
     /// <param name="dist">An array to be populated with the log of the prior distribution.</param>
     /// <param name="context">The indices of the contextual predicates for an event.</param>
     /// <param name="values">The values associated with the context.</param>
     void LogPrior(double[] dist, int[] context, float[] values);
+
     /// <summary>
-    /// Populates the specified array with the the log of the distribution for the specified context.
+    /// Populates the specified array with the log of the distribution for the specified context.
     /// The returned array will be overwritten and needs to be re-initialized with every call to this method.
     /// </summary>
     /// <param name="dist">An array to be populated with the log of the prior distribution.</param>
     /// <param name="context">The indices of the contextual predicates for an event.</param>
     /// <param name="values">The values associated with the context.</param>
     void LogPrior(double[] dist, Context[] context, float[] values);
+
     /// <summary>
     /// Method to specify the label for the outcomes and contexts.  This is used to map
     /// integer outcomes and contexts to their string values.  This method is called prior

@@ -19,7 +19,6 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using System.Globalization;
-using System.Text;
 using J2N;
 using NOpenNLP.Tools.Support;
 

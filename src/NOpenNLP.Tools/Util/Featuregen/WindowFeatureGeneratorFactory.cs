@@ -18,26 +18,21 @@
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using NOpenNLP.Tools.Support;
-using NOpenNLP.Tools.Util;
-using System;
 using System.Xml;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Util.Featuregen;
 
 /// <summary>
 /// </summary>
 /// <remarks>@seeWindowFeatureGenerator</remarks>
-public class WindowFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.XmlFeatureGeneratorFactory
+public class WindowFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
     public WindowFeatureGeneratorFactory() : base()
     {
     }
 
-    public virtual AdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
+    public virtual IAdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
     {
         XmlElement nestedGeneratorElement = null;
         XmlNodeList kids = generatorElement.ChildNodes;
@@ -56,7 +51,7 @@ public class WindowFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeature
             throw new InvalidFormatException("window feature generator must contain" + " an aggregator element");
         }
 
-        AdaptiveFeatureGenerator nestedGenerator = GeneratorFactory.CreateGenerator(nestedGeneratorElement, resourceManager);
+        IAdaptiveFeatureGenerator nestedGenerator = GeneratorFactory.CreateGenerator(nestedGeneratorElement, resourceManager);
         string prevLengthString = generatorElement.GetAttribute("prevLength");
         int prevLength;
         try
@@ -82,14 +77,14 @@ public class WindowFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeature
         return new WindowFeatureGenerator(nestedGenerator, prevLength, nextLength);
     }
 
-    internal static void Register(IDictionary<string, GeneratorFactory.XmlFeatureGeneratorFactory> factoryMap)
+    internal static void Register(IDictionary<string, GeneratorFactory.IXmlFeatureGeneratorFactory> factoryMap)
     {
         factoryMap.Put("window", new WindowFeatureGeneratorFactory());
     }
 
-    public override AdaptiveFeatureGenerator Create()
+    public override IAdaptiveFeatureGenerator Create()
     {
-        AdaptiveFeatureGenerator generator = (AdaptiveFeatureGenerator)args["generator#0"];
+        IAdaptiveFeatureGenerator generator = (IAdaptiveFeatureGenerator)args["generator#0"];
         if (generator == null)
         {
             throw new InvalidFormatException("window feature generator must contain" + " an aggregator element");

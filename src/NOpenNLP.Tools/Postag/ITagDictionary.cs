@@ -17,12 +17,19 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
+namespace NOpenNLP.Tools.Postag;
 
-namespace NOpenNLP.Tools.Ml.Model;
-
-public interface DataReader
+/// <summary>
+/// Interface to determine which tags are valid for a particular word
+/// based on a tag dictionary.
+/// </summary>
+public interface ITagDictionary
 {
-    double ReadDouble();
-    int ReadInt();
-    string ReadUTF();
+    /// <summary>
+    /// Returns a list of valid tags for the specified word.
+    /// </summary>
+    /// <param name="word">The word.</param>
+    /// <returns>A list of valid tags for the specified word or null if no information
+    /// is available for that word.</returns>
+    string[] GetTags(string word);
 }

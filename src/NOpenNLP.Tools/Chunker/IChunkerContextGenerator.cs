@@ -17,29 +17,24 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
+using NOpenNLP.Tools.Util;
 
-using System.Collections.Generic;
-
-namespace NOpenNLP.Tools.Lemmatizer;
+namespace NOpenNLP.Tools.Chunker;
 
 /// <summary>
-/// The interface for lemmatizers.
+/// Interface for the context generator used in syntactic chunking.
 /// </summary>
-public interface Lemmatizer
+public interface IChunkerContextGenerator : IBeamSearchContextGenerator<TokenTag>
 {
     /// <summary>
-    /// Generates lemmas for the word and postag returning the result in an array.
+    /// Returns the contexts for chunking of the specified index.
     /// </summary>
-    /// <param name="toks">an array of the tokens</param>
-    /// <param name="tags">an array of the pos tags</param>
-    /// <returns>an array of possible lemmas for each token in the sequence.</returns>
-    string[] Lemmatize(string[] toks, string[] tags);
-    /// <summary>
-    /// Generates a lemma tags for the word and postag returning the result in a list
-    /// of every possible lemma for each token and postag.
-    /// </summary>
-    /// <param name="toks">an array of the tokens</param>
-    /// <param name="tags">an array of the pos tags</param>
-    /// <returns>a list of every possible lemma for each token in the sequence.</returns>
-    IList<IList<string>> Lemmatize(IList<string> toks, IList<string> tags);
+    /// <param name="i">The index of the token in the specified toks array for which the context should be constructed.</param>
+    /// <param name="toks">The tokens of the sentence.  The <c>ToString</c> methods of these objects
+    ///             should return the token text.</param>
+    /// <param name="tags">The POS tags for the specified tokens.</param>
+    /// <param name="preds">The previous decisions made in the taging of this sequence.
+    ///              Only indices less than <paramref name="i"/> will be examined.</param>
+    /// <returns>An array of predictive contexts on which a model basis its decisions.</returns>
+    string[] GetContext(int i, string[] toks, string[] tags, string[] preds);
 }

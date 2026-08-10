@@ -24,24 +24,28 @@ using System.Text;
 
 namespace NOpenNLP.Tools.Ml.Model;
 
-public abstract class AbstractModel : MaxentModel
+public abstract class AbstractModel : IMaxentModel
 {
     /// <summary>
     /// Mapping between predicates/contexts and an integer representing them.
     /// </summary>
     protected Dictionary<string, Context> pmap;
+
     /// <summary>
     /// The names of the outcomes.
     /// </summary>
     protected string[] outcomeNames;
+
     /// <summary>
     /// Parameters for the model.
     /// </summary>
     protected EvalParameters evalParams;
+
     /// <summary>
     /// Prior distribution for this model.
     /// </summary>
-    protected Prior prior;
+    protected IPrior prior;
+
     public enum ModelType
     {
         Maxent,
@@ -54,6 +58,7 @@ public abstract class AbstractModel : MaxentModel
     /// The type of the model.
     /// </summary>
     protected ModelType modelType;
+
     protected AbstractModel(Context[] @params, string[] predLabels, Dictionary<string, Context> pmap, string[] outcomeNames)
     {
         this.pmap = pmap;
@@ -78,9 +83,11 @@ public abstract class AbstractModel : MaxentModel
         this.outcomeNames = outcomeNames;
     }
 
-    // NOpenNLP: from MaxentModel interface
+    // NOpenNLP: from IMaxentModel interface
     public abstract double[] Eval(string[] context);
+
     public abstract double[] Eval(string[] context, double[] probs);
+
     public abstract double[] Eval(string[] context, float[] values);
 
     /// <summary>

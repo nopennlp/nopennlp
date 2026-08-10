@@ -24,8 +24,6 @@ using NOpenNLP.Tools.Util.Model;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Xml;
 using System.Xml.XPath;
 using J2N.Collections.Generic;
@@ -61,18 +59,18 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// &lt;/featureGenerators&gt;
 /// </p>
 ///
-/// Each XML element is mapped to a {@link GeneratorFactory.XmlFeatureGeneratorFactory} which
+/// Each XML element is mapped to a {@link GeneratorFactory.IXmlFeatureGeneratorFactory} which
 /// is responsible to process the element and create the specified
-/// {@link AdaptiveFeatureGenerator}. Elements can contain other
+/// {@link IAdaptiveFeatureGenerator}. Elements can contain other
 /// elements in this case it is the responsibility of the mapped factory to process
 /// the child elements correctly. In some factories this leads to recursive
 /// calls the
-/// {@link GeneratorFactory.XmlFeatureGeneratorFactory#create(Element, FeatureGeneratorResourceProvider)}
+/// {@link GeneratorFactory.IXmlFeatureGeneratorFactory#create(Element, FeatureGeneratorResourceProvider)}
 /// method.
 ///
 /// In the example above the generators element is mapped to the
 /// {@link AggregatedFeatureGeneratorFactory} which then
-/// creates all the aggregated {@link AdaptiveFeatureGenerator}s to
+/// creates all the aggregated {@link IAdaptiveFeatureGenerator}s to
 /// accomplish this it evaluates the mapping with the same mechanism
 /// and gives the child element to the corresponding factories. All
 /// created generators are added to a new instance of the
@@ -81,21 +79,21 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 public class GeneratorFactory
 {
     /// <summary>
-    /// The {@link XmlFeatureGeneratorFactory} is responsible to construct
-    /// an {@link AdaptiveFeatureGenerator} from an given XML {@link Element}
+    /// The {@link IXmlFeatureGeneratorFactory} is responsible to construct
+    /// an {@link IAdaptiveFeatureGenerator} from an given XML {@link Element}
     /// which contains all necessary configuration if any.
     /// </summary>
-    internal interface XmlFeatureGeneratorFactory
+    internal interface IXmlFeatureGeneratorFactory
     {
         /// <summary>
-        /// Creates an {@link AdaptiveFeatureGenerator} from a the describing
+        /// Creates an {@link IAdaptiveFeatureGenerator} from a the describing
         /// XML element.
         /// </summary>
         /// <param name="generatorElement">the element which contains the configuration</param>
         /// <param name="resourceManager">the resource manager which could be used
         ///     to access referenced resources</param>
-        /// <returns>the configured {@link AdaptiveFeatureGenerator}</returns>
-        AdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager);
+        /// <returns>the configured {@link IAdaptiveFeatureGenerator}</returns>
+        IAdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager);
     }
 
     public abstract class AbstractXmlFeatureGeneratorFactory
@@ -103,13 +101,14 @@ public class GeneratorFactory
         protected XmlElement generatorElement;
         protected FeatureGeneratorResourceProvider resourceManager;
         // to respect the order <generator/> in AggregatedFeatureGenerator, let's use LinkedHashMap
-        protected LinkedDictionary<string, object> args;
+        protected readonly LinkedDictionary<string, object> args; // NOpenNLP: made readonly
+
         public AbstractXmlFeatureGeneratorFactory()
         {
             args = new LinkedDictionary<string, object>();
         }
 
-        public virtual JCG.Dictionary<string, ArtifactSerializer> GetArtifactSerializerMapping()
+        public virtual JCG.Dictionary<string, IArtifactSerializer> GetArtifactSerializerMapping()
         {
             return null;
         }
@@ -118,7 +117,7 @@ public class GeneratorFactory
         {
             this.generatorElement = element;
             this.resourceManager = resourceManager;
-            IList<AdaptiveFeatureGenerator> generators = new JCG.List<AdaptiveFeatureGenerator>();
+            IList<IAdaptiveFeatureGenerator> generators = new JCG.List<IAdaptiveFeatureGenerator>();
             XmlNodeList childNodes = generatorElement.ChildNodes;
             for (int i = 0; i < childNodes.Count; i++)
             {
@@ -130,7 +129,7 @@ public class GeneratorFactory
                     if (type.Equals("generator"))
                     {
                         string key = "generator#" + generators.Count;
-                        AdaptiveFeatureGenerator afg = BuildGenerator(elem, resourceManager);
+                        IAdaptiveFeatureGenerator afg = BuildGenerator(elem, resourceManager);
                         generators.Add(afg);
                         if (afg != null)
                             args.Put(key, afg);
@@ -170,7 +169,7 @@ public class GeneratorFactory
 
             if (generators.Count > 1)
             {
-                AdaptiveFeatureGenerator aggregatedFeatureGenerator = new AggregatedFeatureGenerator(generators.ToArray());
+                IAdaptiveFeatureGenerator aggregatedFeatureGenerator = new AggregatedFeatureGenerator([.. generators]);
                 args.Put("generator#0", aggregatedFeatureGenerator);
             }
         }
@@ -284,9 +283,9 @@ public class GeneratorFactory
             {
                 throw new InvalidFormatException("parameter " + name + " must be set!");
             }
-            else if (value is Double)
+            else if (value is double)
             {
-                return (Double)value;
+                return (double)value;
             }
             else
             {
@@ -301,9 +300,9 @@ public class GeneratorFactory
             {
                 return defValue;
             }
-            else if (value is Double)
+            else if (value is double)
             {
-                return (Double)value;
+                return (double)value;
             }
             else
             {
@@ -383,7 +382,7 @@ public class GeneratorFactory
         /// </summary>
         /// <returns>null if the subclass uses {@link #resourceManager} to instantiate</returns>
         /// <exception cref="InvalidFormatException"></exception>
-        public abstract AdaptiveFeatureGenerator Create();
+        public abstract IAdaptiveFeatureGenerator Create();
     }
 
     // TODO: We have to support custom resources here. How does it work ?!
@@ -394,12 +393,12 @@ public class GeneratorFactory
     // When training, the descriptor could be consulted first to register the serializers, and afterwards
     // they are stored in the model.
     // TODO: (OPENNLP-1174) just remove this class when back-compat is no longer needed
-    class CustomFeatureGeneratorFactory : XmlFeatureGeneratorFactory
+    class CustomFeatureGeneratorFactory : IXmlFeatureGeneratorFactory
     {
-        public virtual AdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
+        public virtual IAdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
         {
             string featureGeneratorClassName = generatorElement.GetAttribute("class");
-            AdaptiveFeatureGenerator generator = ExtensionLoader.InstantiateExtension<AdaptiveFeatureGenerator>(featureGeneratorClassName);
+            IAdaptiveFeatureGenerator generator = ExtensionLoader.InstantiateExtension<IAdaptiveFeatureGenerator>(featureGeneratorClassName);
             if (generator is CustomFeatureGenerator)
             {
                 CustomFeatureGenerator customGenerator = (CustomFeatureGenerator)generator;
@@ -423,14 +422,15 @@ public class GeneratorFactory
             return generator;
         }
 
-        internal static void Register(JCG.Dictionary<string, XmlFeatureGeneratorFactory> factoryMap)
+        internal static void Register(JCG.Dictionary<string, IXmlFeatureGeneratorFactory> factoryMap)
         {
             factoryMap.Put("custom", new CustomFeatureGeneratorFactory());
         }
     }
 
     // TODO: (OPENNLP-1174) just remove when back-compat is no longer needed
-    private static JCG.Dictionary<string, XmlFeatureGeneratorFactory> factories = new JCG.Dictionary<string, XmlFeatureGeneratorFactory>();
+    private static readonly JCG.Dictionary<string, IXmlFeatureGeneratorFactory> factories = new JCG.Dictionary<string, IXmlFeatureGeneratorFactory>(); // NOpenNLP: made readonly
+
     // TODO: (OPENNLP-1174) just remove when back-compat is no longer needed
     static GeneratorFactory()
     {
@@ -459,7 +459,7 @@ public class GeneratorFactory
     }
 
     /// <summary>
-    /// Creates a {@link AdaptiveFeatureGenerator} for the provided element.
+    /// Creates a {@link IAdaptiveFeatureGenerator} for the provided element.
     /// To accomplish this it looks up the corresponding factory by the
     /// element tag name. The factory is then responsible for the creation
     /// of the generator from the element.
@@ -467,14 +467,14 @@ public class GeneratorFactory
     /// <param name="generatorElement"></param>
     /// <param name="resourceManager"></param>
     /// <returns></returns>
-    internal static AdaptiveFeatureGenerator CreateGenerator(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
+    internal static IAdaptiveFeatureGenerator CreateGenerator(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
     {
         string elementName = generatorElement.Name;
 
         // check it is new format?
         if (elementName.Equals("featureGenerators"))
         {
-            IList<AdaptiveFeatureGenerator> generators = new JCG.List<AdaptiveFeatureGenerator>();
+            IList<IAdaptiveFeatureGenerator> generators = new JCG.List<IAdaptiveFeatureGenerator>();
             XmlNodeList childNodes = generatorElement.ChildNodes;
             for (int i = 0; i < childNodes.Count; i++)
             {
@@ -492,11 +492,11 @@ public class GeneratorFactory
                 }
             }
 
-            AdaptiveFeatureGenerator featureGenerator = null;
+            IAdaptiveFeatureGenerator featureGenerator = null;
             if (generators.Count == 1)
                 featureGenerator = generators[0];
             else if (generators.Count > 1)
-                featureGenerator = new AggregatedFeatureGenerator(generators.ToArray());
+                featureGenerator = new AggregatedFeatureGenerator([.. generators]);
             else
                 throw new InvalidFormatException("featureGenerators must have one or more generators");
 
@@ -505,7 +505,7 @@ public class GeneratorFactory
                 throw new InvalidFormatException("CachedFeatureGeneratorFactory cannot be specified manually." + "Use cache=\"true\" attribute in featureGenerators element instead.");
 
             // check cache usage
-            if (Boolean.Parse(generatorElement.GetAttribute("cache")))
+            if (bool.Parse(generatorElement.GetAttribute("cache")))
                 return new CachedFeatureGenerator(featureGenerator);
             else
                 return featureGenerator;
@@ -514,7 +514,7 @@ public class GeneratorFactory
         {
 
             // support classic format
-            XmlFeatureGeneratorFactory generatorFactory = factories[elementName];
+            IXmlFeatureGeneratorFactory generatorFactory = factories[elementName];
             if (generatorFactory != null)
             {
                 return generatorFactory.Create(generatorElement, resourceManager);
@@ -539,7 +539,7 @@ public class GeneratorFactory
     }
 
     /// <summary>
-    /// Creates a {@link AdaptiveFeatureGenerator} for the provided element.
+    /// Creates a {@link IAdaptiveFeatureGenerator} for the provided element.
     /// To accomplish this it looks up the corresponding factory by the
     /// element tag name. The factory is then responsible for the creation
     /// of the generator from the element.
@@ -547,7 +547,7 @@ public class GeneratorFactory
     /// <param name="generatorElement"></param>
     /// <param name="resourceManager"></param>
     /// <returns></returns>
-    static AdaptiveFeatureGenerator BuildGenerator(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
+    static IAdaptiveFeatureGenerator BuildGenerator(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
     {
         string className = generatorElement.GetAttribute("class");
         if (className == null)
@@ -616,7 +616,7 @@ public class GeneratorFactory
     }
 
     /// <summary>
-    /// Creates an {@link AdaptiveFeatureGenerator} from an provided XML descriptor.
+    /// Creates an {@link IAdaptiveFeatureGenerator} from an provided XML descriptor.
     ///
     /// Usually this XML descriptor contains a set of nested feature generators
     /// which are then used to generate the features by one of the opennlp
@@ -629,7 +629,7 @@ public class GeneratorFactory
     /// <returns>created feature generators</returns>
     /// <exception cref="IOException">if an error occurs during reading from the descriptor
     ///     {@link InputStream}</exception>
-    public static AdaptiveFeatureGenerator Create(Stream xmlDescriptorIn, FeatureGeneratorResourceProvider resourceManager)
+    public static IAdaptiveFeatureGenerator Create(Stream xmlDescriptorIn, FeatureGeneratorResourceProvider resourceManager)
     {
         XmlDocument xmlDescriptorDOM = CreateDOM(xmlDescriptorIn);
         XmlElement generatorElement = xmlDescriptorDOM.DocumentElement;
@@ -638,7 +638,7 @@ public class GeneratorFactory
         return CreateGenerator(generatorElement, resourceManager);
     }
 
-    public static JCG.Dictionary<string, ArtifactSerializer> ExtractArtifactSerializerMappings(Stream xmlDescriptorIn)
+    public static JCG.Dictionary<string, IArtifactSerializer> ExtractArtifactSerializerMappings(Stream xmlDescriptorIn)
     {
         XmlDocument xmlDescriptorDOM = CreateDOM(xmlDescriptorIn);
         XmlElement element = xmlDescriptorDOM.DocumentElement;
@@ -647,7 +647,7 @@ public class GeneratorFactory
         // check it is new format?
         if (elementName.Equals("featureGenerators"))
         {
-            JCG.Dictionary<string, ArtifactSerializer> mapping = new JCG.Dictionary<string, ArtifactSerializer>();
+            JCG.Dictionary<string, IArtifactSerializer> mapping = new JCG.Dictionary<string, IArtifactSerializer>();
             XmlNodeList nodes = element.ChildNodes;
             for (int i = 0; i < nodes.Count; i++)
             {
@@ -669,7 +669,7 @@ public class GeneratorFactory
         }
     }
 
-    static void ExtractArtifactSerializerMappings(JCG.Dictionary<string, ArtifactSerializer> mapping, XmlElement element)
+    static void ExtractArtifactSerializerMappings(JCG.Dictionary<string, IArtifactSerializer> mapping, XmlElement element)
     {
         string className = element.GetAttribute("class");
         if (className != null)
@@ -686,7 +686,7 @@ public class GeneratorFactory
             {
                 AbstractXmlFeatureGeneratorFactory factory = (AbstractXmlFeatureGeneratorFactory)Activator.CreateInstance(factoryClass);
                 factory.Init(element, null);
-                JCG.Dictionary<string, ArtifactSerializer> map = factory.GetArtifactSerializerMapping();
+                JCG.Dictionary<string, IArtifactSerializer> map = factory.GetArtifactSerializerMapping();
                 if (map != null)
                     mapping.PutAll(map);
             }
@@ -736,9 +736,9 @@ public class GeneratorFactory
         }
     }
 
-    static JCG.Dictionary<string, ArtifactSerializer> ExtractArtifactSerializerMappingsClassicFormat(XmlElement elem)
+    static JCG.Dictionary<string, IArtifactSerializer> ExtractArtifactSerializerMappingsClassicFormat(XmlElement elem)
     {
-        JCG.Dictionary<string, ArtifactSerializer> mapping = new JCG.Dictionary<string, ArtifactSerializer>();
+        JCG.Dictionary<string, IArtifactSerializer> mapping = new JCG.Dictionary<string, IArtifactSerializer>();
         //Xpath xPath = XPathFactory.NewInstance().NewXPath();
         XmlNodeList customElements;
         try
@@ -758,10 +758,10 @@ public class GeneratorFactory
 
                 // Note: The resource provider is not available at that point, to provide
                 // resources they need to be loaded first!
-                AdaptiveFeatureGenerator generator = CreateGenerator(customElement, null);
-                if (generator is ArtifactToSerializerMapper)
+                IAdaptiveFeatureGenerator generator = CreateGenerator(customElement, null);
+                if (generator is IArtifactToSerializerMapper)
                 {
-                    ArtifactToSerializerMapper mapper = (ArtifactToSerializerMapper)generator;
+                    IArtifactToSerializerMapper mapper = (IArtifactToSerializerMapper)generator;
                     mapping.PutAll(mapper.GetArtifactSerializerMapping());
                 }
             }

@@ -31,8 +31,8 @@ public class ArrayMath
 {
     public static double InnerProduct(double[] vecA, double[] vecB)
     {
-        if (vecA == null || vecB == null || vecA.Length != vecB.Length)
-            return Double.NaN;
+        if (vecA == null! || vecB == null! || vecA.Length != vecB.Length)
+            return double.NaN;
         double product = 0;
         for (int i = 0; i < vecA.Length; i++)
         {
@@ -81,7 +81,7 @@ public class ArrayMath
         double sum = 0;
         for (int i = 0; i < x.Length; i++)
         {
-            if (x[i] != Double.NegativeInfinity)
+            if (!double.IsNegativeInfinity(x[i]))
                 sum += Math.Exp(x[i] - max);
         }
 
@@ -145,7 +145,7 @@ public class ArrayMath
     /// <summary>
     /// Convert a list of Double objects into an array of primitive doubles
     /// </summary>
-    public static double[] ToDoubleArray(IList<Double> list)
+    public static double[] ToDoubleArray(IList<double> list)
     {
         double[] arr = new double[list.Count];
         for (int i = 0; i < arr.Length; i++)

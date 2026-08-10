@@ -19,11 +19,6 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using J2N.Text;
 using NOpenNLP.Tools.Util;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Tokenize;
 
@@ -31,7 +26,7 @@ namespace NOpenNLP.Tools.Tokenize;
 // equivalent accessibility, and a public class may not derive from a less
 // accessible base (CS0060), so the public TokenizerME, SimpleTokenizer and
 // WhitespaceTokenizer subclasses require this to be public.
-public abstract class AbstractTokenizer : Tokenizer
+public abstract class AbstractTokenizer : ITokenizer
 {
     public virtual string[] Tokenize(string s)
     {

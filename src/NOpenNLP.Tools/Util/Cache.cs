@@ -19,7 +19,6 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Util;

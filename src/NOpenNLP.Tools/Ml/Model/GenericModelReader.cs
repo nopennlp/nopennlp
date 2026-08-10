@@ -28,35 +28,27 @@ namespace NOpenNLP.Tools.Ml.Model;
 public class GenericModelReader : AbstractModelReader
 {
     private AbstractModelReader delegateModelReader;
+
     public GenericModelReader(FileInfo f) : base(f)
     {
     }
 
-    public GenericModelReader(DataReader dataReader) : base(dataReader)
+    public GenericModelReader(IDataReader dataReader) : base(dataReader)
     {
     }
 
     public override void CheckModelType()
     {
         string modelType = ReadUTF();
-        switch (modelType)
+
+        delegateModelReader = modelType switch
         {
-            case "Perceptron":
-                delegateModelReader = new PerceptronModelReader(this.dataReader);
-                break;
-            case "GIS":
-                delegateModelReader = new GISModelReader(this.dataReader);
-                break;
-            case "QN":
-                delegateModelReader = new QNModelReader(this.dataReader);
-                break;
-            case "NaiveBayes":
-                delegateModelReader = new NaiveBayesModelReader(this.dataReader);
-                break;
-            default:
-                throw new InvalidOperationException("Unknown model format: " + modelType);
-                break;
-        }
+            "Perceptron" => new PerceptronModelReader(this.dataReader),
+            "GIS" => new GISModelReader(this.dataReader),
+            "QN" => new QNModelReader(this.dataReader),
+            "NaiveBayes" => new NaiveBayesModelReader(this.dataReader),
+            _ => throw new InvalidOperationException("Unknown model format: " + modelType)
+        };
     }
 
     public override AbstractModel ConstructModel()

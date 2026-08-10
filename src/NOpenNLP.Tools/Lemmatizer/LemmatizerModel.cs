@@ -31,24 +31,28 @@ namespace NOpenNLP.Tools.Lemmatizer;
 
 /// <summary>
 /// The {@link LemmatizerModel} is the model used
-/// by a learnable {@link Lemmatizer}.
+/// by a learnable {@link ILemmatizer}.
 /// </summary>
 /// <remarks>@seeLemmatizerME</remarks>
 public class LemmatizerModel : BaseModel
 {
-    private static readonly string COMPONENT_NAME = "StatisticalLemmatizer";
-    private static readonly string LEMMATIZER_MODEL_ENTRY_NAME = "lemmatizer.model";
-    public LemmatizerModel(string languageCode, SequenceClassificationModel<string> lemmatizerModel, Dictionary<string, string> manifestInfoEntries, LemmatizerFactory factory) : base(COMPONENT_NAME, languageCode, manifestInfoEntries, factory)
+    private const string COMPONENT_NAME = "StatisticalLemmatizer";
+    private const string LEMMATIZER_MODEL_ENTRY_NAME = "lemmatizer.model";
+
+    public LemmatizerModel(string languageCode, ISequenceClassificationModel<string> lemmatizerModel, Dictionary<string, string> manifestInfoEntries, LemmatizerFactory factory)
+        : base(COMPONENT_NAME, languageCode, manifestInfoEntries, factory)
     {
         artifactMap.Put(LEMMATIZER_MODEL_ENTRY_NAME, lemmatizerModel);
         CheckArtifactMap();
     }
 
-    public LemmatizerModel(string languageCode, MaxentModel lemmatizerModel, Dictionary<string, string> manifestInfoEntries, LemmatizerFactory factory) : this(languageCode, lemmatizerModel, LemmatizerME.DEFAULT_BEAM_SIZE, manifestInfoEntries, factory)
+    public LemmatizerModel(string languageCode, IMaxentModel lemmatizerModel, Dictionary<string, string> manifestInfoEntries, LemmatizerFactory factory)
+        : this(languageCode, lemmatizerModel, LemmatizerME.DEFAULT_BEAM_SIZE, manifestInfoEntries, factory)
     {
     }
 
-    public LemmatizerModel(string languageCode, MaxentModel lemmatizerModel, int beamSize, Dictionary<string, string> manifestInfoEntries, LemmatizerFactory factory) : base(COMPONENT_NAME, languageCode, manifestInfoEntries, factory)
+    public LemmatizerModel(string languageCode, IMaxentModel lemmatizerModel, int beamSize, Dictionary<string, string> manifestInfoEntries, LemmatizerFactory factory)
+        : base(COMPONENT_NAME, languageCode, manifestInfoEntries, factory)
     {
         artifactMap.Put(LEMMATIZER_MODEL_ENTRY_NAME, lemmatizerModel);
         Properties manifest = (Properties)artifactMap[MANIFEST_ENTRY];
@@ -56,23 +60,28 @@ public class LemmatizerModel : BaseModel
         CheckArtifactMap();
     }
 
-    public LemmatizerModel(string languageCode, MaxentModel lemmatizerModel, LemmatizerFactory factory) : this(languageCode, lemmatizerModel, null, factory)
+    public LemmatizerModel(string languageCode, IMaxentModel lemmatizerModel, LemmatizerFactory factory)
+        : this(languageCode, lemmatizerModel, null, factory)
     {
     }
 
-    public LemmatizerModel(Stream @in) : base(COMPONENT_NAME, @in)
+    public LemmatizerModel(Stream @in)
+        : base(COMPONENT_NAME, @in)
     {
     }
 
-    public LemmatizerModel(FileInfo modelFile) : base(COMPONENT_NAME, modelFile)
+    public LemmatizerModel(FileInfo modelFile)
+        : base(COMPONENT_NAME, modelFile)
     {
     }
 
-    public LemmatizerModel(string modelPath) : this(new FileInfo(modelPath))
+    public LemmatizerModel(string modelPath)
+        : this(new FileInfo(modelPath))
     {
     }
 
-    // public LemmatizerModel(URL modelURL) : base(COMPONENT_NAME, modelURL)
+    // public LemmatizerModel(URL modelURL)
+    //     : base(COMPONENT_NAME, modelURL)
     // {
     // }
 
@@ -81,14 +90,14 @@ public class LemmatizerModel : BaseModel
         base.ValidateArtifactMap();
         if (!(artifactMap[LEMMATIZER_MODEL_ENTRY_NAME] is AbstractModel))
         {
-            throw new InvalidFormatException("Lemmatizer model is incomplete!");
+            throw new InvalidFormatException("ILemmatizer model is incomplete!");
         }
     }
 
-    public virtual SequenceClassificationModel<string> GetLemmatizerSequenceModel()
+    public virtual ISequenceClassificationModel<string> GetLemmatizerSequenceModel()
     {
         Properties manifest = (Properties)artifactMap[MANIFEST_ENTRY];
-        if (artifactMap[LEMMATIZER_MODEL_ENTRY_NAME] is MaxentModel)
+        if (artifactMap[LEMMATIZER_MODEL_ENTRY_NAME] is IMaxentModel)
         {
             string beamSizeString = manifest.GetProperty(BeamSearch.BEAM_SIZE_PARAMETER);
             int beamSize = LemmatizerME.DEFAULT_BEAM_SIZE;
@@ -97,11 +106,11 @@ public class LemmatizerModel : BaseModel
                 beamSize = int.Parse(beamSizeString);
             }
 
-            return new BeamSearch<string>(beamSize, (MaxentModel)artifactMap[LEMMATIZER_MODEL_ENTRY_NAME]);
+            return new BeamSearch<string>(beamSize, (IMaxentModel)artifactMap[LEMMATIZER_MODEL_ENTRY_NAME]);
         }
-        else if (artifactMap[LEMMATIZER_MODEL_ENTRY_NAME] is SequenceClassificationModel<string>)
+        else if (artifactMap[LEMMATIZER_MODEL_ENTRY_NAME] is ISequenceClassificationModel<string>)
         {
-            return (SequenceClassificationModel<string>)artifactMap[LEMMATIZER_MODEL_ENTRY_NAME];
+            return (ISequenceClassificationModel<string>)artifactMap[LEMMATIZER_MODEL_ENTRY_NAME];
         }
         else
         {
@@ -116,6 +125,6 @@ public class LemmatizerModel : BaseModel
 
     public virtual LemmatizerFactory GetFactory()
     {
-        return (LemmatizerFactory)this.toolFactory;
+        return (LemmatizerFactory)toolFactory;
     }
 }

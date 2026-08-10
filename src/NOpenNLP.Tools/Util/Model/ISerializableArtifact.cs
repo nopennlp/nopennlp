@@ -17,25 +17,19 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using NOpenNLP.Tools.Util;
 using System;
 
-namespace NOpenNLP.Tools.Chunker;
+namespace NOpenNLP.Tools.Util.Model;
 
-/// <summary>
-/// Interface for the context generator used in syntactic chunking.
-/// </summary>
-public interface ChunkerContextGenerator : BeamSearchContextGenerator<TokenTag>
+public interface ISerializableArtifact
 {
     /// <summary>
-    /// Returns the contexts for chunking of the specified index.
+    /// Retrieves the class which can serialize and recreate this artifact.
+    /// <br/>
+    /// Note:
+    /// The serializer class must have a public zero argument constructor or
+    /// an exception is thrown during model serialization/loading.
     /// </summary>
-    /// <param name="i">The index of the token in the specified toks array for which the context should be constructed.</param>
-    /// <param name="toks">The tokens of the sentence.  The <code>toString</code> methods of these objects
-    ///             should return the token text.</param>
-    /// <param name="tags">The POS tags for the the specified tokens.</param>
-    /// <param name="preds">The previous decisions made in the taging of this sequence.
-    ///              Only indices less than i will be examined.</param>
-    /// <returns>An array of predictive contexts on which a model basis its decisions.</returns>
-    string[] GetContext(int i, string[] toks, string[] tags, string[] preds);
+    /// <returns>the corresponding IArtifactSerializer class.</returns>
+    Type GetArtifactSerializerClass();
 }

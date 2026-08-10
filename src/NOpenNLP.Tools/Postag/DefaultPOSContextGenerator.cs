@@ -17,32 +17,30 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using NOpenNLP.Tools.Dictionary;
-using NOpenNLP.Tools.Support;
+
 using NOpenNLP.Tools.Util;
 using System;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Postag;
 
 /// <summary>
 /// A context generator for the POS Tagger.
 /// </summary>
-public class DefaultPOSContextGenerator : POSContextGenerator
+public class DefaultPOSContextGenerator : IPOSContextGenerator
 {
-    protected readonly string SE = "*SE*";
-    protected readonly string SB = "*SB*";
-    private static readonly int PREFIX_LENGTH = 4;
-    private static readonly int SUFFIX_LENGTH = 4;
-    private static Regex hasCap = new Regex("[A-Z]");
-    private static Regex hasNum = new Regex("[0-9]");
-    private Cache<String, String[]> contextsCache;
+    // NOpenNLP: made various fields const/readonly
+    protected const string SE = "*SE*";
+    protected const string SB = "*SB*";
+    private const int PREFIX_LENGTH = 4;
+    private const int SUFFIX_LENGTH = 4;
+    private static readonly Regex hasCap = new Regex("[A-Z]");
+    private static readonly Regex hasNum = new Regex("[0-9]");
+    private readonly Cache<string, string[]> contextsCache;
     private object wordsKey;
-    private NOpenNLP.Tools.Dictionary.Dictionary dict;
+    private readonly NOpenNLP.Tools.Dictionary.Dictionary dict;
+
     /// <summary>
     /// Initializes the current instance.
     /// </summary>
@@ -65,7 +63,7 @@ public class DefaultPOSContextGenerator : POSContextGenerator
         }
     }
 
-    protected static String[] GetPrefixes(string lex)
+    protected static string[] GetPrefixes(string lex)
     {
         string[] prefs = new string[PREFIX_LENGTH];
         for (int li = 0; li < PREFIX_LENGTH; li++)
@@ -76,7 +74,7 @@ public class DefaultPOSContextGenerator : POSContextGenerator
         return prefs;
     }
 
-    protected static String[] GetSuffixes(string lex)
+    protected static string[] GetSuffixes(string lex)
     {
         string[] suffs = new string[SUFFIX_LENGTH];
         for (int li = 0; li < SUFFIX_LENGTH; li++)
@@ -87,7 +85,7 @@ public class DefaultPOSContextGenerator : POSContextGenerator
         return suffs;
     }
 
-    public virtual String[] GetContext(int index, string[] sequence, string[] priorDecisions, object[] additionalContext)
+    public virtual string[] GetContext(int index, string[] sequence, string[] priorDecisions, object[] additionalContext)
     {
         return GetContext(index, sequence, priorDecisions);
     }
@@ -101,7 +99,7 @@ public class DefaultPOSContextGenerator : POSContextGenerator
     /// <param name="tags">The tags assigned to the previous words in the sentence.</param>
     /// <returns>The context for making a pos tag decision at the specified token index
     ///     given the specified tokens and previous tags.</returns>
-    public virtual String[] GetContext(int index, object[] tokens, string[] tags)
+    public virtual string[] GetContext(int index, object[] tokens, string[] tags)
     {
         string next, nextnext = null, lex, prev, prevprev = null;
         string tagprev, tagprevprev;
@@ -225,7 +223,7 @@ public class DefaultPOSContextGenerator : POSContextGenerator
             }
         }
 
-        string[] contexts = e.ToArray();
+        string[] contexts = [.. e];
         if (contextsCache != null)
         {
             contextsCache.Put(cacheKey, contexts);

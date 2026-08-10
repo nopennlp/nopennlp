@@ -30,7 +30,7 @@ namespace NOpenNLP.Tools.Util;
 /// Extensions of this class should:
 /// <ul>
 ///  <li>implement an empty constructor (TODO is it necessary?)
-///  <li>implement a constructor that takes the {@link ArtifactProvider} and
+///  <li>implement a constructor that takes the {@link IArtifactProvider} and
 ///      calls {@code BaseToolFactory(Map)}
 ///  <li>override {@link #createArtifactMap()} and
 ///      {@link #createArtifactSerializersMap()} methods if necessary.
@@ -38,7 +38,7 @@ namespace NOpenNLP.Tools.Util;
 /// </summary>
 public abstract class BaseToolFactory
 {
-    protected ArtifactProvider artifactProvider;
+    protected IArtifactProvider artifactProvider;
     /// <summary>
     /// All sub-classes should have an empty constructor
     /// </summary>
@@ -49,22 +49,22 @@ public abstract class BaseToolFactory
     /// <summary>
     /// Initializes the ToolFactory with an artifact provider.
     /// </summary>
-    protected virtual void Init(ArtifactProvider artifactProvider)
+    protected virtual void Init(IArtifactProvider artifactProvider)
     {
         this.artifactProvider = artifactProvider;
     }
 
     /// <summary>
-    /// Creates a {@link Map} with pairs of keys and {@link ArtifactSerializer}.
+    /// Creates a {@link Map} with pairs of keys and {@link IArtifactSerializer}.
     /// The models implementation should call this method from
     /// {@code BaseModel#createArtifactSerializersMap}
     /// <p>
     /// The base implementation will return a {@link HashMap} that should be
     /// populated by sub-classes.
     /// </summary>
-    public virtual Dictionary<string, ArtifactSerializer> CreateArtifactSerializersMap()
+    public virtual Dictionary<string, IArtifactSerializer> CreateArtifactSerializersMap()
     {
-        return new Dictionary<string, ArtifactSerializer>();
+        return new Dictionary<string, IArtifactSerializer>();
     }
 
     /// <summary>
@@ -99,7 +99,7 @@ public abstract class BaseToolFactory
     /// </summary>
     /// <exception cref="InvalidFormatException"></exception>
     public abstract void ValidateArtifactMap();
-    public static BaseToolFactory Create(string subclassName, ArtifactProvider artifactProvider)
+    public static BaseToolFactory Create(string subclassName, IArtifactProvider artifactProvider)
     {
         BaseToolFactory theFactory;
         try
@@ -121,7 +121,7 @@ public abstract class BaseToolFactory
         return theFactory;
     }
 
-    public static BaseToolFactory Create(Type factoryClass, ArtifactProvider artifactProvider)
+    public static BaseToolFactory Create(Type factoryClass, IArtifactProvider artifactProvider)
     {
         BaseToolFactory theFactory = null;
         if (factoryClass != null)

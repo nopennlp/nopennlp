@@ -24,7 +24,7 @@ using System.IO;
 
 namespace NOpenNLP.Tools.Util.Model;
 
-public class GenericModelSerializer : ArtifactSerializer<AbstractModel>
+public class GenericModelSerializer : IArtifactSerializer<AbstractModel>
 {
     public virtual AbstractModel Create(Stream @in)
     {
@@ -36,13 +36,13 @@ public class GenericModelSerializer : ArtifactSerializer<AbstractModel>
     //     ModelUtil.WriteModel(artifact, @out);
     // }
 
-    public static void Register(Dictionary<string, ArtifactSerializer> factories)
+    public static void Register(Dictionary<string, IArtifactSerializer> factories)
     {
         factories["model"] = new GenericModelSerializer();
     }
 
     // NOpenNLP: upstream relies on a default interface implementation to
-    // bridge the non-generic ArtifactSerializer; DIMs are unavailable on
+    // bridge the non-generic IArtifactSerializer; DIMs are unavailable on
     // netstandard2.0/net462, so the bridge is explicit here.
-    object ArtifactSerializer.Create(Stream @in) => Create(@in);
+    object IArtifactSerializer.Create(Stream @in) => Create(@in);
 }

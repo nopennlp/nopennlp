@@ -20,8 +20,6 @@
 using NOpenNLP.Tools.Util;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Text;
 
 namespace NOpenNLP.Tools.Sentdetect;
@@ -29,20 +27,24 @@ namespace NOpenNLP.Tools.Sentdetect;
 /// <summary>
 /// Generate event contexts for maxent decisions for sentence detection.
 /// </summary>
-public class DefaultSDContextGenerator : SDContextGenerator
+public class DefaultSDContextGenerator : ISDContextGenerator
 {
+    // NOpenNLP: made fields readonly
+
     /// <summary>
     /// String buffer for generating features.
     /// </summary>
-    protected StringBuilder buf;
+    protected readonly StringBuilder buf;
+
     /// <summary>
     /// List for holding features as they are generated.
     /// </summary>
-    protected IList<string> collectFeats;
-    private ISet<string> inducedAbbreviations;
-    private HashSet<char> eosCharacters;
+    protected readonly IList<string> collectFeats;
+    private readonly ISet<string> inducedAbbreviations;
+    private readonly HashSet<char> eosCharacters;
+
     /// <summary>
-    /// Creates a new <code>SDContextGenerator</code> instance with
+    /// Creates a new <code>ISDContextGenerator</code> instance with
     /// no induced abbreviations.
     /// </summary>
     /// <param name="eosCharacters"></param>
@@ -51,7 +53,7 @@ public class DefaultSDContextGenerator : SDContextGenerator
     }
 
     /// <summary>
-    /// Creates a new <code>SDContextGenerator</code> instance which uses
+    /// Creates a new <code>ISDContextGenerator</code> instance which uses
     /// the set of induced abbreviations.
     /// </summary>
     /// <param name="inducedAbbreviations">a <code>Set</code> of Strings
@@ -61,7 +63,7 @@ public class DefaultSDContextGenerator : SDContextGenerator
     public DefaultSDContextGenerator(ISet<string> inducedAbbreviations, char[] eosCharacters)
     {
         this.inducedAbbreviations = inducedAbbreviations;
-        this.eosCharacters = new HashSet<char>();
+        this.eosCharacters = [];
         foreach (char eosChar in eosCharacters)
         {
             this.eosCharacters.Add(eosChar);
@@ -83,13 +85,13 @@ public class DefaultSDContextGenerator : SDContextGenerator
             return "<CR>";
         }
 
-        return new string (new char[] { c });
+        return new string ([c]);
     }
 
     /* (non-Javadoc)
-     * @see opennlp.tools.sentdetect.SDContextGenerator#getContext(java.lang.StringBuffer, int)
+     * @see opennlp.tools.sentdetect.ISDContextGenerator#getContext(java.lang.StringBuffer, int)
      */
-    public virtual String[] GetContext(string sb, int position)
+    public virtual string[] GetContext(string sb, int position)
     {
         /*
          * String preceding the eos character in the eos token.
@@ -164,7 +166,7 @@ public class DefaultSDContextGenerator : SDContextGenerator
 
         CollectFeatures(prefix, suffix, previous, next, sb[position]);
         string[] context = new string[collectFeats.Count];
-        context = collectFeats.ToArray();
+        context = [.. collectFeats];
         collectFeats.Clear();
         return context;
     }

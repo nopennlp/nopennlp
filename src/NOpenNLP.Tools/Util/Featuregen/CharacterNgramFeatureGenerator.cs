@@ -28,7 +28,7 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// generate features about each token.
 /// The minimum and maximum length can be specified.
 /// </summary>
-public class CharacterNgramFeatureGenerator : AdaptiveFeatureGenerator
+public class CharacterNgramFeatureGenerator : IAdaptiveFeatureGenerator
 {
     private readonly int minLength;
     private readonly int maxLength;
@@ -47,7 +47,7 @@ public class CharacterNgramFeatureGenerator : AdaptiveFeatureGenerator
 
     public virtual void CreateFeatures(IList<string> features, string[] tokens, int index, string[] preds)
     {
-        NGramModel model = new NGramModel();
+        NGramModel model = [];
         model.Add(tokens[index], minLength, maxLength);
         foreach (StringList tokenList in model)
         {
@@ -58,7 +58,7 @@ public class CharacterNgramFeatureGenerator : AdaptiveFeatureGenerator
         }
     }
 
-    // NOpenNLP: AdaptiveFeatureGenerator declares these as Java 8 default
+    // NOpenNLP: IAdaptiveFeatureGenerator declares these as Java 8 default
     // methods; C# default interface implementations are unavailable on
     // netstandard2.0/net462, so the empty bodies are supplied here.
     public virtual void UpdateAdaptiveData(string[] tokens, string[] outcomes)

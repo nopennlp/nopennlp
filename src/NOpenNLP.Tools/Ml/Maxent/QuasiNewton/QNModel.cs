@@ -25,14 +25,14 @@ namespace NOpenNLP.Tools.Ml.Maxent.Quasinewton;
 
 public class QNModel : AbstractModel
 {
-    public QNModel(Context[] @params, String[] predLabels, String[] outcomeNames) : base(@params, predLabels, outcomeNames)
+    public QNModel(Context[] @params, string[] predLabels, string[] outcomeNames) : base(@params, predLabels, outcomeNames)
     {
-        this.modelType = ModelType.MaxentQn;
+        modelType = ModelType.MaxentQn;
     }
 
     public override int GetNumOutcomes()
     {
-        return this.outcomeNames.Length;
+        return outcomeNames.Length;
     }
 
     private Context GetPredIndex(string predicate)

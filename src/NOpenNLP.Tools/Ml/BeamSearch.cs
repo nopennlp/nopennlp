@@ -22,7 +22,6 @@ using NOpenNLP.Tools.Ml.Model;
 using NOpenNLP.Tools.Util;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Ml;
@@ -42,25 +41,22 @@ public abstract class BeamSearch
 /// @seeSequenceValidator
 /// @seeBeamSearchContextGenerator
 /// </remarks>
-public class BeamSearch<T> : BeamSearch, SequenceClassificationModel<T>
+public class BeamSearch<T> : BeamSearch, ISequenceClassificationModel<T>
 {
-    private static readonly object[] EMPTY_ADDITIONAL_CONTEXT = new object[0];
-    protected int size;
-    protected MaxentModel model;
-    private double[] probs;
-    private Cache<string[], double[]> contextsCache;
-    private static readonly int zeroLog = -100000;
+    private static readonly object[] EMPTY_ADDITIONAL_CONTEXT = [];
+    // NOpenNLP: made fields readonly
+    protected readonly int size;
+    protected readonly IMaxentModel model;
+    private readonly double[] probs;
+    private readonly Cache<string[], double[]>? contextsCache;
+    private const int zeroLog = -100000;
 
     /// <summary>
     /// Creates new search object.
     /// </summary>
     /// <param name="size">The size of the beam (k).</param>
     /// <param name="model">the model for assigning probabilities to the sequence outcomes.</param>
-    public BeamSearch(int size, MaxentModel model) : this(size, model, 0)
-    {
-    }
-
-    public BeamSearch(int size, MaxentModel model, int cacheSize)
+    public BeamSearch(int size, IMaxentModel model, int cacheSize = 0)
     {
         this.size = size;
         this.model = model;
@@ -81,7 +77,7 @@ public class BeamSearch<T> : BeamSearch, SequenceClassificationModel<T>
     ///     assumption that the context are appropiate.</param>
     /// <returns>The top ranked sequence of outcomes or null if no sequence could be found</returns>
     public virtual Sequence[] BestSequences(int numSequences, T[] sequence, object[] additionalContext,
-        double minSequenceScore, BeamSearchContextGenerator<T> cg, SequenceValidator<T> validator)
+        double minSequenceScore, IBeamSearchContextGenerator<T> cg, ISequenceValidator<T> validator)
     {
         var prev = new PriorityQueue<Sequence>(size);
         var next = new PriorityQueue<Sequence>(size);
@@ -99,7 +95,7 @@ public class BeamSearch<T> : BeamSearch, SequenceClassificationModel<T>
             {
                 Sequence top = prev.Dequeue();
                 IList<string> tmpOutcomes = top.GetOutcomes();
-                string[] outcomes = tmpOutcomes.ToArray();
+                string[] outcomes = [.. tmpOutcomes];
                 string[] contexts = cg.GetContext(i, sequence, outcomes, additionalContext);
                 double[] scores;
                 if (contextsCache != null)
@@ -168,13 +164,13 @@ public class BeamSearch<T> : BeamSearch, SequenceClassificationModel<T>
     }
 
     public virtual Sequence[] BestSequences(int numSequences, T[] sequence, object[] additionalContext,
-        BeamSearchContextGenerator<T> cg, SequenceValidator<T> validator)
+        IBeamSearchContextGenerator<T> cg, ISequenceValidator<T> validator)
     {
         return BestSequences(numSequences, sequence, additionalContext, zeroLog, cg, validator);
     }
 
-    public virtual Sequence BestSequence(T[] sequence, object[] additionalContext, BeamSearchContextGenerator<T> cg,
-        SequenceValidator<T> validator)
+    public virtual Sequence BestSequence(T[] sequence, object[] additionalContext, IBeamSearchContextGenerator<T> cg,
+        ISequenceValidator<T> validator)
     {
         Sequence[] sequences = BestSequences(1, sequence, additionalContext, cg, validator);
         if (sequences.Length > 0)

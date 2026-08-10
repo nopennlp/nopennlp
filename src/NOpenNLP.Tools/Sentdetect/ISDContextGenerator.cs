@@ -17,19 +17,21 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using NOpenNLP.Tools.Util;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
-namespace NOpenNLP.Tools.Postag;
+namespace NOpenNLP.Tools.Sentdetect;
 
 /// <summary>
-/// The interface for a context generator for the POS Tagger.
+/// Interface for {@link SentenceDetectorME} context generators.
 /// </summary>
-public interface POSContextGenerator : BeamSearchContextGenerator<string>
+public interface ISDContextGenerator
 {
-    String[] GetContext(int pos, String[] tokens, String[] prevTags, Object[] ac);
+    /// <summary>
+    /// Returns an array of contextual features for the potential sentence boundary at the
+    /// specified position within the specified string buffer.
+    /// </summary>
+    /// <param name="s">The {@link String} for which sentences are being determined.</param>
+    /// <param name="position">An index into the specified string buffer when a sentence boundary may occur.</param>
+    /// <returns>an array of contextual features for the potential sentence boundary at the
+    /// specified position within the specified string buffer.</returns>
+    string[] GetContext(string s, int position);
 }

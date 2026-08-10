@@ -17,19 +17,14 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Postag;
 
 /// <summary>
-/// Interface that allows {@link TagDictionary} entries to be added and removed.
+/// Interface that allows {@link ITagDictionary} entries to be added and removed.
 /// This can be used to induce the dictionary from training data.
 /// </summary>
-public interface MutableTagDictionary : TagDictionary
+public interface IMutableTagDictionary : ITagDictionary
 {
     /// <summary>
     /// Associates the specified tags with the specified word. If the dictionary
@@ -43,11 +38,12 @@ public interface MutableTagDictionary : TagDictionary
     /// <returns>the previous tags associated with the word, or null if there was no
     ///         mapping for word.</returns>
     string[] Put(string word, params string[] tags);
+
     /// <summary>
     /// Whether if the dictionary is case sensitive or not
     /// </summary>
     /// <returns>true if the dictionary is case sensitive</returns>
-    // TODO: move to TagDictionary, can't do it now because of backward
+    // TODO: move to ITagDictionary, can't do it now because of backward
     // compatibility.
     bool IsCaseSensitive();
 }

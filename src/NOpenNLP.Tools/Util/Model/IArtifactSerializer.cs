@@ -19,7 +19,6 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 #nullable enable
-using System;
 using System.IO;
 
 namespace NOpenNLP.Tools.Util.Model;
@@ -27,7 +26,7 @@ namespace NOpenNLP.Tools.Util.Model;
 /// <summary>
 /// Responsible to create an artifact from an {@link InputStream}.
 /// </summary>
-public interface ArtifactSerializer<T> : ArtifactSerializer
+public interface IArtifactSerializer<T> : IArtifactSerializer
 {
     /// <summary>
     /// Creates the artifact from the provided {@link InputStream}.
@@ -44,7 +43,7 @@ public interface ArtifactSerializer<T> : ArtifactSerializer
     // /// </summary>
     // void Serialize(T artifact, Stream @out);
 
-    // void ArtifactSerializer.Serialize(object artifact, Stream @out)
+    // void IArtifactSerializer.Serialize(object artifact, Stream @out)
     // {
     //     if (artifact is T typedArtifact)
     //     {
@@ -57,7 +56,7 @@ public interface ArtifactSerializer<T> : ArtifactSerializer
     // }
 }
 
-public interface ArtifactSerializer
+public interface IArtifactSerializer
 {
     object? Create(Stream @in);
     //void Serialize(object artifact, Stream @out);

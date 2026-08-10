@@ -25,14 +25,9 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// <summary>
 /// Generates a feature which contains the token itself.
 /// </summary>
-public class TokenFeatureGenerator : AdaptiveFeatureGenerator
+public class TokenFeatureGenerator(bool lowercase) : IAdaptiveFeatureGenerator
 {
-    private static readonly string WORD_PREFIX = "w";
-    private bool lowercase;
-    public TokenFeatureGenerator(bool lowercase)
-    {
-        this.lowercase = lowercase;
-    }
+    private const string WORD_PREFIX = "w";
 
     public TokenFeatureGenerator() : this(true)
     {
@@ -50,7 +45,7 @@ public class TokenFeatureGenerator : AdaptiveFeatureGenerator
         }
     }
 
-    // NOpenNLP: AdaptiveFeatureGenerator declares these as Java 8 default
+    // NOpenNLP: IAdaptiveFeatureGenerator declares these as Java 8 default
     // methods; C# default interface implementations are unavailable on
     // netstandard2.0/net462, so the empty bodies are supplied here.
     public virtual void UpdateAdaptiveData(string[] tokens, string[] outcomes)

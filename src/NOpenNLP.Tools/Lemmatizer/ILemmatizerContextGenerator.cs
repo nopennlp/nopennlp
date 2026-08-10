@@ -17,25 +17,24 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
+using NOpenNLP.Tools.Util;
 
-namespace NOpenNLP.Tools.Postag;
+namespace NOpenNLP.Tools.Lemmatizer;
 
 /// <summary>
-/// Interface to determine which tags are valid for a particular word
-/// based on a tag dictionary.
+/// Interface for the context generator used for probabilistic lemmatizer.
 /// </summary>
-public interface TagDictionary
+public interface ILemmatizerContextGenerator : IBeamSearchContextGenerator<string>
 {
     /// <summary>
-    /// Returns a list of valid tags for the specified word.
+    /// Returns the contexts for lemmatizing of the specified index.
     /// </summary>
-    /// <param name="word">The word.</param>
-    /// <returns>A list of valid tags for the specified word or null if no information
-    /// is available for that word.</returns>
-    String[] GetTags(string word);
+    /// <param name="i">The index of the token in the specified toks array for which the context should be constructed.</param>
+    /// <param name="toks">The tokens of the sentence.  The <code>toString</code> methods of
+    ///             these objects should return the token text.</param>
+    /// <param name="tags">The POS tags for the the specified tokens.</param>
+    /// <param name="lemmas">The previous decisions made in the tagging of this sequence.
+    ///               Only indices less than i will be examined.</param>
+    /// <returns>An array of predictive contexts on which a model basis its decisions.</returns>
+    string[] GetContext(int i, string[] toks, string[] tags, string[] lemmas);
 }

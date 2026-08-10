@@ -19,22 +19,21 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using NOpenNLP.Tools.Support;
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Dictionary.Serializer;
 
 /// <summary>
 /// The {@link Attributes} class stores name value pairs.
-/// 
+///
 /// Problem: The HashMap for storing the name value pairs has a very high
 /// memory footprint, replace it.
 /// </summary>
-public class Attributes
+public class Attributes : IEnumerable<string>
 {
-    private Dictionary<string, string> mNameValueMap = new Dictionary<string, string>();
+    private readonly Dictionary<string, string> mNameValueMap = new Dictionary<string, string>(); // NOpenNLP-specific: made readonly
+
     /// <summary>
     /// Retrieves the value for the given key or null if attribute it not set.
     /// </summary>
@@ -69,8 +68,10 @@ public class Attributes
     /// Iterates over the keys.
     /// </summary>
     /// <returns>key-{@link Iterator}</returns>
-    public virtual IEnumerator<string> Iterator()
+    public virtual IEnumerator<string> GetEnumerator()
     {
         return mNameValueMap.Keys.GetEnumerator();
     }
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

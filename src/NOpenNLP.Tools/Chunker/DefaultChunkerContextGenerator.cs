@@ -18,7 +18,6 @@
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using NOpenNLP.Tools.Util;
-using System;
 
 namespace NOpenNLP.Tools.Chunker;
 
@@ -27,7 +26,7 @@ namespace NOpenNLP.Tools.Chunker;
 ///  parsing with conditional random fields. In Proceedings of HLT-NAACL 2003. Association
 ///  for Computational Linguistics, 2003.
 /// </summary>
-public class DefaultChunkerContextGenerator : ChunkerContextGenerator
+public class DefaultChunkerContextGenerator : IChunkerContextGenerator
 {
     /// <summary>
     /// Creates the default context generator a chunker.
@@ -102,8 +101,8 @@ public class DefaultChunkerContextGenerator : ChunkerContextGenerator
             t2 = "t2=" + tags[i + 2];
         }
 
-        string[] features = new string[]
-        {
+        string[] features =
+        [
             w_2,
             w_1,
             w0,
@@ -145,7 +144,7 @@ public class DefaultChunkerContextGenerator : ChunkerContextGenerator
             p_1 + w2,
             p_1 + w_1 + w0,
             p_1 + w0 + w1
-        };
+        ];
         return features;
     }
 

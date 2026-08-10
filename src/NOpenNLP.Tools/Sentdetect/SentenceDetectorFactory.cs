@@ -17,17 +17,13 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using NOpenNLP.Tools.Dictionary;
+
 using NOpenNLP.Tools.Sentdetect.Lang;
 using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Util;
 using NOpenNLP.Tools.Util.Ext;
-using J2N.Text;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Sentdetect;
 
@@ -41,9 +37,10 @@ public class SentenceDetectorFactory : BaseToolFactory
     private char[] eosCharacters;
     private NOpenNLP.Tools.Dictionary.Dictionary abbreviationDictionary;
     private bool? useTokenEnd = null;
-    private static readonly string ABBREVIATIONS_ENTRY_NAME = "abbreviations.dictionary";
-    private static readonly string EOS_CHARACTERS_PROPERTY = "eosCharacters";
-    private static readonly string TOKEN_END_PROPERTY = "useTokenEnd";
+    private const string ABBREVIATIONS_ENTRY_NAME = "abbreviations.dictionary";
+    private const string EOS_CHARACTERS_PROPERTY = "eosCharacters";
+    private const string TOKEN_END_PROPERTY = "useTokenEnd";
+
     /// <summary>
     /// Creates a {@link SentenceDetectorFactory} that provides the default
     /// implementation of the resources.
@@ -104,11 +101,10 @@ public class SentenceDetectorFactory : BaseToolFactory
         return manifestEntries;
     }
 
-    public static SentenceDetectorFactory Create(string subclassName, string languageCode, bool useTokenEnd, NOpenNLP.Tools.Dictionary.Dictionary abbreviationDictionary, char[] eosCharacters)
+    public static SentenceDetectorFactory Create(string? subclassName, string languageCode, bool useTokenEnd, NOpenNLP.Tools.Dictionary.Dictionary abbreviationDictionary, char[] eosCharacters)
     {
         if (subclassName == null)
         {
-
             // will create the default factory
             return new SentenceDetectorFactory(languageCode, useTokenEnd, abbreviationDictionary, eosCharacters);
         }
@@ -183,7 +179,7 @@ public class SentenceDetectorFactory : BaseToolFactory
         return this.languageCode;
     }
 
-    public virtual EndOfSentenceScanner GetEndOfSentenceScanner()
+    public virtual IEndOfSentenceScanner GetEndOfSentenceScanner()
     {
         Factory f = new Factory();
         char[] eosChars = GetEOSCharacters();
@@ -197,7 +193,7 @@ public class SentenceDetectorFactory : BaseToolFactory
         }
     }
 
-    public virtual SDContextGenerator GetSDContextGenerator()
+    public virtual ISDContextGenerator GetSDContextGenerator()
     {
         Factory f = new Factory();
         char[] eosChars = GetEOSCharacters();

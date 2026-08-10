@@ -17,13 +17,10 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using NOpenNLP.Tools.Dictionary;
+
 using NOpenNLP.Tools.Util;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Namefind;
 
@@ -31,29 +28,23 @@ namespace NOpenNLP.Tools.Namefind;
 /// This is a dictionary based name finder, it scans text
 /// for names inside a dictionary.
 /// </summary>
-public class DictionaryNameFinder : TokenNameFinder
+public class DictionaryNameFinder : ITokenNameFinder
 {
-    private static readonly string DEFAULT_TYPE = "default";
-    private NOpenNLP.Tools.Dictionary.Dictionary mDictionary;
+    private const string DEFAULT_TYPE = "default";
+    private readonly NOpenNLP.Tools.Dictionary.Dictionary mDictionary; // NOpenNLP: made readonly
     private readonly string type;
+
     /// <summary>
     /// Initialized the current instance with he provided dictionary
     /// and a type.
     /// </summary>
     /// <param name="dictionary"></param>
     /// <param name="type">the name type used for the produced spans</param>
-    public DictionaryNameFinder(NOpenNLP.Tools.Dictionary.Dictionary dictionary, string type)
+    // NOpenNLP: introduced optional parameter
+    public DictionaryNameFinder(NOpenNLP.Tools.Dictionary.Dictionary dictionary, string type = DEFAULT_TYPE)
     {
         mDictionary = dictionary;
         this.type = type;
-    }
-
-    /// <summary>
-    /// Initializes the current instance with the provided dictionary.
-    /// </summary>
-    /// <param name="dictionary"></param>
-    public DictionaryNameFinder(NOpenNLP.Tools.Dictionary.Dictionary dictionary) : this(dictionary, DEFAULT_TYPE)
-    {
     }
 
     public virtual Span[] Find(string[] textTokenized)
@@ -61,8 +52,7 @@ public class DictionaryNameFinder : TokenNameFinder
         IList<Span> namesFound = new List<Span>();
         for (int offsetFrom = 0; offsetFrom < textTokenized.Length; offsetFrom++)
         {
-            Span nameFound = null;
-            string[] tokensSearching;
+            Span? nameFound = null;
             for (int offsetTo = offsetFrom; offsetTo < textTokenized.Length; offsetTo++)
             {
                 int lengthSearching = offsetTo - offsetFrom + 1;
@@ -72,7 +62,7 @@ public class DictionaryNameFinder : TokenNameFinder
                 }
                 else
                 {
-                    tokensSearching = new string[lengthSearching];
+                    var tokensSearching = new string[lengthSearching];
                     Array.Copy(textTokenized, offsetFrom, tokensSearching, 0, lengthSearching);
                     StringList entryForSearch = new StringList(tokensSearching);
                     if (mDictionary.Contains(entryForSearch))
@@ -91,7 +81,7 @@ public class DictionaryNameFinder : TokenNameFinder
             }
         }
 
-        return namesFound.ToArray();
+        return [.. namesFound];
     }
 
     public virtual void ClearAdaptiveData()

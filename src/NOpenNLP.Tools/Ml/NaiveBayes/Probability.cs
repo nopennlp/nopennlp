@@ -30,16 +30,11 @@ public abstract class Probability
 /// <summary>
 /// Class implementing the probability for a label.
 /// </summary>
-/// <param name="<T>">the label (category) class</param>
-public class Probability<T> : Probability
+/// <typeparam name="T">the label (category) class</typeparam>
+public class Probability<T>(T label) : Probability
 {
-    protected T label;
+    protected T label = label;
     protected double probability = 1;
-
-    public Probability(T label)
-    {
-        this.label = label;
-    }
 
     /// <summary>
     /// Assigns a probability to a label, discarding any previously assigned probability.

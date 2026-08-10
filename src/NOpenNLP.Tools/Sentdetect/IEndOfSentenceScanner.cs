@@ -17,10 +17,8 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using System;
+
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Text;
 
 namespace NOpenNLP.Tools.Sentdetect;
@@ -28,23 +26,25 @@ namespace NOpenNLP.Tools.Sentdetect;
 /// <summary>
 /// Scans Strings, StringBuffers, and char[] arrays for the offsets of
 /// sentence ending characters.
-/// 
+///
 /// <p>Implementations of this interface can use regular expressions,
 /// hand-coded DFAs, and other scanning techniques to locate end of
 /// sentence offsets.</p>
 /// </summary>
-public interface EndOfSentenceScanner
+public interface IEndOfSentenceScanner
 {
     /// <summary>
     /// Returns an array of character which can indicate the end of a sentence.
     /// </summary>
     /// <returns>an array of character which can indicate the end of a sentence.</returns>
     char[] GetEndOfSentenceCharacters();
+
     /// <summary>
     /// Returns a set of character which can indicate the end of a sentence.
     /// </summary>
     /// <returns>a set of character which can indicate the end of a sentence.</returns>
     HashSet<char> GetEOSCharacters();
+
     /// <summary>
     /// The receiver scans the specified string for sentence ending characters and
     /// returns their offsets.
@@ -52,6 +52,7 @@ public interface EndOfSentenceScanner
     /// <param name="s">a <code>String</code> value</param>
     /// <returns>a <code>List</code> of Integer objects.</returns>
     IList<int> GetPositions(string s);
+
     /// <summary>
     /// The receiver scans `buf' for sentence ending characters and
     /// returns their offsets.
@@ -59,6 +60,7 @@ public interface EndOfSentenceScanner
     /// <param name="buf">a <code>StringBuilder</code> value</param>
     /// <returns>a <code>List</code> of Integer objects.</returns>
     IList<int> GetPositions(StringBuilder buf);
+
     /// <summary>
     /// The receiver scans `cbuf' for sentence ending characters and
     /// returns their offsets.

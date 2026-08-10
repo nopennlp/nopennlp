@@ -18,18 +18,13 @@
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using NOpenNLP.Tools.Util;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Dictionary.Serializer;
 
 /// <summary>
 /// An {@link Entry} is a {@link StringList} which can
 /// optionally be mapped to attributes.
-/// 
+///
 /// {@link Entry}s is a read and written by the {@link DictionaryEntryPersistor}.
 /// </summary>
 /// <remarks>
@@ -38,8 +33,10 @@ namespace NOpenNLP.Tools.Dictionary.Serializer;
 /// </remarks>
 public class Entry
 {
-    private StringList tokens;
-    private Attributes attributes;
+    // NOpenNLP-specific: made readonly
+    private readonly StringList tokens;
+    private readonly Attributes attributes;
+
     /// <summary>
     /// Initializes the current instance.
     /// </summary>

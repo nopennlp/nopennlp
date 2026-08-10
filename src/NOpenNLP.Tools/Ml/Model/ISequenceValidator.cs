@@ -18,35 +18,19 @@
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
-using System;
-using System.Collections.Generic;
-
 namespace NOpenNLP.Tools.Util;
 
-public interface SequenceCodec<T>
+public interface ISequenceValidator<in T> // NOpenNLP: made contravariant
 {
     /// <summary>
-    /// Decodes a sequence T objects into Span objects.
+    /// Determines whether a particular continuation of a sequence is valid.
+    /// This is used to restrict invalid sequences such as those used in start/continue tag-based chunking
+    /// or could be used to implement tag dictionary restrictions.
     /// </summary>
-    /// <param name="c"></param>
-    /// <returns></returns>
-    Span[] Decode(IList<T> c);
-    /// <summary>
-    /// Encodes Span objects into a sequence of T objects.
-    /// </summary>
-    /// <param name="names"></param>
-    /// <param name="length"></param>
-    /// <returns></returns>
-    T[] Encode(Span[] names, int length);
-    /// <summary>
-    /// Creates a sequence validator which can validate a sequence of outcomes.
-    /// </summary>
-    /// <returns></returns>
-    SequenceValidator<T> CreateSequenceValidator();
-    /// <summary>
-    /// Checks if the outcomes of the model are compatible with the codec.
-    /// </summary>
-    /// <param name="outcomes">all possible model outcomes</param>
-    /// <returns></returns>
-    bool AreOutcomesCompatible(string[] outcomes);
+    /// <param name="i">The index in the input sequence for which the new outcome is being proposed.</param>
+    /// <param name="inputSequence">The input sequence.</param>
+    /// <param name="outcomesSequence">The outcomes so far in this sequence.</param>
+    /// <param name="outcome">The next proposed outcome for the outcomes sequence.</param>
+    /// <returns>true is the sequence would still be valid with the new outcome, false otherwise.</returns>
+    bool ValidSequence(int i, T[] inputSequence, string[] outcomesSequence, string outcome);
 }

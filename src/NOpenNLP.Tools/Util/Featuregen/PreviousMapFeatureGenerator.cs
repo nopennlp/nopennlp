@@ -24,12 +24,13 @@ using System.Collections.Generic;
 namespace NOpenNLP.Tools.Util.Featuregen;
 
 /// <summary>
-/// This {@link AdaptiveFeatureGenerator} generates features indicating the
+/// This {@link IAdaptiveFeatureGenerator} generates features indicating the
 /// outcome associated with a previously occuring word.
 /// </summary>
-public class PreviousMapFeatureGenerator : AdaptiveFeatureGenerator
+public class PreviousMapFeatureGenerator : IAdaptiveFeatureGenerator
 {
-    private Dictionary<string, string> previousMap = new Dictionary<string, string>();
+    private readonly Dictionary<string, string> previousMap = new Dictionary<string, string>(); // NOpenNLP: made readonly
+
     public virtual void CreateFeatures(IList<string> features, string[] tokens, int index, string[] preds)
     {
         features.Add("pd=" + previousMap[tokens[index]]);

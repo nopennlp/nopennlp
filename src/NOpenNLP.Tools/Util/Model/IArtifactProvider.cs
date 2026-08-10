@@ -17,31 +17,39 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using NOpenNLP.Tools.Util;
-using NOpenNLP.Tools.Util.Featuregen;
 
-namespace NOpenNLP.Tools.Namefind;
+namespace NOpenNLP.Tools.Util.Model;
 
 /// <summary>
-/// Interface for generating the context for an name finder by specifying a set of geature generators.
+/// Provides access to model persisted artifacts.
 /// </summary>
-public interface NameContextGenerator : BeamSearchContextGenerator<string>
+public interface IArtifactProvider
 {
     /// <summary>
-    /// Adds a feature generator to this set of feature generators.
+    /// Gets an artifact by name
     /// </summary>
-    /// <param name="generator">The feature generator to add.</param>
-    void AddFeatureGenerator(AdaptiveFeatureGenerator generator);
+    T GetArtifact<T>(string key);
+
     /// <summary>
-    /// Informs all the feature generators for a name finder that the specified tokens have
-    /// been classified with the coorisponds set of specified outcomes.
+    /// Retrieves the value to the given key from the manifest.properties
+    /// entry.
     /// </summary>
-    /// <param name="tokens">The tokens of the sentence or other text unit which has been processed.</param>
-    /// <param name="outcomes">The outcomes associated with the specified tokens.</param>
-    void UpdateAdaptiveData(string[] tokens, string[] outcomes);
+    /// <param name="key"></param>
+    /// <returns>the value</returns>
+    string GetManifestProperty(string key);
+
     /// <summary>
-    /// Informs all the feature generators for a name finder that the context of the adaptive
-    /// data (typically a document) is no longer valid.
+    /// Retrieves the language code of the material which was used to train the
+    /// model or x-unspecified if non was set.
     /// </summary>
-    void ClearAdaptiveData();
+    /// <returns>the language code of this model</returns>
+    string GetLanguage();
+
+    /// <summary>
+    /// Indicates if this provider was loaded from serialized. It is useful, for
+    /// example, while validating artifacts: you can skip the time consuming ones
+    /// if they where already validated during the serialization.
+    /// </summary>
+    /// <returns>true if this model was loaded from serialized</returns>
+    bool IsLoadedFromSerialized();
 }

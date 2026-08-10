@@ -22,7 +22,7 @@ using System.IO;
 
 namespace NOpenNLP.Tools.Util.Model;
 
-public class ByteArraySerializer : ArtifactSerializer<byte[]>
+public class ByteArraySerializer : IArtifactSerializer<byte[]>
 {
     public virtual byte[] Create(Stream @in)
     {
@@ -35,7 +35,7 @@ public class ByteArraySerializer : ArtifactSerializer<byte[]>
     // }
 
     // NOpenNLP: upstream relies on a default interface implementation to
-    // bridge the non-generic ArtifactSerializer; DIMs are unavailable on
+    // bridge the non-generic IArtifactSerializer; DIMs are unavailable on
     // netstandard2.0/net462, so the bridge is explicit here.
-    object ArtifactSerializer.Create(Stream @in) => Create(@in);
+    object IArtifactSerializer.Create(Stream @in) => Create(@in);
 }

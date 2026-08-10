@@ -17,35 +17,26 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using System;
+
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace NOpenNLP.Tools.Util.Featuregen;
 
 /// <summary>
 /// Generates Brown cluster features for current token.
 /// </summary>
-public class BrownTokenFeatureGenerator : AdaptiveFeatureGenerator
+public class BrownTokenFeatureGenerator(BrownCluster dict) : IAdaptiveFeatureGenerator
 {
-    private BrownCluster brownLexicon;
-    public BrownTokenFeatureGenerator(BrownCluster dict)
-    {
-        this.brownLexicon = dict;
-    }
-
     public virtual void CreateFeatures(IList<string> features, string[] tokens, int index, string[] previousOutcomes)
     {
-        IList<string> wordClasses = BrownTokenClasses.GetWordClasses(tokens[index], brownLexicon);
+        IList<string> wordClasses = BrownTokenClasses.GetWordClasses(tokens[index], dict);
         for (int i = 0; i < wordClasses.Count; i++)
         {
             features.Add("browncluster" + "=" + wordClasses[i]);
         }
     }
 
-    // NOpenNLP: AdaptiveFeatureGenerator declares these as Java 8 default
+    // NOpenNLP: IAdaptiveFeatureGenerator declares these as Java 8 default
     // methods; C# default interface implementations are unavailable on
     // netstandard2.0/net462, so the empty bodies are supplied here.
     public virtual void UpdateAdaptiveData(string[] tokens, string[] outcomes)
