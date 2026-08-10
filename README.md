@@ -17,16 +17,10 @@ Early work in progress. The port currently covers the **inference** APIs of the
 | Maxent / Perceptron / Naive Bayes inference | Corpus format readers |
 | Model loading and feature generation | Document categorization, parser, stemmers |
 
-## Installation
-
-```
-dotnet add package NOpenNLP.Tools
-```
+## Usage
 
 Targets `net10.0`, `net8.0`, and `netstandard2.0`. The only runtime dependency is
 [J2N](https://github.com/NightOwl888/J2N).
-
-## Usage
 
 ```csharp
 using NOpenNLP.Tools.Tokenize;
