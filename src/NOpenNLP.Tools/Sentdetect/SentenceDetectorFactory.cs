@@ -173,7 +173,7 @@ public class SentenceDetectorFactory : BaseToolFactory
     {
         if (this.languageCode == null && artifactProvider != null)
         {
-            this.languageCode = this.artifactProvider.GetLanguage();
+            this.languageCode = this.artifactProvider.Language;
         }
 
         return this.languageCode;

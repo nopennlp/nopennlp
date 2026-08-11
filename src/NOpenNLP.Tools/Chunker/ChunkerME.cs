@@ -17,6 +17,8 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
+
+using System;
 using NOpenNLP.Tools.Ml;
 using NOpenNLP.Tools.Ml.Model;
 using NOpenNLP.Tools.Util;
@@ -32,7 +34,7 @@ public class ChunkerME : IChunker
 {
     public const int DEFAULT_BEAM_SIZE = 10;
 
-    private Sequence bestSequence;
+    private Sequence? bestSequence;
 
     /// <summary>
     /// The model used to assign chunk tags to a sequence of tokens.
@@ -58,13 +60,13 @@ public class ChunkerME : IChunker
     {
         this.sequenceValidator = sequenceValidator;
         this.contextGenerator = contextGenerator;
-        if (model.GetChunkerSequenceModel() != null)
+        if (model.ChunkerSequenceModel is { } chunkerSequenceModel)
         {
-            this.model = model.GetChunkerSequenceModel();
+            this.model = chunkerSequenceModel;
         }
         else
         {
-            this.model = new BeamSearch<TokenTag>(beamSize, model.GetChunkerModel(), 0);
+            this.model = new BeamSearch<TokenTag>(beamSize, model.ChunkerModelValue, 0);
         }
     }
 
@@ -77,15 +79,15 @@ public class ChunkerME : IChunker
     /// <remarks>Deprecated: Beam size is now stored inside the model</remarks>
     private ChunkerME(ChunkerModel model, int beamSize)
     {
-        contextGenerator = model.GetFactory().GetContextGenerator();
-        sequenceValidator = model.GetFactory().GetSequenceValidator();
-        if (model.GetChunkerSequenceModel() != null)
+        contextGenerator = model.Factory.ContextGenerator;
+        sequenceValidator = model.Factory.SequenceValidator;
+        if (model.ChunkerSequenceModel is { } chunkerSequenceModel)
         {
-            this.model = model.GetChunkerSequenceModel();
+            this.model = chunkerSequenceModel;
         }
         else
         {
-            this.model = new BeamSearch<TokenTag>(beamSize, model.GetChunkerModel(), 0);
+            this.model = new BeamSearch<TokenTag>(beamSize, model.ChunkerModelValue, 0);
         }
     }
 
@@ -109,7 +111,7 @@ public class ChunkerME : IChunker
     public virtual Span[] ChunkAsSpans(string[] toks, string[] tags)
     {
         string[] preds = Chunk(toks, tags);
-        return ChunkSample.PhrasesAsSpanList(toks, tags, preds);
+        return ChunkSample.GetPhrasesAsSpanList(toks, tags, preds);
     }
 
     public virtual Sequence[] TopKSequences(string[] sentence, string[] tags)
@@ -126,24 +128,36 @@ public class ChunkerME : IChunker
 
     /// <summary>
     /// Populates the specified array with the probabilities of the last decoded sequence.  The
-    /// sequence was determined based on the previous call to <code>chunk</code>.  The
+    /// sequence was determined based on the previous call to <see cref="Chunk"/>.  The
     /// specified array should be at least as large as the numbe of tokens in the previous
-    /// call to <code>chunk</code>.
+    /// call to <see cref="Chunk"/>.
     /// </summary>
     /// <param name="probs">An array used to hold the probabilities of the last decoded sequence.</param>
     public virtual void Probs(double[] probs)
     {
+        // NOpenNLP: check to ensure bestSequence is not null, to avoid NRE
+        if (bestSequence is null)
+        {
+            throw new InvalidOperationException($"You must call {nameof(Chunk)} before calling {nameof(Probs)}");
+        }
+
         bestSequence.GetProbs(probs);
     }
 
     /// <summary>
     /// Returns an array with the probabilities of the last decoded sequence.  The
-    /// sequence was determined based on the previous call to <code>chunk</code>.
+    /// sequence was determined based on the previous call to <see cref="Chunk"/>.
     /// </summary>
-    /// <returns>An array with the same number of probabilities as tokens were sent to <code>chunk</code>
+    /// <returns>An array with the same number of probabilities as tokens were sent to <see cref="Chunk"/>
     ///     when it was last called.</returns>
     public virtual double[] Probs()
     {
+        // NOpenNLP: check to ensure bestSequence is not null, to avoid NRE
+        if (bestSequence is null)
+        {
+            throw new InvalidOperationException($"You must call {nameof(Chunk)} before calling {nameof(Probs)}");
+        }
+
         return bestSequence.GetProbs();
     }
 

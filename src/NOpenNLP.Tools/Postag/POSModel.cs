@@ -93,10 +93,7 @@ public sealed class POSModel : BaseModel, ISerializableArtifact
     // {
     // }
 
-    protected override Type GetDefaultFactory()
-    {
-        return typeof(POSTaggerFactory);
-    }
+    protected override Type DefaultFactory => typeof(POSTaggerFactory);
 
     protected override void ValidateArtifactMap()
     {

@@ -117,10 +117,7 @@ public class SentenceModel : BaseModel
         return (SentenceDetectorFactory)this.toolFactory;
     }
 
-    protected override Type GetDefaultFactory()
-    {
-        return typeof(SentenceDetectorFactory);
-    }
+    protected override Type DefaultFactory => typeof(SentenceDetectorFactory);
 
     public virtual IMaxentModel GetMaxentModel()
     {

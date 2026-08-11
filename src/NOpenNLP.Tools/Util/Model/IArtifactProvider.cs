@@ -43,7 +43,7 @@ public interface IArtifactProvider
     /// model or x-unspecified if non was set.
     /// </summary>
     /// <returns>the language code of this model</returns>
-    string GetLanguage();
+    string Language { get; }
 
     /// <summary>
     /// Indicates if this provider was loaded from serialized. It is useful, for

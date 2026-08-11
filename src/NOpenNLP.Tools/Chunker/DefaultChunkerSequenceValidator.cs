@@ -25,7 +25,7 @@ namespace NOpenNLP.Tools.Chunker;
 public class DefaultChunkerSequenceValidator : ISequenceValidator<TokenTag>
 {
     // NOpenNLP-specific: made static
-    private static bool ValidOutcome(string outcome, string prevOutcome)
+    private static bool ValidOutcome(string outcome, string? prevOutcome)
     {
         if (outcome.StartsWith("I-", StringComparison.Ordinal))
         {
@@ -52,7 +52,7 @@ public class DefaultChunkerSequenceValidator : ISequenceValidator<TokenTag>
 
     protected virtual bool ValidOutcome(string outcome, string[] sequence)
     {
-        string prevOutcome = null;
+        string? prevOutcome = null;
         if (sequence.Length > 0)
         {
             prevOutcome = sequence[^1];

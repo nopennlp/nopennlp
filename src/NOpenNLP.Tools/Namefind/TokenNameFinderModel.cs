@@ -166,10 +166,7 @@ public class TokenNameFinderModel : BaseModel
         }
     }
 
-    protected override Type GetDefaultFactory()
-    {
-        return typeof(TokenNameFinderFactory);
-    }
+    protected override Type DefaultFactory => typeof(TokenNameFinderFactory);
 
     public virtual ISequenceCodec<string> GetSequenceCodec()
     {

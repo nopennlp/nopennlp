@@ -216,7 +216,7 @@ public class TokenizerFactory : BaseToolFactory
     {
         if (this.languageCode == null && this.artifactProvider != null)
         {
-            this.languageCode = this.artifactProvider.GetLanguage();
+            this.languageCode = this.artifactProvider.Language;
         }
 
         return this.languageCode;

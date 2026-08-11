@@ -127,7 +127,7 @@ public class TokenizerME : AbstractTokenizer
     /// </remarks>
     public TokenizerME(TokenizerModel model, Factory factory)
     {
-        string languageCode = model.GetLanguage();
+        string languageCode = model.Language;
         this.alphanumeric = factory.GetAlphanumeric(languageCode);
         this.cg = factory.CreateTokenContextGenerator(languageCode, GetAbbreviations(model.GetAbbreviations()));
         this.model = model.GetMaxentModel();

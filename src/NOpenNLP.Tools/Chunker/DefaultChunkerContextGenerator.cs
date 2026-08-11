@@ -42,7 +42,6 @@ public class DefaultChunkerContextGenerator : IChunkerContextGenerator
 
     public virtual string[] GetContext(int i, string[] toks, string[] tags, string[] preds)
     {
-
         // Words in a 5-word window
         string w_2, w_1, w0, w1, w2;
 
@@ -145,6 +144,7 @@ public class DefaultChunkerContextGenerator : IChunkerContextGenerator
             p_1 + w_1 + w0,
             p_1 + w0 + w1
         ];
+
         return features;
     }
 

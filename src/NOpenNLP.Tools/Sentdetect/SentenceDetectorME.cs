@@ -94,8 +94,8 @@ public class SentenceDetectorME : ISentenceDetector
         char[] customEOSCharacters = model.GetEosCharacters();
         if (customEOSCharacters == null)
         {
-            cgen = factory.CreateSentenceContextGenerator(model.GetLanguage(), GetAbbreviations(model.GetAbbreviations()));
-            scanner = factory.CreateEndOfSentenceScanner(model.GetLanguage());
+            cgen = factory.CreateSentenceContextGenerator(model.Language, GetAbbreviations(model.GetAbbreviations()));
+            scanner = factory.CreateEndOfSentenceScanner(model.Language);
         }
         else
         {

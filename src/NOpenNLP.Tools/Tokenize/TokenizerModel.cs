@@ -113,10 +113,7 @@ public sealed class TokenizerModel : BaseModel
         return (TokenizerFactory)this.toolFactory;
     }
 
-    protected override Type GetDefaultFactory()
-    {
-        return typeof(TokenizerFactory);
-    }
+    protected override Type DefaultFactory => typeof(TokenizerFactory);
 
     public IMaxentModel GetMaxentModel()
     {

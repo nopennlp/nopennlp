@@ -118,10 +118,7 @@ public class LemmatizerModel : BaseModel
         }
     }
 
-    protected override Type GetDefaultFactory()
-    {
-        return typeof(LemmatizerFactory);
-    }
+    protected override Type DefaultFactory => typeof(LemmatizerFactory);
 
     public virtual LemmatizerFactory GetFactory()
     {

@@ -84,66 +84,58 @@ public class ChunkerModel : BaseModel
     protected override void ValidateArtifactMap()
     {
         base.ValidateArtifactMap();
-        if (!(artifactMap[CHUNKER_MODEL_ENTRY_NAME] is AbstractModel))
+
+        if (artifactMap[CHUNKER_MODEL_ENTRY_NAME] is not AbstractModel)
         {
             throw new InvalidFormatException("IChunker model is incomplete!");
         }
 
-
         // Since 1.8.0 we changed the ChunkerFactory signature. This will check the if the model
         // declares a not default factory, and if yes, check if it was created before 1.8
-        if ((GetManifestProperty(FACTORY_NAME) != null && !GetManifestProperty(FACTORY_NAME).Equals("opennlp.tools.chunker.ChunkerFactory")) && this.GetVersion().GetMajor() <= 1 && this.GetVersion().GetMinor() < 8)
+        if (GetManifestProperty(FACTORY_NAME) != null
+            && !string.Equals(GetManifestProperty(FACTORY_NAME), "opennlp.tools.chunker.ChunkerFactory")
+            && Version.GetMajor() <= 1
+            && Version.GetMinor() < 8)
         {
-            throw new InvalidFormatException("The IChunker factory '" + GetManifestProperty(FACTORY_NAME) + "' is no longer compatible. Please update it to match the latest ChunkerFactory.");
+            throw new InvalidFormatException($"The IChunker factory '{GetManifestProperty(FACTORY_NAME)}' is no longer compatible. Please update it to match the latest ChunkerFactory.");
         }
     }
 
     /// <summary>
     /// </summary>
-    /// <remarks>Deprecated: Use getChunkerSequenceModel instead. This method will be removed soon.</remarks>
-    public virtual IMaxentModel GetChunkerModel()
-    {
-        if (artifactMap[CHUNKER_MODEL_ENTRY_NAME] is IMaxentModel)
-        {
-            return (IMaxentModel)artifactMap[CHUNKER_MODEL_ENTRY_NAME];
-        }
-        else
-        {
-            return null;
-        }
-    }
+    /// <remarks>NOpenNLP: This was <c>getChunkerModel()</c> in Java.</remarks>
+    [Obsolete("Use ChunkerSequenceModel instead. This property will be removed soon.")]
+    public virtual IMaxentModel? ChunkerModelValue
+        => artifactMap[CHUNKER_MODEL_ENTRY_NAME] as IMaxentModel;
 
-    public virtual ISequenceClassificationModel<TokenTag> GetChunkerSequenceModel()
+    public virtual ISequenceClassificationModel<TokenTag>? ChunkerSequenceModel
     {
-        Properties manifest = (Properties)artifactMap[MANIFEST_ENTRY];
-        if (artifactMap[CHUNKER_MODEL_ENTRY_NAME] is IMaxentModel)
+        get
         {
-            string beamSizeString = manifest.GetProperty(BeamSearch.BEAM_SIZE_PARAMETER);
-            int beamSize = ChunkerME.DEFAULT_BEAM_SIZE;
-            if (beamSizeString != null)
+            Properties manifest = (Properties)artifactMap[MANIFEST_ENTRY];
+            if (artifactMap[CHUNKER_MODEL_ENTRY_NAME] is IMaxentModel)
             {
-                beamSize = int.Parse(beamSizeString);
+                string? beamSizeString = manifest.GetProperty(BeamSearch.BEAM_SIZE_PARAMETER);
+                int beamSize = ChunkerME.DEFAULT_BEAM_SIZE;
+                if (beamSizeString != null)
+                {
+                    beamSize = int.Parse(beamSizeString);
+                }
+
+                return new BeamSearch<TokenTag>(beamSize, (IMaxentModel)artifactMap[CHUNKER_MODEL_ENTRY_NAME]);
             }
-
-            return new BeamSearch<TokenTag>(beamSize, (IMaxentModel)artifactMap[CHUNKER_MODEL_ENTRY_NAME]);
-        }
-        else if (artifactMap[CHUNKER_MODEL_ENTRY_NAME] is ISequenceClassificationModel<TokenTag>)
-        {
-            return (ISequenceClassificationModel<TokenTag>)artifactMap[CHUNKER_MODEL_ENTRY_NAME];
-        }
-        else
-        {
-            return null;
+            else if (artifactMap[CHUNKER_MODEL_ENTRY_NAME] is ISequenceClassificationModel<TokenTag>)
+            {
+                return (ISequenceClassificationModel<TokenTag>)artifactMap[CHUNKER_MODEL_ENTRY_NAME];
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 
-    protected override Type GetDefaultFactory()
-    {
-        return typeof(ChunkerFactory);
-    }
+    protected override Type DefaultFactory => typeof(ChunkerFactory);
 
-    public virtual ChunkerFactory GetFactory()
-    {
-        return (ChunkerFactory)this.toolFactory;
-    }
+    public virtual ChunkerFactory Factory => (ChunkerFactory)this.toolFactory;
 }

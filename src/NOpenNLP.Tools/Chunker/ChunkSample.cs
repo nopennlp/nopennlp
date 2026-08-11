@@ -72,34 +72,26 @@ public class ChunkSample
     /// <summary>
     /// Gets the training sentence
     /// </summary>
-    public virtual string[] GetSentence()
-    {
-        return [.. sentence];
-    }
+    public virtual string[] Sentence => [.. sentence];
 
     /// <summary>
     /// Gets the POS Tags for the sentence
     /// </summary>
-    public virtual string[] GetTags()
-    {
-        return [.. tags];
-    }
+    public virtual string[] Tags => [.. tags];
 
     /// <summary>
     /// Gets the Chunk tags in B-* I-* notation
     /// </summary>
-    public virtual string[] GetPreds()
-    {
-        return [.. preds];
-    }
+    public virtual string[] Preds => [.. preds];
 
     /// <summary>
     /// Gets the phrases as an array of spans
     /// </summary>
-    public virtual Span[] GetPhrasesAsSpanList()
-    {
-        return PhrasesAsSpanList(GetSentence(), GetTags(), GetPreds());
-    }
+    /// <remarks>
+    /// NOpenNLP: This was <c>getPhrasesAsSpanList()</c> in Java.
+    /// Swapped names with the static method below for .NET consistency.
+    /// </remarks>
+    public virtual Span[] PhrasesAsSpanList => GetPhrasesAsSpanList(Sentence, Tags, Preds);
 
     /// <summary>
     /// Static method to create arrays of spans of phrases
@@ -111,7 +103,11 @@ public class ChunkSample
     /// <param name="aPreds">
     ///          Chunk tags in B-* I-* notation</param>
     /// <returns>the phrases as an array of spans</returns>
-    public static Span[] PhrasesAsSpanList(string[] aSentence, string[] aTags, string[] aPreds)
+    /// <remarks>
+    /// NOpenNLP: This was <c>phrasesAsSpanList()</c> in Java.
+    /// Swapped names with the property above for .NET consistency.
+    /// </remarks>
+    public static Span[] GetPhrasesAsSpanList(string[] aSentence, string[] aTags, string[] aPreds)
     {
         ValidateArguments(aSentence.Length, aTags.Length, aPreds.Length);
 
@@ -178,7 +174,7 @@ public class ChunkSample
     /// <returns>a nice to read string representation of the chunk phases</returns>
     public virtual string NicePrint()
     {
-        Span[] spans = GetPhrasesAsSpanList();
+        Span[] spans = PhrasesAsSpanList;
         StringBuilder result = new StringBuilder(" ");
         for (int tokenIndex = 0; tokenIndex < sentence.Count; tokenIndex++)
         {
@@ -224,10 +220,10 @@ public class ChunkSample
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Arrays.GetHashCode(GetSentence()), Arrays.GetHashCode(GetTags()), Arrays.GetHashCode(GetPreds()));
+        return HashCode.Combine(Arrays.GetHashCode(Sentence), Arrays.GetHashCode(Tags), Arrays.GetHashCode(Preds));
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (this == obj)
         {
@@ -236,7 +232,9 @@ public class ChunkSample
 
         if (obj is ChunkSample sample)
         {
-            return Arrays.Equals(GetSentence(), sample.GetSentence()) && Arrays.Equals(GetTags(), sample.GetTags()) && Arrays.Equals(GetPreds(), sample.GetPreds());
+            return Arrays.Equals(Sentence, sample.Sentence)
+                   && Arrays.Equals(Tags, sample.Tags)
+                   && Arrays.Equals(Preds, sample.Preds);
         }
 
         return false;

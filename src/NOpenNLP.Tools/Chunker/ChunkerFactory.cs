@@ -34,11 +34,10 @@ public class ChunkerFactory : BaseToolFactory
     {
     }
 
-    public static ChunkerFactory Create(string subclassName)
+    public static ChunkerFactory Create(string? subclassName)
     {
         if (subclassName == null)
         {
-
             // will create the default factory
             return new ChunkerFactory();
         }
@@ -60,13 +59,7 @@ public class ChunkerFactory : BaseToolFactory
     {
     }
 
-    public virtual ISequenceValidator<TokenTag> GetSequenceValidator()
-    {
-        return new DefaultChunkerSequenceValidator();
-    }
+    public virtual ISequenceValidator<TokenTag> SequenceValidator => new DefaultChunkerSequenceValidator();
 
-    public virtual IChunkerContextGenerator GetContextGenerator()
-    {
-        return new DefaultChunkerContextGenerator();
-    }
+    public virtual IChunkerContextGenerator ContextGenerator => new DefaultChunkerContextGenerator();
 }

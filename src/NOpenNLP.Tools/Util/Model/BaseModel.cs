@@ -223,7 +223,7 @@ public abstract class BaseModel : IArtifactProvider
         if (factoryName == null)
         {
             // load the default factory
-            var factoryClass = GetDefaultFactory();
+            var factoryClass = DefaultFactory;
             if (factoryClass != null)
             {
                 this.toolFactory = BaseToolFactory.Create(factoryClass, this);
@@ -247,10 +247,7 @@ public abstract class BaseModel : IArtifactProvider
     /// BaseToolFactory sub-class.
     /// </summary>
     /// <returns>the default <see cref="BaseToolFactory"/> for the module, or null if none.</returns>
-    protected virtual Type? GetDefaultFactory()
-    {
-        return null;
-    }
+    protected virtual Type? DefaultFactory => null;
 
     /// <summary>
     /// Loads the artifact serializers.
@@ -499,20 +496,20 @@ public abstract class BaseModel : IArtifactProvider
     /// non was set.
     /// </summary>
     /// <returns>the language code of this model</returns>
-    public string GetLanguage()
-    {
-        return GetManifestProperty(LANGUAGE_PROPERTY);
-    }
+    public string Language => GetManifestProperty(LANGUAGE_PROPERTY);
 
     /// <summary>
     /// Retrieves the OpenNLP version which was used
     /// to create the model.
     /// </summary>
     /// <returns>the version</returns>
-    public Version GetVersion()
+    public Version Version
     {
-        string version = GetManifestProperty(VERSION_PROPERTY);
-        return Version.Parse(version);
+        get
+        {
+            string version = GetManifestProperty(VERSION_PROPERTY);
+            return Version.Parse(version);
+        }
     }
 
     // /// <summary>
