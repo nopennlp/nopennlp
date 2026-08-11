@@ -47,7 +47,7 @@ public class BioCodec : ISequenceCodec<string>
     {
         int start = -1;
         int end = -1;
-        IList<Span?> spans = new List<Span?>(c.Count);
+        IList<Span> spans = new List<Span>(c.Count);
         for (int li = 0; li < c.Count; li++)
         {
             string chunkTag = c[li];
@@ -78,7 +78,7 @@ public class BioCodec : ISequenceCodec<string>
 
         if (start != -1)
         {
-            spans.Add(new Span(start, end, ExtractNameType(c[c.Count - 1])));
+            spans.Add(new Span(start, end, ExtractNameType(c[^1])));
         }
 
         return [.. spans];
@@ -89,31 +89,30 @@ public class BioCodec : ISequenceCodec<string>
         string[] outcomes = new string[length];
         for (int i = 0; i < outcomes.Length; i++)
         {
-            outcomes[i] = BioCodec.OTHER;
+            outcomes[i] = OTHER;
         }
 
-        foreach (Span name in names)
+        foreach (var name in names)
         {
-            if (name.GetType() == null)
+            if (name.Type == null)
             {
-                outcomes[name.GetStart()] = "default" + "-" + BioCodec.START;
+                outcomes[name.Start] = "default" + "-" + START;
             }
             else
             {
-                outcomes[name.GetStart()] = name.GetType() + "-" + BioCodec.START;
+                outcomes[name.Start] = name.Type + "-" + START;
             }
 
-
             // now iterate from begin + 1 till end
-            for (int i = name.GetStart() + 1; i < name.GetEnd(); i++)
+            for (int i = name.Start + 1; i < name.End; i++)
             {
-                if (name.GetType() == null)
+                if (name.Type == null)
                 {
-                    outcomes[i] = "default" + "-" + BioCodec.CONTINUE;
+                    outcomes[i] = "default" + "-" + CONTINUE;
                 }
                 else
                 {
-                    outcomes[i] = name.GetType() + "-" + BioCodec.CONTINUE;
+                    outcomes[i] = name.Type + "-" + CONTINUE;
                 }
             }
         }
@@ -121,10 +120,7 @@ public class BioCodec : ISequenceCodec<string>
         return outcomes;
     }
 
-    public virtual ISequenceValidator<string> CreateSequenceValidator()
-    {
-        return new NameFinderSequenceValidator();
-    }
+    public virtual ISequenceValidator<string> CreateSequenceValidator() => new NameFinderSequenceValidator();
 
     public virtual bool AreOutcomesCompatible(string[] outcomes)
     {

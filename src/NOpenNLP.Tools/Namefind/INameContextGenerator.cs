@@ -32,6 +32,7 @@ public interface INameContextGenerator : IBeamSearchContextGenerator<string>
     /// </summary>
     /// <param name="generator">The feature generator to add.</param>
     void AddFeatureGenerator(IAdaptiveFeatureGenerator generator);
+
     /// <summary>
     /// Informs all the feature generators for a name finder that the specified tokens have
     /// been classified with the coorisponds set of specified outcomes.
@@ -39,6 +40,7 @@ public interface INameContextGenerator : IBeamSearchContextGenerator<string>
     /// <param name="tokens">The tokens of the sentence or other text unit which has been processed.</param>
     /// <param name="outcomes">The outcomes associated with the specified tokens.</param>
     void UpdateAdaptiveData(string[] tokens, string[] outcomes);
+
     /// <summary>
     /// Informs all the feature generators for a name finder that the context of the adaptive
     /// data (typically a document) is no longer valid.

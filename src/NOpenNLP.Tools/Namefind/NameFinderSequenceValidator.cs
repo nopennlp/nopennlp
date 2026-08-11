@@ -46,8 +46,8 @@ public class NameFinderSequenceValidator : ISequenceValidator<string>
             {
 
                 // if it is continue or start, we have to check if previous match was of the same type
-                string previousNameType = NameFinderME.ExtractNameType(outcomesSequence[li]);
-                string nameType = NameFinderME.ExtractNameType(outcome);
+                string? previousNameType = NameFinderME.ExtractNameType(outcomesSequence[li]);
+                string? nameType = NameFinderME.ExtractNameType(outcome);
                 if (previousNameType != null || nameType != null)
                 {
                     if (nameType != null)

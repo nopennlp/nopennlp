@@ -36,7 +36,7 @@ public class GenericModelSerializer : IArtifactSerializer<AbstractModel>
     //     ModelUtil.WriteModel(artifact, @out);
     // }
 
-    public static void Register(Dictionary<string, IArtifactSerializer> factories)
+    public static void Register(IDictionary<string, IArtifactSerializer> factories)
     {
         factories["model"] = new GenericModelSerializer();
     }

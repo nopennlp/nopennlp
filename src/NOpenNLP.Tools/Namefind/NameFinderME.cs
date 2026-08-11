@@ -37,7 +37,7 @@ public class NameFinderME : ITokenNameFinder
 
     public const int DEFAULT_BEAM_SIZE = 3;
 
-    private static readonly Regex typedOutcomePattern = new Regex("(.+)-\\w+", RegexOptions.Compiled);
+    private static readonly Regex typedOutcomePattern = new("(.+)-\\w+", RegexOptions.Compiled);
 
     public const string START = "start";
     public const string CONTINUE = "cont";
@@ -47,15 +47,15 @@ public class NameFinderME : ITokenNameFinder
     protected readonly ISequenceClassificationModel<string> model;
     protected readonly INameContextGenerator contextGenerator;
     private Sequence bestSequence;
-    private readonly AdditionalContextFeatureGenerator additionalContextFeatureGenerator = new AdditionalContextFeatureGenerator();
+    private readonly AdditionalContextFeatureGenerator additionalContextFeatureGenerator = new();
     private readonly ISequenceValidator<string> sequenceValidator;
 
     public NameFinderME(TokenNameFinderModel model)
     {
-        TokenNameFinderFactory factory = model.GetFactory();
+        TokenNameFinderFactory factory = model.Factory;
         seqCodec = factory.CreateSequenceCodec();
         sequenceValidator = seqCodec.CreateSequenceValidator();
-        this.model = model.GetNameFinderSequenceModel();
+        this.model = model.NameFinderSequenceModel;
         contextGenerator = factory.CreateContextGenerator();
 
         // TODO: We should deprecate this. And come up with a better solution!
@@ -64,18 +64,10 @@ public class NameFinderME : ITokenNameFinder
 
     private static IAdaptiveFeatureGenerator? CreateFeatureGenerator(byte[]? generatorDescriptor, Dictionary<string, object>? resources)
     {
-        IAdaptiveFeatureGenerator featureGenerator;
+        IAdaptiveFeatureGenerator? featureGenerator;
         if (generatorDescriptor != null)
         {
-            featureGenerator = GeneratorFactory.Create(new System.IO.MemoryStream(generatorDescriptor), (key) =>
-            {
-                if (resources != null)
-                {
-                    return resources[key];
-                }
-
-                return null;
-            });
+            featureGenerator = GeneratorFactory.Create(new System.IO.MemoryStream(generatorDescriptor), key => resources?[key]);
         }
         else
         {
@@ -85,10 +77,7 @@ public class NameFinderME : ITokenNameFinder
         return featureGenerator;
     }
 
-    public virtual Span[] Find(string[] tokens)
-    {
-        return Find(tokens, EMPTY);
-    }
+    public virtual Span[] Find(string[] tokens) => Find(tokens, EMPTY);
 
     /// <summary>
     /// Generates name tags for the given sequence, typically a sentence, returning
@@ -178,12 +167,12 @@ public class NameFinderME : ITokenNameFinder
         for (int si = 0; si < spans.Length; si++)
         {
             double p = 0;
-            for (int oi = spans[si].GetStart(); oi < spans[si].GetEnd(); oi++)
+            for (int oi = spans[si].Start; oi < spans[si].End; oi++)
             {
                 p += probs[oi];
             }
 
-            p /= spans[si].Length();
+            p /= spans[si].Length;
             sprobs[si] = p;
         }
 

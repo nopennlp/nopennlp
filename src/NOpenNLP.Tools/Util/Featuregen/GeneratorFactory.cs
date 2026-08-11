@@ -467,7 +467,7 @@ public class GeneratorFactory
     /// <param name="generatorElement"></param>
     /// <param name="resourceManager"></param>
     /// <returns></returns>
-    internal static IAdaptiveFeatureGenerator CreateGenerator(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
+    internal static IAdaptiveFeatureGenerator? CreateGenerator(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
     {
         string elementName = generatorElement.Name;
 
@@ -492,7 +492,7 @@ public class GeneratorFactory
                 }
             }
 
-            IAdaptiveFeatureGenerator featureGenerator = null;
+            IAdaptiveFeatureGenerator? featureGenerator = null;
             if (generators.Count == 1)
                 featureGenerator = generators[0];
             else if (generators.Count > 1)
@@ -629,7 +629,7 @@ public class GeneratorFactory
     /// <returns>created feature generators</returns>
     /// <exception cref="IOException">if an error occurs during reading from the descriptor
     ///     <see cref="System.IO.Stream"/></exception>
-    public static IAdaptiveFeatureGenerator Create(Stream xmlDescriptorIn, FeatureGeneratorResourceProvider resourceManager)
+    public static IAdaptiveFeatureGenerator? Create(Stream xmlDescriptorIn, FeatureGeneratorResourceProvider resourceManager)
     {
         XmlDocument xmlDescriptorDOM = CreateDOM(xmlDescriptorIn);
         XmlElement generatorElement = xmlDescriptorDOM.DocumentElement;

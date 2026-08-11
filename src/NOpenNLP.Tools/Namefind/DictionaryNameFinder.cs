@@ -77,7 +77,7 @@ public class DictionaryNameFinder : ITokenNameFinder
                 namesFound.Add(nameFound);
 
                 // skip over the found tokens for the next search
-                offsetFrom += nameFound.Length() - 1;
+                offsetFrom += nameFound.Length - 1;
             }
         }
 

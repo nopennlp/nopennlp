@@ -38,7 +38,7 @@ public class DictionarySerializer : IArtifactSerializer<NOpenNLP.Tools.Dictionar
     //     dictionary.Serialize(@out);
     // }
 
-    public static void Register(Dictionary<string, IArtifactSerializer> factories)
+    public static void Register(IDictionary<string, IArtifactSerializer> factories)
     {
         factories.Put("dictionary", new DictionarySerializer());
     }

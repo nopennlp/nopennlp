@@ -176,7 +176,7 @@ public class TokenizerME : AbstractTokenizer
         foreach (Span s in tokens)
         {
             // NOpenNLP: Java substring(begin, end) takes an end index; .NET takes a length.
-            string tok = d.Substring(s.GetStart(), s.GetEnd() - s.GetStart());
+            string tok = d.Substring(s.Start, s.End - s.Start);
 
             // Can't tokenize single characters
             if (tok.Length < 2)
@@ -191,9 +191,9 @@ public class TokenizerME : AbstractTokenizer
             }
             else
             {
-                int start = s.GetStart();
-                int end = s.GetEnd();
-                int origStart = s.GetStart();
+                int start = s.Start;
+                int end = s.End;
+                int origStart = s.Start;
                 double tokenProb = 1;
                 for (int j = origStart + 1; j < end; j++)
                 {

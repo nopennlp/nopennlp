@@ -53,8 +53,8 @@ public class TokenNameFinderModel : BaseModel
     public TokenNameFinderModel(string languageCode,
         ISequenceClassificationModel<string> nameFinderModel,
         byte[] generatorDescriptor,
-        Dictionary<string, object> resources,
-        Dictionary<string, string> manifestInfoEntries,
+        IDictionary<string, object> resources,
+        IDictionary<string, string> manifestInfoEntries,
         ISequenceCodec<string> seqCodec,
         TokenNameFinderFactory factory)
         : base(COMPONENT_NAME, languageCode, manifestInfoEntries, factory)
@@ -69,9 +69,9 @@ public class TokenNameFinderModel : BaseModel
     public TokenNameFinderModel(string languageCode,
         IMaxentModel nameFinderModel,
         int beamSize,
-        byte[] generatorDescriptor,
-        Dictionary<string, object> resources,
-        Dictionary<string, string> manifestInfoEntries,
+        byte[]? generatorDescriptor,
+        IDictionary<string, object> resources,
+        IDictionary<string, string> manifestInfoEntries,
         ISequenceCodec<string> seqCodec,
         TokenNameFinderFactory factory)
         : base(COMPONENT_NAME, languageCode, manifestInfoEntries, factory)
@@ -88,40 +88,51 @@ public class TokenNameFinderModel : BaseModel
     // TODO: Extend this one with beam size!
     public TokenNameFinderModel(string languageCode,
         IMaxentModel nameFinderModel,
-        byte[] generatorDescriptor,
-        Dictionary<string, object> resources,
-        Dictionary<string, string> manifestInfoEntries)
+        byte[]? generatorDescriptor,
+        IDictionary<string, object> resources,
+        IDictionary<string, string> manifestInfoEntries)
         : this(languageCode, nameFinderModel, NameFinderME.DEFAULT_BEAM_SIZE, generatorDescriptor, resources, manifestInfoEntries, new BioCodec(), new TokenNameFinderFactory())
     {
     }
 
-    public TokenNameFinderModel(string languageCode, IMaxentModel nameFinderModel, Dictionary<string, object> resources, Dictionary<string, string> manifestInfoEntries)
+    public TokenNameFinderModel(string languageCode,
+        IMaxentModel nameFinderModel,
+        IDictionary<string, object> resources,
+        IDictionary<string, string> manifestInfoEntries)
         : this(languageCode, nameFinderModel, null, resources, manifestInfoEntries)
     {
     }
 
-    public TokenNameFinderModel(Stream @in) : base(COMPONENT_NAME, @in)
+    public TokenNameFinderModel(Stream @in)
+        : base(COMPONENT_NAME, @in)
     {
     }
 
-    public TokenNameFinderModel(FileInfo modelFile) : base(COMPONENT_NAME, modelFile)
+    public TokenNameFinderModel(FileInfo modelFile)
+        : base(COMPONENT_NAME, modelFile)
     {
     }
 
-    public TokenNameFinderModel(string modelPath) : this(new FileInfo(modelPath))
+    public TokenNameFinderModel(string modelPath)
+        : this(new FileInfo(modelPath))
     {
     }
 
-    // public TokenNameFinderModel(URL modelURL) : base(COMPONENT_NAME, modelURL)
+    // public TokenNameFinderModel(URL modelURL)
+    //     : base(COMPONENT_NAME, modelURL)
     // {
     // }
 
-    private void Init(object nameFinderModel, byte[] generatorDescriptor, Dictionary<string, object> resources, Dictionary<string, string> manifestInfoEntries, ISequenceCodec<string> seqCodec)
+    private void Init(object nameFinderModel,
+        byte[]? generatorDescriptor,
+        IDictionary<string, object>? resources,
+        IDictionary<string, string> manifestInfoEntries,
+        ISequenceCodec<string> seqCodec)
     {
         Properties manifest = (Properties)artifactMap[MANIFEST_ENTRY];
         manifest.Put(SEQUENCE_CODEC_CLASS_NAME_PARAMETER, seqCodec.GetType().FullName);
         artifactMap.Put(MAXENT_MODEL_ENTRY_NAME, nameFinderModel);
-        if (generatorDescriptor != null && generatorDescriptor.Length > 0)
+        if (generatorDescriptor is { Length: > 0 })
             artifactMap.Put(GENERATOR_DESCRIPTOR_ENTRY_NAME, generatorDescriptor);
         if (resources != null)
         {
@@ -142,41 +153,34 @@ public class TokenNameFinderModel : BaseModel
         CheckArtifactMap();
     }
 
-    public virtual ISequenceClassificationModel<string> GetNameFinderSequenceModel()
+    public virtual ISequenceClassificationModel<string>? NameFinderSequenceModel
     {
-        Properties manifest = (Properties)artifactMap[MANIFEST_ENTRY];
-        if (artifactMap[MAXENT_MODEL_ENTRY_NAME] is IMaxentModel)
+        get
         {
-            string beamSizeString = manifest.GetProperty(BeamSearch.BEAM_SIZE_PARAMETER);
-            int beamSize = NameFinderME.DEFAULT_BEAM_SIZE;
-            if (beamSizeString != null)
+            Properties manifest = (Properties)artifactMap[MANIFEST_ENTRY];
+            if (artifactMap[MAXENT_MODEL_ENTRY_NAME] is IMaxentModel)
             {
-                beamSize = int.Parse(beamSizeString);
-            }
+                string? beamSizeString = manifest.GetProperty(BeamSearch.BEAM_SIZE_PARAMETER);
+                int beamSize = NameFinderME.DEFAULT_BEAM_SIZE;
+                if (beamSizeString != null)
+                {
+                    beamSize = int.Parse(beamSizeString);
+                }
 
-            return new BeamSearch<string>(beamSize, (IMaxentModel)artifactMap[MAXENT_MODEL_ENTRY_NAME]);
-        }
-        else if (artifactMap[MAXENT_MODEL_ENTRY_NAME] is ISequenceClassificationModel<string>)
-        {
-            return (ISequenceClassificationModel<string>)artifactMap[MAXENT_MODEL_ENTRY_NAME];
-        }
-        else
-        {
-            return null;
+                return new BeamSearch<string>(beamSize, (IMaxentModel)artifactMap[MAXENT_MODEL_ENTRY_NAME]);
+            }
+            else
+            {
+                return artifactMap[MAXENT_MODEL_ENTRY_NAME] as ISequenceClassificationModel<string>;
+            }
         }
     }
 
     protected override Type DefaultFactory => typeof(TokenNameFinderFactory);
 
-    public virtual ISequenceCodec<string> GetSequenceCodec()
-    {
-        return this.GetFactory().GetSequenceCodec();
-    }
+    public virtual ISequenceCodec<string> SequenceCodec => Factory.SequenceCodec;
 
-    public virtual TokenNameFinderFactory GetFactory()
-    {
-        return (TokenNameFinderFactory)this.toolFactory;
-    }
+    public virtual TokenNameFinderFactory Factory => (TokenNameFinderFactory)toolFactory;
 
     public override void CreateArtifactSerializers(IDictionary<string, IArtifactSerializer> serializers)
     {
@@ -193,7 +197,7 @@ public class TokenNameFinderModel : BaseModel
     /// is 'wordcluster', which is the key used to add the serializer to the map.
     /// </summary>
     /// <returns>the map containing the added serializers</returns>
-    public static Dictionary<string, IArtifactSerializer> CreateArtifactSerializers()
+    public new static IDictionary<string, IArtifactSerializer> CreateArtifactSerializers()
     {
 
         // TODO: Not so nice, because code cannot really be reused by the other create serializer method
@@ -202,7 +206,7 @@ public class TokenNameFinderModel : BaseModel
         //
         //       The XML feature generator factory should provide these mappings.
         //       Usually the feature generators should know what type of resource they expect.
-        Dictionary<string, IArtifactSerializer> serializers = BaseModel.CreateArtifactSerializers();
+        var serializers = BaseModel.CreateArtifactSerializers();
         serializers.Put("featuregen", new ByteArraySerializer());
         serializers.Put("wordcluster", new WordClusterDictionary.WordClusterDictionarySerializer());
         serializers.Put("brownclustertoken", new BrownCluster.BrownClusterSerializer());
@@ -214,18 +218,20 @@ public class TokenNameFinderModel : BaseModel
     private bool IsModelValid(IMaxentModel model)
     {
         string[] outcomes = new string[model.NumOutcomes];
+
         for (int i = 0; i < model.NumOutcomes; i++)
         {
             outcomes[i] = model.GetOutcome(i);
         }
 
-        return GetFactory().CreateSequenceCodec().AreOutcomesCompatible(outcomes);
+        return Factory.CreateSequenceCodec().AreOutcomesCompatible(outcomes);
     }
 
     protected override void ValidateArtifactMap()
     {
         base.ValidateArtifactMap();
-        if (!(artifactMap[MAXENT_MODEL_ENTRY_NAME] is IMaxentModel) && !(artifactMap[MAXENT_MODEL_ENTRY_NAME] is ISequenceClassificationModel<string>))
+
+        if (artifactMap[MAXENT_MODEL_ENTRY_NAME] is not IMaxentModel and not ISequenceClassificationModel<string>)
         {
             throw new InvalidFormatException("Token Name Finder model is incomplete!");
         }

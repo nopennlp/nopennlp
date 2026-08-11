@@ -31,14 +31,15 @@ public class Span : IComparable<Span>
     private readonly int start;
     private readonly int end;
     private readonly double prob; //default is 0
-    private readonly string type;
+    private readonly string? type;
+
     /// <summary>
     /// Initializes a new Span Object. Sets the prob to 0 as default.
     /// </summary>
     /// <param name="s">start of span.</param>
     /// <param name="e">end of span, which is +1 more than the last element in the span.</param>
     /// <param name="type">the type of the span</param>
-    public Span(int s, int e, string type) : this(s, e, type, 0)
+    public Span(int s, int e, string? type) : this(s, e, type, 0)
     {
     }
 
@@ -49,7 +50,7 @@ public class Span : IComparable<Span>
     /// <param name="e">end of span, which is +1 more than the last element in the span.</param>
     /// <param name="type">the type of the span</param>
     /// <param name="prob">probability of span.</param>
-    public Span(int s, int e, string type, double prob)
+    public Span(int s, int e, string? type, double prob)
     {
         if (s < 0)
         {
@@ -96,7 +97,7 @@ public class Span : IComparable<Span>
     /// </summary>
     /// <param name="span"></param>
     /// <param name="offset"></param>
-    public Span(Span span, int offset) : this(span.start + offset, span.end + offset, span.GetType(), span.GetProb())
+    public Span(Span span, int offset) : this(span.start + offset, span.end + offset, span.Type, span.Prob)
     {
     }
 
@@ -105,7 +106,7 @@ public class Span : IComparable<Span>
     /// </summary>
     /// <param name="span">the span that has no prob or the prob is incorrect and a new Span must be generated</param>
     /// <param name="prob">the probability of the span</param>
-    public Span(Span span, double prob) : this(span.start, span.end, span.GetType(), prob)
+    public Span(Span span, double prob) : this(span.start, span.end, span.Type, prob)
     {
     }
 
@@ -113,10 +114,7 @@ public class Span : IComparable<Span>
     /// Return the start of a span.
     /// </summary>
     /// <returns>the start of a span.</returns>
-    public virtual int GetStart()
-    {
-        return start;
-    }
+    public virtual int Start => start;
 
     /// <summary>
     /// Return the end of a span.
@@ -125,28 +123,19 @@ public class Span : IComparable<Span>
     /// text, or the first element past the end of the span.
     /// </summary>
     /// <returns>the end of a span.</returns>
-    public virtual int GetEnd()
-    {
-        return end;
-    }
+    public virtual int End => end;
 
     /// <summary>
     /// Retrieves the type of the span.
     /// </summary>
     /// <returns>the type or null if not set</returns>
-    public virtual string GetType()
-    {
-        return type;
-    }
+    public virtual string? Type => type;
 
     /// <summary>
     /// Returns the length of this span.
     /// </summary>
     /// <returns>the length of the span.</returns>
-    public virtual int Length()
-    {
-        return end - start;
-    }
+    public virtual int Length => end - start;
 
     /// <summary>
     /// Returns true if the specified span is contained by this span. Identical
@@ -156,7 +145,7 @@ public class Span : IComparable<Span>
     /// <returns>true is the specified span is contained by this span; false otherwise.</returns>
     public virtual bool Contains(Span s)
     {
-        return start <= s.GetStart() && s.GetEnd() <= end;
+        return start <= s.Start && s.End <= end;
     }
 
     /// <summary>
@@ -179,7 +168,7 @@ public class Span : IComparable<Span>
     ///     in this span; false otherwise</returns>
     public virtual bool StartsWith(Span s)
     {
-        return GetStart() == s.GetStart() && Contains(s);
+        return Start == s.Start && Contains(s);
     }
 
     /// <summary>
@@ -189,10 +178,10 @@ public class Span : IComparable<Span>
     /// <returns>true is the spans overlap; false otherwise.</returns>
     public virtual bool Intersects(Span s)
     {
-        int sstart = s.GetStart();
+        int sstart = s.Start;
 
         //either s's start is in this or this' start is in s
-        return this.Contains(s) || s.Contains(this) || GetStart() <= sstart && sstart < GetEnd() || sstart <= GetStart() && GetStart() < s.GetEnd();
+        return this.Contains(s) || s.Contains(this) || Start <= sstart && sstart < End || sstart <= Start && Start < s.End;
     }
 
     /// <summary>
@@ -203,10 +192,10 @@ public class Span : IComparable<Span>
     ///     non-overlapping section; false otherwise.</returns>
     public virtual bool Crosses(Span s)
     {
-        int sstart = s.GetStart();
+        int sstart = s.Start;
 
         //either s's start is in this or this' start is in s
-        return !this.Contains(s) && !s.Contains(this) && (GetStart() <= sstart && sstart < GetEnd() || sstart <= GetStart() && GetStart() < s.GetEnd());
+        return !this.Contains(s) && !s.Contains(this) && (Start <= sstart && sstart < End || sstart <= Start && Start < s.End);
     }
 
     /// <summary>
@@ -216,14 +205,14 @@ public class Span : IComparable<Span>
     /// <returns>the substring covered by the current span</returns>
     public virtual ICharSequence GetCoveredText(ICharSequence text)
     {
-        if (GetEnd() > text.Length)
+        if (End > text.Length)
         {
             throw new ArgumentException("The span " + ToString() + " is outside the given text which has length " + text.Length + "!");
         }
 
         // NOpenNLP: Subsequence takes (startIndex, length) here, whereas Java's
         // subSequence takes (begin, end).
-        return text.Subsequence(GetStart(), GetEnd() - GetStart());
+        return text.Subsequence(Start, End - Start);
     }
 
     /// <summary>
@@ -233,29 +222,29 @@ public class Span : IComparable<Span>
     /// <returns>the trimmed span or the same object if already trimmed</returns>
     public virtual Span Trim(ICharSequence text)
     {
-        int newStartOffset = GetStart();
-        for (int i = GetStart(); i < GetEnd() && char.IsWhiteSpace(text[i]); i++)
+        int newStartOffset = Start;
+        for (int i = Start; i < End && char.IsWhiteSpace(text[i]); i++)
         {
             newStartOffset++;
         }
 
-        int newEndOffset = GetEnd();
-        for (int i = GetEnd(); i > GetStart() && char.IsWhiteSpace(text[i - 1]); i--)
+        int newEndOffset = End;
+        for (int i = End; i > Start && char.IsWhiteSpace(text[i - 1]); i--)
         {
             newEndOffset--;
         }
 
-        if (newStartOffset == GetStart() && newEndOffset == GetEnd())
+        if (newStartOffset == Start && newEndOffset == End)
         {
             return this;
         }
         else if (newStartOffset > newEndOffset)
         {
-            return new Span(GetStart(), GetStart(), GetType());
+            return new Span(Start, Start, Type);
         }
         else
         {
-            return new Span(newStartOffset, newEndOffset, GetType());
+            return new Span(newStartOffset, newEndOffset, Type);
         }
     }
 
@@ -264,35 +253,33 @@ public class Span : IComparable<Span>
     /// </summary>
     public virtual int CompareTo(Span s)
     {
-        if (GetStart() < s.GetStart())
+        if (Start < s.Start)
         {
             return -1;
         }
-        else if (GetStart() == s.GetStart())
+        else if (Start == s.Start)
         {
-            if (GetEnd() > s.GetEnd())
+            if (End > s.End)
             {
                 return -1;
             }
-            else if (GetEnd() < s.GetEnd())
+            else if (End < s.End)
             {
                 return 1;
             }
             else
             {
-
                 // compare the type
-                if (GetType() == null && s.GetType() == null)
+                if (Type == null && s.Type == null)
                 {
                     return 0;
                 }
-                else if (GetType() != null && s.GetType() != null)
+                else if (Type != null && s.Type != null)
                 {
-
                     // use type lexicography order
-                    return GetType().CompareTo(s.GetType());
+                    return string.Compare(Type, s.Type, StringComparison.Ordinal);
                 }
-                else if (GetType() != null)
+                else if (Type != null)
                 {
                     return -1;
                 }
@@ -309,25 +296,21 @@ public class Span : IComparable<Span>
     /// <summary>
     /// Generates a hash code of the current span.
     /// </summary>
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(GetStart(), GetEnd(), GetType());
-    }
+    public override int GetHashCode() => HashCode.Combine(Start, End, Type);
 
     /// <summary>
     /// Checks if the specified span is equal to the current span.
     /// </summary>
-    public override bool Equals(object o)
+    public override bool Equals(object? o)
     {
         if (o == this)
         {
             return true;
         }
 
-        if (o is Span)
+        if (o is Span s)
         {
-            Span s = (Span)o;
-            return GetStart() == s.GetStart() && GetEnd() == s.GetEnd() && Equals(GetType(), s.GetType());
+            return Start == s.Start && End == s.End && Equals(Type, s.Type);
         }
 
         return false;
@@ -340,14 +323,14 @@ public class Span : IComparable<Span>
     {
         StringBuilder toStringBuffer = new StringBuilder(15);
         toStringBuffer.Append("[");
-        toStringBuffer.Append(GetStart());
+        toStringBuffer.Append(Start);
         toStringBuffer.Append("..");
-        toStringBuffer.Append(GetEnd());
+        toStringBuffer.Append(End);
         toStringBuffer.Append(")");
-        if (GetType() != null)
+        if (Type != null)
         {
             toStringBuffer.Append(" ");
-            toStringBuffer.Append(GetType());
+            toStringBuffer.Append(Type);
         }
 
         return toStringBuffer.ToString();
@@ -377,7 +360,7 @@ public class Span : IComparable<Span>
         for (int si = 0, sl = spans.Length; si < sl; si++)
         {
             cb.Length = 0;
-            for (int ti = spans[si].GetStart(); ti < spans[si].GetEnd(); ti++)
+            for (int ti = spans[si].Start; ti < spans[si].End; ti++)
             {
                 cb.Append(tokens[ti]).Append(" ");
             }
@@ -388,8 +371,5 @@ public class Span : IComparable<Span>
         return chunks;
     }
 
-    public virtual double GetProb()
-    {
-        return prob;
-    }
+    public virtual double Prob => prob;
 }

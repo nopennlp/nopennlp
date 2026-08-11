@@ -51,7 +51,7 @@ public abstract class BaseModel : IArtifactProvider
     private const string SERIALIZER_CLASS_NAME_PREFIX = "serializer-class-";
     private readonly JCG.Dictionary<string, IArtifactSerializer> artifactSerializers = new();
     protected readonly IDictionary<string, object> artifactMap = new Dictionary<string, object>();
-    public BaseToolFactory? toolFactory;
+    public BaseToolFactory toolFactory;
     private readonly string componentName;
     private bool subclassSerializersInitiated /* = false */;
     private bool finishedLoadingArtifacts /* = false */;
@@ -78,7 +78,7 @@ public abstract class BaseModel : IArtifactProvider
     ///          additional information in the manifest</param>
     /// <param name="factory">
     ///          the factory</param>
-    public BaseModel(string componentName, string languageCode, IDictionary<string, string>? manifestInfoEntries, BaseToolFactory? factory)
+    protected BaseModel(string componentName, string languageCode, IDictionary<string, string>? manifestInfoEntries, BaseToolFactory? factory)
         : this(componentName, false)
     {
         // NOpenNLP: ArgumentException.ThrowIfNullOrEmpty is net7.0+.
@@ -149,18 +149,21 @@ public abstract class BaseModel : IArtifactProvider
     /// <param name="componentName">the component name</param>
     /// <param name="in">the input stream containing the model</param>
     /// <exception cref="IOException"></exception>
-    protected BaseModel(string componentName, Stream @in) : this(componentName, true)
+    protected BaseModel(string componentName, Stream @in)
+        : this(componentName, true)
     {
         LoadModel(@in);
     }
 
-    protected BaseModel(string componentName, FileInfo modelFile) : this(componentName, true)
+    protected BaseModel(string componentName, FileInfo modelFile)
+        : this(componentName, true)
     {
         using Stream @in = modelFile.OpenRead();
         LoadModel(@in);
     }
-    //
-    // protected BaseModel(string componentName, Uri modelURL) : this(componentName, true)
+
+    // protected BaseModel(string componentName, Uri modelURL)
+    //     : this(componentName, true)
     // {
     //     using (InputStream in = new BufferedInputStream(modelURL.OpenStream()))
     //     {
@@ -323,9 +326,9 @@ public abstract class BaseModel : IArtifactProvider
         }
     }
 
-    public static Dictionary<string, IArtifactSerializer> CreateArtifactSerializers()
+    public static IDictionary<string, IArtifactSerializer> CreateArtifactSerializers()
     {
-        Dictionary<string, IArtifactSerializer> serializers = new Dictionary<string, IArtifactSerializer>();
+        JCG.Dictionary<string, IArtifactSerializer> serializers = new();
         GenericModelSerializer.Register(serializers);
         PropertiesSerializer.Register(serializers);
         DictionarySerializer.Register(serializers);

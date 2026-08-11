@@ -38,11 +38,12 @@ namespace NOpenNLP.Tools.Util;
 /// </summary>
 public abstract class BaseToolFactory
 {
-    protected IArtifactProvider artifactProvider;
+    protected IArtifactProvider? artifactProvider;
+
     /// <summary>
     /// All sub-classes should have an empty constructor
     /// </summary>
-    public BaseToolFactory()
+    protected BaseToolFactory()
     {
     }
 

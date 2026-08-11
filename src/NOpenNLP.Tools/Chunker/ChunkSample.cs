@@ -180,12 +180,12 @@ public class ChunkSample
         {
             foreach (Span span in spans)
             {
-                if (span.GetStart() == tokenIndex)
+                if (span.Start == tokenIndex)
                 {
-                    result.Append("[").Append(span.GetType()).Append(" ");
+                    result.Append("[").Append(span.Type).Append(" ");
                 }
 
-                if (span.GetEnd() == tokenIndex)
+                if (span.End == tokenIndex)
                 {
                     result.Append("]").Append(' ');
                 }
@@ -198,7 +198,7 @@ public class ChunkSample
             result.Length = result.Length - 1;
         foreach (Span span in spans)
         {
-            if (span.GetEnd() == sentence.Count)
+            if (span.End == sentence.Count)
             {
                 result.Append(']');
             }

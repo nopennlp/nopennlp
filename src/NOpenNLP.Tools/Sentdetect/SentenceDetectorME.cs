@@ -254,7 +254,7 @@ public class SentenceDetectorME : ISentenceDetector
             // A span might contain only white spaces, in this case the length of
             // the span will be zero after trimming and should be ignored.
             Span span = new Span(start, starts[si]).Trim(s.AsCharSequence());
-            if (span.Length() > 0)
+            if (span.Length > 0)
             {
                 spans[si] = span;
             }
@@ -267,7 +267,7 @@ public class SentenceDetectorME : ISentenceDetector
         if (leftover)
         {
             Span span = new Span(starts[starts.Length - 1], s.Length).Trim(s.AsCharSequence());
-            if (span.Length() > 0)
+            if (span.Length > 0)
             {
                 spans[spans.Length - 1] = span;
                 sentProbs.Add(1);

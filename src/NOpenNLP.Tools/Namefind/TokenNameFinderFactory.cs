@@ -34,8 +34,8 @@ namespace NOpenNLP.Tools.Namefind;
 // That only works if that's the central class used for training/runtime
 public class TokenNameFinderFactory : BaseToolFactory
 {
-    private byte[] featureGeneratorBytes;
-    private Dictionary<string, object> resources;
+    private byte[]? featureGeneratorBytes;
+    private IDictionary<string, object>? resources;
     private ISequenceCodec<string> seqCodec;
 
     /// <summary>
@@ -47,12 +47,12 @@ public class TokenNameFinderFactory : BaseToolFactory
         this.seqCodec = new BioCodec();
     }
 
-    public TokenNameFinderFactory(byte[] featureGeneratorBytes, Dictionary<string, object> resources, ISequenceCodec<string> seqCodec)
+    public TokenNameFinderFactory(byte[] featureGeneratorBytes, IDictionary<string, object> resources, ISequenceCodec<string> seqCodec)
     {
         Init(featureGeneratorBytes, resources, seqCodec);
     }
 
-    public virtual void Init(byte[] featureGeneratorBytes, Dictionary<string, object> resources, ISequenceCodec<string> seqCodec)
+    public virtual void Init(byte[] featureGeneratorBytes, IDictionary<string, object> resources, ISequenceCodec<string> seqCodec)
     {
         this.featureGeneratorBytes = featureGeneratorBytes;
         this.resources = resources;
@@ -86,20 +86,11 @@ public class TokenNameFinderFactory : BaseToolFactory
         return bytes.ToArray();
     }
 
-    public virtual ISequenceCodec<string> GetSequenceCodec()
-    {
-        return seqCodec;
-    }
+    public virtual ISequenceCodec<string> SequenceCodec => seqCodec;
 
-    protected virtual Dictionary<string, object> GetResources()
-    {
-        return resources;
-    }
+    protected virtual IDictionary<string, object>? Resources => resources;
 
-    protected virtual byte[] GetFeatureGenerator()
-    {
-        return featureGeneratorBytes;
-    }
+    protected virtual byte[]? FeatureGenerator => featureGeneratorBytes;
 
     public static TokenNameFinderFactory Create(string? subclassName, byte[] featureGeneratorBytes, Dictionary<string, object> resources, ISequenceCodec<string> seqCodec)
     {
@@ -147,10 +138,16 @@ public class TokenNameFinderFactory : BaseToolFactory
 
     public virtual INameContextGenerator CreateContextGenerator()
     {
-        IAdaptiveFeatureGenerator featureGenerator = CreateFeatureGenerators();
+        IAdaptiveFeatureGenerator? featureGenerator = CreateFeatureGenerators();
         if (featureGenerator == null)
         {
-            featureGenerator = new CachedFeatureGenerator(new WindowFeatureGenerator(new TokenFeatureGenerator(), 2, 2), new WindowFeatureGenerator(new TokenClassFeatureGenerator(true), 2, 2), new OutcomePriorFeatureGenerator(), new PreviousMapFeatureGenerator(), new BigramNameFeatureGenerator(), new SentenceFeatureGenerator(true, false));
+            featureGenerator = new CachedFeatureGenerator(
+                new WindowFeatureGenerator(new TokenFeatureGenerator(), 2, 2),
+                new WindowFeatureGenerator(new TokenClassFeatureGenerator(true), 2, 2),
+                new OutcomePriorFeatureGenerator(),
+                new PreviousMapFeatureGenerator(),
+                new BigramNameFeatureGenerator(),
+                new SentenceFeatureGenerator(true, false));
         }
 
         return new DefaultNameContextGenerator(featureGenerator);
@@ -164,7 +161,7 @@ public class TokenNameFinderFactory : BaseToolFactory
     /// The generators are created on every call to this method.
     /// </summary>
     /// <returns>the feature generator or null if there is no descriptor in the model</returns>
-    public virtual IAdaptiveFeatureGenerator CreateFeatureGenerators()
+    public virtual IAdaptiveFeatureGenerator? CreateFeatureGenerators()
     {
         if (featureGeneratorBytes == null && artifactProvider != null)
         {
@@ -177,10 +174,10 @@ public class TokenNameFinderFactory : BaseToolFactory
         }
 
         var descriptorIn = new MemoryStream(featureGeneratorBytes);
-        IAdaptiveFeatureGenerator generator;
+        IAdaptiveFeatureGenerator? generator;
         try
         {
-            generator = GeneratorFactory.Create(descriptorIn, (key) =>
+            generator = GeneratorFactory.Create(descriptorIn, key =>
             {
                 if (artifactProvider != null)
                 {
@@ -188,7 +185,7 @@ public class TokenNameFinderFactory : BaseToolFactory
                 }
                 else
                 {
-                    return resources[key];
+                    return resources?[key];
                 }
             });
         }
@@ -213,7 +210,7 @@ public class TokenNameFinderFactory : BaseToolFactory
         return generator;
     }
 
-    public static ISequenceCodec<string> InstantiateSequenceCodec(string sequenceCodecImplName)
+    public static ISequenceCodec<string> InstantiateSequenceCodec(string? sequenceCodecImplName)
     {
         if (sequenceCodecImplName != null)
         {
@@ -221,7 +218,6 @@ public class TokenNameFinderFactory : BaseToolFactory
         }
         else
         {
-
             // If nothing is specified return old default!
             return new BioCodec();
         }

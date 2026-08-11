@@ -38,7 +38,7 @@ internal class PropertiesSerializer : IArtifactSerializer<Properties>
     //     properties.Store(@out, "");
     // }
 
-    public static void Register(Dictionary<string, IArtifactSerializer> factories)
+    public static void Register(IDictionary<string, IArtifactSerializer> factories)
     {
         factories.Put("properties", new PropertiesSerializer());
     }

@@ -100,14 +100,13 @@ public class DefaultNameContextGenerator : INameContextGenerator
     ///              Only indices less than <paramref name="index"/> will be examined.</param>
     /// <param name="additionalContext">Addition features which may be based on a context outside of the sentence.</param>
     /// <returns>the context for finding names at the specified index.</returns>
-    public virtual string[] GetContext(int index, string[] tokens, string[] preds, object[] additionalContext)
+    public virtual string[] GetContext(int index, string[] tokens, string[]? preds, object[] additionalContext)
     {
         IList<string> features = new List<string>();
         foreach (var featureGenerator in featureGenerators)
         {
             featureGenerator.CreateFeatures(features, tokens, index, preds);
         }
-
 
         //previous outcome features
         string po = NameFinderME.OTHER;
