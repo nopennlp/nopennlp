@@ -109,8 +109,5 @@ public class BrownCluster : ISerializableArtifact
     //     writer.Flush();
     // }
 
-    public virtual Type GetArtifactSerializerClass()
-    {
-        return typeof(BrownClusterSerializer);
-    }
+    public virtual Type ArtifactSerializerClass => typeof(BrownClusterSerializer);
 }

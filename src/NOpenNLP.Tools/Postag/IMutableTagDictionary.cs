@@ -37,7 +37,7 @@ public interface IMutableTagDictionary : ITagDictionary
     ///          tags to be associated with the specified word</param>
     /// <returns>the previous tags associated with the word, or null if there was no
     ///         mapping for word.</returns>
-    string[] Put(string word, params string[] tags);
+    string[]? Put(string word, params string[] tags);
 
     /// <summary>
     /// Whether if the dictionary is case sensitive or not
@@ -45,5 +45,5 @@ public interface IMutableTagDictionary : ITagDictionary
     /// <returns>true if the dictionary is case sensitive</returns>
     // TODO: move to ITagDictionary, can't do it now because of backward
     // compatibility.
-    bool IsCaseSensitive();
+    bool IsCaseSensitive { get; }
 }

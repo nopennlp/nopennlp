@@ -23,6 +23,10 @@ using NOpenNLP.Tools.Ml.Model;
 using NOpenNLP.Tools.Util;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+
+// disable obsolete warnings
+#pragma warning disable CS0618
 
 namespace NOpenNLP.Tools.Postag;
 
@@ -44,7 +48,7 @@ public class POSTaggerME : IPOSTagger
     /// Tag dictionary used for restricting words to a fixed set of tags.
     /// </summary>
     protected ITagDictionary tagDictionary;
-    protected NOpenNLP.Tools.Dictionary.Dictionary ngramDictionary;
+    protected NOpenNLP.Tools.Dictionary.Dictionary? ngramDictionary;
     /// <summary>
     /// Says whether a filter should be used to check whether a tag assignment
     /// is to a word outside of a closed class.
@@ -54,7 +58,7 @@ public class POSTaggerME : IPOSTagger
     /// The size of the beam to be used in determining the best sequence of pos tags.
     /// </summary>
     protected readonly int size;
-    private Sequence bestSequence;
+    private Sequence? bestSequence;
     private readonly ISequenceClassificationModel<string> model;
     private readonly ISequenceValidator<string> sequenceValidator;
 
@@ -64,9 +68,9 @@ public class POSTaggerME : IPOSTagger
     /// <param name="model"></param>
     public POSTaggerME(POSModel model)
     {
-        POSTaggerFactory factory = model.GetFactory();
+        POSTaggerFactory factory = model.Factory;
         int beamSize = POSTaggerME.DEFAULT_BEAM_SIZE;
-        string beamSizeString = model.GetManifestProperty(BeamSearch.BEAM_SIZE_PARAMETER);
+        string? beamSizeString = model.GetManifestProperty(BeamSearch.BEAM_SIZE_PARAMETER);
         if (beamSizeString != null)
         {
             beamSize = int.Parse(beamSizeString);
@@ -77,13 +81,14 @@ public class POSTaggerME : IPOSTagger
         tagDictionary = factory.GetTagDictionary();
         size = beamSize;
         sequenceValidator = factory.GetSequenceValidator();
-        if (model.GetPosSequenceModel() != null)
+        if (model.PosSequenceModel is { } posSequenceModel)
         {
-            this.model = model.GetPosSequenceModel();
+            this.model = posSequenceModel;
         }
         else
         {
-            this.model = new BeamSearch<string>(beamSize, model.GetPosModel(), 0);
+            Debug.Assert(model.PosModel is not null);
+            this.model = new BeamSearch<string>(beamSize, model.PosModel, 0);
         }
     }
 
@@ -99,9 +104,9 @@ public class POSTaggerME : IPOSTagger
         return this.Tag(sentence, null);
     }
 
-    public virtual string[] Tag(string[] sentence, object[] additionaContext)
+    public virtual string[] Tag(string[] sentence, object[]? additionalContext)
     {
-        bestSequence = model.BestSequence(sentence, additionaContext, contextGen, sequenceValidator);
+        bestSequence = model.BestSequence(sentence, additionalContext, contextGen, sequenceValidator);
         IList<string> t = bestSequence.GetOutcomes();
         return [.. t];
     }
@@ -130,7 +135,7 @@ public class POSTaggerME : IPOSTagger
         return this.TopKSequences(sentence, null);
     }
 
-    public virtual Sequence[] TopKSequences(string[] sentence, object[] additionaContext)
+    public virtual Sequence[] TopKSequences(string[] sentence, object[]? additionaContext)
     {
         return model.BestSequences(size, sentence, additionaContext, contextGen, sequenceValidator);
     }
@@ -141,6 +146,11 @@ public class POSTaggerME : IPOSTagger
     /// <param name="probs">An array to put the probabilities into.</param>
     public virtual void Probs(double[] probs)
     {
+        // NOpenNLP: check to ensure bestSequence is not null, to avoid NRE
+        if (bestSequence is null)
+        {
+            throw new InvalidOperationException($"You must call {nameof(Tag)} before calling {nameof(Probs)}");
+        }
         bestSequence.GetProbs(probs);
     }
 
@@ -150,6 +160,12 @@ public class POSTaggerME : IPOSTagger
     /// <returns>an array with the probabilities for each tag of the last tagged sentence.</returns>
     public virtual double[] Probs()
     {
+        // NOpenNLP: check to ensure bestSequence is not null, to avoid NRE
+        if (bestSequence is null)
+        {
+            throw new InvalidOperationException($"You must call {nameof(Tag)} before calling {nameof(Probs)}");
+        }
+
         return bestSequence.GetProbs();
     }
 
@@ -158,11 +174,10 @@ public class POSTaggerME : IPOSTagger
         return GetOrderedTags(words, tags, index, null);
     }
 
-    public virtual string[] GetOrderedTags(IList<string> words, IList<string> tags, int index, double[] tprobs)
+    public virtual string[] GetOrderedTags(IList<string> words, IList<string> tags, int index, double[]? tprobs)
     {
-        if (modelPackage.GetPosModel() != null)
+        if (modelPackage.PosModel is { } posModel)
         {
-            IMaxentModel posModel = modelPackage.GetPosModel();
             double[] probs = posModel.Eval(contextGen.GetContext(index, [.. words], [.. tags], null));
             string[] orderedTags = new string[probs.Length];
             for (int i = 0; i < probs.Length; i++)

@@ -76,11 +76,13 @@ public sealed class POSModel : BaseModel, ISerializableArtifact
     //     CheckArtifactMap();
     // }
 
-    public POSModel(Stream @in) : base(COMPONENT_NAME, @in)
+    public POSModel(Stream @in)
+        : base(COMPONENT_NAME, @in)
     {
     }
 
-    public POSModel(FileInfo modelFile) : base(COMPONENT_NAME, modelFile)
+    public POSModel(FileInfo modelFile)
+        : base(COMPONENT_NAME, modelFile)
     {
     }
 
@@ -98,58 +100,39 @@ public sealed class POSModel : BaseModel, ISerializableArtifact
     protected override void ValidateArtifactMap()
     {
         base.ValidateArtifactMap();
-        if (!(artifactMap[POS_MODEL_ENTRY_NAME] is IMaxentModel))
+        if (artifactMap[POS_MODEL_ENTRY_NAME] is not IMaxentModel)
         {
             throw new InvalidFormatException("POS model is incomplete!");
         }
     }
 
-    /// <summary>
-    /// </summary>
-    /// <remarks>
-    /// Deprecated: Use getPosSequenceModel instead. This method will be removed soon.
-    /// Only required for Parser 1.5.x backward compatibility. Newer models don't need this anymore.
-    /// </remarks>
-    public IMaxentModel GetPosModel()
-    {
-        if (artifactMap[POS_MODEL_ENTRY_NAME] is IMaxentModel)
-        {
-            return (IMaxentModel)artifactMap[POS_MODEL_ENTRY_NAME];
-        }
-        else
-        {
-            return null;
-        }
-    }
+    [Obsolete("Use PosSequenceModel instead. This property will be removed soon. Only required for Parser 1.5.x backward compatibility. Newer models don't need this anymore.")]
+    public IMaxentModel? PosModel => artifactMap[POS_MODEL_ENTRY_NAME] as IMaxentModel;
 
-    public ISequenceClassificationModel<string> GetPosSequenceModel()
+    public ISequenceClassificationModel<string>? PosSequenceModel
     {
-        Properties manifest = (Properties)artifactMap[MANIFEST_ENTRY];
-        if (artifactMap[POS_MODEL_ENTRY_NAME] is IMaxentModel)
+        get
         {
-            string beamSizeString = manifest.GetProperty(BeamSearch.BEAM_SIZE_PARAMETER);
-            int beamSize = POSTaggerME.DEFAULT_BEAM_SIZE;
-            if (beamSizeString != null)
+            Properties manifest = (Properties)artifactMap[MANIFEST_ENTRY];
+            if (artifactMap[POS_MODEL_ENTRY_NAME] is IMaxentModel)
             {
-                beamSize = int.Parse(beamSizeString);
+                string? beamSizeString = manifest.GetProperty(BeamSearch.BEAM_SIZE_PARAMETER);
+                int beamSize = POSTaggerME.DEFAULT_BEAM_SIZE;
+                if (beamSizeString != null)
+                {
+                    beamSize = int.Parse(beamSizeString);
+                }
+
+                return new BeamSearch<string>(beamSize, (IMaxentModel)artifactMap[POS_MODEL_ENTRY_NAME]);
             }
-
-            return new BeamSearch<string>(beamSize, (IMaxentModel)artifactMap[POS_MODEL_ENTRY_NAME]);
-        }
-        else if (artifactMap[POS_MODEL_ENTRY_NAME] is ISequenceClassificationModel<string>)
-        {
-            return (ISequenceClassificationModel<string>)artifactMap[POS_MODEL_ENTRY_NAME];
-        }
-        else
-        {
-            return null;
+            else
+            {
+                return artifactMap[POS_MODEL_ENTRY_NAME] as ISequenceClassificationModel<string>;
+            }
         }
     }
 
-    public POSTaggerFactory GetFactory()
-    {
-        return (POSTaggerFactory)this.toolFactory;
-    }
+    public POSTaggerFactory Factory => (POSTaggerFactory)this.toolFactory;
 
     public override void CreateArtifactSerializers(IDictionary<string, IArtifactSerializer> serializers)
     {
@@ -161,15 +144,7 @@ public sealed class POSModel : BaseModel, ISerializableArtifact
     /// Retrieves the ngram dictionary.
     /// </summary>
     /// <returns>ngram dictionary or null if not used</returns>
-    public NOpenNLP.Tools.Dictionary.Dictionary GetNgramDictionary()
-    {
-        if (GetFactory() != null)
-            return GetFactory().GetDictionary();
-        return null;
-    }
+    public NOpenNLP.Tools.Dictionary.Dictionary? NgramDictionary => Factory.GetDictionary();
 
-    public Type GetArtifactSerializerClass()
-    {
-        return typeof(POSModelSerializer);
-    }
+    public Type ArtifactSerializerClass => typeof(POSModelSerializer);
 }

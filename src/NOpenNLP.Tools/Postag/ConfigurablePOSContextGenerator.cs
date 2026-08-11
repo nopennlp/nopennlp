@@ -30,8 +30,8 @@ namespace NOpenNLP.Tools.Postag;
 /// </summary>
 public class ConfigurablePOSContextGenerator : IPOSContextGenerator
 {
-    private readonly Cache<string, string[]> contextsCache; // NOpenNLP: made readonly
-    private object wordsKey;
+    private readonly Cache<string, string[]?>? contextsCache; // NOpenNLP: made readonly
+    private object? wordsKey;
     private readonly IAdaptiveFeatureGenerator featureGenerator;
 
     /// <summary>
@@ -43,14 +43,15 @@ public class ConfigurablePOSContextGenerator : IPOSContextGenerator
         this.featureGenerator = featureGenerator ?? throw new ArgumentNullException(nameof(featureGenerator));
         if (cacheSize > 0)
         {
-            contextsCache = new Cache<string, string[]>(cacheSize);
+            contextsCache = new Cache<string, string[]?>(cacheSize);
         }
     }
 
     /// <summary>
     /// Initializes the current instance.
     /// </summary>
-    public ConfigurablePOSContextGenerator(IAdaptiveFeatureGenerator featureGenerator) : this(0, featureGenerator)
+    public ConfigurablePOSContextGenerator(IAdaptiveFeatureGenerator featureGenerator)
+        : this(0, featureGenerator)
     {
     }
 
@@ -63,7 +64,7 @@ public class ConfigurablePOSContextGenerator : IPOSContextGenerator
     /// <param name="tags">The tags assigned to the previous words in the sentence.</param>
     /// <returns>The context for making a pos tag decision at the specified token index
     ///     given the specified tokens and previous tags.</returns>
-    public virtual string[] GetContext(int index, string[] tokens, string[] tags, object[] additionalContext)
+    public virtual string[] GetContext(int index, string[] tokens, string[] tags, object[]? additionalContext)
     {
         string? tagprev = null;
         string? tagprevprev = null;
@@ -81,7 +82,7 @@ public class ConfigurablePOSContextGenerator : IPOSContextGenerator
         {
             if (wordsKey == tokens)
             {
-                string[] cachedContexts = contextsCache[cacheKey];
+                string[]? cachedContexts = contextsCache[cacheKey];
                 if (cachedContexts != null)
                 {
                     return cachedContexts;
@@ -97,10 +98,7 @@ public class ConfigurablePOSContextGenerator : IPOSContextGenerator
         IList<string> e = new List<string>();
         featureGenerator.CreateFeatures(e, tokens, index, tags);
         string[] contexts = [.. e];
-        if (contextsCache != null)
-        {
-            contextsCache.Put(cacheKey, contexts);
-        }
+        contextsCache?.Put(cacheKey, contexts);
 
         return contexts;
     }

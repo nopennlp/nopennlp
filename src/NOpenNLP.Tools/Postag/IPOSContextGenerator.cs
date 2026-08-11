@@ -26,5 +26,5 @@ namespace NOpenNLP.Tools.Postag;
 /// </summary>
 public interface IPOSContextGenerator : IBeamSearchContextGenerator<string>
 {
-    string[] GetContext(int pos, string[] tokens, string[] prevTags, object[] ac);
+    new string[] GetContext(int pos, string[] tokens, string[] prevTags, object[]? ac);
 }

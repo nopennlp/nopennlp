@@ -32,7 +32,7 @@ public class DefaultPOSSequenceValidator(ITagDictionary? tagDictionary) : ISeque
         }
         else
         {
-            string[] tags = tagDictionary.GetTags(inputSequence[i]);
+            string[]? tags = tagDictionary.GetTags(inputSequence[i]);
             return tags == null || new List<string>(tags).Contains(outcome);
         }
     }

@@ -31,5 +31,5 @@ public interface ITagDictionary
     /// <param name="word">The word.</param>
     /// <returns>A list of valid tags for the specified word or null if no information
     /// is available for that word.</returns>
-    string[] GetTags(string word);
+    string[]? GetTags(string word);
 }

@@ -26,6 +26,7 @@ using System.Collections;
 using System.IO;
 using System.Collections.Generic;
 using System.Text;
+using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Postag;
 
@@ -35,8 +36,8 @@ namespace NOpenNLP.Tools.Postag;
 /// </summary>
 public class POSDictionary : IEnumerable<string>, IMutableTagDictionary, ISerializableArtifact
 {
-    private Dictionary<string, string[]> dictionary;
-    private bool caseSensitive = true;
+    private JCG.Dictionary<string, string[]> dictionary;
+    private bool caseSensitive /* = true */; // NOpenNLP note: `= true` is always overwritten
 
     /// <summary>
     /// Initializes an empty case sensitive <see cref="POSDictionary"/>.
@@ -51,7 +52,7 @@ public class POSDictionary : IEnumerable<string>, IMutableTagDictionary, ISerial
     /// <param name="caseSensitive">the <see cref="POSDictionary"/> case sensitivity</param>
     public POSDictionary(bool caseSensitive)
     {
-        dictionary = new Dictionary<string, string[]>();
+        dictionary = new JCG.Dictionary<string, string[]>();
         this.caseSensitive = caseSensitive;
     }
 
@@ -61,7 +62,7 @@ public class POSDictionary : IEnumerable<string>, IMutableTagDictionary, ISerial
     /// <param name="word">The word.</param>
     /// <returns>A list of valid tags for the specified word or
     ///     null if no information is available for that word.</returns>
-    public virtual string[] GetTags(string word)
+    public virtual string[]? GetTags(string word)
     {
         if (caseSensitive)
         {
@@ -93,16 +94,13 @@ public class POSDictionary : IEnumerable<string>, IMutableTagDictionary, ISerial
     /// <summary>
     /// Retrieves an iterator over all words in the dictionary.
     /// </summary>
-    public virtual IEnumerator<string> GetEnumerator()
-    {
-        return dictionary.Keys.GetEnumerator();
-    }
+    public virtual IEnumerator<string> GetEnumerator() => dictionary.Keys.GetEnumerator();
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     private static string TagsToString(string[] tags)
     {
-        StringBuilder tagString = new StringBuilder();
+        var tagString = new StringBuilder();
         foreach (string tag in tags)
         {
             tagString.Append(tag);
@@ -112,7 +110,7 @@ public class POSDictionary : IEnumerable<string>, IMutableTagDictionary, ISerial
         // remove last space
         if (tagString.Length > 0)
         {
-            tagString.Length = tagString.Length - 1;
+            tagString.Length -= 1;
         }
 
         return tagString.ToString();
@@ -239,7 +237,7 @@ public class POSDictionary : IEnumerable<string>, IMutableTagDictionary, ISerial
         // TODO: The dictionary API needs to be improved to do this better!
         if (!isCaseSensitive)
         {
-            Dictionary<string, string[]> lowerCasedDictionary = new Dictionary<string, string[]>();
+            var lowerCasedDictionary = new JCG.Dictionary<string, string[]>();
             foreach (var entry in newPosDict.dictionary)
             {
                 lowerCasedDictionary[StringUtil.ToLowerCase(entry.Key)] = entry.Value;
@@ -251,7 +249,7 @@ public class POSDictionary : IEnumerable<string>, IMutableTagDictionary, ISerial
         return newPosDict;
     }
 
-    public virtual string[] Put(string word, params string[] tags)
+    public virtual string[]? Put(string word, params string[] tags)
     {
         if (this.caseSensitive)
         {
@@ -263,13 +261,7 @@ public class POSDictionary : IEnumerable<string>, IMutableTagDictionary, ISerial
         }
     }
 
-    public virtual bool IsCaseSensitive()
-    {
-        return this.caseSensitive;
-    }
+    public virtual bool IsCaseSensitive => caseSensitive;
 
-    public virtual Type GetArtifactSerializerClass()
-    {
-        return typeof(POSTaggerFactory.POSDictionarySerializer);
-    }
+    public virtual Type ArtifactSerializerClass => typeof(POSTaggerFactory.POSDictionarySerializer);
 }

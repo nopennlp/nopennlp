@@ -36,14 +36,14 @@ internal static class Arrays
     /// Returns whether the two arrays are structurally equal, element by
     /// element, as Java's <c>Arrays.equals</c> does.
     /// </summary>
-    public static bool Equals<T>(T[] a, T[] b) =>
+    public static bool Equals<T>(T[]? a, T[]? b) =>
         ArrayEqualityComparer<T>.OneDimensional.Equals(a, b);
 
     /// <summary>
     /// Returns a hash code derived from the array's contents, as Java's
     /// <c>Arrays.hashCode</c> does.
     /// </summary>
-    public static int GetHashCode<T>(T[] array) =>
+    public static int GetHashCode<T>(T[]? array) =>
         array is null ? 0 : ArrayEqualityComparer<T>.OneDimensional.GetHashCode(array);
 
     /// <summary>

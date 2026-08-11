@@ -33,7 +33,7 @@ public interface IPOSTagger
     /// <returns>an array of pos tags for each token provided in sentence.</returns>
     string[] Tag(string[] sentence);
 
-    string[] Tag(string[] sentence, object[] additionaContext);
+    string[] Tag(string[] sentence, object[] additionalContext);
 
     Sequence[] TopKSequences(string[] sentence);
 

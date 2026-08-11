@@ -88,8 +88,5 @@ public class WordClusterDictionary : ISerializableArtifact
     //     writer.Flush();
     // }
 
-    public virtual Type GetArtifactSerializerClass()
-    {
-        return typeof(WordClusterDictionarySerializer);
-    }
+    public virtual Type ArtifactSerializerClass => typeof(WordClusterDictionarySerializer);
 }

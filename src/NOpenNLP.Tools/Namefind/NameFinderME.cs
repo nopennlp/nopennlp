@@ -44,9 +44,9 @@ public class NameFinderME : ITokenNameFinder
     public const string OTHER = "other";
 
     private readonly ISequenceCodec<string> seqCodec = new BioCodec();
-    protected readonly ISequenceClassificationModel<string> model;
+    protected readonly ISequenceClassificationModel<string>? model;
     protected readonly INameContextGenerator contextGenerator;
-    private Sequence bestSequence;
+    private Sequence? bestSequence;
     private readonly AdditionalContextFeatureGenerator additionalContextFeatureGenerator = new();
     private readonly ISequenceValidator<string> sequenceValidator;
 

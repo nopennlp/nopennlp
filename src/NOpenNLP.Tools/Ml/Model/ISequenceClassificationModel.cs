@@ -34,7 +34,7 @@ public interface ISequenceClassificationModel<T>
     /// <param name="cg"></param>
     /// <param name="validator"></param>
     /// <returns></returns>
-    Sequence? BestSequence(T[] sequence, object[] additionalContext, IBeamSearchContextGenerator<T> cg, ISequenceValidator<T> validator);
+    Sequence? BestSequence(T[] sequence, object[]? additionalContext, IBeamSearchContextGenerator<T> cg, ISequenceValidator<T> validator);
 
     /// <summary>
     /// Finds the n most probable sequences.
@@ -44,7 +44,7 @@ public interface ISequenceClassificationModel<T>
     /// <param name="cg"></param>
     /// <param name="validator"></param>
     /// <returns></returns>
-    Sequence[] BestSequences(int numSequences, T[] sequence, object[] additionalContext, double minSequenceScore, IBeamSearchContextGenerator<T> cg, ISequenceValidator<T> validator);
+    Sequence[] BestSequences(int numSequences, T[] sequence, object[]? additionalContext, double minSequenceScore, IBeamSearchContextGenerator<T> cg, ISequenceValidator<T> validator);
 
     /// <summary>
     /// Finds the n most probable sequences.
@@ -54,7 +54,7 @@ public interface ISequenceClassificationModel<T>
     /// <param name="cg"></param>
     /// <param name="validator"></param>
     /// <returns></returns>
-    Sequence[] BestSequences(int numSequences, T[] sequence, object[] additionalContext, IBeamSearchContextGenerator<T> cg, ISequenceValidator<T> validator);
+    Sequence[] BestSequences(int numSequences, T[] sequence, object[]? additionalContext, IBeamSearchContextGenerator<T> cg, ISequenceValidator<T> validator);
 
     /// <summary>
     /// Returns all possible outcomes.

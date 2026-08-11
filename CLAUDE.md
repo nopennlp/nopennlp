@@ -9,6 +9,7 @@ The current version of OpenNLP being targeted is: 1.9.1
 When converting the original Java code to C#, take care to:
 
 - Add proper license attribution (see other files for an example)
+- Use 4 spaces for tabs.
 - Keep code in the same order, file structure, etc. as upstream as much as possible. This eases porting future updates.
 - Projects match the Java names with the following transformation: replace hyphen with period, `opennlp` with `NOpenNLP`, and use .NET-style casing. i.e. `opennlp-tools` becomes `NOpenNLP.Tools`
 - Namespaces should match their file structure and the upstream Java package, i.e. `src/NOpenNLP.Tools/Util/Model/BaseModel.cs` should be in `NOpenNLP.Tools.Util.Model`.
@@ -30,6 +31,7 @@ When converting the original Java code to C#, take care to:
 - When deviating from upstream OpenNLP, add a brief comment like `// NOpenNLP-specific: {justification of change}`
 - Try to make ported code nullable-friendly with nullable-reference annotations. Trace all usages throughout the codebase to determine proper nullability. Do not default to the safe choice of making everything nullable.
 - Convert `Get`- and `Set`-style methods into C# properties. Use auto-properties where it makes sense. i.e. `string GetLanguage();` would become `string Language { get; }`
+- For one-line methods and property getters, use expression bodies, i.e. `public int Count => field.Count;`. If the expression or method/property signature is long, move the arrow to the next line, indented 4 spaces from the line above it.
 - Rename `size()` methods to be `Count` if it can be converted to a property and represents the length/size of something.
 - Place `: this(...)` and `: base(...)` constructor calls on a new line
 - Chop very long lines (> 120 chars wide)

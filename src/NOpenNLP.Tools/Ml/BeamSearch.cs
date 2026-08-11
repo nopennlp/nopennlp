@@ -167,13 +167,13 @@ public class BeamSearch<T> : BeamSearch, ISequenceClassificationModel<T>
         return topSequences;
     }
 
-    public virtual Sequence[] BestSequences(int numSequences, T[] sequence, object[] additionalContext,
+    public virtual Sequence[] BestSequences(int numSequences, T[] sequence, object[]? additionalContext,
         IBeamSearchContextGenerator<T> cg, ISequenceValidator<T> validator)
     {
         return BestSequences(numSequences, sequence, additionalContext, zeroLog, cg, validator);
     }
 
-    public virtual Sequence? BestSequence(T[] sequence, object[] additionalContext, IBeamSearchContextGenerator<T> cg,
+    public virtual Sequence? BestSequence(T[] sequence, object[]? additionalContext, IBeamSearchContextGenerator<T> cg,
         ISequenceValidator<T> validator)
     {
         Sequence[] sequences = BestSequences(1, sequence, additionalContext, cg, validator);

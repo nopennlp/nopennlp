@@ -31,5 +31,5 @@ public interface ISerializableArtifact
     /// an exception is thrown during model serialization/loading.
     /// </summary>
     /// <returns>the corresponding IArtifactSerializer class.</returns>
-    Type GetArtifactSerializerClass();
+    Type ArtifactSerializerClass { get; }
 }

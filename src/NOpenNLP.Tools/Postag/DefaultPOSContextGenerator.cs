@@ -35,17 +35,18 @@ public class DefaultPOSContextGenerator : IPOSContextGenerator
     protected const string SB = "*SB*";
     private const int PREFIX_LENGTH = 4;
     private const int SUFFIX_LENGTH = 4;
-    private static readonly Regex hasCap = new Regex("[A-Z]");
-    private static readonly Regex hasNum = new Regex("[0-9]");
-    private readonly Cache<string, string[]> contextsCache;
-    private object wordsKey;
-    private readonly NOpenNLP.Tools.Dictionary.Dictionary dict;
+    private static readonly Regex hasCap = new("[A-Z]");
+    private static readonly Regex hasNum = new("[0-9]");
+    private readonly Cache<string, string[]?>? contextsCache;
+    private object? wordsKey;
+    private readonly NOpenNLP.Tools.Dictionary.Dictionary? dict;
 
     /// <summary>
     /// Initializes the current instance.
     /// </summary>
     /// <param name="dict"></param>
-    public DefaultPOSContextGenerator(NOpenNLP.Tools.Dictionary.Dictionary dict) : this(0, dict)
+    public DefaultPOSContextGenerator(NOpenNLP.Tools.Dictionary.Dictionary? dict)
+        : this(0, dict)
     {
     }
 
@@ -54,12 +55,12 @@ public class DefaultPOSContextGenerator : IPOSContextGenerator
     /// </summary>
     /// <param name="cacheSize"></param>
     /// <param name="dict"></param>
-    public DefaultPOSContextGenerator(int cacheSize, NOpenNLP.Tools.Dictionary.Dictionary dict)
+    public DefaultPOSContextGenerator(int cacheSize, NOpenNLP.Tools.Dictionary.Dictionary? dict)
     {
         this.dict = dict;
         if (cacheSize > 0)
         {
-            contextsCache = new Cache<string, string[]>(cacheSize);
+            contextsCache = new Cache<string, string[]?>(cacheSize);
         }
     }
 
@@ -68,7 +69,7 @@ public class DefaultPOSContextGenerator : IPOSContextGenerator
         string[] prefs = new string[PREFIX_LENGTH];
         for (int li = 0; li < PREFIX_LENGTH; li++)
         {
-            prefs[li] = lex.Substring(0, Math.Min(li + 1, lex.Length));
+            prefs[li] = lex[..Math.Min(li + 1, lex.Length)];
         }
 
         return prefs;
@@ -79,13 +80,13 @@ public class DefaultPOSContextGenerator : IPOSContextGenerator
         string[] suffs = new string[SUFFIX_LENGTH];
         for (int li = 0; li < SUFFIX_LENGTH; li++)
         {
-            suffs[li] = lex.Substring(Math.Max(lex.Length - li - 1, 0));
+            suffs[li] = lex[Math.Max(lex.Length - li - 1, 0)..];
         }
 
         return suffs;
     }
 
-    public virtual string[] GetContext(int index, string[] sequence, string[] priorDecisions, object[] additionalContext)
+    public virtual string[] GetContext(int index, string[] sequence, string[] priorDecisions, object[]? additionalContext)
     {
         return GetContext(index, sequence, priorDecisions);
     }
@@ -101,8 +102,9 @@ public class DefaultPOSContextGenerator : IPOSContextGenerator
     ///     given the specified tokens and previous tags.</returns>
     public virtual string[] GetContext(int index, object[] tokens, string[] tags)
     {
-        string next, nextnext = null, lex, prev, prevprev = null;
-        string tagprev, tagprevprev;
+        string next, lex, prev;
+        string? nextnext = null, prevprev = null;
+        string? tagprev, tagprevprev;
         tagprev = tagprevprev = null;
         lex = tokens[index].ToString();
         if (tokens.Length > index + 1)
@@ -142,7 +144,7 @@ public class DefaultPOSContextGenerator : IPOSContextGenerator
         {
             if (wordsKey == tokens)
             {
-                string[] cachedContexts = contextsCache[cacheKey];
+                string[]? cachedContexts = contextsCache[cacheKey];
                 if (cachedContexts != null)
                 {
                     return cachedContexts;
@@ -162,7 +164,6 @@ public class DefaultPOSContextGenerator : IPOSContextGenerator
         e.Add("w=" + lex);
         if (dict == null || !dict.Contains(new StringList(lex)))
         {
-
             // do some basic suffix analysis
             string[] suffs = GetSuffixes(lex);
             for (int i = 0; i < suffs.Length; i++)
@@ -175,7 +176,6 @@ public class DefaultPOSContextGenerator : IPOSContextGenerator
             {
                 e.Add("pre=" + prefs[i]);
             }
-
 
             // see if the word has any special characters
             if (lex.IndexOf('-') != -1)
@@ -193,7 +193,6 @@ public class DefaultPOSContextGenerator : IPOSContextGenerator
                 e.Add("d");
             }
         }
-
 
         // add the words and pos's of the surrounding context
         if (prev != null)
@@ -224,10 +223,7 @@ public class DefaultPOSContextGenerator : IPOSContextGenerator
         }
 
         string[] contexts = [.. e];
-        if (contextsCache != null)
-        {
-            contextsCache.Put(cacheKey, contexts);
-        }
+        contextsCache?.Put(cacheKey, contexts);
 
         return contexts;
     }
