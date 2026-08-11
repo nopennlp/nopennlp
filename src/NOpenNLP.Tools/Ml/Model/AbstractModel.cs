@@ -44,7 +44,7 @@ public abstract class AbstractModel : IMaxentModel
     /// <summary>
     /// Prior distribution for this model.
     /// </summary>
-    protected IPrior prior;
+    protected IPrior? prior;
 
     public enum ModelType
     {
@@ -66,7 +66,7 @@ public abstract class AbstractModel : IMaxentModel
         this.evalParams = new EvalParameters(@params, outcomeNames.Length);
     }
 
-    public AbstractModel(Context[] @params, string[] predLabels, string[] outcomeNames)
+    protected AbstractModel(Context[] @params, string[] predLabels, string[] outcomeNames)
     {
         Init(predLabels, @params, outcomeNames);
         this.evalParams = new EvalParameters(@params, outcomeNames.Length);
@@ -94,7 +94,7 @@ public abstract class AbstractModel : IMaxentModel
     /// Return the name of the outcome corresponding to the highest likelihood
     /// in the parameter ocs.
     /// </summary>
-    /// <param name="ocs">A double[] as returned by the eval(String[] context)
+    /// <param name="ocs">A <see cref="double[]"/> as returned by the <see cref="Eval(string[])"/>
     ///            method.</param>
     /// <returns>   The name of the most likely outcome.</returns>
     public string GetBestOutcome(double[] ocs)
@@ -109,14 +109,14 @@ public abstract class AbstractModel : IMaxentModel
 
     /// <summary>
     /// Return a string matching all the outcome names with all the
-    /// probabilities produced by the <c>eval(String[] context)</c>
+    /// probabilities produced by the <see cref="Eval(string[])"/>
     /// method.
     /// </summary>
-    /// <param name="ocs">A <c>double[]</c> as returned by the
-    ///            <c>eval(String[] context)</c>
+    /// <param name="ocs">A <see cref="double[]"/> as returned by the
+    ///            <see cref="Eval(string[])"/>
     ///            method.</param>
     /// <returns>   String containing outcome names paired with the normalized
-    ///            probability (contained in the <c>double[] ocs</c>)
+    ///            probability (contained in the <paramref name="ocs"/>)
     ///            for each one.</returns>
     public string GetAllOutcomes(double[] ocs)
     {
@@ -166,10 +166,7 @@ public abstract class AbstractModel : IMaxentModel
         return -1;
     }
 
-    public virtual int GetNumOutcomes()
-    {
-        return evalParams.GetNumOutcomes();
-    }
+    public virtual int NumOutcomes => evalParams.GetNumOutcomes();
 
     /// <summary>
     /// Provides the fundamental data structures which encode the maxent model
@@ -201,7 +198,7 @@ public abstract class AbstractModel : IMaxentModel
         return HashCode.Combine(pmap, Arrays.GetHashCode(outcomeNames), evalParams, prior);
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (obj == this)
         {

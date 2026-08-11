@@ -524,7 +524,7 @@ public class GeneratorFactory
         }
     }
 
-    static XmlElement GetFirstChild(XmlElement elem)
+    internal static XmlElement GetFirstChild(XmlElement elem)
     {
         XmlNodeList nodes = elem.ChildNodes;
         for (int i = 0; i < nodes.Count; i++)
@@ -547,7 +547,7 @@ public class GeneratorFactory
     /// <param name="generatorElement"></param>
     /// <param name="resourceManager"></param>
     /// <returns></returns>
-    static IAdaptiveFeatureGenerator BuildGenerator(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
+    internal static IAdaptiveFeatureGenerator BuildGenerator(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
     {
         string className = generatorElement.GetAttribute("class");
         if (className == null)
@@ -669,7 +669,7 @@ public class GeneratorFactory
         }
     }
 
-    static void ExtractArtifactSerializerMappings(JCG.Dictionary<string, IArtifactSerializer> mapping, XmlElement element)
+    internal static void ExtractArtifactSerializerMappings(JCG.Dictionary<string, IArtifactSerializer> mapping, XmlElement element)
     {
         string className = element.GetAttribute("class");
         if (className != null)
@@ -736,7 +736,7 @@ public class GeneratorFactory
         }
     }
 
-    static JCG.Dictionary<string, IArtifactSerializer> ExtractArtifactSerializerMappingsClassicFormat(XmlElement elem)
+    internal static JCG.Dictionary<string, IArtifactSerializer> ExtractArtifactSerializerMappingsClassicFormat(XmlElement elem)
     {
         JCG.Dictionary<string, IArtifactSerializer> mapping = new JCG.Dictionary<string, IArtifactSerializer>();
         //Xpath xPath = XPathFactory.NewInstance().NewXPath();

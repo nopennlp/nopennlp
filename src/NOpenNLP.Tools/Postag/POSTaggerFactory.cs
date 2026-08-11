@@ -314,7 +314,7 @@ public class POSTaggerFactory : BaseToolFactory
         }
 
         HashSet<string> modelTags = [];
-        for (int i = 0; i < posModel.GetNumOutcomes(); i++)
+        for (int i = 0; i < posModel.NumOutcomes; i++)
         {
             modelTags.Add(posModel.GetOutcome(i));
         }

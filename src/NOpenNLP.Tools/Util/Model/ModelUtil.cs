@@ -72,11 +72,11 @@ public sealed class ModelUtil
     public static bool ValidateOutcomes(IMaxentModel model, params string[] expectedOutcomes)
     {
         bool result = true;
-        if (expectedOutcomes.Length == model.GetNumOutcomes())
+        if (expectedOutcomes.Length == model.NumOutcomes)
         {
             var expectedOutcomesSet = new HashSet<string>();
             expectedOutcomesSet.UnionWith(expectedOutcomes);
-            for (int i = 0; i < model.GetNumOutcomes(); i++)
+            for (int i = 0; i < model.NumOutcomes; i++)
             {
                 if (!expectedOutcomesSet.Contains(model.GetOutcome(i)))
                 {

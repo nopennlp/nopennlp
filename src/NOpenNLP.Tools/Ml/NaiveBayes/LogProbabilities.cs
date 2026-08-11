@@ -21,6 +21,7 @@
 using NOpenNLP.Tools.Support;
 using System;
 using System.Collections.Generic;
+using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Ml.Naivebayes;
 
@@ -52,7 +53,7 @@ public class LogProbabilities<T> : Probabilities<T>
     public override void Set(T t, Probability<T> probability)
     {
         isNormalised = false;
-        map.Put(t, probability.GetLog());
+        map.Put(t, probability.Log);
     }
 
     /// <summary>
@@ -95,19 +96,18 @@ public class LogProbabilities<T> : Probabilities<T>
         isNormalised = false;
         // NOpenNLP: Java Map.get() returns null for an absent key.
         map.TryGetValue(t, out double? p);
-        if (p == null)
-            p = 0;
+        p ??= 0;
         probability = Log(probability) * count;
         map.Put(t, p + probability);
     }
 
-    private Dictionary<T, double?> Normalize()
+    private IDictionary<T?, double?> Normalize()
     {
         if (isNormalised)
-            return normalised;
-        Dictionary<T, double?> temp = CreateMapDataStructure();
+            return normalised!; // [!]: isNormalized gates whether normalized is null
+        var temp = CreateMapDataStructure();
         double highestLogProbability = double.NegativeInfinity;
-        foreach (KeyValuePair<T, double?> entry in map)
+        foreach (var entry in map)
         {
             double? p = entry.Value;
             if (p != null && p > highestLogProbability)
@@ -117,9 +117,9 @@ public class LogProbabilities<T> : Probabilities<T>
         }
 
         double sum = 0;
-        foreach (KeyValuePair<T, double?> entry in map)
+        foreach (var entry in map)
         {
-            T t = entry.Key;
+            var t = entry.Key;
             double? p = entry.Value;
             if (p != null)
             {
@@ -132,9 +132,9 @@ public class LogProbabilities<T> : Probabilities<T>
             }
         }
 
-        foreach (KeyValuePair<T, double?> entry in temp)
+        foreach (var entry in temp)
         {
-            T t = entry.Key;
+            var t = entry.Key;
             double? p = entry.Value;
             if (p != null && sum > double.MinValue)
             {
@@ -147,7 +147,8 @@ public class LogProbabilities<T> : Probabilities<T>
         return temp;
     }
 
-    private double Log(double prob)
+    // NOpenNLP TODO: replace with static import of Math.Log
+    private static double Log(double prob) // NOpenNLP: made static
     {
         return Math.Log(prob);
     }
@@ -157,7 +158,7 @@ public class LogProbabilities<T> : Probabilities<T>
     /// </summary>
     /// <param name="t">the label whose probability needs to be returned</param>
     /// <returns>the probability associated with the label</returns>
-    public override double? Get(T t)
+    public override double? Get(T? t)
     {
         double? d = Normalize()[t];
         if (d == null)
@@ -175,26 +176,22 @@ public class LogProbabilities<T> : Probabilities<T>
         // NOpenNLP: Java Map.get() returns null for an absent key, which this
         // maps to negative infinity, so the result is never null.
         map.TryGetValue(t, out double? d);
-        if (d == null)
-            return double.NegativeInfinity;
-        return d.Value;
+        return d ?? double.NegativeInfinity;
     }
 
     public override void DiscardCountsBelow(double i)
     {
         i = Math.Log(i);
         List<T> labelsToRemove = [];
-        foreach (KeyValuePair<T, double?> entry in map)
+        foreach (var entry in map)
         {
-            T label = entry.Key;
-            double? sum = entry.Value;
-            if (sum == null)
-                sum = double.NegativeInfinity;
+            var label = entry.Key;
+            double? sum = entry.Value ?? double.NegativeInfinity;
             if (sum < i)
                 labelsToRemove.Add(label);
         }
 
-        foreach (T label in labelsToRemove)
+        foreach (var label in labelsToRemove)
         {
             map.Remove(label);
         }
@@ -204,22 +201,19 @@ public class LogProbabilities<T> : Probabilities<T>
     /// Returns the probabilities associated with all labels
     /// </summary>
     /// <returns>the HashMap of labels and their probabilities</returns>
-    public override Dictionary<T, double?> GetAll()
-    {
-        return Normalize();
-    }
+    public override IDictionary<T?, double?> All => Normalize();
 
     /// <summary>
     /// Returns the most likely label
     /// </summary>
     /// <returns>the label that has the highest associated probability</returns>
-    public override T GetMax()
+    public override T? GetMax()
     {
         double max = double.NegativeInfinity;
-        T maxT = default(T);
-        foreach (KeyValuePair<T, double?> entry in map)
+        var maxT = default(T);
+        foreach (var entry in map)
         {
-            T t = entry.Key;
+            var t = entry.Key;
             double? temp = entry.Value;
             if (temp >= max)
             {

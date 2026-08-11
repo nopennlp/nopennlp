@@ -21,6 +21,7 @@
 using NOpenNLP.Tools.Support;
 using System;
 using System.Collections.Generic;
+using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Ml.Naivebayes;
 
@@ -30,10 +31,10 @@ namespace NOpenNLP.Tools.Ml.Naivebayes;
 /// <typeparam name="T">the label (category) class</typeparam>
 public abstract class Probabilities<T>
 {
-    protected readonly Dictionary<T, double?> map = new Dictionary<T, double?>(); // NOpenNLP: made readonly
-    protected bool isNormalised = false;
-    protected Dictionary<T, double?> normalised;
-    protected double confidence = 0;
+    protected readonly IDictionary<T, double?> map = new JCG.Dictionary<T, double?>(); // NOpenNLP: made readonly
+    protected bool isNormalised /* = false */;
+    protected IDictionary<T?, double?>? normalised;
+    protected double confidence /* = 0 */;
 
     /// <summary>
     /// Assigns a probability to a label, discarding any previously assigned probability.
@@ -54,7 +55,7 @@ public abstract class Probabilities<T>
     public virtual void Set(T t, Probability<T> probability)
     {
         isNormalised = false;
-        map.Put(t, probability.Get());
+        map.Put(t, probability.Value);
     }
 
     /// <summary>
@@ -95,8 +96,7 @@ public abstract class Probabilities<T>
         isNormalised = false;
         // NOpenNLP: Java Map.get() returns null for an absent key.
         map.TryGetValue(t, out double? p);
-        if (p == null)
-            p = 1;
+        p ??= 1;
         probability = Math.Pow(probability, count);
         map.Put(t, p * probability);
     }
@@ -106,7 +106,7 @@ public abstract class Probabilities<T>
     /// </summary>
     /// <param name="t">the label whose probability needs to be returned</param>
     /// <returns>the probability associated with the label</returns>
-    public virtual double? Get(T t)
+    public virtual double? Get(T? t)
     {
         double? d = Normalize()[t];
         if (d == null)
@@ -127,29 +127,22 @@ public abstract class Probabilities<T>
     /// <summary>
     /// Returns the probabilities associated with all labels
     /// </summary>
-    /// <returns>the HashMap of labels and their probabilities</returns>
-    public virtual HashSet<T> GetKeys()
-    {
-        // NOpenNLP: Enumerable.ToHashSet is netstandard2.1+.
-        return [.. map.Keys];
-    }
+    /// <returns>the <see cref="ISet{T}"/> of labels and their probabilities</returns>
+    public virtual ISet<T> Keys => new HashSet<T>(map.Keys);
 
     /// <summary>
     /// Returns the probabilities associated with all labels
     /// </summary>
-    /// <returns>the HashMap of labels and their probabilities</returns>
-    public virtual Dictionary<T, double?> GetAll()
-    {
-        return Normalize();
-    }
+    /// <returns>the <see cref="ISet{T}"/> of labels and their probabilities</returns>
+    public virtual IDictionary<T?, double?> All => Normalize();
 
-    private Dictionary<T, double?> Normalize()
+    private IDictionary<T?, double?> Normalize()
     {
         if (isNormalised)
-            return normalised;
-        Dictionary<T, double?> temp = CreateMapDataStructure();
+            return normalised!; // [!]: isNormalized gates whether this is null or not
+        var temp = CreateMapDataStructure();
         double sum = 0;
-        foreach (KeyValuePair<T, double?> entry in map)
+        foreach (var entry in map)
         {
             double? p = entry.Value;
             if (p != null)
@@ -158,9 +151,9 @@ public abstract class Probabilities<T>
             }
         }
 
-        foreach (KeyValuePair<T, double?> entry in temp)
+        foreach (var entry in temp)
         {
-            T t = entry.Key;
+            var t = entry.Key;
             double? p = entry.Value;
             if (p != null)
             {
@@ -173,22 +166,22 @@ public abstract class Probabilities<T>
         return temp;
     }
 
-    protected virtual Dictionary<T, double?> CreateMapDataStructure()
+    protected virtual IDictionary<T?, double?> CreateMapDataStructure()
     {
-        return new Dictionary<T, double?>();
+        return new JCG.Dictionary<T?, double?>();
     }
 
     /// <summary>
     /// Returns the most likely label
     /// </summary>
     /// <returns>the label that has the highest associated probability</returns>
-    public virtual T GetMax()
+    public virtual T? GetMax()
     {
         double max = 0;
-        T maxT = default(T);
-        foreach (KeyValuePair<T, double?> entry in map)
+        var maxT = default(T);
+        foreach (var entry in map)
         {
-            T t = entry.Key;
+            var t = entry.Key;
             double? temp = entry.Value;
             if (temp >= max)
             {
@@ -204,25 +197,20 @@ public abstract class Probabilities<T>
     /// Returns the probability of the most likely label
     /// </summary>
     /// <returns>the highest probability</returns>
-    public virtual double? GetMaxValue()
-    {
-        return Get(GetMax());
-    }
+    public virtual double? MaxValue => Get(GetMax());
 
     public virtual void DiscardCountsBelow(double i)
     {
         IList<T> labelsToRemove = new List<T>();
-        foreach (KeyValuePair<T, double?> entry in map)
+        foreach (var entry in map)
         {
-            T label = entry.Key;
-            double? sum = entry.Value;
-            if (sum == null)
-                sum = 0;
+            var label = entry.Key;
+            double? sum = entry.Value ?? 0;
             if (sum < i)
                 labelsToRemove.Add(label);
         }
 
-        foreach (T label in labelsToRemove)
+        foreach (var label in labelsToRemove)
         {
             map.Remove(label);
         }
@@ -250,8 +238,5 @@ public abstract class Probabilities<T>
         this.confidence = confidence;
     }
 
-    public override string ToString()
-    {
-        return GetAll().ToString();
-    }
+    public override string ToString() => All.ToString();
 }

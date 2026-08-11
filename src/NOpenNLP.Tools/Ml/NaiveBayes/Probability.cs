@@ -18,13 +18,20 @@
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using System;
+using System.Globalization;
 
 namespace NOpenNLP.Tools.Ml.Naivebayes;
 
 // NOpenNLP: non-generic base class
 public abstract class Probability
 {
-    public abstract double Get();
+    /// <summary>
+    /// Gets the probability.
+    /// </summary>
+    /// <remarks>
+    /// NOpenNLP: This was <c>get()</c> in Java.
+    /// </remarks>
+    public abstract double Value { get; }
 }
 
 /// <summary>
@@ -33,7 +40,7 @@ public abstract class Probability
 /// <typeparam name="T">the label (category) class</typeparam>
 public class Probability<T>(T label) : Probability
 {
-    protected T label = label;
+    protected readonly T label = label; // NOpenNLP: made readonly
     protected double probability = 1;
 
     /// <summary>
@@ -51,7 +58,7 @@ public class Probability<T>(T label) : Probability
     /// <param name="probability">the probability to assign</param>
     public virtual void Set(Probability probability)
     {
-        this.probability = probability.Get();
+        this.probability = probability.Value;
     }
 
     /// <summary>
@@ -74,9 +81,9 @@ public class Probability<T>(T label) : Probability
     /// <param name="probability">the probability to assign</param>
     public virtual void SetIfLarger(Probability probability)
     {
-        if (this.probability < probability.Get())
+        if (this.probability < probability.Value)
         {
-            this.probability = probability.Get();
+            this.probability = probability.Value;
         }
     }
 
@@ -86,7 +93,7 @@ public class Probability<T>(T label) : Probability
     /// <param name="probability">the probability to assign</param>
     public virtual bool IsLarger(Probability probability)
     {
-        return this.probability < probability.Get();
+        return this.probability < probability.Value;
     }
 
     /// <summary>
@@ -111,31 +118,22 @@ public class Probability<T>(T label) : Probability
     /// Returns the probability associated with a label
     /// </summary>
     /// <returns>the probability associated with the label</returns>
-    public override double Get()
-    {
-        return probability;
-    }
+    public override double Value => probability;
 
     /// <summary>
     /// Returns the log probability associated with a label
     /// </summary>
     /// <returns>the log probability associated with the label</returns>
-    public virtual double GetLog()
-    {
-        return Math.Log(Get());
-    }
+    public virtual double Log => Math.Log(Value);
 
     /// <summary>
     /// Returns the probabilities associated with all labels
     /// </summary>
     /// <returns>the HashMap of labels and their probabilities</returns>
-    public virtual T GetLabel()
-    {
-        return label;
-    }
+    public virtual T Label => label;
 
     public override string ToString()
-    {
-        return label == null ? "" + probability : label.ToString() + ":" + probability;
-    }
+        => label == null
+            ? probability.ToString(CultureInfo.InvariantCulture)
+            : $"{label}:{probability}";
 }

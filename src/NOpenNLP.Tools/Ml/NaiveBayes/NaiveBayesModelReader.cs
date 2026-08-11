@@ -29,11 +29,13 @@ namespace NOpenNLP.Tools.Ml.Naivebayes;
 /// </summary>
 public class NaiveBayesModelReader : AbstractModelReader
 {
-    public NaiveBayesModelReader(FileInfo file) : base(file)
+    public NaiveBayesModelReader(FileInfo file)
+        : base(file)
     {
     }
 
-    public NaiveBayesModelReader(IDataReader dataReader) : base(dataReader)
+    public NaiveBayesModelReader(IDataReader dataReader)
+        : base(dataReader)
     {
     }
 
@@ -59,9 +61,9 @@ public class NaiveBayesModelReader : AbstractModelReader
     ///     this NaiveBayesModelReader (usually via its the constructor).</returns>
     public override AbstractModel ConstructModel()
     {
-        string[] outcomeLabels = GetOutcomes();
-        int[][] outcomePatterns = GetOutcomePatterns();
-        string[] predLabels = GetPredicates();
+        string[] outcomeLabels = Outcomes;
+        int[][] outcomePatterns = OutcomePatterns;
+        string[] predLabels = Predicates;
         Context[] @params = GetParameters(outcomePatterns);
         return new NaiveBayesModel(@params, predLabels, outcomeLabels);
     }

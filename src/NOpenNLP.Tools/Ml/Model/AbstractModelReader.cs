@@ -32,7 +32,7 @@ public abstract class AbstractModelReader
     protected int NUM_PREDS;
     protected readonly IDataReader dataReader; // NOpenNLP: made readonly
 
-    public AbstractModelReader(FileInfo f)
+    protected AbstractModelReader(FileInfo f)
     {
         string filename = f.Name;
         Stream input;
@@ -62,7 +62,8 @@ public abstract class AbstractModelReader
         }
     }
 
-    public AbstractModelReader(IDataReader dataReader) : base()
+    protected AbstractModelReader(IDataReader dataReader)
+        /* : base() */
     {
         this.dataReader = dataReader;
     }
@@ -70,7 +71,7 @@ public abstract class AbstractModelReader
     /// <summary>
     /// Implement as needed for the format the model is stored in.
     /// </summary>
-    public virtual int ReadInt()
+    public virtual int ReadInt32()
     {
         return dataReader.ReadInt32();
     }
@@ -91,53 +92,65 @@ public abstract class AbstractModelReader
         return dataReader.ReadUTF();
     }
 
-    public virtual AbstractModel GetModel()
+    public virtual AbstractModel Model
     {
-        CheckModelType();
-        return ConstructModel();
+        get
+        {
+            CheckModelType();
+            return ConstructModel();
+        }
     }
 
     public abstract void CheckModelType();
 
     public abstract AbstractModel ConstructModel();
 
-    protected virtual string[] GetOutcomes()
+    protected virtual string[] Outcomes
     {
-        int numOutcomes = ReadInt();
-        string[] outcomeLabels = new string[numOutcomes];
-        for (int i = 0; i < numOutcomes; i++)
-            outcomeLabels[i] = ReadUTF();
-        return outcomeLabels;
+        get
+        {
+            int numOutcomes = ReadInt32();
+            string[] outcomeLabels = new string[numOutcomes];
+            for (int i = 0; i < numOutcomes; i++)
+                outcomeLabels[i] = ReadUTF();
+            return outcomeLabels;
+        }
     }
 
-    protected virtual int[][] GetOutcomePatterns()
+    protected virtual int[][] OutcomePatterns
     {
-        int numOCTypes = ReadInt();
-        int[][] outcomePatterns = new int[numOCTypes][];
-        for (int i = 0; i < numOCTypes; i++)
+        get
         {
-            StringTokenizer tok = new StringTokenizer(ReadUTF(), " ");
-            int[] infoInts = new int[tok.RemainingTokens];
-            int j = 0;
-            while (tok.MoveNext())
+            int numOCTypes = ReadInt32();
+            int[][] outcomePatterns = new int[numOCTypes][];
+            for (int i = 0; i < numOCTypes; i++)
             {
-                infoInts[j] = int.Parse(tok.Current);
-                j++;
+                StringTokenizer tok = new StringTokenizer(ReadUTF(), " ");
+                int[] infoInts = new int[tok.RemainingTokens];
+                int j = 0;
+                while (tok.MoveNext())
+                {
+                    infoInts[j] = int.Parse(tok.Current);
+                    j++;
+                }
+
+                outcomePatterns[i] = infoInts;
             }
 
-            outcomePatterns[i] = infoInts;
+            return outcomePatterns;
         }
-
-        return outcomePatterns;
     }
 
-    protected virtual string[] GetPredicates()
+    protected virtual string[] Predicates
     {
-        NUM_PREDS = ReadInt();
-        string[] predLabels = new string[NUM_PREDS];
-        for (int i = 0; i < NUM_PREDS; i++)
-            predLabels[i] = ReadUTF();
-        return predLabels;
+        get
+        {
+            NUM_PREDS = ReadInt32();
+            string[] predLabels = new string[NUM_PREDS];
+            for (int i = 0; i < NUM_PREDS; i++)
+                predLabels[i] = ReadUTF();
+            return predLabels;
+        }
     }
 
     /// <summary>

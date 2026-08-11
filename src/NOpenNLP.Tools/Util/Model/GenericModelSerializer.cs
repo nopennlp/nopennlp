@@ -28,7 +28,7 @@ public class GenericModelSerializer : IArtifactSerializer<AbstractModel>
 {
     public virtual AbstractModel Create(Stream @in)
     {
-        return new GenericModelReader(new BinaryFileDataReader(@in)).GetModel();
+        return new GenericModelReader(new BinaryFileDataReader(@in)).Model;
     }
 
     // public virtual void Serialize(AbstractModel artifact, Stream @out)

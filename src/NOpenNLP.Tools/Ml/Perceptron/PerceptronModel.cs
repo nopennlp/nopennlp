@@ -47,7 +47,7 @@ public class PerceptronModel : AbstractModel
         return Eval(context, null, probs);
     }
 
-    public virtual double[] Eval(string[] context, float[] values, double[] outsums)
+    public virtual double[] Eval(string[] context, float[]? values, double[] outsums)
     {
         Context[] scontexts = new Context[context.Length];
         outsums.Fill(0);
@@ -66,7 +66,7 @@ public class PerceptronModel : AbstractModel
         return Eval(context, null, prior, model, true);
     }
 
-    static double[] Eval(int[] context, float[] values, double[] prior, EvalParameters model, bool normalize)
+    internal static double[] Eval(int[] context, float[]? values, double[] prior, EvalParameters model, bool normalize)
     {
         Context[] scontexts = new Context[context.Length];
         for (int i = 0; i < context.Length; i++)
@@ -77,7 +77,7 @@ public class PerceptronModel : AbstractModel
         return Eval(scontexts, values, prior, model, normalize);
     }
 
-    static double[] Eval(Context[] context, float[] values, double[] prior, EvalParameters model, bool normalize)
+    internal static double[] Eval(Context[] context, float[]? values, double[] prior, EvalParameters model, bool normalize)
     {
         ArrayMath.SumFeatures(context, values, prior);
         if (normalize)

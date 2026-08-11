@@ -92,10 +92,7 @@ public class POSTaggerME : IPOSTagger
     /// tagger.
     /// </summary>
     /// <returns>String[]</returns>
-    public virtual string[] GetAllPosTags()
-    {
-        return model.GetOutcomes();
-    }
+    public virtual string[] AllPosTags => model.Outcomes;
 
     public virtual string[] Tag(string[] sentence)
     {

@@ -52,16 +52,34 @@ public class PlainTextFileDataReader : IDataReader
 
     public virtual double ReadDouble()
     {
-        return double.Parse(input.ReadLine());
+        // NOpenNLP: validate we're not at the end of the stream
+        if (input.ReadLine() is not { } line)
+        {
+            throw new EndOfStreamException();
+        }
+
+        return double.Parse(line);
     }
 
     public virtual int ReadInt32()
     {
-        return int.Parse(input.ReadLine());
+        // NOpenNLP: validate we're not at the end of the stream
+        if (input.ReadLine() is not { } line)
+        {
+            throw new EndOfStreamException();
+        }
+
+        return int.Parse(line);
     }
 
     public virtual string ReadUTF()
     {
-        return input.ReadLine();
+        // NOpenNLP: validate we're not at the end of the stream
+        if (input.ReadLine() is not { } line)
+        {
+            throw new EndOfStreamException();
+        }
+
+        return line;
     }
 }

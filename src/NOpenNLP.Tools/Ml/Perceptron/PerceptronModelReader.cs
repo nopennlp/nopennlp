@@ -29,11 +29,13 @@ namespace NOpenNLP.Tools.Ml.Perceptron;
 /// </summary>
 public class PerceptronModelReader : AbstractModelReader
 {
-    public PerceptronModelReader(FileInfo file) : base(file)
+    public PerceptronModelReader(FileInfo file)
+        : base(file)
     {
     }
 
-    public PerceptronModelReader(IDataReader dataReader) : base(dataReader)
+    public PerceptronModelReader(IDataReader dataReader)
+        : base(dataReader)
     {
     }
 
@@ -59,9 +61,9 @@ public class PerceptronModelReader : AbstractModelReader
     ///         this PerceptronModelReader (usually via its the constructor).</returns>
     public override AbstractModel ConstructModel()
     {
-        string[] outcomeLabels = GetOutcomes();
-        int[][] outcomePatterns = GetOutcomePatterns();
-        string[] predLabels = GetPredicates();
+        string[] outcomeLabels = Outcomes;
+        int[][] outcomePatterns = OutcomePatterns;
+        string[] predLabels = Predicates;
         Context[] @params = GetParameters(outcomePatterns);
         return new PerceptronModel(@params, predLabels, outcomeLabels);
     }
@@ -70,6 +72,6 @@ public class PerceptronModelReader : AbstractModelReader
     {
         string modelType = ReadUTF();
         if (!modelType.Equals("Perceptron"))
-            Console.WriteLine("Error: attempting to load a " + modelType + " model as a Perceptron model." + " You should expect problems.");
+            Console.WriteLine($"Error: attempting to load a {modelType} model as a Perceptron model. You should expect problems.");
     }
 }

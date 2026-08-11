@@ -34,7 +34,7 @@ public interface ISequenceClassificationModel<T>
     /// <param name="cg"></param>
     /// <param name="validator"></param>
     /// <returns></returns>
-    Sequence BestSequence(T[] sequence, object[] additionalContext, IBeamSearchContextGenerator<T> cg, ISequenceValidator<T> validator);
+    Sequence? BestSequence(T[] sequence, object[] additionalContext, IBeamSearchContextGenerator<T> cg, ISequenceValidator<T> validator);
 
     /// <summary>
     /// Finds the n most probable sequences.
@@ -60,5 +60,5 @@ public interface ISequenceClassificationModel<T>
     /// Returns all possible outcomes.
     /// </summary>
     /// <returns></returns>
-    string[] GetOutcomes();
+    string[] Outcomes { get; }
 }

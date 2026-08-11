@@ -27,7 +27,7 @@ namespace NOpenNLP.Tools.Ml;
 /// <summary>
 /// Utility class for simple vector arithmetic.
 /// </summary>
-public class ArrayMath
+public static class ArrayMath // NOpenNLP: made static
 {
     public static double InnerProduct(double[] vecA, double[] vecB)
     {
@@ -117,15 +117,14 @@ public class ArrayMath
         return maxIdx;
     }
 
-    public static void SumFeatures(Context[] context, float[] values, double[] prior)
+    public static void SumFeatures(Context?[] context, float[]? values, double[] prior)
     {
         for (int ci = 0; ci < context.Length; ci++)
         {
-            if (context[ci] != null)
+            if (context[ci] is { } predParams)
             {
-                Context predParams = context[ci];
-                int[] activeOutcomes = predParams.GetOutcomes();
-                double[] activeParameters = predParams.GetParameters();
+                int[] activeOutcomes = predParams.Outcomes;
+                double[] activeParameters = predParams.Parameters;
                 double value = 1;
                 if (values != null)
                 {

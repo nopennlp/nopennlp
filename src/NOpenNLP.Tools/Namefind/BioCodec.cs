@@ -32,7 +32,7 @@ public class BioCodec : ISequenceCodec<string>
     public const string OTHER = "other";
     private static readonly Regex typedOutcomePattern = new Regex("(.+)-\\w+", RegexOptions.Compiled);
 
-    static string? ExtractNameType(string outcome)
+    internal static string? ExtractNameType(string outcome)
     {
         var matcher = typedOutcomePattern.Match(outcome);
         if (matcher.Success)

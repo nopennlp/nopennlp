@@ -27,17 +27,7 @@ namespace NOpenNLP.Tools.Ml.Naivebayes;
 public class NaiveBayesEvalParameters(Context[] @params, int numOutcomes, double[] outcomeTotals, long vocabulary)
     : EvalParameters(@params, numOutcomes)
 {
-    // NOpenNLP: made readonly
-    protected readonly double[] outcomeTotals = outcomeTotals;
-    protected readonly long vocabulary = vocabulary;
+    public virtual double[] OutcomeTotals => outcomeTotals;
 
-    public virtual double[] GetOutcomeTotals()
-    {
-        return outcomeTotals;
-    }
-
-    public virtual long GetVocabulary()
-    {
-        return vocabulary;
-    }
+    public virtual long Vocabulary => vocabulary;
 }

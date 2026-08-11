@@ -30,7 +30,7 @@ public class UniformPrior : IPrior
     private int numOutcomes;
     private double r;
 
-    public virtual void LogPrior(double[] dist, int[] context, float[] values)
+    public virtual void LogPrior(double[] dist, int[]? context, float[]? values)
     {
         for (int oi = 0; oi < numOutcomes; oi++)
         {
@@ -40,7 +40,7 @@ public class UniformPrior : IPrior
 
     public virtual void LogPrior(double[] dist, Context[] context, float[] values)
     {
-        LogPrior(dist, (int[])null, values);
+        LogPrior(dist, (int[]?)null, values);
     }
 
     public virtual void LogPrior(double[] dist, int[] context)

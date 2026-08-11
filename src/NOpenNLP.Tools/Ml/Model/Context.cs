@@ -56,19 +56,13 @@ public class Context
     /// Returns the outcomes for which parameters exists for this context.
     /// </summary>
     /// <returns>Array of outcomes for which parameters exists for this context.</returns>
-    public virtual int[] GetOutcomes()
-    {
-        return outcomes;
-    }
+    public virtual int[] Outcomes => outcomes;
 
     /// <summary>
     /// Returns the parameters or expected values for the outcomes which occur with this context.
     /// </summary>
     /// <returns>Array of parameters for the outcomes of this context.</returns>
-    public virtual double[] GetParameters()
-    {
-        return parameters;
-    }
+    public virtual double[] Parameters => parameters;
 
     public override int GetHashCode()
     {

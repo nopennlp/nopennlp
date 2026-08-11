@@ -25,20 +25,18 @@ namespace NOpenNLP.Tools.Ml.Maxent.Quasinewton;
 
 public class QNModel : AbstractModel
 {
-    public QNModel(Context[] @params, string[] predLabels, string[] outcomeNames) : base(@params, predLabels, outcomeNames)
+    public QNModel(Context[] @params, string[] predLabels, string[] outcomeNames)
+        : base(@params, predLabels, outcomeNames)
     {
         modelType = ModelType.MaxentQn;
     }
 
-    public override int GetNumOutcomes()
-    {
-        return outcomeNames.Length;
-    }
+    public override int NumOutcomes => outcomeNames.Length;
 
-    private Context GetPredIndex(string predicate)
+    private Context? GetPredIndex(string predicate)
     {
         // NOpenNLP: Java's Map.get() returns null for an absent key; the .NET indexer throws.
-        pmap.TryGetValue(predicate, out Context value);
+        _ = pmap.TryGetValue(predicate, out var value);
         return value;
     }
 
@@ -69,18 +67,18 @@ public class QNModel : AbstractModel
     /// <param name="probs">
     ///          Probability for outcomes.</param>
     /// <returns>Normalized probabilities for the outcomes given the context.</returns>
-    private double[] Eval(string[] context, float[] values, double[] probs)
+    private double[] Eval(string[] context, float[]? values, double[] probs)
     {
         for (int ci = 0; ci < context.Length; ci++)
         {
-            Context pred = GetPredIndex(context[ci]);
+            Context? pred = GetPredIndex(context[ci]);
             if (pred != null)
             {
                 double predValue = 1;
                 if (values != null)
                     predValue = values[ci];
-                double[] parameters = pred.GetParameters();
-                int[] outcomes = pred.GetOutcomes();
+                double[] parameters = pred.Parameters;
+                int[] outcomes = pred.Outcomes;
                 for (int i = 0; i < outcomes.Length; i++)
                 {
                     int oi = outcomes[i];
@@ -116,7 +114,7 @@ public class QNModel : AbstractModel
     /// <param name="parameters">
     ///          Model parameters</param>
     /// <returns>Normalized probabilities for the outcomes given the context.</returns>
-    static double[] Eval(int[] context, float[] values, double[] probs, int nOutcomes, int nPredLabels, double[] parameters)
+    internal static double[] Eval(int[] context, float[] values, double[] probs, int nOutcomes, int nPredLabels, double[] parameters)
     {
         for (int i = 0; i < context.Length; i++)
         {

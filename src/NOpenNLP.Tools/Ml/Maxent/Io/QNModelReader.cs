@@ -27,11 +27,13 @@ namespace NOpenNLP.Tools.Ml.Maxent.Io;
 
 public class QNModelReader : GISModelReader
 {
-    public QNModelReader(IDataReader dataReader) : base(dataReader)
+    public QNModelReader(IDataReader dataReader)
+        : base(dataReader)
     {
     }
 
-    public QNModelReader(FileInfo file) : base(file)
+    public QNModelReader(FileInfo file)
+        : base(file)
     {
     }
 
@@ -47,9 +49,9 @@ public class QNModelReader : GISModelReader
     // returned instance is still a QNModel.
     public override AbstractModel ConstructModel()
     {
-        string[] outcomeLabels = GetOutcomes();
-        int[][] outcomePatterns = GetOutcomePatterns();
-        string[] predLabels = GetPredicates();
+        string[] outcomeLabels = Outcomes;
+        int[][] outcomePatterns = OutcomePatterns;
+        string[] predLabels = Predicates;
         Context[] @params = GetParameters(outcomePatterns);
         return new QNModel(@params, predLabels, outcomeLabels);
     }

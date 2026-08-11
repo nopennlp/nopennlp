@@ -29,11 +29,13 @@ namespace NOpenNLP.Tools.Ml.Maxent.Io;
 /// </summary>
 public class GISModelReader : AbstractModelReader
 {
-    public GISModelReader(FileInfo file) : base(file)
+    public GISModelReader(FileInfo file)
+        : base(file)
     {
     }
 
-    public GISModelReader(IDataReader dataReader) : base(dataReader)
+    public GISModelReader(IDataReader dataReader)
+        : base(dataReader)
     {
     }
 
@@ -64,13 +66,13 @@ public class GISModelReader : AbstractModelReader
     public override AbstractModel ConstructModel()
     {
         // read correction constant (not used anymore)
-        ReadInt();
+        ReadInt32();
 
         // read correction params (not used anymore)
         ReadDouble();
-        string[] outcomeLabels = GetOutcomes();
-        int[][] outcomePatterns = GetOutcomePatterns();
-        string[] predLabels = GetPredicates();
+        string[] outcomeLabels = Outcomes;
+        int[][] outcomePatterns = OutcomePatterns;
+        string[] predLabels = Predicates;
         Context[] @params = GetParameters(outcomePatterns);
         return new GISModel(@params, predLabels, outcomeLabels);
     }

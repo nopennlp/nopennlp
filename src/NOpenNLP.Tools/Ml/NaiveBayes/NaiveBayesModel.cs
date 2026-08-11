@@ -32,7 +32,7 @@ public class NaiveBayesModel : AbstractModel
     protected readonly double[] outcomeTotals; // NOpenNLP: made readonly
     protected long vocabulary;
 
-    NaiveBayesModel(Context[] @params, string[] predLabels, Dictionary<string, Context> pmap, string[] outcomeNames) : base(@params, predLabels, pmap, outcomeNames)
+    internal NaiveBayesModel(Context[] @params, string[] predLabels, Dictionary<string, Context> pmap, string[] outcomeNames) : base(@params, predLabels, pmap, outcomeNames)
     {
         outcomeTotals = InitOutcomeTotals(outcomeNames, @params);
         this.evalParams = new NaiveBayesEvalParameters(@params, outcomeNames.Length, outcomeTotals, predLabels.Length);
@@ -52,10 +52,10 @@ public class NaiveBayesModel : AbstractModel
         for (int i = 0; i < @params.Length; ++i)
         {
             Context context = @params[i];
-            for (int j = 0; j < context.GetOutcomes().Length; ++j)
+            for (int j = 0; j < context.Outcomes.Length; ++j)
             {
-                int outcome = context.GetOutcomes()[j];
-                double count = context.GetParameters()[j];
+                int outcome = context.Outcomes[j];
+                double count = context.Parameters[j];
                 outcomeTotals[outcome] += count;
             }
         }
@@ -78,7 +78,7 @@ public class NaiveBayesModel : AbstractModel
         return Eval(context, null, probs);
     }
 
-    public virtual double[] Eval(string[] context, float[] values, double[] outsums)
+    public virtual double[] Eval(string[] context, float[]? values, double[] outsums)
     {
         Context[] scontexts = new Context[context.Length];
         outsums.Fill(0);
@@ -97,21 +97,20 @@ public class NaiveBayesModel : AbstractModel
         return Eval(context, null, prior, model, true);
     }
 
-    static double[] Eval(Context[] context, float[] values, double[] prior, EvalParameters model, bool normalize)
+    internal static double[] Eval(Context?[] context, float[]? values, double[] prior, EvalParameters model, bool normalize)
     {
         Probabilities<int> probabilities = new LogProbabilities<int>();
-        double[] outcomeTotals = model is NaiveBayesEvalParameters ? ((NaiveBayesEvalParameters)model).GetOutcomeTotals() : new double[prior.Length];
-        long vocabulary = model is NaiveBayesEvalParameters ? ((NaiveBayesEvalParameters)model).GetVocabulary() : 0;
+        double[] outcomeTotals = model is NaiveBayesEvalParameters naiveBayesEvalParameters ? naiveBayesEvalParameters.OutcomeTotals : new double[prior.Length];
+        long vocabulary = model is NaiveBayesEvalParameters naiveBayesEvalParameters2 ? naiveBayesEvalParameters2.Vocabulary : 0;
         double[] activeParameters;
         int[] activeOutcomes;
         double value = 1;
         for (int ci = 0; ci < context.Length; ci++)
         {
-            if (context[ci] != null)
+            if (context[ci] is { } predParams)
             {
-                Context predParams = context[ci];
-                activeOutcomes = predParams.GetOutcomes();
-                activeParameters = predParams.GetParameters();
+                activeOutcomes = predParams.Outcomes;
+                activeParameters = predParams.Parameters;
                 if (values != null)
                 {
                     value = values[ci];
@@ -148,7 +147,7 @@ public class NaiveBayesModel : AbstractModel
         return prior;
     }
 
-    static double[] Eval(int[] context, float[] values, double[] prior, EvalParameters model, bool normalize)
+    internal static double[] Eval(int[] context, float[]? values, double[] prior, EvalParameters model, bool normalize)
     {
         Context[] scontexts = new Context[context.Length];
         for (int i = 0; i < context.Length; i++)

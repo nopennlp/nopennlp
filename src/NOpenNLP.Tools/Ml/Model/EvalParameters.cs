@@ -61,7 +61,7 @@ public class EvalParameters(Context[] @params, int numOutcomes)
         return HashCode.Combine(Arrays.GetHashCode(@params), numOutcomes, correctionConstant);
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (obj == this)
         {

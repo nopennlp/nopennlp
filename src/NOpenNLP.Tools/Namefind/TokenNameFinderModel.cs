@@ -60,7 +60,7 @@ public class TokenNameFinderModel : BaseModel
         : base(COMPONENT_NAME, languageCode, manifestInfoEntries, factory)
     {
         Init(nameFinderModel, generatorDescriptor, resources, manifestInfoEntries, seqCodec);
-        if (!seqCodec.AreOutcomesCompatible(nameFinderModel.GetOutcomes()))
+        if (!seqCodec.AreOutcomesCompatible(nameFinderModel.Outcomes))
         {
             throw new ArgumentException("Model not compatible with name finder!");
         }
@@ -213,8 +213,8 @@ public class TokenNameFinderModel : BaseModel
 
     private bool IsModelValid(IMaxentModel model)
     {
-        string[] outcomes = new string[model.GetNumOutcomes()];
-        for (int i = 0; i < model.GetNumOutcomes(); i++)
+        string[] outcomes = new string[model.NumOutcomes];
+        for (int i = 0; i < model.NumOutcomes; i++)
         {
             outcomes[i] = model.GetOutcome(i);
         }

@@ -105,5 +105,5 @@ public interface IMaxentModel
     /// Returns the number of outcomes for this model.
     /// </summary>
     /// <returns>The number of outcomes.</returns>
-    int GetNumOutcomes();
+    int NumOutcomes { get; }
 }

@@ -17,7 +17,6 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using System;
 using System.Text;
 
 namespace NOpenNLP.Tools.Ml.Model;
@@ -29,27 +28,15 @@ namespace NOpenNLP.Tools.Ml.Model;
 // NOpenNLP: used optional parameter instead of ctor overload
 public class Event(string outcome, string[] context, float[]? values = null)
 {
-    private readonly string outcome = outcome ?? throw new ArgumentNullException(nameof(outcome));
-    private readonly string[] context = context ?? throw new ArgumentNullException(nameof(context));
+    public virtual string Outcome => outcome;
 
-    public virtual string GetOutcome()
-    {
-        return outcome;
-    }
+    public virtual string[] Context => context;
 
-    public virtual string[] GetContext()
-    {
-        return context;
-    }
-
-    public virtual float[]? GetValues()
-    {
-        return values;
-    }
+    public virtual float[]? Values => values;
 
     public override string ToString()
     {
-        StringBuilder sb = new StringBuilder();
+        var sb = new StringBuilder();
         sb.Append(outcome).Append(" [");
         if (context.Length > 0)
         {

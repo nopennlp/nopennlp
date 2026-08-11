@@ -103,13 +103,13 @@ public sealed class GISModel : AbstractModel
     ///         The indexes of the double[] are the outcome ids, and the actual
     ///         string representation of the outcomes can be obtained from the
     ///         method getOutcome(int i).</returns>
-    public double[] Eval(string[] context, float[] values, double[] outsums)
+    public double[] Eval(string[] context, float[]? values, double[] outsums)
     {
         Context[] scontexts = new Context[context.Length];
         for (int i = 0; i < context.Length; i++)
         {
             // NOpenNLP: Java's Map.get() returns null for an absent key; the .NET indexer throws.
-            pmap.TryGetValue(context[i], out Context ctx);
+            pmap.TryGetValue(context[i], out var ctx);
             scontexts[i] = ctx;
         }
 
@@ -154,7 +154,7 @@ public sealed class GISModel : AbstractModel
     ///         The indexes of the double[] are the outcome ids, and the actual
     ///         string representation of the outcomes can be obtained from the
     ///         method getOutcome(int i).</returns>
-    static double[] Eval(int[] context, float[] values, double[] prior, EvalParameters model)
+    internal static double[] Eval(int[] context, float[]? values, double[] prior, EvalParameters model)
     {
         Context[] scontexts = new Context[context.Length];
         for (int i = 0; i < context.Length; i++)
@@ -182,7 +182,7 @@ public sealed class GISModel : AbstractModel
     ///         The indexes of the double[] are the outcome ids, and the actual
     ///         string representation of the outcomes can be obtained from the
     ///         method getOutcome(int i).</returns>
-    static double[] Eval(Context[] context, float[] values, double[] prior, EvalParameters model)
+    internal static double[] Eval(Context[] context, float[]? values, double[] prior, EvalParameters model)
     {
         ArrayMath.SumFeatures(context, values, prior);
         double normal = 0;
