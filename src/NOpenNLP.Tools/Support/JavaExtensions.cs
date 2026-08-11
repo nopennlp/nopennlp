@@ -37,14 +37,14 @@ internal static class JavaExtensions
     /// When the previous value is not needed, assigning through the indexer is
     /// more efficient.
     /// </remarks>
-    public static TValue Put<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue value)
+    public static TValue? Put<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue value)
     {
         if (dictionary is null)
         {
             throw new ArgumentNullException(nameof(dictionary));
         }
 
-        if (!dictionary.TryGetValue(key, out TValue oldValue))
+        if (!dictionary.TryGetValue(key, out var oldValue))
         {
             oldValue = default;
         }

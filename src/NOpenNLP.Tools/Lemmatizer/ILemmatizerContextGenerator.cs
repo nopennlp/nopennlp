@@ -30,11 +30,11 @@ public interface ILemmatizerContextGenerator : IBeamSearchContextGenerator<strin
     /// Returns the contexts for lemmatizing of the specified index.
     /// </summary>
     /// <param name="i">The index of the token in the specified toks array for which the context should be constructed.</param>
-    /// <param name="toks">The tokens of the sentence.  The <code>toString</code> methods of
+    /// <param name="toks">The tokens of the sentence.  The <see cref="object.ToString()"/> methods of
     ///             these objects should return the token text.</param>
-    /// <param name="tags">The POS tags for the the specified tokens.</param>
+    /// <param name="tags">The POS tags for the specified tokens.</param>
     /// <param name="lemmas">The previous decisions made in the tagging of this sequence.
-    ///               Only indices less than i will be examined.</param>
+    ///               Only indices less than <paramref name="i"/> will be examined.</param>
     /// <returns>An array of predictive contexts on which a model basis its decisions.</returns>
     string[] GetContext(int i, string[] toks, string[] tags, string[] lemmas);
 }

@@ -31,7 +31,7 @@ public class EvalParameters(Context[] @params, int numOutcomes)
 {
     /// <summary>
     /// Mapping between outcomes and parameter values for each context.
-    /// The integer representation of the context can be found using <code>pmap</code>.
+    /// The integer representation of the context can be found using <c>pmap</c>.
     /// </summary>
     private readonly Context[] @params = @params; // NOpenNLP: made readonly
 

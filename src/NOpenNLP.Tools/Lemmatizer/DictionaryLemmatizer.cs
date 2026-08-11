@@ -21,6 +21,7 @@
 using NOpenNLP.Tools.Support;
 using System.Collections.Generic;
 using System.IO;
+using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Lemmatizer;
 
@@ -37,8 +38,8 @@ public class DictionaryLemmatizer : ILemmatizer
     // NOpenNLP: Java's HashMap keys on List.equals/hashCode (value equality), while
     // a .NET Dictionary would use reference equality for IList<string> keys and never
     // find a match. J2N's ListEqualityComparer restores the Java semantics.
-    private readonly Dictionary<IList<string>, IList<string>> dictMap =
-        new(J2N.Collections.Generic.ListEqualityComparer<string>.Default);
+    private readonly JCG.Dictionary<IList<string>, IList<string>> dictMap =
+        new(JCG.ListEqualityComparer<string>.Default);
 
     /// <summary>
     /// Construct a hashmap from the input tab separated dictionary.
@@ -60,7 +61,8 @@ public class DictionaryLemmatizer : ILemmatizer
         Init(@in);
     }
 
-    public DictionaryLemmatizer(string dictionaryFile) : this(new FileInfo(dictionaryFile))
+    public DictionaryLemmatizer(string dictionaryFile)
+        : this(new FileInfo(dictionaryFile))
     {
     }
 
@@ -79,10 +81,7 @@ public class DictionaryLemmatizer : ILemmatizer
     /// Get the Map containing the dictionary.
     /// </summary>
     /// <returns>dictMap the Map</returns>
-    public virtual Dictionary<IList<string>, IList<string>> GetDictMap()
-    {
-        return dictMap;
-    }
+    public virtual IDictionary<IList<string>, IList<string>> DictMap => dictMap;
 
     /// <summary>
     /// Get the dictionary keys (word and postag).
@@ -92,7 +91,7 @@ public class DictionaryLemmatizer : ILemmatizer
     /// <param name="postag">
     ///          the assigned postag</param>
     /// <returns>returns the dictionary keys</returns>
-    private IList<string> GetDictKeys(string word, string postag)
+    private static IList<string> GetDictKeys(string word, string postag) // NOpenNLP: made static
     {
         var keys = new List<string>();
         keys.AddRange([word.ToLower(), postag]);

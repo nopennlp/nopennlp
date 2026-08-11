@@ -49,23 +49,23 @@ public interface IEndOfSentenceScanner
     /// The receiver scans the specified string for sentence ending characters and
     /// returns their offsets.
     /// </summary>
-    /// <param name="s">a <code>String</code> value</param>
-    /// <returns>a <code>List</code> of Integer objects.</returns>
+    /// <param name="s">a <see cref="string"/> value</param>
+    /// <returns>a <see cref="List{T}"/> of <see cref="int"/>s.</returns>
     IList<int> GetPositions(string s);
 
     /// <summary>
     /// The receiver scans `buf' for sentence ending characters and
     /// returns their offsets.
     /// </summary>
-    /// <param name="buf">a <code>StringBuilder</code> value</param>
-    /// <returns>a <code>List</code> of Integer objects.</returns>
+    /// <param name="buf">a <see cref="StringBuilder"/> value</param>
+    /// <returns>a <see cref="List{T}"/> of <see cref="int"/>s.</returns>
     IList<int> GetPositions(StringBuilder buf);
 
     /// <summary>
     /// The receiver scans `cbuf' for sentence ending characters and
     /// returns their offsets.
     /// </summary>
-    /// <param name="cbuf">a <code>char[]</code> value</param>
-    /// <returns>a <code>List</code> of Integer objects.</returns>
+    /// <param name="cbuf">a <see cref="char[]"/> value</param>
+    /// <returns>a <see cref="List{T}"/> of <see cref="int"/>s.</returns>
     IList<int> GetPositions(char[] cbuf);
 }

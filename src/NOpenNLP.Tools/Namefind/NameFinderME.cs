@@ -123,8 +123,8 @@ public class NameFinderME : ITokenNameFinder
     /// <summary>
     /// Populates the specified array with the probabilities of the last decoded
     /// sequence. The sequence was determined based on the previous call to
-    /// <code>chunk</code>. The specified array should be at least as large as the
-    /// number of tokens in the previous call to <code>chunk</code>.
+    /// <see cref="Find(string[], string[][])"/>. The specified array should be at least as large as the
+    /// number of tokens in the previous call to <see cref="Find(string[], string[][])"/>.
     /// </summary>
     /// <param name="probs">An array used to hold the probabilities of the last decoded
     ///     sequence.</param>
@@ -135,10 +135,10 @@ public class NameFinderME : ITokenNameFinder
 
     /// <summary>
     /// Returns an array with the probabilities of the last decoded sequence. The
-    /// sequence was determined based on the previous call to <code>chunk</code>.
+    /// sequence was determined based on the previous call to <see cref="Find(string[], string[][])"/>.
     /// </summary>
     /// <returns>An array with the same number of probabilities as tokens were sent
-    ///     to <code>chunk</code> when it was last called.</returns>
+    ///     to <see cref="Find(string[], string[][])"/> when it was last called.</returns>
     public virtual double[] Probs()
     {
         return bestSequence.GetProbs();

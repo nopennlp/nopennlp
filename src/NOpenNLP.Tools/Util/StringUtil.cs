@@ -37,7 +37,7 @@ public class StringUtil
     /// <li>Its a part of the Unicode Zs category (<see cref="System.Globalization.UnicodeCategory.SpaceSeparator"/>).</li>
     /// </ul>
     ///
-    /// <code>Character.isWhitespace(int)</code> does not include no-break spaces.
+    /// <c>Character.isWhitespace(int)</c> does not include no-break spaces.
     /// In OpenNLP no-break spaces are also considered as white spaces.
     /// </summary>
     /// <param name="charCode"></param>
@@ -58,7 +58,7 @@ public class StringUtil
     /// <li>Its a part of the Unicode Zs category (<see cref="System.Globalization.UnicodeCategory.SpaceSeparator"/>).</li>
     /// </ul>
     ///
-    /// <code>Character.isWhitespace(int)</code> does not include no-break spaces.
+    /// <c>Character.isWhitespace(int)</c> does not include no-break spaces.
     /// In OpenNLP no-break spaces are also considered as white spaces.
     /// </summary>
     /// <param name="charCode"></param>

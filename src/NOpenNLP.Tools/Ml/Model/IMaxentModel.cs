@@ -57,22 +57,22 @@ public interface IMaxentModel
     /// Simple function to return the outcome associated with the index
     /// containing the highest probability in the double[].
     /// </summary>
-    /// <param name="outcomes">A <code>double[]</code> as returned by the
-    ///            <code>eval(String[] context)</code>
+    /// <param name="outcomes">A <c>double[]</c> as returned by the
+    ///            <c>eval(String[] context)</c>
     ///            method.</param>
     /// <returns>the String name of the best outcome</returns>
     string GetBestOutcome(double[] outcomes);
 
     /// <summary>
     /// Return a string matching all the outcome names with all the
-    /// probabilities produced by the <code>eval(String[]
-    /// context)</code> method.
+    /// probabilities produced by the <c>eval(String[]
+    /// context)</c> method.
     /// </summary>
-    /// <param name="outcomes">A <code>double[]</code> as returned by the
-    ///            <code>eval(String[] context)</code>
+    /// <param name="outcomes">A <c>double[]</c> as returned by the
+    ///            <c>eval(String[] context)</c>
     ///            method.</param>
     /// <returns>   String containing outcome names paired with the normalized
-    ///            probability (contained in the <code>double[] ocs</code>)
+    ///            probability (contained in the <c>double[] ocs</c>)
     ///            for each one.</returns>
     // TODO: This should be removed, can't be used anyway without format spec
     string GetAllOutcomes(double[] outcomes);

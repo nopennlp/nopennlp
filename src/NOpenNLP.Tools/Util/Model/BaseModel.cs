@@ -18,13 +18,13 @@
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
-#nullable enable
 using NOpenNLP.Tools.Util.Ext;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using NOpenNLP.Tools.Support;
+using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Util.Model;
 
@@ -49,12 +49,12 @@ public abstract class BaseModel : IArtifactProvider
     public const string TRAINING_ITERATIONS_PROPERTY = "Training-Iterations";
     public const string TRAINING_EVENTHASH_PROPERTY = "Training-Eventhash";
     private const string SERIALIZER_CLASS_NAME_PREFIX = "serializer-class-";
-    private readonly Dictionary<string, IArtifactSerializer> artifactSerializers = new Dictionary<string, IArtifactSerializer>();
-    protected readonly Dictionary<string, object> artifactMap = new Dictionary<string, object>();
-    public BaseToolFactory toolFactory;
+    private readonly JCG.Dictionary<string, IArtifactSerializer> artifactSerializers = new();
+    protected readonly IDictionary<string, object> artifactMap = new Dictionary<string, object>();
+    public BaseToolFactory? toolFactory;
     private readonly string componentName;
-    private bool subclassSerializersInitiated = false;
-    private bool finishedLoadingArtifacts = false;
+    private bool subclassSerializersInitiated /* = false */;
+    private bool finishedLoadingArtifacts /* = false */;
     private readonly bool isLoadedFromSerialized;
 
     private BaseModel(string componentName, bool isLoadedFromSerialized)
@@ -78,7 +78,8 @@ public abstract class BaseModel : IArtifactProvider
     ///          additional information in the manifest</param>
     /// <param name="factory">
     ///          the factory</param>
-    public BaseModel(string componentName, string languageCode, Dictionary<string, string>? manifestInfoEntries, BaseToolFactory? factory) : this(componentName, false)
+    public BaseModel(string componentName, string languageCode, IDictionary<string, string>? manifestInfoEntries, BaseToolFactory? factory)
+        : this(componentName, false)
     {
         // NOpenNLP: ArgumentException.ThrowIfNullOrEmpty is net7.0+.
         if (string.IsNullOrEmpty(languageCode))
@@ -302,12 +303,12 @@ public abstract class BaseModel : IArtifactProvider
     /// <param name="entry">the entry name which contains the extension</param>
     /// <returns>the extension</returns>
     /// <exception cref="InvalidFormatException">if no extension can be extracted</exception>
-    private string GetEntryExtension(string entry)
+    private static string GetEntryExtension(string entry) // NOpenNLP: made static
     {
         int extensionIndex = entry.LastIndexOf('.') + 1;
         if (extensionIndex == -1 || extensionIndex >= entry.Length)
             throw new InvalidFormatException("Entry name must have type extension: " + entry);
-        return entry.Substring(extensionIndex);
+        return entry[extensionIndex..];
     }
 
     public virtual IArtifactSerializer GetArtifactSerializer(string resourceName)
@@ -348,13 +349,13 @@ public abstract class BaseModel : IArtifactProvider
     /// </summary>
     /// <param name="serializers">the key of the map is the file extension used to lookup
     ///     the <see cref="IArtifactSerializer"/>.</param>
-    public virtual void CreateArtifactSerializers(Dictionary<string, IArtifactSerializer> serializers)
+    public virtual void CreateArtifactSerializers(IDictionary<string, IArtifactSerializer> serializers)
     {
         if (this.toolFactory != null)
             serializers.PutAll(this.toolFactory.CreateArtifactSerializersMap());
     }
 
-    private void CreateBaseArtifactSerializers(Dictionary<string, IArtifactSerializer> serializers)
+    private void CreateBaseArtifactSerializers(JCG.Dictionary<string, IArtifactSerializer> serializers)
     {
         serializers.PutAll(CreateArtifactSerializers());
     }

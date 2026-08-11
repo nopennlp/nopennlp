@@ -109,14 +109,14 @@ public abstract class AbstractModel : IMaxentModel
 
     /// <summary>
     /// Return a string matching all the outcome names with all the
-    /// probabilities produced by the <code>eval(String[] context)</code>
+    /// probabilities produced by the <c>eval(String[] context)</c>
     /// method.
     /// </summary>
-    /// <param name="ocs">A <code>double[]</code> as returned by the
-    ///            <code>eval(String[] context)</code>
+    /// <param name="ocs">A <c>double[]</c> as returned by the
+    ///            <c>eval(String[] context)</c>
     ///            method.</param>
     /// <returns>   String containing outcome names paired with the normalized
-    ///            probability (contained in the <code>double[] ocs</code>)
+    ///            probability (contained in the <c>double[] ocs</c>)
     ///            for each one.</returns>
     public string GetAllOutcomes(double[] ocs)
     {

@@ -151,7 +151,7 @@ public sealed class POSModel : BaseModel, ISerializableArtifact
         return (POSTaggerFactory)this.toolFactory;
     }
 
-    public override void CreateArtifactSerializers(Dictionary<string, IArtifactSerializer> serializers)
+    public override void CreateArtifactSerializers(IDictionary<string, IArtifactSerializer> serializers)
     {
         base.CreateArtifactSerializers(serializers);
         serializers.Put("featuregen", new ByteArraySerializer());

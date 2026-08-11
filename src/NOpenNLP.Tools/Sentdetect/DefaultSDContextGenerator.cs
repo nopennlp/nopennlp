@@ -44,7 +44,7 @@ public class DefaultSDContextGenerator : ISDContextGenerator
     private readonly HashSet<char> eosCharacters;
 
     /// <summary>
-    /// Creates a new <code>ISDContextGenerator</code> instance with
+    /// Creates a new <see cref="ISDContextGenerator"/> instance with
     /// no induced abbreviations.
     /// </summary>
     /// <param name="eosCharacters"></param>
@@ -53,10 +53,10 @@ public class DefaultSDContextGenerator : ISDContextGenerator
     }
 
     /// <summary>
-    /// Creates a new <code>ISDContextGenerator</code> instance which uses
+    /// Creates a new <see cref="ISDContextGenerator"/> instance which uses
     /// the set of induced abbreviations.
     /// </summary>
-    /// <param name="inducedAbbreviations">a <code>Set</code> of Strings
+    /// <param name="inducedAbbreviations">a <see cref="ISet{T}"/> of <see cref="string"/>s
     ///     representing induced abbreviations in the training data.
     ///     Example: &quot;Mr.&quot;</param>
     /// <param name="eosCharacters"></param>

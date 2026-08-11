@@ -102,7 +102,7 @@ public class TokenizerME : AbstractTokenizer
 
     /// <summary>
     /// List of probabilities for each token returned from a call to
-    /// <code>tokenize</code> or <code>tokenizePos</code>.
+    /// <see cref="TokenizePos"/>.
     /// </summary>
     private readonly IList<double> tokProbs; // NOpenNLP: made readonly
 

@@ -112,8 +112,8 @@ public class ExtensionLoader
     /// <para/>
     /// Initially it tries using the public default
     /// constructor. If it is not found, it will check if the class follows the singleton
-    /// pattern: a static field named <code>INSTANCE</code> that returns an object of the type
-    /// <code>T</code>.
+    /// pattern: a static field named <c>INSTANCE</c> that returns an object of the type
+    /// <typeparamref name="T"/>.
     /// </summary>
     /// <param name="extensionClassName"></param>
     /// <returns>the instance of the extension class</returns>

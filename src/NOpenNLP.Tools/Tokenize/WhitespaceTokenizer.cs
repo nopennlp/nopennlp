@@ -26,7 +26,7 @@ namespace NOpenNLP.Tools.Tokenize;
 /// This tokenizer uses white spaces to tokenize the input text.
 ///
 /// To obtain an instance of this tokenizer use the static final
-/// <code>INSTANCE</code> field.
+/// <see cref="INSTANCE"/> field.
 /// </summary>
 public class WhitespaceTokenizer : AbstractTokenizer
 {

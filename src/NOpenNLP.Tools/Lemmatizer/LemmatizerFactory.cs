@@ -34,7 +34,7 @@ public class LemmatizerFactory : BaseToolFactory
     {
     }
 
-    public static LemmatizerFactory Create(string subclassName)
+    public static LemmatizerFactory Create(string? subclassName)
     {
         if (subclassName == null)
         {
@@ -48,7 +48,7 @@ public class LemmatizerFactory : BaseToolFactory
         }
         catch (Exception e)
         {
-            string msg = "Could not instantiate the " + subclassName + ". The initialization throw an exception.";
+            string msg = $"Could not instantiate the {subclassName}. The initialization throw an exception.";
             Console.Error.WriteLine(msg);
             e.PrintStackTrace();
             throw new InvalidFormatException(msg, e);
@@ -59,13 +59,7 @@ public class LemmatizerFactory : BaseToolFactory
     {
     }
 
-    public virtual ISequenceValidator<string> GetSequenceValidator()
-    {
-        return new DefaultLemmatizerSequenceValidator();
-    }
+    public virtual ISequenceValidator<string> SequenceValidator => new DefaultLemmatizerSequenceValidator();
 
-    public virtual ILemmatizerContextGenerator GetContextGenerator()
-    {
-        return new DefaultLemmatizerContextGenerator();
-    }
+    public virtual ILemmatizerContextGenerator ContextGenerator => new DefaultLemmatizerContextGenerator();
 }

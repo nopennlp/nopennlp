@@ -18,6 +18,7 @@
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
+using System;
 using NOpenNLP.Tools.Ml;
 using NOpenNLP.Tools.Ml.Model;
 using NOpenNLP.Tools.Util;
@@ -37,7 +38,7 @@ public class LemmatizerME : ILemmatizer
     public const int LEMMA_NUMBER = 29;
     public const int DEFAULT_BEAM_SIZE = 3;
     protected readonly int beamSize; // NOpenNLP: made readonly
-    private Sequence bestSequence;
+    private Sequence? bestSequence;
 
     // NOpenNLP: made readonly
     private readonly ISequenceClassificationModel<string> model;
@@ -53,22 +54,22 @@ public class LemmatizerME : ILemmatizer
     {
         var factory = model.GetFactory();
         int defaultBeamSize = DEFAULT_BEAM_SIZE;
-        string beamSizeString = model.GetManifestProperty(BeamSearch.BEAM_SIZE_PARAMETER);
+        string? beamSizeString = model.GetManifestProperty(BeamSearch.BEAM_SIZE_PARAMETER);
         if (beamSizeString != null)
         {
             defaultBeamSize = int.Parse(beamSizeString);
         }
 
-        contextGenerator = factory.GetContextGenerator();
+        contextGenerator = factory.ContextGenerator;
         beamSize = defaultBeamSize;
-        sequenceValidator = factory.GetSequenceValidator();
-        if (model.GetLemmatizerSequenceModel() != null)
+        sequenceValidator = factory.SequenceValidator;
+        if (model.LemmatizerSequenceModel is { } lemmatizerSequenceModel)
         {
-            this.model = model.GetLemmatizerSequenceModel();
+            this.model = lemmatizerSequenceModel;
         }
         else
         {
-            this.model = new BeamSearch<string>(beamSize, (IMaxentModel)model.GetLemmatizerSequenceModel(), 0);
+            this.model = new BeamSearch<string>(beamSize, (IMaxentModel)model.LemmatizerSequenceModel, 0);
         }
     }
 
@@ -168,35 +169,43 @@ public class LemmatizerME : ILemmatizer
     }
 
     public virtual Sequence[] TopKSequences(string[] sentence, string[] tags)
-    {
-        return model.BestSequences(DEFAULT_BEAM_SIZE, sentence, [tags], contextGenerator, sequenceValidator);
-    }
+        => model.BestSequences(DEFAULT_BEAM_SIZE, sentence, [tags], contextGenerator, sequenceValidator);
 
     public virtual Sequence[] TopKSequences(string[] sentence, string[] tags, double minSequenceScore)
-    {
-        return model.BestSequences(DEFAULT_BEAM_SIZE, sentence, [tags], minSequenceScore, contextGenerator, sequenceValidator);
-    }
+        => model.BestSequences(DEFAULT_BEAM_SIZE, sentence, [tags], minSequenceScore, contextGenerator, sequenceValidator);
 
     /// <summary>
     /// Populates the specified array with the probabilities of the last decoded sequence.  The
-    /// sequence was determined based on the previous call to <code>lemmatize</code>.  The
+    /// sequence was determined based on the previous call to <see cref="PredictSES"/>.  The
     /// specified array should be at least as large as the number of tokens in the
-    /// previous call to <code>lemmatize</code>.
+    /// previous call to <see cref="PredictSES"/>.
     /// </summary>
     /// <param name="probs">An array used to hold the probabilities of the last decoded sequence.</param>
     public virtual void Probs(double[] probs)
     {
+        // NOpenNLP: check to ensure bestSequence is not null, to avoid NRE
+        if (bestSequence is null)
+        {
+            throw new InvalidOperationException($"You must call {nameof(PredictSES)} before calling {nameof(Probs)}");
+        }
+
         bestSequence.GetProbs(probs);
     }
 
     /// <summary>
     /// Returns an array with the probabilities of the last decoded sequence.  The
-    /// sequence was determined based on the previous call to <code>chunk</code>.
+    /// sequence was determined based on the previous call to <see cref="PredictSES"/>.
     /// </summary>
-    /// <returns>An array with the same number of probabilities as tokens were sent to <code>chunk</code>
+    /// <returns>An array with the same number of probabilities as tokens were sent to <see cref="PredictSES"/>
     ///     when it was last called.</returns>
     public virtual double[] Probs()
     {
+        // NOpenNLP: check to ensure bestSequence is not null, to avoid NRE
+        if (bestSequence is null)
+        {
+            throw new InvalidOperationException($"You must call {nameof(PredictSES)} before calling {nameof(Probs)}");
+        }
+
         return bestSequence.GetProbs();
     }
 
@@ -244,12 +253,8 @@ public class LemmatizerME : ILemmatizer
     // }
 
     public virtual Sequence[] TopKLemmaClasses(string[] sentence, string[] tags)
-    {
-        return model.BestSequences(DEFAULT_BEAM_SIZE, sentence, [tags], contextGenerator, sequenceValidator);
-    }
+        => model.BestSequences(DEFAULT_BEAM_SIZE, sentence, [tags], contextGenerator, sequenceValidator);
 
     public virtual Sequence[] TopKLemmaClasses(string[] sentence, string[] tags, double minSequenceScore)
-    {
-        return model.BestSequences(DEFAULT_BEAM_SIZE, sentence, [tags], minSequenceScore, contextGenerator, sequenceValidator);
-    }
+        => model.BestSequences(DEFAULT_BEAM_SIZE, sentence, [tags], minSequenceScore, contextGenerator, sequenceValidator);
 }

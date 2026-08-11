@@ -46,7 +46,7 @@ public class DefaultLemmatizerContextGenerator : ILemmatizerContextGenerator
     /// The feature names built below become model lookup keys, so they must match
     /// what the trained (Java-produced) models expect.
     /// </summary>
-    private static string ToJavaString(string value) => value ?? "null";
+    private static string ToJavaString(string? value) => value ?? "null";
 
     protected static string[] GetPrefixes(string lex)
     {

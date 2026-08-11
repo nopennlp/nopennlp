@@ -94,10 +94,10 @@ public class DefaultNameContextGenerator : INameContextGenerator
     /// </summary>
     /// <param name="index">The index of the token in the specified toks array for which the
     ///              context should be constructed.</param>
-    /// <param name="tokens">The tokens of the sentence.  The <code>toString</code> methods
+    /// <param name="tokens">The tokens of the sentence.  The <see cref="object.ToString()"/> methods
     ///               of these objects should return the token text.</param>
     /// <param name="preds">The previous decisions made in the tagging of this sequence.
-    ///              Only indices less than i will be examined.</param>
+    ///              Only indices less than <paramref name="index"/> will be examined.</param>
     /// <param name="additionalContext">Addition features which may be based on a context outside of the sentence.</param>
     /// <returns>the context for finding names at the specified index.</returns>
     public virtual string[] GetContext(int index, string[] tokens, string[] preds, object[] additionalContext)
