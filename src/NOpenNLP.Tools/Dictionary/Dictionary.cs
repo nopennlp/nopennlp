@@ -50,24 +50,19 @@ public class Dictionary : IEnumerable<StringList> //, ISerializableArtifact
             return stringList;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             bool result;
+
             if (obj == this)
             {
                 result = true;
             }
-            else if (obj is StringListWrapper)
+            else if (obj is StringListWrapper other)
             {
-                StringListWrapper other = (StringListWrapper)obj;
-                if (isCaseSensitive)
-                {
-                    result = this.stringList.Equals(other.GetStringList());
-                }
-                else
-                {
-                    result = this.stringList.CompareToIgnoreCase(other.GetStringList());
-                }
+                result = isCaseSensitive
+                    ? stringList.Equals(other.GetStringList())
+                    : stringList.CompareToIgnoreCase(other.GetStringList());
             }
             else
             {
@@ -79,21 +74,17 @@ public class Dictionary : IEnumerable<StringList> //, ISerializableArtifact
 
         public override int GetHashCode()
         {
-
             // if lookup is too slow optimize this
-            return StringUtil.ToLowerCase(this.stringList.ToString()).GetHashCode();
+            return StringUtil.ToLowerCase(stringList.ToString()).GetHashCode();
         }
 
-        public override string ToString()
-        {
-            return this.stringList.ToString();
-        }
+        public override string ToString() => stringList.ToString();
     }
 
     private readonly HashSet<StringListWrapper> entrySet = []; // NOpenNLP: made readonly
     private readonly bool isCaseSensitive;
     private int minTokenCount = 99999;
-    private int maxTokenCount = 0;
+    private int maxTokenCount /* = 0 */;
 
     /// <summary>
     /// Initializes an empty <see cref="Dictionary"/>.
@@ -113,7 +104,7 @@ public class Dictionary : IEnumerable<StringList> //, ISerializableArtifact
     /// <param name="in"><see cref="System.IO.Stream"/></param>
     public Dictionary(Stream @in)
     {
-        isCaseSensitive = DictionaryEntryPersistor.Create(@in, (entry) => Put(entry.GetTokens()));
+        isCaseSensitive = DictionaryEntryPersistor.Create(@in, entry => Put(entry.Tokens));
     }
 
     /// <summary>
@@ -130,18 +121,12 @@ public class Dictionary : IEnumerable<StringList> //, ISerializableArtifact
     /// <summary>
     /// </summary>
     /// <returns>minimum token count in the dictionary</returns>
-    public virtual int GetMinTokenCount()
-    {
-        return minTokenCount;
-    }
+    public virtual int MinTokenCount => minTokenCount;
 
     /// <summary>
     /// </summary>
     /// <returns>maximum token count in the dictionary</returns>
-    public virtual int GetMaxTokenCount()
-    {
-        return maxTokenCount;
-    }
+    public virtual int MaxTokenCount => maxTokenCount;
 
     /// <summary>
     /// Checks if this dictionary has the given entry.
@@ -182,10 +167,7 @@ public class Dictionary : IEnumerable<StringList> //, ISerializableArtifact
     /// Retrieves the number of tokens in the current instance.
     /// </summary>
     /// <returns>number of tokens</returns>
-    public virtual int Size()
-    {
-        return entrySet.Count;
-    }
+    public virtual int Count => entrySet.Count;
 
     ///// <summary>
     ///// Writes the current instance to the given <see cref="System.IO.Stream"/>.
@@ -224,7 +206,7 @@ public class Dictionary : IEnumerable<StringList> //, ISerializableArtifact
     //    }
     //}
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         bool result;
         if (obj == this)
@@ -243,15 +225,9 @@ public class Dictionary : IEnumerable<StringList> //, ISerializableArtifact
         return result;
     }
 
-    public override int GetHashCode()
-    {
-        return entrySet.GetHashCode();
-    }
+    public override int GetHashCode() => entrySet.GetHashCode();
 
-    public override string ToString()
-    {
-        return entrySet.ToString();
-    }
+    public override string ToString() => entrySet.ToString();
 
     /// <summary>
     /// Reads a dictionary which has one entry per line. The tokens inside an
@@ -316,7 +292,7 @@ public class Dictionary : IEnumerable<StringList> //, ISerializableArtifact
 
         public int Count => entrySet.Count;
 
-        public bool Contains(string item)
+        public bool Contains(string? item)
         {
             if (item is null)
             {

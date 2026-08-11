@@ -35,14 +35,14 @@ public class Entry
 {
     // NOpenNLP-specific: made readonly
     private readonly StringList tokens;
-    private readonly Attributes attributes;
+    private readonly Attributes? attributes;
 
     /// <summary>
     /// Initializes the current instance.
     /// </summary>
     /// <param name="tokens"></param>
     /// <param name="attributes"></param>
-    public Entry(StringList tokens, Attributes attributes)
+    public Entry(StringList tokens, Attributes? attributes)
     {
         this.tokens = tokens;
         this.attributes = attributes;
@@ -52,17 +52,11 @@ public class Entry
     /// Retrieves the tokens.
     /// </summary>
     /// <returns>the tokens</returns>
-    public virtual StringList GetTokens()
-    {
-        return tokens;
-    }
+    public virtual StringList Tokens => tokens;
 
     /// <summary>
     /// Retrieves the <see cref="Attributes"/>.
     /// </summary>
     /// <returns>the <see cref="Attributes"/></returns>
-    public virtual Attributes GetAttributes()
-    {
-        return attributes;
-    }
+    public virtual Attributes? Attributes => attributes;
 }

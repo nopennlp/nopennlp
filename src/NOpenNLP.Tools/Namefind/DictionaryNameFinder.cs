@@ -56,7 +56,7 @@ public class DictionaryNameFinder : ITokenNameFinder
             for (int offsetTo = offsetFrom; offsetTo < textTokenized.Length; offsetTo++)
             {
                 int lengthSearching = offsetTo - offsetFrom + 1;
-                if (lengthSearching > mDictionary.GetMaxTokenCount())
+                if (lengthSearching > mDictionary.MaxTokenCount)
                 {
                     break;
                 }

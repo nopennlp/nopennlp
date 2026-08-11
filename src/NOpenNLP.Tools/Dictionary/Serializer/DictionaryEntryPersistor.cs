@@ -56,7 +56,7 @@ public static class DictionaryEntryPersistor // NOpenNLP-specific: made static
         // The element/attribute handling below mirrors DictionaryContenthandler.
         bool isCaseSensitiveDictionary = true;
         var tokenList = new List<string>();
-        Attributes attributes = null;
+        Attributes? attributes = null;
 
         var settings = new XmlReaderSettings
         {
@@ -68,7 +68,7 @@ public static class DictionaryEntryPersistor // NOpenNLP-specific: made static
 
         try
         {
-            using XmlReader reader = XmlReader.Create(@in, settings);
+            using var reader = XmlReader.Create(@in, settings);
 
             while (reader.Read())
             {
@@ -82,7 +82,7 @@ public static class DictionaryEntryPersistor // NOpenNLP-specific: made static
                         attributes = ReadAttributes(reader);
 
                         /* get the attribute here ... */
-                        string caseSensitive = attributes.GetValue(ATTRIBUTE_CASE_SENSITIVE);
+                        string? caseSensitive = attributes.GetValue(ATTRIBUTE_CASE_SENSITIVE);
                         if (caseSensitive != null)
                         {
                             isCaseSensitiveDictionary = bool.TryParse(caseSensitive, out bool parsed) && parsed;
@@ -142,7 +142,7 @@ public static class DictionaryEntryPersistor // NOpenNLP-specific: made static
         return attributes;
     }
 
-    private static void InsertEntry(EntryInserter inserter, List<string> tokenList, Attributes attributes)
+    private static void InsertEntry(EntryInserter inserter, List<string> tokenList, Attributes? attributes)
     {
         string[] tokens = [.. tokenList];
 

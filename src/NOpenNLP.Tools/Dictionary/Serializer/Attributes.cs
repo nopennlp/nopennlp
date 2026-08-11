@@ -17,10 +17,11 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using NOpenNLP.Tools.Support;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using NOpenNLP.Tools.Support;
+using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Dictionary.Serializer;
 
@@ -32,14 +33,14 @@ namespace NOpenNLP.Tools.Dictionary.Serializer;
 /// </summary>
 public class Attributes : IEnumerable<string>
 {
-    private readonly Dictionary<string, string> mNameValueMap = new Dictionary<string, string>(); // NOpenNLP-specific: made readonly
+    private readonly JCG.Dictionary<string, string> mNameValueMap = new(); // NOpenNLP-specific: made readonly
 
     /// <summary>
     /// Retrieves the value for the given key or null if attribute it not set.
     /// </summary>
     /// <param name="key"></param>
     /// <returns>the value</returns>
-    public virtual string GetValue(string key)
+    public virtual string? GetValue(string key)
     {
         return mNameValueMap[key];
     }
@@ -68,10 +69,7 @@ public class Attributes : IEnumerable<string>
     /// Iterates over the keys.
     /// </summary>
     /// <returns>key-<see cref="System.Collections.Generic.IEnumerator{T}"/></returns>
-    public virtual IEnumerator<string> GetEnumerator()
-    {
-        return mNameValueMap.Keys.GetEnumerator();
-    }
+    public virtual IEnumerator<string> GetEnumerator() => mNameValueMap.Keys.GetEnumerator();
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

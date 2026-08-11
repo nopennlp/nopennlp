@@ -227,9 +227,9 @@ public class POSDictionary : IEnumerable<string>, IMutableTagDictionary, ISerial
         POSDictionary newPosDict = new POSDictionary();
         bool isCaseSensitive = DictionaryEntryPersistor.Create(@in, (entry) =>
         {
-            string tagString = entry.GetAttributes().GetValue("tags");
+            string tagString = entry.Attributes.GetValue("tags");
             string[] tags = tagString.Split(' ');
-            StringList word = entry.GetTokens();
+            StringList word = entry.Tokens;
             if (word.Count != 1)
                 throw new InvalidFormatException("Each entry must have exactly one token! " + word);
             newPosDict.dictionary.Put(word.GetToken(0), tags);
