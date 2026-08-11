@@ -28,14 +28,14 @@ public class Factory
     public const string DEFAULT_ALPHANUMERIC = "^[A-Za-z0-9]+$";
 
     /// <summary>
-    /// Gets the alpha numeric pattern for the language. Please save the value
+    /// Gets the alphanumeric pattern for the language. Please save the value
     /// locally because this call is expensive.
     /// </summary>
     /// <param name="languageCode">
     ///          the language code. If null or unknow the default pattern will be
     ///          returned.</param>
-    /// <returns>the alpha numeric pattern for the language or the default pattern.</returns>
-    public virtual Regex GetAlphanumeric(string languageCode)
+    /// <returns>the alphanumeric pattern for the language or the default pattern.</returns>
+    public virtual Regex GetAlphanumeric(string? languageCode)
     {
         if ("pt".Equals(languageCode) || "por".Equals(languageCode))
         {
@@ -45,7 +45,7 @@ public class Factory
         return new Regex(DEFAULT_ALPHANUMERIC);
     }
 
-    public virtual ITokenContextGenerator CreateTokenContextGenerator(string languageCode, ISet<string> abbreviations)
+    public virtual ITokenContextGenerator CreateTokenContextGenerator(string? languageCode, ISet<string> abbreviations)
     {
         return new DefaultTokenContextGenerator(abbreviations);
     }

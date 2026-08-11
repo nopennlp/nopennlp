@@ -29,9 +29,7 @@ namespace NOpenNLP.Tools.Tokenize;
 public abstract class AbstractTokenizer : ITokenizer
 {
     public virtual string[] Tokenize(string s)
-    {
-        return Span.SpansToStrings(TokenizePos(s), s.AsCharSequence());
-    }
+        => Span.SpansToStrings(TokenizePos(s), s.AsCharSequence());
 
     // NOpenNLP: Java allows an abstract class to leave an interface method
     // unimplemented; C# requires an explicit abstract declaration.

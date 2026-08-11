@@ -78,7 +78,7 @@ public abstract class BaseModel : IArtifactProvider
     ///          additional information in the manifest</param>
     /// <param name="factory">
     ///          the factory</param>
-    protected BaseModel(string componentName, string languageCode, IDictionary<string, string>? manifestInfoEntries, BaseToolFactory? factory)
+    protected BaseModel(string componentName, string? languageCode, IDictionary<string, string>? manifestInfoEntries, BaseToolFactory? factory)
         : this(componentName, false)
     {
         // NOpenNLP: ArgumentException.ThrowIfNullOrEmpty is net7.0+.

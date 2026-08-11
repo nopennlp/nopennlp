@@ -19,6 +19,7 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using NOpenNLP.Tools.Util;
 using System.Collections.Generic;
+using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Tokenize;
 
@@ -32,7 +33,8 @@ public class DefaultTokenContextGenerator : ITokenContextGenerator
     /// <summary>
     /// Creates a default context generator for tokenizer.
     /// </summary>
-    public DefaultTokenContextGenerator() : this(new HashSet<string>())
+    public DefaultTokenContextGenerator()
+        : this(new JCG.HashSet<string>())
     {
     }
 
@@ -48,7 +50,7 @@ public class DefaultTokenContextGenerator : ITokenContextGenerator
     /// <inheritdoc/>
     public virtual string[] GetContext(string sentence, int index)
     {
-        IList<string> preds = CreateContext(sentence, index);
+        var preds = CreateContext(sentence, index);
         return [.. preds];
     }
 
@@ -65,9 +67,9 @@ public class DefaultTokenContextGenerator : ITokenContextGenerator
     ///         at the specified index.</returns>
     protected virtual IList<string> CreateContext(string sentence, int index)
     {
-        IList<string> preds = new List<string>();
-        string prefix = sentence.Substring(0, index);
-        string suffix = sentence.Substring(index);
+        IList<string> preds = new JCG.List<string>();
+        string prefix = sentence[..index];
+        string suffix = sentence[index..];
         preds.Add("p=" + prefix);
         preds.Add("s=" + suffix);
         if (index > 0)
@@ -101,7 +103,7 @@ public class DefaultTokenContextGenerator : ITokenContextGenerator
             preds.Add("f2=bok");
         }
 
-        if (sentence[0] == '&' && sentence[sentence.Length - 1] == ';')
+        if (sentence[0] == '&' && sentence[^1] == ';')
         {
             preds.Add("cc"); //character code
         }
@@ -138,19 +140,19 @@ public class DefaultTokenContextGenerator : ITokenContextGenerator
         }
         else
         {
-            if (c == '.' || c == '?' || c == '!')
+            if (c is '.' or '?' or '!')
             {
                 preds.Add(key + "_eos");
             }
-            else if (c == '`' || c == '"' || c == '\'')
+            else if (c is '`' or '"' or '\'')
             {
                 preds.Add(key + "_quote");
             }
-            else if (c == '[' || c == '{' || c == '(')
+            else if (c is '[' or '{' or '(')
             {
                 preds.Add(key + "_lp");
             }
-            else if (c == ']' || c == '}' || c == ')')
+            else if (c is ']' or '}' or ')')
             {
                 preds.Add(key + "_rp");
             }

@@ -29,13 +29,14 @@ public class SimpleTokenizer : AbstractTokenizer
 {
     private class CharacterEnum
     {
-        internal static readonly CharacterEnum WHITESPACE = new CharacterEnum("whitespace");
-        internal static readonly CharacterEnum ALPHABETIC = new CharacterEnum("alphabetic");
-        internal static readonly CharacterEnum NUMERIC = new CharacterEnum("numeric");
-        internal static readonly CharacterEnum OTHER = new CharacterEnum("other");
+        internal static readonly CharacterEnum WHITESPACE = new("whitespace");
+        internal static readonly CharacterEnum ALPHABETIC = new("alphabetic");
+        internal static readonly CharacterEnum NUMERIC = new("numeric");
+        internal static readonly CharacterEnum OTHER = new("other");
+
         private readonly string name; // NOpenNLP: made readonly
 
-        internal CharacterEnum(string name)
+        private CharacterEnum(string name)
         {
             this.name = name;
         }

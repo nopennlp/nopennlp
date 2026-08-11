@@ -23,6 +23,7 @@ using NOpenNLP.Tools.Tokenize.Lang;
 using NOpenNLP.Tools.Util;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
+using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Tokenize;
 
@@ -80,9 +81,9 @@ public class TokenizerME : AbstractTokenizer
     /// Alpha-Numeric Regex
     /// </summary>
     /// <remarks>Deprecated: As of release 1.5.2, replaced by <see cref="Lang.Factory.GetAlphanumeric(string)"/></remarks>
-    public static readonly Regex alphaNumeric = new Regex(Factory.DEFAULT_ALPHANUMERIC);
+    public static readonly Regex alphaNumeric = new(Factory.DEFAULT_ALPHANUMERIC);
 
-    private readonly Regex alphanumeric;
+    private readonly Regex? alphanumeric;
 
     /// <summary>
     /// The maximum entropy model to use to evaluate contexts.
@@ -110,11 +111,11 @@ public class TokenizerME : AbstractTokenizer
 
     public TokenizerME(TokenizerModel model)
     {
-        TokenizerFactory factory = model.GetFactory();
-        this.alphanumeric = factory.GetAlphaNumericPattern();
-        this.cg = factory.GetContextGenerator();
-        this.model = model.GetMaxentModel();
-        this.useAlphaNumericOptimization = factory.IsUseAlphaNumericOptmization();
+        TokenizerFactory factory = model.Factory;
+        alphanumeric = factory.AlphaNumericPattern;
+        cg = factory.ContextGenerator;
+        this.model = model.MaxentModel;
+        useAlphaNumericOptimization = factory.UseAlphaNumericOptmization;
         newTokens = new List<Span>();
         tokProbs = new List<double>(50);
     }
@@ -128,15 +129,15 @@ public class TokenizerME : AbstractTokenizer
     public TokenizerME(TokenizerModel model, Factory factory)
     {
         string languageCode = model.Language;
-        this.alphanumeric = factory.GetAlphanumeric(languageCode);
-        this.cg = factory.CreateTokenContextGenerator(languageCode, GetAbbreviations(model.GetAbbreviations()));
-        this.model = model.GetMaxentModel();
-        useAlphaNumericOptimization = model.UseAlphaNumericOptimization();
+        alphanumeric = factory.GetAlphanumeric(languageCode);
+        cg = factory.CreateTokenContextGenerator(languageCode, GetAbbreviations(model.Abbreviations));
+        this.model = model.MaxentModel;
+        useAlphaNumericOptimization = model.UseAlphaNumericOptimization;
         newTokens = new List<Span>();
         tokProbs = new List<double>(50);
     }
 
-    private static HashSet<string> GetAbbreviations(NOpenNLP.Tools.Dictionary.Dictionary abbreviations)
+    private static JCG.HashSet<string> GetAbbreviations(NOpenNLP.Tools.Dictionary.Dictionary? abbreviations)
     {
         if (abbreviations == null)
         {
@@ -152,15 +153,18 @@ public class TokenizerME : AbstractTokenizer
     /// </summary>
     /// <returns>probability for each token returned for the most recent
     ///     call to tokenize.  If not applicable an empty array is returned.</returns>
-    public virtual double[] GetTokenProbabilities()
+    public virtual double[] TokenProbabilities
     {
-        double[] tokProbArray = new double[tokProbs.Count];
-        for (int i = 0; i < tokProbArray.Length; i++)
+        get
         {
-            tokProbArray[i] = tokProbs[i];
-        }
+            double[] tokProbArray = new double[tokProbs.Count];
+            for (int i = 0; i < tokProbArray.Length; i++)
+            {
+                tokProbArray[i] = tokProbs[i];
+            }
 
-        return tokProbArray;
+            return tokProbArray;
+        }
     }
 
     /// <summary>
@@ -184,7 +188,7 @@ public class TokenizerME : AbstractTokenizer
                 newTokens.Add(s);
                 tokProbs.Add(1);
             }
-            else if (UseAlphaNumericOptimization() && alphanumeric.IsMatch(tok))
+            else if (UseAlphaNumericOptimization && alphanumeric.IsMatch(tok))
             {
                 newTokens.Add(s);
                 tokProbs.Add(1);
@@ -200,7 +204,7 @@ public class TokenizerME : AbstractTokenizer
                     double[] probs = model.Eval(cg.GetContext(tok, j - origStart));
                     string best = model.GetBestOutcome(probs);
                     tokenProb *= probs[model.GetIndex(best)];
-                    if (best.Equals(TokenizerME.SPLIT))
+                    if (best.Equals(SPLIT))
                     {
                         newTokens.Add(new Span(start, j));
                         tokProbs.Add(tokenProb);
@@ -245,8 +249,5 @@ public class TokenizerME : AbstractTokenizer
     /// Returns the value of the alpha-numeric optimization flag.
     /// </summary>
     /// <returns>true if the tokenizer should use alpha-numeric optimization, false otherwise.</returns>
-    public virtual bool UseAlphaNumericOptimization()
-    {
-        return useAlphaNumericOptimization;
-    }
+    public virtual bool UseAlphaNumericOptimization => useAlphaNumericOptimization;
 }

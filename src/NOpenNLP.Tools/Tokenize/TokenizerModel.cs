@@ -45,7 +45,7 @@ public sealed class TokenizerModel : BaseModel
     /// <param name="manifestInfoEntries">the manifest</param>
     /// <param name="tokenizerFactory">the factory</param>
     public TokenizerModel(IMaxentModel tokenizerModel, Dictionary<string, string> manifestInfoEntries, TokenizerFactory tokenizerFactory)
-        : base(COMPONENT_NAME, tokenizerFactory.GetLanguageCode(), manifestInfoEntries, tokenizerFactory)
+        : base(COMPONENT_NAME, tokenizerFactory.LanguageCode, manifestInfoEntries, tokenizerFactory)
     {
         artifactMap.Put(TOKENIZER_MODEL_ENTRY, tokenizerModel);
         CheckArtifactMap();
@@ -102,36 +102,30 @@ public sealed class TokenizerModel : BaseModel
             throw new InvalidFormatException("Token model is incomplete!");
         }
 
-        if (!IsModelCompatible(GetMaxentModel()))
+        if (!IsModelCompatible(MaxentModel))
         {
             throw new InvalidFormatException("The maxent model is not compatible with the tokenizer!");
         }
     }
 
-    public TokenizerFactory GetFactory()
-    {
-        return (TokenizerFactory)this.toolFactory;
-    }
+    public TokenizerFactory Factory => (TokenizerFactory)this.toolFactory;
 
     protected override Type DefaultFactory => typeof(TokenizerFactory);
 
-    public IMaxentModel GetMaxentModel()
-    {
-        return (IMaxentModel)artifactMap[TOKENIZER_MODEL_ENTRY];
-    }
+    public IMaxentModel MaxentModel => (IMaxentModel)artifactMap[TOKENIZER_MODEL_ENTRY];
 
-    public NOpenNLP.Tools.Dictionary.Dictionary GetAbbreviations()
+    public NOpenNLP.Tools.Dictionary.Dictionary? Abbreviations
     {
-        if (GetFactory() != null)
+        get
         {
-            return GetFactory().GetAbbreviationDictionary();
+            if (Factory != null)
+            {
+                return Factory.AbbreviationDictionary;
+            }
+
+            return null;
         }
-
-        return null;
     }
 
-    public bool UseAlphaNumericOptimization()
-    {
-        return GetFactory() != null && GetFactory().IsUseAlphaNumericOptmization();
-    }
+    public bool UseAlphaNumericOptimization => Factory is { UseAlphaNumericOptmization: true };
 }

@@ -25,6 +25,7 @@ using NOpenNLP.Tools.Util.Ext;
 using System;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
+using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Tokenize;
 
@@ -35,10 +36,10 @@ namespace NOpenNLP.Tools.Tokenize;
 /// </summary>
 public class TokenizerFactory : BaseToolFactory
 {
-    private string languageCode;
-    private NOpenNLP.Tools.Dictionary.Dictionary abbreviationDictionary;
-    private bool useAlphaNumericOptimization = false;
-    private Regex alphaNumericPattern;
+    private string? languageCode;
+    private NOpenNLP.Tools.Dictionary.Dictionary? abbreviationDictionary;
+    private bool useAlphaNumericOptimization /* = false */;
+    private Regex? alphaNumericPattern;
     private const string ABBREVIATIONS_ENTRY_NAME = "abbreviations.dictionary";
     private const string USE_ALPHA_NUMERIC_OPTIMIZATION = "useAlphaNumericOptimization";
     private const string ALPHA_NUMERIC_PATTERN = "alphaNumericPattern";
@@ -64,12 +65,12 @@ public class TokenizerFactory : BaseToolFactory
     /// <param name="alphaNumericPattern">
     ///          null or a custom alphanumeric pattern (default is:
     ///          "^[A-Za-z0-9]+$", provided by <see cref="Lang.Factory.DEFAULT_ALPHANUMERIC"/></param>
-    public TokenizerFactory(string languageCode, NOpenNLP.Tools.Dictionary.Dictionary abbreviationDictionary, bool useAlphaNumericOptimization, Regex alphaNumericPattern)
+    public TokenizerFactory(string languageCode, NOpenNLP.Tools.Dictionary.Dictionary? abbreviationDictionary, bool useAlphaNumericOptimization, Regex alphaNumericPattern)
     {
         this.Init(languageCode, abbreviationDictionary, useAlphaNumericOptimization, alphaNumericPattern);
     }
 
-    protected virtual void Init(string languageCode, NOpenNLP.Tools.Dictionary.Dictionary abbreviationDictionary, bool useAlphaNumericOptimization, Regex alphaNumericPattern)
+    protected virtual void Init(string languageCode, NOpenNLP.Tools.Dictionary.Dictionary? abbreviationDictionary, bool useAlphaNumericOptimization, Regex alphaNumericPattern)
     {
         this.languageCode = languageCode;
         this.useAlphaNumericOptimization = useAlphaNumericOptimization;
@@ -79,10 +80,10 @@ public class TokenizerFactory : BaseToolFactory
 
     public override void ValidateArtifactMap()
     {
-        if (this.artifactProvider.GetManifestProperty(USE_ALPHA_NUMERIC_OPTIMIZATION) == null)
+        if (this.artifactProvider?.GetManifestProperty(USE_ALPHA_NUMERIC_OPTIMIZATION) == null)
             throw new InvalidFormatException(USE_ALPHA_NUMERIC_OPTIMIZATION + " is a mandatory property!");
         object abbreviationsEntry = this.artifactProvider.GetArtifact<NOpenNLP.Tools.Dictionary.Dictionary>(ABBREVIATIONS_ENTRY_NAME);
-        if (abbreviationsEntry != null && !(abbreviationsEntry is NOpenNLP.Tools.Dictionary.Dictionary))
+        if (abbreviationsEntry != null && abbreviationsEntry is not Dictionary.Dictionary)
         {
             throw new InvalidFormatException("Abbreviations dictionary '" + abbreviationsEntry + "' has wrong type, needs to be of type NOpenNLP.Tools.Dictionary.Dictionary!");
         }
@@ -104,12 +105,12 @@ public class TokenizerFactory : BaseToolFactory
     public override IDictionary<string, string> CreateManifestEntries()
     {
         var manifestEntries = base.CreateManifestEntries();
-        manifestEntries.Put(USE_ALPHA_NUMERIC_OPTIMIZATION, (IsUseAlphaNumericOptmization().ToString()));
+        manifestEntries.Put(USE_ALPHA_NUMERIC_OPTIMIZATION, UseAlphaNumericOptmization.ToString());
 
         // alphanumeric pattern is optional
-        if (GetAlphaNumericPattern() != null)
+        if (AlphaNumericPattern is { } alpha)
         {
-            manifestEntries.Put(ALPHA_NUMERIC_PATTERN, GetAlphaNumericPattern().ToString());
+            manifestEntries.Put(ALPHA_NUMERIC_PATTERN, alpha.ToString());
         }
 
         return manifestEntries;
@@ -126,27 +127,24 @@ public class TokenizerFactory : BaseToolFactory
     /// <param name="alphaNumericPattern">the pattern the alpha numeric optimization should use</param>
     /// <returns>the instance of the ITokenizer Factory</returns>
     /// <exception cref="InvalidFormatException">if once of the input parameters doesn't comply if the expected format</exception>
-    public static TokenizerFactory Create(string subclassName, string languageCode, NOpenNLP.Tools.Dictionary.Dictionary abbreviationDictionary, bool useAlphaNumericOptimization, Regex alphaNumericPattern)
+    public static TokenizerFactory? Create(string? subclassName, string languageCode, NOpenNLP.Tools.Dictionary.Dictionary? abbreviationDictionary, bool useAlphaNumericOptimization, Regex alphaNumericPattern)
     {
         if (subclassName == null)
         {
-
             // will create the default factory
             return new TokenizerFactory(languageCode, abbreviationDictionary, useAlphaNumericOptimization, alphaNumericPattern);
         }
 
         try
         {
-            TokenizerFactory theFactory = ExtensionLoader.InstantiateExtension<TokenizerFactory>(subclassName);
-            theFactory.Init(languageCode, abbreviationDictionary, useAlphaNumericOptimization, alphaNumericPattern);
+            TokenizerFactory? theFactory = ExtensionLoader.InstantiateExtension<TokenizerFactory>(subclassName);
+            theFactory?.Init(languageCode, abbreviationDictionary, useAlphaNumericOptimization, alphaNumericPattern);
             return theFactory;
         }
         catch (Exception e)
         {
-            string msg = "Could not instantiate the " + subclassName + ". The initialization throw an exception.";
-            // NOpenNLP: upstream writes to stderr here.
-            // Console.Error.WriteLine(msg);
-            e.ToString();
+            string msg = $"Could not instantiate the {subclassName}. The initialization throw an exception.";
+            Console.Error.WriteLine(msg);
             throw new InvalidFormatException(msg, e);
         }
     }
@@ -155,91 +153,103 @@ public class TokenizerFactory : BaseToolFactory
     /// Gets the alpha numeric pattern.
     /// </summary>
     /// <returns>the user specified alpha numeric pattern or a default.</returns>
-    public virtual Regex GetAlphaNumericPattern()
+    public virtual Regex? AlphaNumericPattern
     {
-        if (this.alphaNumericPattern == null)
+        get
         {
-            if (this.artifactProvider != null)
+            if (this.alphaNumericPattern == null)
             {
-                string prop = this.artifactProvider.GetManifestProperty(ALPHA_NUMERIC_PATTERN);
+                string? prop = this.artifactProvider?.GetManifestProperty(ALPHA_NUMERIC_PATTERN);
+
                 if (prop != null)
                 {
                     this.alphaNumericPattern = new Regex(prop);
                 }
+
+                // could not load from manifest, will get from language dependent factory
+                if (this.alphaNumericPattern == null)
+                {
+                    Factory f = new Factory();
+                    this.alphaNumericPattern = f.GetAlphanumeric(languageCode);
+                }
             }
 
-
-            // could not load from manifest, will get from language dependent factory
-            if (this.alphaNumericPattern == null)
-            {
-                Factory f = new Factory();
-                this.alphaNumericPattern = f.GetAlphanumeric(languageCode);
-            }
+            return this.alphaNumericPattern;
         }
-
-        return this.alphaNumericPattern;
     }
 
     /// <summary>
     /// Gets whether to use alphanumeric optimization.
     /// </summary>
     /// <returns>true if the alpha numeric optimization is enabled, otherwise false</returns>
-    public virtual bool IsUseAlphaNumericOptmization()
+    public virtual bool UseAlphaNumericOptmization
     {
-        if (artifactProvider != null)
+        get
         {
-            this.useAlphaNumericOptimization = bool.Parse(this.artifactProvider.GetManifestProperty(USE_ALPHA_NUMERIC_OPTIMIZATION));
-        }
+            if (artifactProvider != null)
+            {
+                this.useAlphaNumericOptimization = bool.Parse(this.artifactProvider.GetManifestProperty(USE_ALPHA_NUMERIC_OPTIMIZATION));
+            }
 
-        return this.useAlphaNumericOptimization;
+            return this.useAlphaNumericOptimization;
+        }
     }
 
     /// <summary>
     /// Gets the abbreviation dictionary
     /// </summary>
     /// <returns>null or the abbreviation dictionary</returns>
-    public virtual NOpenNLP.Tools.Dictionary.Dictionary GetAbbreviationDictionary()
+    public virtual NOpenNLP.Tools.Dictionary.Dictionary? AbbreviationDictionary
     {
-        if (this.abbreviationDictionary == null && artifactProvider != null)
+        get
         {
-            this.abbreviationDictionary = this.artifactProvider.GetArtifact<NOpenNLP.Tools.Dictionary.Dictionary>(ABBREVIATIONS_ENTRY_NAME);
-        }
+            if (this.abbreviationDictionary == null && artifactProvider != null)
+            {
+                this.abbreviationDictionary = this.artifactProvider.GetArtifact<NOpenNLP.Tools.Dictionary.Dictionary>(ABBREVIATIONS_ENTRY_NAME);
+            }
 
-        return this.abbreviationDictionary;
+            return this.abbreviationDictionary;
+        }
     }
 
     /// <summary>
     /// Retrieves the language code.
     /// </summary>
     /// <returns>the language code</returns>
-    public virtual string GetLanguageCode()
+    public virtual string? LanguageCode
     {
-        if (this.languageCode == null && this.artifactProvider != null)
+        get
         {
-            this.languageCode = this.artifactProvider.Language;
-        }
+            if (this.languageCode == null && this.artifactProvider != null)
+            {
+                this.languageCode = this.artifactProvider.Language;
+            }
 
-        return this.languageCode;
+            return this.languageCode;
+        }
     }
 
     /// <summary>
     /// Gets the context generator
     /// </summary>
     /// <returns>a new instance of the context generator</returns>
-    public virtual ITokenContextGenerator GetContextGenerator()
+    public virtual ITokenContextGenerator ContextGenerator
     {
-        Factory f = new Factory();
-        ISet<string> abbs;
-        NOpenNLP.Tools.Dictionary.Dictionary abbDict = GetAbbreviationDictionary();
-        if (abbDict != null)
+        get
         {
-            abbs = abbDict.AsStringSet();
-        }
-        else
-        {
-            abbs = new HashSet<string>();
-        }
+            Factory f = new Factory();
+            ISet<string> abbs;
+            NOpenNLP.Tools.Dictionary.Dictionary? abbDict = AbbreviationDictionary;
+            if (abbDict != null)
+            {
+                abbs = abbDict.AsStringSet();
+            }
+            else
+            {
+                abbs = new JCG.HashSet<string>();
+            }
 
-        return f.CreateTokenContextGenerator(GetLanguageCode(), abbs);
+            return f.CreateTokenContextGenerator(LanguageCode, abbs);
+        }
     }
 }

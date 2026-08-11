@@ -34,7 +34,7 @@ internal sealed class ByteArrayOutputStream : MemoryStream
     /// </summary>
     public new byte[] ToArray() => buffer ?? base.ToArray();
 
-    private byte[] buffer;
+    private byte[]? buffer;
 
     protected override void Dispose(bool disposing)
     {
