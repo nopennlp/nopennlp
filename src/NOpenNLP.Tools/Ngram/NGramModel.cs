@@ -20,7 +20,9 @@
 
 using NOpenNLP.Tools.Util;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Ngram;
 
@@ -30,8 +32,9 @@ namespace NOpenNLP.Tools.Ngram;
 /// <seealso cref="StringList"/>
 public class NGramModel : IEnumerable<StringList>
 {
-    protected static readonly string COUNT = "count";
-    private readonly Dictionary<StringList, int> mNGrams = new Dictionary<StringList, int>(); // NOpenNLP: made readonly
+    protected const string COUNT = "count";
+
+    private readonly JCG.Dictionary<StringList, int> mNGrams = new(); // NOpenNLP: made readonly
 
     /// <summary>
     /// Initializes an empty instance.
@@ -82,6 +85,7 @@ public class NGramModel : IEnumerable<StringList>
         {
             return count;
         }
+
         return 0;
     }
 
@@ -96,6 +100,7 @@ public class NGramModel : IEnumerable<StringList>
         {
             throw new InvalidOperationException("Ngram does not exist");
         }
+
         mNGrams[ngram] = count;
     }
 
@@ -184,33 +189,32 @@ public class NGramModel : IEnumerable<StringList>
     /// Retrieves the number of <see cref="StringList"/> entries in the current instance.
     /// </summary>
     /// <returns>number of different grams</returns>
-    public virtual int Size()
-    {
-        return mNGrams.Count;
-    }
+    public virtual int Count => mNGrams.Count;
 
     /// <summary>
-    /// Retrieves an <see cref="System.Collections.Generic.IEnumerator{T}"/> over all <see cref="StringList"/> entries.
+    /// Retrieves an <see cref="IEnumerator{T}"/> over all <see cref="StringList"/> entries.
     /// </summary>
     /// <returns>iterator over all grams</returns>
-    public virtual IEnumerator<StringList> Iterator()
-    {
-        return mNGrams.Keys.GetEnumerator();
-    }
+    public IEnumerator<StringList> GetEnumerator() => mNGrams.Keys.GetEnumerator();
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     /// <summary>
     /// Retrieves the total count of all Ngrams.
     /// </summary>
     /// <returns>total count of all ngrams</returns>
-    public virtual int NumberOfGrams()
+    public virtual int NumberOfGrams
     {
-        int counter = 0;
-        foreach (StringList ngram in this)
+        get
         {
-            counter += GetCount(ngram);
-        }
+            int counter = 0;
+            foreach (var ngram in this)
+            {
+                counter += GetCount(ngram);
+            }
 
-        return counter;
+            return counter;
+        }
     }
 
     /// <summary>
@@ -224,7 +228,7 @@ public class NGramModel : IEnumerable<StringList>
         if (cutoffUnder > 0 || cutoffOver < int.MaxValue)
         {
             var toRemove = new List<StringList>();
-            foreach (StringList ngram in this)
+            foreach (var ngram in this)
             {
                 int count = GetCount(ngram);
                 if (count < cutoffUnder || count > cutoffOver)
@@ -232,7 +236,7 @@ public class NGramModel : IEnumerable<StringList>
                     toRemove.Add(ngram);
                 }
             }
-            foreach (StringList ngram in toRemove)
+            foreach (var ngram in toRemove)
             {
                 Remove(ngram);
             }
@@ -248,10 +252,7 @@ public class NGramModel : IEnumerable<StringList>
     /// Calling this method is the same as calling <c>ToDictionary(bool)</c> with true.
     /// </summary>
     /// <returns>a dictionary of the ngrams</returns>
-    public virtual NOpenNLP.Tools.Dictionary.Dictionary ToDictionary()
-    {
-        return ToDictionary(false);
-    }
+    public virtual NOpenNLP.Tools.Dictionary.Dictionary ToDictionary() => ToDictionary(false);
 
     /// <summary>
     /// Creates a dictionary which contains all <see cref="StringList"/>s which
@@ -262,8 +263,8 @@ public class NGramModel : IEnumerable<StringList>
     /// <returns>a dictionary of the ngrams</returns>
     public virtual NOpenNLP.Tools.Dictionary.Dictionary ToDictionary(bool caseSensitive)
     {
-        NOpenNLP.Tools.Dictionary.Dictionary dict = new NOpenNLP.Tools.Dictionary.Dictionary(caseSensitive);
-        foreach (StringList stringList in this)
+        var dict = new NOpenNLP.Tools.Dictionary.Dictionary(caseSensitive);
+        foreach (var stringList in this)
         {
             dict.Put(stringList);
         }
@@ -326,16 +327,6 @@ public class NGramModel : IEnumerable<StringList>
     //    }
     //}
 
-    public IEnumerator<StringList> GetEnumerator()
-    {
-        return Iterator();
-    }
-
-    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-    {
-        return GetEnumerator();
-    }
-
     public override bool Equals(object? obj)
     {
         bool result;
@@ -355,10 +346,7 @@ public class NGramModel : IEnumerable<StringList>
         return result;
     }
 
-    public override string ToString() => $"Size: {Size()}";
+    public override string ToString() => $"Size: {Count}";
 
-    public override int GetHashCode()
-    {
-        return mNGrams.GetHashCode();
-    }
+    public override int GetHashCode() => mNGrams.GetHashCode();
 }
