@@ -33,9 +33,9 @@ namespace NOpenNLP.Tools.Sentdetect;
 /// </summary>
 public class SentenceDetectorFactory : BaseToolFactory
 {
-    private string languageCode;
-    private char[] eosCharacters;
-    private NOpenNLP.Tools.Dictionary.Dictionary abbreviationDictionary;
+    private string? languageCode;
+    private char[]? eosCharacters;
+    private NOpenNLP.Tools.Dictionary.Dictionary? abbreviationDictionary;
     private bool? useTokenEnd = null;
     private const string ABBREVIATIONS_ENTRY_NAME = "abbreviations.dictionary";
     private const string EOS_CHARACTERS_PROPERTY = "eosCharacters";
@@ -56,12 +56,12 @@ public class SentenceDetectorFactory : BaseToolFactory
     /// <param name="languageCode"></param>
     /// <param name="abbreviationDictionary"></param>
     /// <param name="eosCharacters"></param>
-    public SentenceDetectorFactory(string languageCode, bool useTokenEnd, NOpenNLP.Tools.Dictionary.Dictionary abbreviationDictionary, char[] eosCharacters)
+    public SentenceDetectorFactory(string languageCode, bool useTokenEnd, NOpenNLP.Tools.Dictionary.Dictionary abbreviationDictionary, char[]? eosCharacters)
     {
         this.Init(languageCode, useTokenEnd, abbreviationDictionary, eosCharacters);
     }
 
-    protected virtual void Init(string languageCode, bool useTokenEnd, NOpenNLP.Tools.Dictionary.Dictionary abbreviationDictionary, char[] eosCharacters)
+    protected virtual void Init(string languageCode, bool useTokenEnd, NOpenNLP.Tools.Dictionary.Dictionary abbreviationDictionary, char[]? eosCharacters)
     {
         this.languageCode = languageCode;
         this.useTokenEnd = useTokenEnd;
@@ -71,18 +71,18 @@ public class SentenceDetectorFactory : BaseToolFactory
 
     public override void ValidateArtifactMap()
     {
-        if (this.artifactProvider.GetManifestProperty(TOKEN_END_PROPERTY) == null)
+        if (this.artifactProvider?.GetManifestProperty(TOKEN_END_PROPERTY) == null)
             throw new InvalidFormatException(TOKEN_END_PROPERTY + " is a mandatory property!");
         object abbreviationsEntry = this.artifactProvider.GetArtifact<NOpenNLP.Tools.Dictionary.Dictionary>(ABBREVIATIONS_ENTRY_NAME);
-        if (abbreviationsEntry != null && !(abbreviationsEntry is NOpenNLP.Tools.Dictionary.Dictionary))
+        if (abbreviationsEntry != null && abbreviationsEntry is not Dictionary.Dictionary)
         {
             throw new InvalidFormatException("Abbreviations dictionary '" + abbreviationsEntry + "' has wrong type, needs to be of type NOpenNLP.Tools.Dictionary.Dictionary!");
         }
     }
 
-    public override Dictionary<string, object> CreateArtifactMap()
+    public override IDictionary<string, object> CreateArtifactMap()
     {
-        Dictionary<string, object> artifactMap = base.CreateArtifactMap();
+        var artifactMap = base.CreateArtifactMap();
 
         // Abbreviations are optional
         if (abbreviationDictionary != null)
@@ -90,14 +90,14 @@ public class SentenceDetectorFactory : BaseToolFactory
         return artifactMap;
     }
 
-    public override Dictionary<string, string> CreateManifestEntries()
+    public override IDictionary<string, string> CreateManifestEntries()
     {
-        Dictionary<string, string> manifestEntries = base.CreateManifestEntries();
-        manifestEntries.Put(TOKEN_END_PROPERTY, (IsUseTokenEnd().ToString()));
+        var manifestEntries = base.CreateManifestEntries();
+        manifestEntries.Put(TOKEN_END_PROPERTY, IsUseTokenEnd.ToString());
 
         // EOS characters are optional
-        if (GetEOSCharacters() != null)
-            manifestEntries.Put(EOS_CHARACTERS_PROPERTY, EosCharArrayToString(GetEOSCharacters()));
+        if (EOSCharacters is { } ec)
+            manifestEntries.Put(EOS_CHARACTERS_PROPERTY, EosCharArrayToString(ec));
         return manifestEntries;
     }
 
@@ -111,94 +111,107 @@ public class SentenceDetectorFactory : BaseToolFactory
 
         try
         {
-            SentenceDetectorFactory theFactory = ExtensionLoader.InstantiateExtension<SentenceDetectorFactory>(subclassName);
+            SentenceDetectorFactory? theFactory = ExtensionLoader.InstantiateExtension<SentenceDetectorFactory>(subclassName);
             theFactory.Init(languageCode, useTokenEnd, abbreviationDictionary, eosCharacters);
             return theFactory;
         }
         catch (Exception e)
         {
-            string msg = "Could not instantiate the " + subclassName + ". The initialization throw an exception.";
-            // NOpenNLP: upstream writes to stderr here.
-            // Console.Error.WriteLine(msg);
-            e.ToString();
+            string msg = $"Could not instantiate the {subclassName}. The initialization throw an exception.";
+            Console.Error.WriteLine(msg);
             throw new InvalidFormatException(msg, e);
         }
     }
 
-    public virtual char[] GetEOSCharacters()
+    public virtual char[]? EOSCharacters
     {
-        if (this.eosCharacters == null)
+        get
         {
-            if (artifactProvider != null)
+            if (this.eosCharacters == null)
             {
-                string prop = this.artifactProvider.GetManifestProperty(EOS_CHARACTERS_PROPERTY);
-                if (prop != null)
+                if (artifactProvider != null)
                 {
-                    this.eosCharacters = EosStringToCharArray(prop);
+                    string? prop = this.artifactProvider.GetManifestProperty(EOS_CHARACTERS_PROPERTY);
+                    if (prop != null)
+                    {
+                        this.eosCharacters = EosStringToCharArray(prop);
+                    }
                 }
+                else
+                {
+
+                    // get from language dependent factory
+                    Factory f = new Factory();
+                    this.eosCharacters = f.GetEOSCharacters(languageCode);
+                }
+            }
+
+            return this.eosCharacters;
+        }
+    }
+
+    public virtual bool IsUseTokenEnd
+    {
+        get
+        {
+            if (this.useTokenEnd == null && artifactProvider != null)
+            {
+                this.useTokenEnd = bool.Parse(artifactProvider.GetManifestProperty(TOKEN_END_PROPERTY));
+            }
+
+            return this.useTokenEnd ?? true;
+        }
+    }
+
+    public virtual NOpenNLP.Tools.Dictionary.Dictionary? AbbreviationDictionary
+    {
+        get
+        {
+            if (this.abbreviationDictionary == null && artifactProvider != null)
+            {
+                this.abbreviationDictionary = artifactProvider.GetArtifact<NOpenNLP.Tools.Dictionary.Dictionary>(ABBREVIATIONS_ENTRY_NAME);
+            }
+
+            return this.abbreviationDictionary;
+        }
+    }
+
+    public virtual string LanguageCode
+    {
+        get
+        {
+            if (this.languageCode == null && artifactProvider != null)
+            {
+                this.languageCode = this.artifactProvider.Language;
+            }
+
+            return this.languageCode;
+        }
+    }
+
+    public virtual IEndOfSentenceScanner EndOfSentenceScanner
+    {
+        get
+        {
+            Factory f = new Factory();
+            char[] eosChars = EOSCharacters;
+            if (eosChars is { Length: > 0 })
+            {
+                return f.CreateEndOfSentenceScanner(eosChars);
             }
             else
             {
-
-                // get from language dependent factory
-                Factory f = new Factory();
-                this.eosCharacters = f.GetEOSCharacters(languageCode);
+                return f.CreateEndOfSentenceScanner(this.languageCode);
             }
-        }
-
-        return this.eosCharacters;
-    }
-
-    public virtual bool IsUseTokenEnd()
-    {
-        if (this.useTokenEnd == null && artifactProvider != null)
-        {
-            this.useTokenEnd = bool.Parse(artifactProvider.GetManifestProperty(TOKEN_END_PROPERTY));
-        }
-
-        return this.useTokenEnd ?? true;
-    }
-
-    public virtual NOpenNLP.Tools.Dictionary.Dictionary GetAbbreviationDictionary()
-    {
-        if (this.abbreviationDictionary == null && artifactProvider != null)
-        {
-            this.abbreviationDictionary = artifactProvider.GetArtifact<NOpenNLP.Tools.Dictionary.Dictionary>(ABBREVIATIONS_ENTRY_NAME);
-        }
-
-        return this.abbreviationDictionary;
-    }
-
-    public virtual string GetLanguageCode()
-    {
-        if (this.languageCode == null && artifactProvider != null)
-        {
-            this.languageCode = this.artifactProvider.Language;
-        }
-
-        return this.languageCode;
-    }
-
-    public virtual IEndOfSentenceScanner GetEndOfSentenceScanner()
-    {
-        Factory f = new Factory();
-        char[] eosChars = GetEOSCharacters();
-        if (eosChars != null && eosChars.Length > 0)
-        {
-            return f.CreateEndOfSentenceScanner(eosChars);
-        }
-        else
-        {
-            return f.CreateEndOfSentenceScanner(this.languageCode);
         }
     }
 
     public virtual ISDContextGenerator GetSDContextGenerator()
     {
         Factory f = new Factory();
-        char[] eosChars = GetEOSCharacters();
+        char[]? eosChars = EOSCharacters;
         ISet<string> abbs;
-        NOpenNLP.Tools.Dictionary.Dictionary abbDict = GetAbbreviationDictionary();
+        NOpenNLP.Tools.Dictionary.Dictionary? abbDict = AbbreviationDictionary;
         if (abbDict != null)
         {
             abbs = abbDict.AsStringSet();
@@ -208,7 +221,7 @@ public class SentenceDetectorFactory : BaseToolFactory
             abbs = new HashSet<string>();
         }
 
-        if (eosChars != null && eosChars.Length > 0)
+        if (eosChars is { Length: > 0 })
         {
             return f.CreateSentenceContextGenerator(abbs, eosChars);
         }
@@ -218,13 +231,9 @@ public class SentenceDetectorFactory : BaseToolFactory
         }
     }
 
-    private string EosCharArrayToString(char[] eosCharacters)
-    {
-        return Convert.ToString(eosCharacters);
-    }
+    private static string EosCharArrayToString(char[] eosCharacters) // NOpenNLP: made static
+        => Convert.ToString(eosCharacters);
 
-    private char[] EosStringToCharArray(string eosCharacters)
-    {
-        return eosCharacters.ToCharArray();
-    }
+    private static char[] EosStringToCharArray(string eosCharacters) // NOpenNLP: made static
+        => eosCharacters.ToCharArray();
 }

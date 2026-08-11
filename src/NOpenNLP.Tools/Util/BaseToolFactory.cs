@@ -21,6 +21,7 @@ using NOpenNLP.Tools.Util.Ext;
 using NOpenNLP.Tools.Util.Model;
 using System;
 using System.Collections.Generic;
+using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Util;
 
@@ -63,9 +64,9 @@ public abstract class BaseToolFactory
     /// The base implementation will return a <see cref="Dictionary{TKey, TValue}"/> that should be
     /// populated by sub-classes.
     /// </summary>
-    public virtual Dictionary<string, IArtifactSerializer> CreateArtifactSerializersMap()
+    public virtual IDictionary<string, IArtifactSerializer> CreateArtifactSerializersMap()
     {
-        return new Dictionary<string, IArtifactSerializer>();
+        return new JCG.Dictionary<string, IArtifactSerializer>();
     }
 
     /// <summary>
@@ -76,18 +77,18 @@ public abstract class BaseToolFactory
     /// The base implementation will return a <see cref="Dictionary{TKey, TValue}"/> that should be
     /// populated by sub-classes.
     /// </summary>
-    public virtual Dictionary<string, object> CreateArtifactMap()
+    public virtual IDictionary<string, object> CreateArtifactMap()
     {
-        return new Dictionary<string, object>();
+        return new JCG.Dictionary<string, object>();
     }
 
     /// <summary>
     /// Creates the manifest entries that will be added to the model manifest
     /// </summary>
     /// <returns>the manifest entries to added to the model manifest</returns>
-    public virtual Dictionary<string, string> CreateManifestEntries()
+    public virtual IDictionary<string, string> CreateManifestEntries()
     {
-        return new Dictionary<string, string>();
+        return new JCG.Dictionary<string, string>();
     }
 
     /// <summary>
@@ -100,9 +101,10 @@ public abstract class BaseToolFactory
     /// </summary>
     /// <exception cref="InvalidFormatException"></exception>
     public abstract void ValidateArtifactMap();
-    public static BaseToolFactory Create(string subclassName, IArtifactProvider artifactProvider)
+
+    public static BaseToolFactory? Create(string subclassName, IArtifactProvider artifactProvider)
     {
-        BaseToolFactory theFactory;
+        BaseToolFactory? theFactory;
         try
         {
 
@@ -122,9 +124,9 @@ public abstract class BaseToolFactory
         return theFactory;
     }
 
-    public static BaseToolFactory Create(Type factoryClass, IArtifactProvider artifactProvider)
+    public static BaseToolFactory? Create(Type? factoryClass, IArtifactProvider artifactProvider)
     {
-        BaseToolFactory theFactory = null;
+        BaseToolFactory? theFactory = null;
         if (factoryClass != null)
         {
             try

@@ -38,7 +38,10 @@ public class SentenceModel : BaseModel
     private const string COMPONENT_NAME = "SentenceDetectorME";
     private const string MAXENT_MODEL_ENTRY_NAME = "sent.model";
 
-    public SentenceModel(string languageCode, IMaxentModel sentModel, Dictionary<string, string> manifestInfoEntries, SentenceDetectorFactory sdFactory)
+    public SentenceModel(string languageCode,
+        IMaxentModel sentModel,
+        IDictionary<string, string>? manifestInfoEntries,
+        SentenceDetectorFactory sdFactory)
         : base(COMPONENT_NAME, languageCode, manifestInfoEntries, sdFactory)
     {
         artifactMap.Put(MAXENT_MODEL_ENTRY_NAME, sentModel);
@@ -53,7 +56,12 @@ public class SentenceModel : BaseModel
     ///             <c>SentenceModel</c>
     ///             instead and pass in a <see cref="SentenceDetectorFactory"/>
     /// </remarks>
-    public SentenceModel(string languageCode, IMaxentModel sentModel, bool useTokenEnd, NOpenNLP.Tools.Dictionary.Dictionary abbreviations, char[] eosCharacters, Dictionary<string, string> manifestInfoEntries)
+    public SentenceModel(string languageCode,
+        IMaxentModel sentModel,
+        bool useTokenEnd,
+        NOpenNLP.Tools.Dictionary.Dictionary abbreviations,
+        char[]? eosCharacters,
+        IDictionary<string, string>? manifestInfoEntries)
         : this(languageCode, sentModel, manifestInfoEntries, new SentenceDetectorFactory(languageCode, useTokenEnd, abbreviations, eosCharacters))
     {
     }
@@ -71,7 +79,7 @@ public class SentenceModel : BaseModel
     {
     }
 
-    public SentenceModel(string languageCode, IMaxentModel sentModel, bool useTokenEnd, NOpenNLP.Tools.Dictionary.Dictionary abbreviations, Dictionary<string, string> manifestInfoEntries)
+    public SentenceModel(string languageCode, IMaxentModel sentModel, bool useTokenEnd, NOpenNLP.Tools.Dictionary.Dictionary abbreviations, IDictionary<string, string> manifestInfoEntries)
         : this(languageCode, sentModel, useTokenEnd, abbreviations, null, manifestInfoEntries)
     {
     }
@@ -81,11 +89,13 @@ public class SentenceModel : BaseModel
     {
     }
 
-    public SentenceModel(Stream @in) : base(COMPONENT_NAME, @in)
+    public SentenceModel(Stream @in)
+        : base(COMPONENT_NAME, @in)
     {
     }
 
-    public SentenceModel(FileInfo modelFile) : base(COMPONENT_NAME, modelFile)
+    public SentenceModel(FileInfo modelFile)
+        : base(COMPONENT_NAME, modelFile)
     {
     }
 
@@ -106,46 +116,21 @@ public class SentenceModel : BaseModel
             throw new InvalidFormatException("Unable to find " + MAXENT_MODEL_ENTRY_NAME + " maxent model!");
         }
 
-        if (!ModelUtil.ValidateOutcomes(GetMaxentModel(), SentenceDetectorME.SPLIT, SentenceDetectorME.NO_SPLIT))
+        if (!ModelUtil.ValidateOutcomes(MaxentModel, SentenceDetectorME.SPLIT, SentenceDetectorME.NO_SPLIT))
         {
             throw new InvalidFormatException("The maxent model is not compatible " + "with the sentence detector!");
         }
     }
 
-    public virtual SentenceDetectorFactory GetFactory()
-    {
-        return (SentenceDetectorFactory)this.toolFactory;
-    }
+    public virtual SentenceDetectorFactory? Factory => (SentenceDetectorFactory)this.toolFactory;
 
     protected override Type DefaultFactory => typeof(SentenceDetectorFactory);
 
-    public virtual IMaxentModel GetMaxentModel()
-    {
-        return (IMaxentModel)artifactMap[MAXENT_MODEL_ENTRY_NAME];
-    }
+    public virtual IMaxentModel MaxentModel => (IMaxentModel)artifactMap[MAXENT_MODEL_ENTRY_NAME];
 
-    public virtual NOpenNLP.Tools.Dictionary.Dictionary GetAbbreviations()
-    {
-        if (GetFactory() != null)
-        {
-            return GetFactory().GetAbbreviationDictionary();
-        }
+    public virtual NOpenNLP.Tools.Dictionary.Dictionary? Abbreviations => Factory?.AbbreviationDictionary;
 
-        return null;
-    }
+    public virtual bool UseTokenEnd() => Factory == null || Factory.IsUseTokenEnd;
 
-    public virtual bool UseTokenEnd()
-    {
-        return GetFactory() == null || GetFactory().IsUseTokenEnd();
-    }
-
-    public virtual char[] GetEosCharacters()
-    {
-        if (GetFactory() != null)
-        {
-            return GetFactory().GetEOSCharacters();
-        }
-
-        return null;
-    }
+    public virtual char[]? EosCharacters => Factory?.EOSCharacters;
 }

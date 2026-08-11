@@ -60,17 +60,13 @@ public class Factory
         '？'
     ];
 
-    public virtual IEndOfSentenceScanner CreateEndOfSentenceScanner(string languageCode)
-    {
-        return new DefaultEndOfSentenceScanner(GetEOSCharacters(languageCode));
-    }
+    public virtual IEndOfSentenceScanner CreateEndOfSentenceScanner(string? languageCode)
+        => new DefaultEndOfSentenceScanner(GetEOSCharacters(languageCode));
 
     public virtual IEndOfSentenceScanner CreateEndOfSentenceScanner(char[] customEOSCharacters)
-    {
-        return new DefaultEndOfSentenceScanner(customEOSCharacters);
-    }
+        => new DefaultEndOfSentenceScanner(customEOSCharacters);
 
-    public virtual ISDContextGenerator CreateSentenceContextGenerator(string languageCode, ISet<string> abbreviations)
+    public virtual ISDContextGenerator CreateSentenceContextGenerator(string? languageCode, ISet<string> abbreviations)
     {
         if ("th".Equals(languageCode) || "tha".Equals(languageCode))
         {
@@ -85,16 +81,12 @@ public class Factory
     }
 
     public virtual ISDContextGenerator CreateSentenceContextGenerator(ISet<string> abbreviations, char[] customEOSCharacters)
-    {
-        return new DefaultSDContextGenerator(abbreviations, customEOSCharacters);
-    }
+        => new DefaultSDContextGenerator(abbreviations, customEOSCharacters);
 
     public virtual ISDContextGenerator CreateSentenceContextGenerator(string languageCode)
-    {
-        return CreateSentenceContextGenerator(languageCode, new HashSet<string>());
-    }
+        => CreateSentenceContextGenerator(languageCode, new HashSet<string>());
 
-    public virtual char[] GetEOSCharacters(string languageCode)
+    public virtual char[] GetEOSCharacters(string? languageCode)
     {
         if ("th".Equals(languageCode) || "tha".Equals(languageCode))
         {

@@ -20,6 +20,7 @@
 
 using System.Collections.Generic;
 using System.Text;
+using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Sentdetect;
 
@@ -31,7 +32,7 @@ namespace NOpenNLP.Tools.Sentdetect;
 public class DefaultEndOfSentenceScanner : IEndOfSentenceScanner
 {
     // NOpenNLP: made readonly
-    private readonly HashSet<char> eosCharacters;
+    private readonly JCG.HashSet<char> eosCharacters;
     private readonly char[] eosChars;
 
     /// <summary>
@@ -73,13 +74,7 @@ public class DefaultEndOfSentenceScanner : IEndOfSentenceScanner
         return l;
     }
 
-    public virtual char[] GetEndOfSentenceCharacters()
-    {
-        return eosChars;
-    }
+    public virtual char[] EndOfSentenceCharacters => eosChars;
 
-    public virtual HashSet<char> GetEOSCharacters()
-    {
-        return eosCharacters;
-    }
+    public virtual ISet<char> EOSCharacters => eosCharacters;
 }

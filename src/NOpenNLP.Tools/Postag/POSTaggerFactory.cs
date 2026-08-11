@@ -174,18 +174,18 @@ public class POSTaggerFactory : BaseToolFactory
         return generator;
     }
 
-    public override Dictionary<string, IArtifactSerializer> CreateArtifactSerializersMap()
+    public override IDictionary<string, IArtifactSerializer> CreateArtifactSerializersMap()
     {
-        Dictionary<string, IArtifactSerializer> serializers = base.CreateArtifactSerializersMap();
+        var serializers = base.CreateArtifactSerializersMap();
 
         // NOTE: This is only needed for old models and this if can be removed if support is dropped
         POSDictionarySerializer.Register(serializers);
         return serializers;
     }
 
-    public override Dictionary<string, object> CreateArtifactMap()
+    public override IDictionary<string, object> CreateArtifactMap()
     {
-        Dictionary<string, object> artifactMap = base.CreateArtifactMap();
+        var artifactMap = base.CreateArtifactMap();
         if (posDictionary != null)
             artifactMap.Put(TAG_DICTIONARY_ENTRY_NAME, posDictionary);
         if (ngramDictionary != null)
@@ -295,7 +295,7 @@ public class POSTaggerFactory : BaseToolFactory
         //     artifact.Serialize(@out);
         // }
 
-        internal static void Register(Dictionary<string, IArtifactSerializer> factories)
+        internal static void Register(IDictionary<string, IArtifactSerializer> factories)
         {
             factories.Put("tagdict", new POSDictionarySerializer());
         }

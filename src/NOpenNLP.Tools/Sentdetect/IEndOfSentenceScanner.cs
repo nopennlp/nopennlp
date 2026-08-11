@@ -37,13 +37,13 @@ public interface IEndOfSentenceScanner
     /// Returns an array of character which can indicate the end of a sentence.
     /// </summary>
     /// <returns>an array of character which can indicate the end of a sentence.</returns>
-    char[] GetEndOfSentenceCharacters();
+    char[] EndOfSentenceCharacters { get; }
 
     /// <summary>
     /// Returns a set of character which can indicate the end of a sentence.
     /// </summary>
     /// <returns>a set of character which can indicate the end of a sentence.</returns>
-    HashSet<char> GetEOSCharacters();
+    ISet<char> EOSCharacters { get; }
 
     /// <summary>
     /// The receiver scans the specified string for sentence ending characters and

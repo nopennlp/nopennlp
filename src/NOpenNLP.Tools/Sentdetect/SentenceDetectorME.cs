@@ -24,6 +24,7 @@ using NOpenNLP.Tools.Util;
 using J2N.Text;
 using System.Collections.Generic;
 using System.Text;
+using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Sentdetect;
 
@@ -72,11 +73,11 @@ public class SentenceDetectorME : ISentenceDetector
     /// <param name="model">the <see cref="SentenceModel"/></param>
     public SentenceDetectorME(SentenceModel model)
     {
-        SentenceDetectorFactory sdFactory = model.GetFactory();
-        this.model = model.GetMaxentModel();
+        SentenceDetectorFactory sdFactory = model.Factory;
+        this.model = model.MaxentModel;
         cgen = sdFactory.GetSDContextGenerator();
-        scanner = sdFactory.GetEndOfSentenceScanner();
-        useTokenEnd = sdFactory.IsUseTokenEnd();
+        scanner = sdFactory.EndOfSentenceScanner;
+        useTokenEnd = sdFactory.IsUseTokenEnd;
     }
 
     /// <summary>
@@ -87,26 +88,26 @@ public class SentenceDetectorME : ISentenceDetector
     /// </remarks>
     public SentenceDetectorME(SentenceModel model, Factory factory)
     {
-        this.model = model.GetMaxentModel();
+        this.model = model.MaxentModel;
 
         // if the model has custom EOS characters set, use this to get the context
         // generator and the EOS scanner; otherwise use language-specific defaults
-        char[] customEOSCharacters = model.GetEosCharacters();
+        char[]? customEOSCharacters = model.EosCharacters;
         if (customEOSCharacters == null)
         {
-            cgen = factory.CreateSentenceContextGenerator(model.Language, GetAbbreviations(model.GetAbbreviations()));
+            cgen = factory.CreateSentenceContextGenerator(model.Language, GetAbbreviations(model.Abbreviations));
             scanner = factory.CreateEndOfSentenceScanner(model.Language);
         }
         else
         {
-            cgen = factory.CreateSentenceContextGenerator(GetAbbreviations(model.GetAbbreviations()), customEOSCharacters);
+            cgen = factory.CreateSentenceContextGenerator(GetAbbreviations(model.Abbreviations), customEOSCharacters);
             scanner = factory.CreateEndOfSentenceScanner(customEOSCharacters);
         }
 
         useTokenEnd = model.UseTokenEnd();
     }
 
-    private static HashSet<string> GetAbbreviations(NOpenNLP.Tools.Dictionary.Dictionary? abbreviations)
+    private static JCG.HashSet<string> GetAbbreviations(NOpenNLP.Tools.Dictionary.Dictionary? abbreviations)
     {
         if (abbreviations == null)
         {
@@ -143,14 +144,14 @@ public class SentenceDetectorME : ISentenceDetector
         return sentences;
     }
 
-    private int GetFirstWS(string s, int pos)
+    private static int GetFirstWS(string s, int pos) // NOpenNLP: made static
     {
         while (pos < s.Length && !StringUtil.IsWhitespace(s[pos]))
             pos++;
         return pos;
     }
 
-    private int GetFirstNonWS(string s, int pos)
+    private static int GetFirstNonWS(string s, int pos) // NOpenNLP: made static
     {
         while (pos < s.Length && StringUtil.IsWhitespace(s[pos]))
             pos++;
@@ -180,7 +181,7 @@ public class SentenceDetectorME : ISentenceDetector
                 continue;
             }
 
-            if (positions.Count > 0 && cint < positions[positions.Count - 1])
+            if (positions.Count > 0 && cint < positions[^1])
                 continue;
             double[] probs = model.Eval(cgen.GetContext(sb.ToString(), cint));
             string bestOutcome = model.GetBestOutcome(probs);
@@ -210,7 +211,6 @@ public class SentenceDetectorME : ISentenceDetector
             starts[i] = positions[i];
         }
 
-
         // string does not contain sentence end positions
         if (starts.Length == 0)
         {
@@ -234,9 +234,8 @@ public class SentenceDetectorME : ISentenceDetector
                 return [];
         }
 
-
         // Convert the sentence end indexes to spans
-        bool leftover = starts[starts.Length - 1] != s.Length;
+        bool leftover = starts[^1] != s.Length;
         Span[] spans = new Span[leftover ? starts.Length + 1 : starts.Length];
         for (int si = 0; si < starts.Length; si++)
         {
@@ -249,7 +248,6 @@ public class SentenceDetectorME : ISentenceDetector
             {
                 start = starts[si - 1];
             }
-
 
             // A span might contain only white spaces, in this case the length of
             // the span will be zero after trimming and should be ignored.
@@ -266,10 +264,10 @@ public class SentenceDetectorME : ISentenceDetector
 
         if (leftover)
         {
-            Span span = new Span(starts[starts.Length - 1], s.Length).Trim(s.AsCharSequence());
+            Span span = new Span(starts[^1], s.Length).Trim(s.AsCharSequence());
             if (span.Length > 0)
             {
-                spans[spans.Length - 1] = span;
+                spans[^1] = span;
                 sentProbs.Add(1);
             }
         }
@@ -292,15 +290,18 @@ public class SentenceDetectorME : ISentenceDetector
     /// </summary>
     /// <returns>probability for each sentence returned for the most recent
     ///     call to sentDetect.  If not applicable an empty array is returned.</returns>
-    public virtual double[] GetSentenceProbabilities()
+    public virtual double[] SentenceProbabilities
     {
-        double[] sentProbArray = new double[sentProbs.Count];
-        for (int i = 0; i < sentProbArray.Length; i++)
+        get
         {
-            sentProbArray[i] = sentProbs[i];
-        }
+            double[] sentProbArray = new double[sentProbs.Count];
+            for (int i = 0; i < sentProbArray.Length; i++)
+            {
+                sentProbArray[i] = sentProbs[i];
+            }
 
-        return sentProbArray;
+            return sentProbArray;
+        }
     }
 
     /// <summary>
@@ -315,10 +316,7 @@ public class SentenceDetectorME : ISentenceDetector
     /// <param name="fromIndex">the start of the segment currently being evaluated</param>
     /// <param name="candidateIndex">the index of the candidate sentence ending</param>
     /// <returns>true if the break is acceptable</returns>
-    protected virtual bool IsAcceptableBreak(string s, int fromIndex, int candidateIndex)
-    {
-        return true;
-    }
+    protected virtual bool IsAcceptableBreak(string s, int fromIndex, int candidateIndex) => true;
 
     // /// <summary>
     // /// </summary>

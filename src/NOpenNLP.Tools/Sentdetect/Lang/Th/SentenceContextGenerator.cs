@@ -43,19 +43,19 @@ public class SentenceContextGenerator() : DefaultSDContextGenerator(eosCharacter
         buf.Append(suffix);
         collectFeats.Add(buf.ToString());
         buf.Clear();
-        collectFeats.Add("p1=" + prefix.Substring(Math.Max(prefix.Length - 1, 0)));
-        collectFeats.Add("p2=" + prefix.Substring(Math.Max(prefix.Length - 2, 0)));
-        collectFeats.Add("p3=" + prefix.Substring(Math.Max(prefix.Length - 3, 0)));
-        collectFeats.Add("p4=" + prefix.Substring(Math.Max(prefix.Length - 4, 0)));
-        collectFeats.Add("p5=" + prefix.Substring(Math.Max(prefix.Length - 5, 0)));
-        collectFeats.Add("p6=" + prefix.Substring(Math.Max(prefix.Length - 6, 0)));
-        collectFeats.Add("p7=" + prefix.Substring(Math.Max(prefix.Length - 7, 0)));
-        collectFeats.Add("n1=" + suffix.Substring(0, Math.Min(1, suffix.Length)));
-        collectFeats.Add("n2=" + suffix.Substring(0, Math.Min(2, suffix.Length)));
-        collectFeats.Add("n3=" + suffix.Substring(0, Math.Min(3, suffix.Length)));
-        collectFeats.Add("n4=" + suffix.Substring(0, Math.Min(4, suffix.Length)));
-        collectFeats.Add("n5=" + suffix.Substring(0, Math.Min(5, suffix.Length)));
-        collectFeats.Add("n6=" + suffix.Substring(0, Math.Min(6, suffix.Length)));
-        collectFeats.Add("n7=" + suffix.Substring(0, Math.Min(7, suffix.Length)));
+        collectFeats.Add("p1=" + prefix[Math.Max(prefix.Length - 1, 0)..]);
+        collectFeats.Add("p2=" + prefix[Math.Max(prefix.Length - 2, 0)..]);
+        collectFeats.Add("p3=" + prefix[Math.Max(prefix.Length - 3, 0)..]);
+        collectFeats.Add("p4=" + prefix[Math.Max(prefix.Length - 4, 0)..]);
+        collectFeats.Add("p5=" + prefix[Math.Max(prefix.Length - 5, 0)..]);
+        collectFeats.Add("p6=" + prefix[Math.Max(prefix.Length - 6, 0)..]);
+        collectFeats.Add("p7=" + prefix[Math.Max(prefix.Length - 7, 0)..]);
+        collectFeats.Add("n1=" + suffix[..Math.Min(1, suffix.Length)]);
+        collectFeats.Add("n2=" + suffix[..Math.Min(2, suffix.Length)]);
+        collectFeats.Add("n3=" + suffix[..Math.Min(3, suffix.Length)]);
+        collectFeats.Add("n4=" + suffix[..Math.Min(4, suffix.Length)]);
+        collectFeats.Add("n5=" + suffix[..Math.Min(5, suffix.Length)]);
+        collectFeats.Add("n6=" + suffix[..Math.Min(6, suffix.Length)]);
+        collectFeats.Add("n7=" + suffix[..Math.Min(7, suffix.Length)]);
     }
 }

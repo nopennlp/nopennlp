@@ -109,8 +109,9 @@ public abstract class BaseModel : IArtifactProvider
             artifactMap.PutAll(factory.CreateArtifactMap());
 
             // new manifest entries
-            Dictionary<string, string> entries = factory.CreateManifestEntries();
-            foreach (KeyValuePair<string, string> entry in entries)
+            var entries = factory.CreateManifestEntries();
+
+            foreach (var entry in entries)
             {
                 SetManifestProperty(entry.Key, entry.Value);
             }

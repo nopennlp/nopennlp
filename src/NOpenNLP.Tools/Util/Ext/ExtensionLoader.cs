@@ -118,7 +118,7 @@ public class ExtensionLoader
     /// <param name="extensionClassName"></param>
     /// <returns>the instance of the extension class</returns>
     // TODO: Throw custom exception if loading fails ...
-    public static T InstantiateExtension<T>(string extensionClassName)
+    public static T? InstantiateExtension<T>(string extensionClassName)
     {
 
         // First try to load extension and instantiate extension from class path

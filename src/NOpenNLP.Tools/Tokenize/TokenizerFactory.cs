@@ -88,9 +88,9 @@ public class TokenizerFactory : BaseToolFactory
         }
     }
 
-    public override Dictionary<string, object> CreateArtifactMap()
+    public override IDictionary<string, object> CreateArtifactMap()
     {
-        Dictionary<string, object> artifactMap = base.CreateArtifactMap();
+        var artifactMap = base.CreateArtifactMap();
 
         // Abbreviations are optional
         if (abbreviationDictionary != null)
@@ -101,9 +101,9 @@ public class TokenizerFactory : BaseToolFactory
         return artifactMap;
     }
 
-    public override Dictionary<string, string> CreateManifestEntries()
+    public override IDictionary<string, string> CreateManifestEntries()
     {
-        Dictionary<string, string> manifestEntries = base.CreateManifestEntries();
+        var manifestEntries = base.CreateManifestEntries();
         manifestEntries.Put(USE_ALPHA_NUMERIC_OPTIMIZATION, (IsUseAlphaNumericOptmization().ToString()));
 
         // alphanumeric pattern is optional

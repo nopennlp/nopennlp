@@ -21,6 +21,7 @@ using NOpenNLP.Tools.Util;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Sentdetect;
 
@@ -41,14 +42,15 @@ public class DefaultSDContextGenerator : ISDContextGenerator
     /// </summary>
     protected readonly IList<string> collectFeats;
     private readonly ISet<string> inducedAbbreviations;
-    private readonly HashSet<char> eosCharacters;
+    private readonly JCG.HashSet<char> eosCharacters;
 
     /// <summary>
     /// Creates a new <see cref="ISDContextGenerator"/> instance with
     /// no induced abbreviations.
     /// </summary>
     /// <param name="eosCharacters"></param>
-    public DefaultSDContextGenerator(char[] eosCharacters) : this(new HashSet<string>(), eosCharacters)
+    public DefaultSDContextGenerator(char[] eosCharacters)
+        : this(new JCG.HashSet<string>(), eosCharacters)
     {
     }
 
@@ -70,7 +72,7 @@ public class DefaultSDContextGenerator : ISDContextGenerator
         }
 
         buf = new StringBuilder();
-        collectFeats = new List<string>();
+        collectFeats = new JCG.List<string>();
     }
 
     private static string EscapeChar(char c)
@@ -85,7 +87,7 @@ public class DefaultSDContextGenerator : ISDContextGenerator
             return "<CR>";
         }
 
-        return new string ([c]);
+        return new string([c]);
     }
 
     /// <inheritdoc/>
@@ -163,7 +165,7 @@ public class DefaultSDContextGenerator : ISDContextGenerator
         }
 
         CollectFeatures(prefix, suffix, previous, next, sb[position]);
-        string[] context = new string[collectFeats.Count];
+        string[] context /* = new string[collectFeats.Count] */; // NOpenNLP: initialization was unused
         context = [.. collectFeats];
         collectFeats.Clear();
         return context;
@@ -262,10 +264,7 @@ public class DefaultSDContextGenerator : ISDContextGenerator
         }
     }
 
-    private static bool IsFirstUpper(string s)
-    {
-        return char.IsUpper(s[0]);
-    }
+    private static bool IsFirstUpper(string s) => char.IsUpper(s[0]);
 
     /// <summary>
     /// Finds the index of the nearest space before a specified index which is not itself preceded by a space.

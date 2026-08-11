@@ -36,7 +36,7 @@ public interface IArtifactProvider
     /// </summary>
     /// <param name="key"></param>
     /// <returns>the value</returns>
-    string GetManifestProperty(string key);
+    string? GetManifestProperty(string key);
 
     /// <summary>
     /// Retrieves the language code of the material which was used to train the
