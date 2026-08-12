@@ -85,3 +85,57 @@ the targeted version. The conversion rules above apply to tests as well, plus:
   compile and pass on all three.
 - Tests covering defects specific to the port, which upstream does not cover, go
   in `Support/PortRegressionTest.cs` rather than alongside the ported tests.
+
+## Benchmarks
+
+Two projects measure the port against the Apache OpenNLP release it targets.
+They answer different questions and both need to stay current as the port grows:
+
+- `src/NOpenNLP.Benchmarks` — BenchmarkDotNet. Runs NOpenNLP and the real Java
+  OpenNLP in one .NET process, the latter cross-compiled from the Maven Central
+  jar by IKVM via `MavenReference`. This is the comparison a .NET caller
+  choosing between the two actually faces.
+- `src/java/opennlp-benchmarks` — JMH, Java OpenNLP on a real JVM. IKVM adds
+  overhead of its own, so the in-process numbers flatter the port; these are the
+  honest baseline. Treat a large win over IKVM as unproven until the JMH number
+  confirms it.
+
+When adding coverage:
+
+- **Port a tool, then benchmark it.** Anything with a public inference entry
+  point belongs here. Add the case to both projects in the same change; a C#
+  benchmark with no JMH counterpart cannot be checked against real Java.
+- **Mirror the two sides exactly.** `BenchmarkData.cs` and `BenchmarkData.java`
+  are line-for-line counterparts — same models, same sample text, same tokens
+  and tags. Change them together. The same goes for the benchmark classes:
+  `FooBenchmarks.cs` pairs with `FooBenchmark.java`, measuring the same call.
+- **Reuse the shared sample text and the downloaded models.** Both projects read
+  `testdata/models-sf/` via `NOPENNLP_TEST_DATA_DIR`, populated by
+  `build/download-test-models.ps1`, and run on the same Penn Treebank WSJ
+  sentences the integration tests use, so a benchmark result and a test failure
+  can be read against each other. Add a model to the download script rather than
+  fetching one in a benchmark.
+- **Fail, do not skip, on a missing model.** The tests report inconclusive
+  because a developer who has not run the download script has broken nothing.
+  A benchmark that skipped would print an empty summary that reads like a
+  successful run.
+- **One `[BenchmarkCategory]` per comparison, each with its own
+  `Baseline = true`,** plus `[GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory)]`
+  on the class. With a single baseline per class, BenchmarkDotNet divides every
+  row by it, so unrelated algorithms get reported as a ratio against each other.
+- **Keep `[GlobalSetup]` out of the measurement.** Load models there, not in the
+  benchmark body, unless loading is the thing being measured — which
+  `ModelLoadingBenchmarks` does separately, because it is a distinct code path
+  and the cost every short-lived process pays.
+- **Reset per-document state identically on both sides.** `NameFinderME`
+  accumulates adaptive state; it is cleared per iteration in both harnesses.
+  State handling that differs between the two makes the numbers incomparable.
+- **Do not add these to CI.** The IKVM dependency unpacks to over 4 GB, and
+  benchmark numbers from a shared runner are too noisy to gate on. CI restores
+  the library and test projects individually, not the solution — keep it that
+  way, and keep the NuGet cache key narrowed to those two projects.
+- **The JMH build targets Java 11 bytecode** so the jar runs on 11 through the
+  current LTS, rather than requiring whatever JDK is installed. It also names
+  the JMH annotation processor explicitly: JDK 23 turned implicit annotation
+  processing off, and without that the build silently produces a jar with no
+  harness that fails only at run time.
