@@ -1,0 +1,61 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!--
+      net10.0 only. The point of this project is a like-for-like comparison
+      against real Java OpenNLP running in the same process via IKVM, and IKVM
+      only supports .NET Core style targets. Benchmarking the library's other
+      target frameworks would need a separate project without the IKVM half of
+      each comparison, which is not worth the duplication; the ported code is
+      identical across targets and only the BCL underneath it differs.
+    -->
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>12.0</LangVersion>
+    <RootNamespace>NOpenNLP.Benchmarks</RootNamespace>
+    <AssemblyName>NOpenNLP.Benchmarks</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+
+    <!--
+      BenchmarkDotNet refuses to run a Debug build, and silently produces
+      meaningless numbers if it is ever coerced into one. Defaulting to Release
+      means `dotnet run` without arguments does the right thing.
+    -->
+    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+    <Optimize Condition=" '$(Configuration)' == 'Release' ">true</Optimize>
+
+    <!-- BenchmarkDotNet generates its own entry point per benchmark assembly. -->
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.15.4" />
+  </ItemGroup>
+
+  <!--
+    IKVM cross-compiles the real Apache OpenNLP jar, resolved from Maven Central
+    at the version this port targets, into a .NET assembly. That gives us the
+    Java implementation in-process as the baseline for every comparison, so both
+    sides are measured by the same harness on the same input in the same run.
+
+    The version deliberately matches OpenNLPToolsMavenReferenceVersion to the
+    version in CLAUDE.md: comparing against a different OpenNLP release would
+    make any difference in output ambiguous between a porting defect and an
+    upstream change.
+  -->
+  <ItemGroup>
+    <PackageReference Include="IKVM" Version="8.7.5" />
+    <PackageReference Include="IKVM.Maven.Sdk" Version="1.6.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <MavenReference Include="org.apache.opennlp:opennlp-tools" Version="1.9.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NOpenNLP.Tools\NOpenNLP.Tools.csproj" />
+  </ItemGroup>
+
+</Project>

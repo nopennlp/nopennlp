@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+ Copyright 2026 NOpenNLP Contributors
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.nopennlp</groupId>
+  <artifactId>opennlp-benchmarks</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>NOpenNLP JMH Benchmarks</name>
+  <description>
+    JMH benchmarks over Apache OpenNLP running on a real JVM, mirroring the
+    BenchmarkDotNet benchmarks in src/NOpenNLP.Benchmarks case for case.
+  </description>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <!--
+      Must match the version the C# port targets (see CLAUDE.md) and the
+      MavenReference version in NOpenNLP.Benchmarks.csproj. Benchmarking a
+      different OpenNLP release would make the two sets of numbers
+      incomparable.
+    -->
+    <opennlp.version>1.9.1</opennlp.version>
+    <jmh.version>1.37</jmh.version>
+
+    <!--
+      OpenNLP 1.9.1 is Java 8 bytecode, but -source/-target 8 is deprecated in
+      current JDKs and slated for removal. 11 is the oldest release modern
+      javac supports without a deprecation warning, and it runs the 1.9.1
+      classes unchanged. Nothing here uses a language feature past 8 anyway.
+    -->
+    <maven.compiler.release>11</maven.compiler.release>
+
+    <uberjar.name>benchmarks</uberjar.name>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.opennlp</groupId>
+      <artifactId>opennlp-tools</artifactId>
+      <version>${opennlp.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.openjdk.jmh</groupId>
+      <artifactId>jmh-core</artifactId>
+      <version>${jmh.version}</version>
+    </dependency>
+
+    <!--
+      Generates the benchmark harness from the @Benchmark annotations at compile
+      time. Provided scope: it is a build-time annotation processor, and its
+      output, not the processor, is what ships in the jar.
+    -->
+    <dependency>
+      <groupId>org.openjdk.jmh</groupId>
+      <artifactId>jmh-generator-annprocess</artifactId>
+      <version>${jmh.version}</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+        <configuration>
+          <!--
+            JDK 23 turned implicit annotation processing off, so the processor
+            has to be named explicitly. Without this the build still succeeds,
+            but silently produces a jar with no generated harness and no
+            META-INF/BenchmarkList, which fails only at run time with
+            "Unable to find the resource: /META-INF/BenchmarkList".
+
+            Naming the processor also pins what runs, rather than leaving it to
+            whatever happens to be on the classpath.
+          -->
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.openjdk.jmh</groupId>
+              <artifactId>jmh-generator-annprocess</artifactId>
+              <version>${jmh.version}</version>
+            </path>
+          </annotationProcessorPaths>
+          <annotationProcessors>
+            <annotationProcessor>org.openjdk.jmh.generators.BenchmarkProcessor</annotationProcessor>
+          </annotationProcessors>
+        </configuration>
+      </plugin>
+
+      <!--
+        JMH needs to run from a single self-contained jar: it forks a fresh JVM
+        per trial, and that JVM gets only the jar on its classpath. A plain
+        `mvn package` jar would start and then fail to find OpenNLP.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.5.3</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <finalName>${uberjar.name}</finalName>
+              <!--
+                The shade plugin otherwise writes a dependency-reduced-pom.xml
+                into the project root, which is build output sitting outside
+                target/ where it would show up as an untracked file after every
+                build. Nothing here consumes it: the jar is run directly, not
+                resolved as a dependency.
+              -->
+              <createDependencyReducedPom>false</createDependencyReducedPom>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <mainClass>org.openjdk.jmh.Main</mainClass>
+                </transformer>
+              </transformers>
+              <filters>
+                <filter>
+                  <!--
+                    Shading merges every dependency's META-INF into one place,
+                    and the signature files that come with them then describe a
+                    jar that no longer exists, which makes the JVM reject it.
+                  -->
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

@@ -19,3 +19,9 @@ TestResults/
 # SourceForge site, and the optional Leipzig corpus. Downloaded on demand and
 # cached; never committed. See src/NOpenNLP.Tools.Tests/Integration/README.md.
 testdata/
+
+# BenchmarkDotNet output.
+BenchmarkDotNet.Artifacts/
+
+# Maven build output for the JMH benchmarks under src/java/.
+target/

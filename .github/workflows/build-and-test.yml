@@ -89,7 +89,10 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ env.NUGET_PACKAGES }}
-          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', '**/*.slnx') }}
+          # Only the projects this job restores. Hashing every csproj would let
+          # an edit to NOpenNLP.Benchmarks, which CI never builds, throw away a
+          # perfectly good cache.
+          key: nuget-${{ runner.os }}-${{ hashFiles('src/NOpenNLP.Tools/*.csproj', 'src/NOpenNLP.Tools.Tests/*.csproj') }}
           restore-keys: nuget-${{ runner.os }}-
 
       # Restores what the models job for this OS already downloaded. The key is
@@ -112,8 +115,15 @@ jobs:
         shell: pwsh
         run: build/download-test-models.ps1
 
+      # Restores the test project (and the library through its ProjectReference)
+      # rather than the solution. The solution also carries NOpenNLP.Benchmarks,
+      # whose IKVM dependency unpacks to over 4 GB; a solution-wide restore
+      # would download and cache that on every one of the nine legs to build
+      # something no CI job runs.
       - name: Restore
-        run: dotnet restore NOpenNLP.slnx -p:TestFrameworks=true
+        run: |
+          dotnet restore src/NOpenNLP.Tools/NOpenNLP.Tools.csproj
+          dotnet restore src/NOpenNLP.Tools.Tests/NOpenNLP.Tools.Tests.csproj -p:TestFrameworks=true
 
       # Builds the library for all of its target frameworks, so the
       # netstandard2.0 leg is compiled here even on the net10.0 run.
