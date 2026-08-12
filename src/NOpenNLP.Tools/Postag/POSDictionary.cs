@@ -64,14 +64,11 @@ public class POSDictionary : IEnumerable<string>, IMutableTagDictionary, ISerial
     ///     null if no information is available for that word.</returns>
     public virtual string[]? GetTags(string word)
     {
-        if (caseSensitive)
-        {
-            return dictionary[word];
-        }
-        else
-        {
-            return dictionary[StringUtil.ToLowerCase(word)];
-        }
+        // NOpenNLP: Java's Map.get returns null for an absent word, which is the
+        // documented "no information available" result. The C# indexer throws
+        // instead, so the lookup goes through TryGetValue.
+        string key = caseSensitive ? word : StringUtil.ToLowerCase(word);
+        return dictionary.TryGetValue(key, out string[]? tags) ? tags : null;
     }
 
     // /// <summary>
@@ -208,7 +205,11 @@ public class POSDictionary : IEnumerable<string>, IMutableTagDictionary, ISerial
         // it is time consuming to output the dictionary entries.
         // will output something meaningful for debugging, like
         // POSDictionary{size=100, caseSensitive=true}
-        return $"POSDictionary{{size={dictionary.Count}, caseSensitive={this.caseSensitive}}}";
+
+        // NOpenNLP: Java renders a boolean as lowercase "true"/"false"; C# renders
+        // "True"/"False". The lowercase form is reproduced to match upstream output.
+        string caseSensitiveText = this.caseSensitive ? "true" : "false";
+        return $"POSDictionary{{size={dictionary.Count}, caseSensitive={caseSensitiveText}}}";
     }
 
     /// <summary>

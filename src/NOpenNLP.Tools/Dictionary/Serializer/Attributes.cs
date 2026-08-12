@@ -42,7 +42,10 @@ public class Attributes : IEnumerable<string>
     /// <returns>the value</returns>
     public virtual string? GetValue(string key)
     {
-        return mNameValueMap[key];
+        // NOpenNLP: Java's Map.get returns null when the attribute is not set,
+        // which is what this method documents. The C# indexer throws instead,
+        // so the lookup goes through TryGetValue.
+        return mNameValueMap.TryGetValue(key, out string? value) ? value : null;
     }
 
     /// <summary>

@@ -148,7 +148,7 @@ public static class GeneratorFactory // NOpenNLP: made static
                                 args.Put(name, text.Data);
                                 break;
                             case "bool":
-                                args.Put(name, bool.Parse(text.Data));
+                                args.Put(name, ParseBoolean(text.Data));
                                 break;
                             default:
                                 throw new InvalidFormatException("child element must be one of generator, int, long, float, double," + " str or bool");
@@ -494,7 +494,7 @@ public static class GeneratorFactory // NOpenNLP: made static
                 throw new InvalidFormatException("CachedFeatureGeneratorFactory cannot be specified manually." + "Use cache=\"true\" attribute in featureGenerators element instead.");
 
             // check cache usage
-            if (bool.Parse(generatorElement.GetAttribute("cache")))
+            if (ParseBoolean(generatorElement.GetAttribute("cache")))
                 return new CachedFeatureGenerator(featureGenerator);
             else
                 return featureGenerator;
@@ -512,6 +512,17 @@ public static class GeneratorFactory // NOpenNLP: made static
                 throw new InvalidFormatException("Unexpected element: " + elementName);
         }
     }
+
+    /// <summary>
+    /// NOpenNLP: reproduces <c>java.lang.Boolean.parseBoolean</c>, which returns
+    /// <c>true</c> only for a case-insensitive "true" and <c>false</c> for anything
+    /// else, including null and the empty string. <see cref="bool.Parse(string)"/>
+    /// throws a <see cref="FormatException"/> instead, which would fail on every
+    /// descriptor that omits the optional "cache" attribute, since
+    /// <c>GetAttribute</c> returns the empty string for an absent attribute.
+    /// </summary>
+    private static bool ParseBoolean(string? value)
+        => "true".Equals(value, StringComparison.OrdinalIgnoreCase);
 
     internal static XmlElement? GetFirstChild(XmlElement elem)
     {
@@ -661,7 +672,12 @@ public static class GeneratorFactory // NOpenNLP: made static
     internal static void ExtractArtifactSerializerMappings(JCG.Dictionary<string, IArtifactSerializer> mapping, XmlElement element)
     {
         string className = element.GetAttribute("class");
-        if (string.IsNullOrEmpty(className))
+
+        // NOpenNLP: upstream guards this block with "className != null", i.e. it
+        // runs when a class name is present. GetAttribute returns the empty string
+        // rather than null for an absent attribute, so the check is for a non-empty
+        // name; elements without a class are skipped, as upstream intends.
+        if (!string.IsNullOrEmpty(className))
         {
             // NOpenNLP: Type.GetType() returns null rather than throwing
             // ClassNotFoundException, so we check for null explicitly.
