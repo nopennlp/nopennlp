@@ -50,6 +50,20 @@
   </ItemGroup>
 
   <!--
+    The netstandard2.0 build of the library compiles against the polyfills below,
+    but NuGet resolves this project's package assets against net9.0, where those
+    APIs are already in the framework, and so contributes no assembly for them.
+    The result builds clean and then throws FileNotFoundException on first use at
+    run time. Referencing them here puts the implementation assemblies in the
+    test output. Keep this list in sync with the netstandard2.0 ItemGroup in
+    NOpenNLP.Tools.csproj.
+  -->
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net9.0' ">
+    <PackageReference Include="Microsoft.Bcl.HashCode" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Bcl.Memory" Version="10.0.10" />
+  </ItemGroup>
+
+  <!--
     Test resources copied from opennlp-tools/src/test/resources upstream. The
     LogicalName mirrors the upstream classpath path so tests can load them the
     same way the library does, via J2N's FindAndGetManifestResourceStream (see
