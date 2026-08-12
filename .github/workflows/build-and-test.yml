@@ -39,11 +39,11 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Cache test models
         id: cache-models
-        uses: actions/cache@v4
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: testdata
           key: testmodels-${{ runner.os }}-${{ hashFiles('build/download-test-models.ps1') }}
@@ -69,7 +69,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # Nerdbank.GitVersioning derives the version from commit height, so it
           # needs the full history rather than the default shallow clone.
@@ -78,7 +78,7 @@ jobs:
       # Each leg needs its own runtime to execute on, plus the .NET 10 SDK to
       # build with. Installing all three keeps the setup identical across legs.
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           dotnet-version: |
             8.0.x
@@ -86,7 +86,7 @@ jobs:
             10.0.x
 
       - name: Cache NuGet packages
-        uses: actions/cache@v4
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ env.NUGET_PACKAGES }}
           key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', '**/*.slnx') }}
@@ -99,7 +99,7 @@ jobs:
       # this key identical to the one in the models job.
       - name: Restore test models
         id: cache-models
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: testdata
           key: testmodels-${{ runner.os }}-${{ hashFiles('build/download-test-models.ps1') }}
@@ -141,7 +141,7 @@ jobs:
           --results-directory "${{ github.workspace }}/testresults"
 
       - name: Upload test results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
           name: testresults-${{ matrix.os }}-${{ matrix.framework }}
@@ -155,14 +155,14 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # Nerdbank.GitVersioning derives the version from commit height, so it
           # needs the full history rather than the default shallow clone.
           fetch-depth: 0
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           dotnet-version: 10.0.x
 
@@ -191,7 +191,7 @@ jobs:
           echo "All required package contents are present."
 
       - name: Upload package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: nupkg
           path: |
