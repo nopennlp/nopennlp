@@ -37,11 +37,12 @@ jobs:
         uses: actions/cache@v4
         with:
           path: testdata
-          key: testmodels-${{ hashFiles('build/download-test-models.sh') }}
+          key: testmodels-${{ hashFiles('build/download-test-models.ps1') }}
 
       - name: Download test models
         if: steps.cache-models.outputs.cache-hit != 'true'
-        run: build/download-test-models.sh
+        shell: pwsh
+        run: build/download-test-models.ps1
 
   test:
     name: ${{ matrix.os }} / ${{ matrix.framework }}
@@ -91,15 +92,15 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: testdata
-          key: testmodels-${{ hashFiles('build/download-test-models.sh') }}
+          key: testmodels-${{ hashFiles('build/download-test-models.ps1') }}
 
       # Should not normally run: the models job populates the cache first. This
       # only covers a cache entry evicted between that job and this one, and the
       # script skips files already present.
       - name: Download test models (fallback)
         if: steps.cache-models.outputs.cache-hit != 'true'
-        shell: bash
-        run: build/download-test-models.sh
+        shell: pwsh
+        run: build/download-test-models.ps1
 
       - name: Restore
         run: dotnet restore NOpenNLP.slnx -p:TestFrameworks=true

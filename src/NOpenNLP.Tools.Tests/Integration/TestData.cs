@@ -26,7 +26,7 @@ namespace NOpenNLP.Tools.Integration;
 /// Authored for NOpenNLP; not part of the Apache OpenNLP source. Upstream's
 /// eval tests read an OPENNLP_DATA_DIR system property that the developer
 /// populates by hand. Here the models are fetched by
-/// <c>build/download-test-models.sh</c> into a gitignored <c>testdata/</c>
+/// <c>build/download-test-models.ps1</c> into a gitignored <c>testdata/</c>
 /// directory at the repository root, so the tests run unattended once that
 /// script has been executed. NOPENNLP_TEST_DATA_DIR overrides the location,
 /// which is what CI sets when it restores the download from its cache.
@@ -55,7 +55,7 @@ internal static class TestData
         if (DataDirectory is null)
         {
             Assert.Inconclusive(
-                $"Integration test data not found. Run build/download-test-models.sh, " +
+                $"Integration test data not found. Run build/download-test-models.ps1, " +
                 $"or set {DataDirVariable} to the directory holding models-sf/.");
         }
 
@@ -65,7 +65,7 @@ internal static class TestData
         {
             Assert.Inconclusive(
                 $"Integration test file '{relativePath}' not found under {DataDirectory}. " +
-                "Run build/download-test-models.sh to fetch the models.");
+                "Run build/download-test-models.ps1 to fetch the models.");
         }
 
         return path;

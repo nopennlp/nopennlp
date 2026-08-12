@@ -43,7 +43,7 @@ namespace NOpenNLP.Tools.Integration;
 /// <para/>
 /// The parser model is excluded: it is 34 MB and the parser is not ported.
 /// <para/>
-/// The models are fetched by build/download-test-models.sh. Without them these
+/// The models are fetched by build/download-test-models.ps1. Without them these
 /// tests report inconclusive rather than failing; see <see cref="TestData"/>.
 /// </remarks>
 [Category("Integration")]
