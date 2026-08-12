@@ -71,6 +71,8 @@
                       LogicalName="opennlp.tools.util.featuregen.%(Filename)%(Extension)" />
     <EmbeddedResource Include="Formats\brown-cluster.txt"
                       LogicalName="opennlp.tools.formats.brown-cluster.txt" />
+    <EmbeddedResource Include="Chunker\*.bin"
+                      LogicalName="opennlp.tools.chunker.%(Filename)%(Extension)" />
   </ItemGroup>
 
 </Project>

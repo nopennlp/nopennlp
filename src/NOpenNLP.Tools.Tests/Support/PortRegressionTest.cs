@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 using NOpenNLP.Tools.Ml.Naivebayes;
+using NOpenNLP.Tools.Chunker;
 using NOpenNLP.Tools.Namefind;
 using NOpenNLP.Tools.Postag;
 using NOpenNLP.Tools.Util;
@@ -167,5 +168,65 @@ public class PortRegressionTest
         IAdaptiveFeatureGenerator generator = factory.CreateFeatureGenerators();
 
         ClassicAssert.IsNotNull(generator);
+    }
+
+    /// <summary>
+    /// Runs real inference against a pre-trained model, which nothing else in the
+    /// suite does. Everything that reads a model — the zip container, the maxent
+    /// model reader, GISModel.Eval, the beam search, the context generator — has to
+    /// be correct end to end for this to produce the right chunks.
+    /// </summary>
+    /// <remarks>
+    /// Authored for NOpenNLP. Upstream covers inference only in tests that train
+    /// their own model, or in SourceForgeModelEval, which needs models and a corpus
+    /// that are not in the repository; none of those are portable. chunker170default.bin
+    /// ships in the upstream test resources, so it is the one pre-trained model
+    /// available to pin numerical behavior against.
+    /// <para/>
+    /// A defect in the maxent arithmetic or the beam search yields plausible but
+    /// wrong tags rather than an exception, so the expected values below were
+    /// checked to be a linguistically sensible parse, not merely recorded.
+    /// </remarks>
+    [Test]
+    public void TestChunkerInferenceAgainstPretrainedModel()
+    {
+        ChunkerModel model = new ChunkerModel(
+            TestResources.OpenResource("/opennlp/tools/chunker/chunker170default.bin"));
+        ChunkerME chunker = new ChunkerME(model);
+
+        // A Penn-Treebank style sentence, of the kind this model was trained on.
+        string[] tokens =
+        [
+            "Rockwell", "said", "the", "agreement", "calls", "for", "it", "to",
+            "supply", "200", "additional", "so-called", "shipsets", "for", "the",
+            "planes", "."
+        ];
+        string[] tags =
+        [
+            "NNP", "VBD", "DT", "NN", "VBZ", "IN", "PRP", "TO", "VB", "CD", "JJ",
+            "JJ", "NNS", "IN", "DT", "NNS", "."
+        ];
+
+        string[] chunks = chunker.Chunk(tokens, tags);
+
+        // "Rockwell" / "said" / "the agreement" / "calls" / "for" / "it" /
+        // "to supply" / "200 additional so-called shipsets" / "for" / "the planes"
+        string[] expected =
+        [
+            "B-NP", "B-VP", "B-NP", "I-NP", "B-VP", "B-SBAR", "B-NP", "B-VP",
+            "I-VP", "B-NP", "I-NP", "I-NP", "I-NP", "B-PP", "B-NP", "I-NP", "O"
+        ];
+        CollectionAssert.AreEqual(expected, chunks);
+
+        // The same result expressed as spans, which exercises the BIO decoding.
+        Span[] spans = chunker.ChunkAsSpans(tokens, tags);
+        ClassicAssert.AreEqual(10, spans.Length);
+        ClassicAssert.AreEqual(new Span(2, 4, "NP"), spans[2]);
+        // The four token noun phrase, which only decodes correctly if the whole
+        // B-NP/I-NP run was tagged correctly.
+        ClassicAssert.AreEqual(new Span(9, 13, "NP"), spans[7]);
+
+        // A confident decision, not a near-tie that happened to fall the right way.
+        ClassicAssert.Greater(chunker.Probs()[0], 0.9d);
     }
 }

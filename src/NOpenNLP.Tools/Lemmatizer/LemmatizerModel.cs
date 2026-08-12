@@ -90,7 +90,8 @@ public class LemmatizerModel : BaseModel
         base.ValidateArtifactMap();
         if (!(artifactMap[LEMMATIZER_MODEL_ENTRY_NAME] is AbstractModel))
         {
-            throw new InvalidFormatException("ILemmatizer model is incomplete!");
+            // NOpenNLP: "Lemmatizer" here names the tool, not the ILemmatizer interface.
+            throw new InvalidFormatException("Lemmatizer model is incomplete!");
         }
     }
 

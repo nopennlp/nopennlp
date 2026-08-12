@@ -87,7 +87,8 @@ public class ChunkerModel : BaseModel
 
         if (artifactMap[CHUNKER_MODEL_ENTRY_NAME] is not AbstractModel)
         {
-            throw new InvalidFormatException("IChunker model is incomplete!");
+            // NOpenNLP: "Chunker" here names the tool, not the IChunker interface.
+            throw new InvalidFormatException("Chunker model is incomplete!");
         }
 
         // Since 1.8.0 we changed the ChunkerFactory signature. This will check the if the model
@@ -96,7 +97,9 @@ public class ChunkerModel : BaseModel
             && !string.Equals(GetManifestProperty(FACTORY_NAME), "opennlp.tools.chunker.ChunkerFactory")
             && Version is { Major: <= 1, Minor: < 8 })
         {
-            throw new InvalidFormatException($"The IChunker factory '{GetManifestProperty(FACTORY_NAME)}' is no longer compatible. Please update it to match the latest ChunkerFactory.");
+            // NOpenNLP: "Chunker" here names the tool, not the IChunker interface;
+            // the message must match upstream's text, which callers assert on.
+            throw new InvalidFormatException($"The Chunker factory '{GetManifestProperty(FACTORY_NAME)}' is no longer compatible. Please update it to match the latest ChunkerFactory.");
         }
     }
 

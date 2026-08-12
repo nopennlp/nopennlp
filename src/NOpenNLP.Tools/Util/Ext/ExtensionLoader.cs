@@ -19,6 +19,8 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using NOpenNLP.Tools.Support;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Security;
 
@@ -44,7 +46,12 @@ public class ExtensionLoader
     /// (for example <c>opennlp.tools.sentdetect.SentenceDetectorFactory</c>).
     /// <see cref="Type.GetType(string)"/> cannot resolve those, so the Java name is
     /// translated to the corresponding ported type by title-casing each segment
-    /// and searching this assembly.
+    /// and searching the loaded assemblies.
+    /// <para/>
+    /// Upstream uses <c>Class.forName</c>, which searches the whole classpath, so a
+    /// user-supplied factory in another jar resolves. Searching only this assembly
+    /// would break that extension point, so the loaded assemblies are searched
+    /// too, with this one taking precedence.
     /// </summary>
     internal static Type? ResolveType(string? className)
     {
@@ -73,24 +80,77 @@ public class ExtensionLoader
 
         string portedName = string.Join(".", parts);
 
-        type = typeof(ExtensionLoader).Assembly.GetType(portedName, throwOnError: false);
-        if (type != null)
+        // This assembly first, so a ported type always wins over a same-named type
+        // that happens to be loaded elsewhere.
+        foreach (Assembly assembly in GetSearchAssemblies())
         {
-            return type;
+            type = assembly.GetType(portedName, throwOnError: false);
+            if (type != null)
+            {
+                return type;
+            }
         }
 
         // Fall back to matching on the simple type name, which covers cases where
         // the Java package does not line up with the ported namespace.
         string simpleName = parts[^1];
-        foreach (var candidate in typeof(ExtensionLoader).Assembly.GetTypes())
+        foreach (Assembly assembly in GetSearchAssemblies())
         {
-            if (string.Equals(candidate.Name, simpleName, StringComparison.Ordinal))
+            Type[] candidates;
+            try
             {
-                return candidate;
+                candidates = assembly.GetTypes();
+            }
+            catch (ReflectionTypeLoadException e)
+            {
+                // A partially loadable assembly still contributes the types that
+                // did load; an unrelated assembly failing to load must not stop
+                // the search.
+                candidates = [.. e.Types.Where(t => t != null)!];
+            }
+
+            foreach (Type candidate in candidates)
+            {
+                if (string.Equals(candidate.Name, simpleName, StringComparison.Ordinal))
+                {
+                    return candidate;
+                }
             }
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// NOpenNLP: this assembly first, then the rest of the loaded assemblies, so a
+    /// factory supplied by the calling application is reachable the way it would be
+    /// on the Java classpath. Framework assemblies are skipped: they cannot define
+    /// an OpenNLP extension and enumerating their types is expensive.
+    /// </summary>
+    private static IEnumerable<Assembly> GetSearchAssemblies()
+    {
+        Assembly self = typeof(ExtensionLoader).Assembly;
+        yield return self;
+
+        foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+        {
+            if (ReferenceEquals(assembly, self) || assembly.IsDynamic)
+            {
+                continue;
+            }
+
+            string? name = assembly.GetName().Name;
+            if (name is null
+                || name.StartsWith("System.", StringComparison.Ordinal)
+                || name.StartsWith("Microsoft.", StringComparison.Ordinal)
+                || string.Equals(name, "mscorlib", StringComparison.Ordinal)
+                || string.Equals(name, "netstandard", StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            yield return assembly;
+        }
     }
 
     internal static bool IsOSGiAvailable
