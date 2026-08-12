@@ -22,7 +22,7 @@
     <LangVersion>12.0</LangVersion>
     <RootNamespace>NOpenNLP.Tools</RootNamespace>
     <AssemblyName>NOpenNLP.Tools.Tests</AssemblyName>
-    <Nullable>disable</Nullable>
+    <Nullable>enable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
