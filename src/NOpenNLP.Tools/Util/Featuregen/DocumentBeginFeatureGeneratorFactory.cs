@@ -25,14 +25,8 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 
 public class DocumentBeginFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
-    public DocumentBeginFeatureGeneratorFactory() : base()
-    {
-    }
-
     public virtual IAdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
-    {
-        return new DocumentBeginFeatureGenerator();
-    }
+        => new DocumentBeginFeatureGenerator();
 
     internal static void Register(IDictionary<string, GeneratorFactory.IXmlFeatureGeneratorFactory> factoryMap)
     {
@@ -40,7 +34,5 @@ public class DocumentBeginFeatureGeneratorFactory : GeneratorFactory.AbstractXml
     }
 
     public override IAdaptiveFeatureGenerator Create()
-    {
-        return new DocumentBeginFeatureGenerator();
-    }
+        => new DocumentBeginFeatureGenerator();
 }

@@ -28,7 +28,7 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// </summary>
 public class AdditionalContextFeatureGenerator : IAdaptiveFeatureGenerator
 {
-    private string[][] additionalContext;
+    private string[][]? additionalContext;
 
     public virtual void CreateFeatures(IList<string> features, string[] tokens, int index, string[] preds)
     {

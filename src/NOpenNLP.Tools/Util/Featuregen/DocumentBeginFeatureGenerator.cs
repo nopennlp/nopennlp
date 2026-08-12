@@ -24,7 +24,8 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 
 public class DocumentBeginFeatureGenerator : IAdaptiveFeatureGenerator
 {
-    private string[] firstSentence;
+    private string[]? firstSentence;
+
     public virtual void CreateFeatures(IList<string> features, string[] tokens, int index, string[] previousOutcomes)
     {
         if (firstSentence == null)

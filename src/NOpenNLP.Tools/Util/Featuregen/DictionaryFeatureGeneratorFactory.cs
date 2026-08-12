@@ -31,21 +31,17 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// <seealso cref="DictionaryFeatureGenerator"/>
 public class DictionaryFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
-    public DictionaryFeatureGeneratorFactory() : base()
-    {
-    }
-
     public virtual IAdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
     {
         string dictResourceKey = generatorElement.GetAttribute("dict");
-        object dictResource = resourceManager(dictResourceKey);
-        if (!(dictResource is NOpenNLP.Tools.Dictionary.Dictionary))
+        object? dictResource = resourceManager(dictResourceKey);
+        if (dictResource is not NOpenNLP.Tools.Dictionary.Dictionary dict)
         {
-            throw new InvalidFormatException("No dictionary resource for key: " + dictResourceKey);
+            throw new InvalidFormatException($"No dictionary resource for key: {dictResourceKey}");
         }
 
         string prefix = generatorElement.GetAttribute("prefix");
-        return new DictionaryFeatureGenerator(prefix, (NOpenNLP.Tools.Dictionary.Dictionary)dictResource);
+        return new DictionaryFeatureGenerator(prefix, dict);
     }
 
     internal static void Register(IDictionary<string, GeneratorFactory.IXmlFeatureGeneratorFactory> factoryMap)
@@ -53,26 +49,28 @@ public class DictionaryFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFea
         factoryMap.Put("dictionary", new DictionaryFeatureGeneratorFactory());
     }
 
-    public override IAdaptiveFeatureGenerator Create()
+    public override IAdaptiveFeatureGenerator? Create()
     {
-
         // if resourceManager is null, we don't instantiate
         if (resourceManager == null)
             return null;
         string dictResourceKey = GetStr("dict");
-        object dictResource = resourceManager(dictResourceKey);
-        if (!(dictResource is NOpenNLP.Tools.Dictionary.Dictionary))
+        object? dictResource = resourceManager(dictResourceKey);
+        if (dictResource is not NOpenNLP.Tools.Dictionary.Dictionary dict)
         {
-            throw new InvalidFormatException("No dictionary resource for key: " + dictResourceKey);
+            throw new InvalidFormatException($"No dictionary resource for key: {dictResourceKey}");
         }
 
-        return new DictionaryFeatureGenerator(GetStr("prefix"), (NOpenNLP.Tools.Dictionary.Dictionary)dictResource);
+        return new DictionaryFeatureGenerator(GetStr("prefix"), dict);
     }
 
-    public override JCG.Dictionary<string, IArtifactSerializer> GetArtifactSerializerMapping()
+    public override IDictionary<string, IArtifactSerializer> ArtifactSerializerMapping
     {
-        JCG.Dictionary<string, IArtifactSerializer> mapping = new JCG.Dictionary<string, IArtifactSerializer>();
-        mapping.Put(GetStr("dict"), new DictionarySerializer());
-        return mapping;
+        get
+        {
+            JCG.Dictionary<string, IArtifactSerializer> mapping = new JCG.Dictionary<string, IArtifactSerializer>();
+            mapping.Put(GetStr("dict"), new DictionarySerializer());
+            return mapping;
+        }
     }
 }

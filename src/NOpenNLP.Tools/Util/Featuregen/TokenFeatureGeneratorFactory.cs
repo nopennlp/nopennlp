@@ -25,14 +25,8 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 
 public class TokenFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
-    public TokenFeatureGeneratorFactory() : base()
-    {
-    }
-
     public virtual IAdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
-    {
-        return new TokenFeatureGenerator();
-    }
+        => new TokenFeatureGenerator();
 
     internal static void Register(IDictionary<string, GeneratorFactory.IXmlFeatureGeneratorFactory> factoryMap)
     {
@@ -40,7 +34,5 @@ public class TokenFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureG
     }
 
     public override IAdaptiveFeatureGenerator Create()
-    {
-        return new TokenFeatureGenerator(GetBool("lowercase", true));
-    }
+        => new TokenFeatureGenerator(GetBool("lowercase", true));
 }

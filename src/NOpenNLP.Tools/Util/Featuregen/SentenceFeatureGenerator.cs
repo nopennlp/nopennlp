@@ -25,16 +25,9 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// <summary>
 /// This feature generator creates sentence begin and end features.
 /// </summary>
-public class SentenceFeatureGenerator : IAdaptiveFeatureGenerator
+public class SentenceFeatureGenerator(bool isGenerateFirstWordFeature, bool isGenerateLastWordFeature)
+    : IAdaptiveFeatureGenerator
 {
-    private readonly bool isGenerateFirstWordFeature;
-    private readonly bool isGenerateLastWordFeature;
-    public SentenceFeatureGenerator(bool isGenerateFirstWordFeature, bool isGenerateLastWordFeature)
-    {
-        this.isGenerateFirstWordFeature = isGenerateFirstWordFeature;
-        this.isGenerateLastWordFeature = isGenerateLastWordFeature;
-    }
-
     public virtual void CreateFeatures(IList<string> features, string[] tokens, int index, string[] previousOutcomes)
     {
         if (isGenerateFirstWordFeature && index == 0)

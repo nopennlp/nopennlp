@@ -28,15 +28,10 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// <seealso cref="DefinitionFeatureGeneratorFactory"/>
 public class DefinitionFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
-    private static readonly string ELEMENT_NAME = "definition";
-    public DefinitionFeatureGeneratorFactory() : base()
-    {
-    }
+    private const string ELEMENT_NAME = "definition";
 
     public virtual IAdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
-    {
-        return new OutcomePriorFeatureGenerator();
-    }
+        => new OutcomePriorFeatureGenerator();
 
     internal static void Register(IDictionary<string, GeneratorFactory.IXmlFeatureGeneratorFactory> factoryMap)
     {
@@ -44,7 +39,5 @@ public class DefinitionFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFea
     }
 
     public override IAdaptiveFeatureGenerator Create()
-    {
-        return new OutcomePriorFeatureGenerator();
-    }
+        => new OutcomePriorFeatureGenerator();
 }

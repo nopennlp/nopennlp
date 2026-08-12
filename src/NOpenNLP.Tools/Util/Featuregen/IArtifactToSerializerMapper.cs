@@ -25,5 +25,5 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 
 public interface IArtifactToSerializerMapper
 {
-    IDictionary<string, IArtifactSerializer> GetArtifactSerializerMapping();
+    IDictionary<string, IArtifactSerializer> ArtifactSerializerMapping { get; }
 }

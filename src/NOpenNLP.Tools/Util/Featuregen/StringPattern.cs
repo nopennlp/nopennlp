@@ -29,22 +29,24 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// </summary>
 public class StringPattern
 {
-    private static readonly int INITAL_CAPITAL_LETTER = 0x1;
-    private static readonly int ALL_CAPITAL_LETTER = 0x1 << 1;
-    private static readonly int ALL_LOWERCASE_LETTER = 0x1 << 2;
-    private static readonly int ALL_LETTERS = 0x1 << 3;
-    private static readonly int ALL_DIGIT = 0x1 << 4;
-    private static readonly int ALL_HIRAGANA = 0x1 << 5;
-    private static readonly int ALL_KATAKANA = 0x1 << 6;
-    private static readonly int CONTAINS_PERIOD = 0x1 << 7;
-    private static readonly int CONTAINS_COMMA = 0x1 << 8;
-    private static readonly int CONTAINS_SLASH = 0x1 << 9;
-    private static readonly int CONTAINS_DIGIT = 0x1 << 10;
-    private static readonly int CONTAINS_HYPHEN = 0x1 << 11;
-    private static readonly int CONTAINS_LETTERS = 0x1 << 12;
-    private static readonly int CONTAINS_UPPERCASE = 0x1 << 13;
+    private const int INITAL_CAPITAL_LETTER = 0x1;
+    private const int ALL_CAPITAL_LETTER = 0x1 << 1;
+    private const int ALL_LOWERCASE_LETTER = 0x1 << 2;
+    private const int ALL_LETTERS = 0x1 << 3;
+    private const int ALL_DIGIT = 0x1 << 4;
+    private const int ALL_HIRAGANA = 0x1 << 5;
+    private const int ALL_KATAKANA = 0x1 << 6;
+    private const int CONTAINS_PERIOD = 0x1 << 7;
+    private const int CONTAINS_COMMA = 0x1 << 8;
+    private const int CONTAINS_SLASH = 0x1 << 9;
+    private const int CONTAINS_DIGIT = 0x1 << 10;
+    private const int CONTAINS_HYPHEN = 0x1 << 11;
+    private const int CONTAINS_LETTERS = 0x1 << 12;
+    private const int CONTAINS_UPPERCASE = 0x1 << 13;
+
     private readonly int pattern;
     private readonly int digits;
+
     private StringPattern(int pattern, int digits)
     {
         this.pattern = pattern;
@@ -81,7 +83,6 @@ public class StringPattern
             }
             else
             {
-
                 // contains chars other than letter, this means
                 // it can not be one of these:
                 pattern &= ~ALL_LETTERS;
@@ -116,7 +117,6 @@ public class StringPattern
                         break;
                 }
             }
-
 
             // for Japanese...
             int codePoint = token.CodePointAt(i);
@@ -153,94 +153,52 @@ public class StringPattern
     /// <summary>
     /// </summary>
     /// <returns>true if all characters are letters.</returns>
-    public virtual bool IsAllLetter()
-    {
-        return (pattern & ALL_LETTERS) > 0;
-    }
+    public virtual bool IsAllLetter => (pattern & ALL_LETTERS) > 0;
 
     /// <summary>
     /// </summary>
     /// <returns>true if first letter is capital.</returns>
-    public virtual bool IsInitialCapitalLetter()
-    {
-        return (pattern & INITAL_CAPITAL_LETTER) > 0;
-    }
+    public virtual bool IsInitialCapitalLetter => (pattern & INITAL_CAPITAL_LETTER) > 0;
 
     /// <summary>
     /// </summary>
     /// <returns>true if all letters are capital.</returns>
-    public virtual bool IsAllCapitalLetter()
-    {
-        return (pattern & ALL_CAPITAL_LETTER) > 0;
-    }
+    public virtual bool IsAllCapitalLetter => (pattern & ALL_CAPITAL_LETTER) > 0;
 
     /// <summary>
     /// </summary>
     /// <returns>true if all letters are lower case.</returns>
-    public virtual bool IsAllLowerCaseLetter()
-    {
-        return (pattern & ALL_LOWERCASE_LETTER) > 0;
-    }
+    public virtual bool IsAllLowerCaseLetter => (pattern & ALL_LOWERCASE_LETTER) > 0;
 
     /// <summary>
     /// </summary>
     /// <returns>true if all chars are digits.</returns>
-    public virtual bool IsAllDigit()
-    {
-        return (pattern & ALL_DIGIT) > 0;
-    }
+    public virtual bool IsAllDigit => (pattern & ALL_DIGIT) > 0;
 
     /// <summary>
     /// </summary>
     /// <returns>true if all chars are hiragana.</returns>
-    public virtual bool IsAllHiragana()
-    {
-        return (pattern & ALL_HIRAGANA) > 0;
-    }
+    public virtual bool IsAllHiragana => (pattern & ALL_HIRAGANA) > 0;
 
     /// <summary>
     /// </summary>
     /// <returns>true if all chars are katakana.</returns>
-    public virtual bool IsAllKatakana()
-    {
-        return (pattern & ALL_KATAKANA) > 0;
-    }
+    public virtual bool IsAllKatakana => (pattern & ALL_KATAKANA) > 0;
 
     /// <summary>
     /// Retrieves the number of digits.
     /// </summary>
-    public virtual int Digits()
-    {
-        return digits;
-    }
+    public virtual int Digits => digits;
 
-    public virtual bool ContainsPeriod()
-    {
-        return (pattern & CONTAINS_PERIOD) > 0;
-    }
+    public virtual bool ContainsPeriod => (pattern & CONTAINS_PERIOD) > 0;
 
-    public virtual bool ContainsComma()
-    {
-        return (pattern & CONTAINS_COMMA) > 0;
-    }
+    public virtual bool ContainsComma => (pattern & CONTAINS_COMMA) > 0;
 
-    public virtual bool ContainsSlash()
-    {
-        return (pattern & CONTAINS_SLASH) > 0;
-    }
+    public virtual bool ContainsSlash => (pattern & CONTAINS_SLASH) > 0;
 
-    public virtual bool ContainsDigit()
-    {
-        return (pattern & CONTAINS_DIGIT) > 0;
-    }
+    public virtual bool ContainsDigit => (pattern & CONTAINS_DIGIT) > 0;
 
-    public virtual bool ContainsHyphen()
-    {
-        return (pattern & CONTAINS_HYPHEN) > 0;
-    }
+    public virtual bool ContainsHyphen => (pattern & CONTAINS_HYPHEN) > 0;
 
-    public virtual bool ContainsLetters()
-    {
-        return (pattern & CONTAINS_LETTERS) > 0;
-    }
+    public virtual bool ContainsLetters => (pattern & CONTAINS_LETTERS) > 0;
 }

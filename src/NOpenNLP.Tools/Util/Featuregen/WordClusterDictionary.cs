@@ -23,6 +23,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Text;
+using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Util.Featuregen;
 
@@ -46,7 +47,7 @@ public class WordClusterDictionary : ISerializableArtifact
         object IArtifactSerializer.Create(Stream @in) => Create(@in);
     }
 
-    private readonly Dictionary<string, string> tokenToClusterMap = new Dictionary<string, string>(); // NOpenNLP: made readonly
+    private readonly JCG.Dictionary<string, string> tokenToClusterMap = new(); // NOpenNLP: made readonly
 
     /// <summary>
     /// Read word2vec and clark clustering style lexicons.
@@ -56,8 +57,7 @@ public class WordClusterDictionary : ISerializableArtifact
     public WordClusterDictionary(Stream @in)
     {
         var reader = new StreamReader(@in, Encoding.UTF8);
-        string line;
-        while ((line = reader.ReadLine()) != null)
+        while (reader.ReadLine() is { } line)
         {
             string[] parts = line.Split(' ');
             if (parts.Length == 3)
@@ -71,7 +71,7 @@ public class WordClusterDictionary : ISerializableArtifact
         }
     }
 
-    public virtual string LookupToken(string @string)
+    public virtual string? LookupToken(string @string)
     {
         return tokenToClusterMap[@string];
     }

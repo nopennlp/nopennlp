@@ -25,19 +25,12 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// <summary>
 /// Generates Brown cluster features for current token and token class.
 /// </summary>
-public class BrownTokenClassFeatureGenerator : IAdaptiveFeatureGenerator
+public class BrownTokenClassFeatureGenerator(BrownCluster dict) : IAdaptiveFeatureGenerator
 {
-    private readonly BrownCluster brownLexicon; // NOpenNLP: made readonly
-
-    public BrownTokenClassFeatureGenerator(BrownCluster dict)
-    {
-        this.brownLexicon = dict;
-    }
-
     public virtual void CreateFeatures(IList<string> features, string[] tokens, int index, string[] previousOutcomes)
     {
         string wordShape = FeatureGeneratorUtil.TokenFeature(tokens[index]);
-        IList<string> wordClasses = BrownTokenClasses.GetWordClasses(tokens[index], brownLexicon);
+        IList<string> wordClasses = BrownTokenClasses.GetWordClasses(tokens[index], dict);
         for (int i = 0; i < wordClasses.Count; i++)
         {
             features.Add("c," + "browncluster" + "=" + wordShape + "," + wordClasses[i]);

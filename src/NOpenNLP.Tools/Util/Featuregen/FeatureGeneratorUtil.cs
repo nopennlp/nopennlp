@@ -25,11 +25,12 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// <summary>
 /// This class provide common utilities for feature generation.
 /// </summary>
-public class FeatureGeneratorUtil
+public static class FeatureGeneratorUtil // NOpenNLP: made static
 {
-    private static readonly string TOKEN_CLASS_PREFIX = "wc";
-    private static readonly string TOKEN_AND_CLASS_PREFIX = "w&c";
-    private static readonly Regex capPeriod = new Regex("^[A-Z]\\.$", RegexOptions.Compiled);
+    private const string TOKEN_CLASS_PREFIX = "wc";
+    private const string TOKEN_AND_CLASS_PREFIX = "w&c";
+    private static readonly Regex capPeriod = new("^[A-Z]\\.$", RegexOptions.Compiled);
+
     /// <summary>
     /// Generates a class name for the specified token.
     /// The classes are as follows where the first matching class is used:
@@ -57,45 +58,45 @@ public class FeatureGeneratorUtil
     {
         StringPattern pattern = StringPattern.Recognize(token);
         string feat;
-        if (pattern.IsAllHiragana())
+        if (pattern.IsAllHiragana)
         {
             feat = "jah";
         }
-        else if (pattern.IsAllKatakana())
+        else if (pattern.IsAllKatakana)
         {
             feat = "jak";
         }
-        else if (pattern.IsAllLowerCaseLetter())
+        else if (pattern.IsAllLowerCaseLetter)
         {
             feat = "lc";
         }
-        else if (pattern.Digits() == 2)
+        else if (pattern.Digits == 2)
         {
             feat = "2d";
         }
-        else if (pattern.Digits() == 4)
+        else if (pattern.Digits == 4)
         {
             feat = "4d";
         }
-        else if (pattern.ContainsDigit())
+        else if (pattern.ContainsDigit)
         {
-            if (pattern.ContainsLetters())
+            if (pattern.ContainsLetters)
             {
                 feat = "an";
             }
-            else if (pattern.ContainsHyphen())
+            else if (pattern.ContainsHyphen)
             {
                 feat = "dd";
             }
-            else if (pattern.ContainsSlash())
+            else if (pattern.ContainsSlash)
             {
                 feat = "ds";
             }
-            else if (pattern.ContainsComma())
+            else if (pattern.ContainsComma)
             {
                 feat = "dc";
             }
-            else if (pattern.ContainsPeriod())
+            else if (pattern.ContainsPeriod)
             {
                 feat = "dp";
             }
@@ -104,7 +105,7 @@ public class FeatureGeneratorUtil
                 feat = "num";
             }
         }
-        else if (pattern.IsAllCapitalLetter())
+        else if (pattern.IsAllCapitalLetter)
         {
             if (token.Length == 1)
             {
@@ -119,7 +120,7 @@ public class FeatureGeneratorUtil
         {
             feat = "cp";
         }
-        else if (pattern.IsInitialCapitalLetter())
+        else if (pattern.IsInitialCapitalLetter)
         {
             feat = "ic";
         }
@@ -128,6 +129,6 @@ public class FeatureGeneratorUtil
             feat = "other";
         }
 
-        return (feat);
+        return feat;
     }
 }

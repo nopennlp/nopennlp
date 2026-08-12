@@ -27,7 +27,8 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// </summary>
 public class OutcomePriorFeatureGenerator : IAdaptiveFeatureGenerator
 {
-    private static readonly string OUTCOME_PRIOR_FEATURE = "def";
+    private const string OUTCOME_PRIOR_FEATURE = "def";
+
     public virtual void CreateFeatures(IList<string> features, string[] tokens, int index, string[] previousOutcomes)
     {
         features.Add(OUTCOME_PRIOR_FEATURE);

@@ -33,11 +33,13 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// </summary>
 public class WindowFeatureGenerator : IAdaptiveFeatureGenerator
 {
-    public static readonly string PREV_PREFIX = "p";
-    public static readonly string NEXT_PREFIX = "n";
+    public const string PREV_PREFIX = "p";
+    public const string NEXT_PREFIX = "n";
+
     private readonly IAdaptiveFeatureGenerator generator;
     private readonly int prevWindowSize;
     private readonly int nextWindowSize;
+
     /// <summary>
     /// Initializes the current instance with the given parameters.
     /// </summary>
@@ -57,7 +59,8 @@ public class WindowFeatureGenerator : IAdaptiveFeatureGenerator
     /// <param name="prevWindowSize"></param>
     /// <param name="nextWindowSize"></param>
     /// <param name="generators"></param>
-    public WindowFeatureGenerator(int prevWindowSize, int nextWindowSize, params IAdaptiveFeatureGenerator[] generators) : this(new AggregatedFeatureGenerator(generators), prevWindowSize, nextWindowSize)
+    public WindowFeatureGenerator(int prevWindowSize, int nextWindowSize, params IAdaptiveFeatureGenerator[] generators)
+        : this(new AggregatedFeatureGenerator(generators), prevWindowSize, nextWindowSize)
     {
     }
 
@@ -65,7 +68,8 @@ public class WindowFeatureGenerator : IAdaptiveFeatureGenerator
     /// Initializes the current instance. The previous and next window size is 5.
     /// </summary>
     /// <param name="generator">feature generator</param>
-    public WindowFeatureGenerator(IAdaptiveFeatureGenerator generator) : this(generator, 5, 5)
+    public WindowFeatureGenerator(IAdaptiveFeatureGenerator generator)
+        : this(generator, 5, 5)
     {
     }
 
@@ -73,13 +77,13 @@ public class WindowFeatureGenerator : IAdaptiveFeatureGenerator
     /// Initializes the current instance with the given parameters.
     /// </summary>
     /// <param name="generators">array of feature generators</param>
-    public WindowFeatureGenerator(params IAdaptiveFeatureGenerator[] generators) : this(new AggregatedFeatureGenerator(generators), 5, 5)
+    public WindowFeatureGenerator(params IAdaptiveFeatureGenerator[] generators)
+        : this(new AggregatedFeatureGenerator(generators), 5, 5)
     {
     }
 
     public virtual void CreateFeatures(IList<string> features, string[] tokens, int index, string[] preds)
     {
-
         // current features
         generator.CreateFeatures(features, tokens, index, preds);
 
@@ -96,7 +100,6 @@ public class WindowFeatureGenerator : IAdaptiveFeatureGenerator
                 }
             }
         }
-
 
         // next features
         for (int i = 1; i < nextWindowSize + 1; i++)
@@ -124,7 +127,5 @@ public class WindowFeatureGenerator : IAdaptiveFeatureGenerator
     }
 
     public override string ToString()
-    {
-        return base.ToString() + ": Prev window size: " + prevWindowSize + ", Next window size: " + nextWindowSize;
-    }
+        => $"{base.ToString()}: Prev window size: {prevWindowSize}, Next window size: {nextWindowSize}";
 }

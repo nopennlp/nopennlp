@@ -29,10 +29,6 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// <seealso cref="CharacterNgramFeatureGenerator"/>
 public class CharacterNgramFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
-    public CharacterNgramFeatureGeneratorFactory() : base()
-    {
-    }
-
     public virtual IAdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
     {
         string minString = generatorElement.GetAttribute("min");
@@ -67,6 +63,6 @@ public class CharacterNgramFeatureGeneratorFactory : GeneratorFactory.AbstractXm
 
     public override IAdaptiveFeatureGenerator Create()
     {
-        return new CharacterNgramFeatureGenerator(GetInt("min"), GetInt("max"));
+        return new CharacterNgramFeatureGenerator(GetInt32("min"), GetInt32("max"));
     }
 }

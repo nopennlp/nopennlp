@@ -32,21 +32,17 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// </summary>
 public class WordClusterFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
-    public WordClusterFeatureGeneratorFactory() : base()
-    {
-    }
-
     public virtual IAdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
     {
         string dictResourceKey = generatorElement.GetAttribute("dict");
         bool lowerCaseDictionary = "true".Equals(generatorElement.GetAttribute("lowerCase"));
-        object dictResource = resourceManager(dictResourceKey);
-        if (!(dictResource is WordClusterDictionary))
+        object? dictResource = resourceManager(dictResourceKey);
+        if (dictResource is not WordClusterDictionary dict)
         {
             throw new InvalidFormatException("Not a WordClusterDictionary resource for key: " + dictResourceKey);
         }
 
-        return new WordClusterFeatureGenerator((WordClusterDictionary)dictResource, dictResourceKey, lowerCaseDictionary);
+        return new WordClusterFeatureGenerator(dict, dictResourceKey, lowerCaseDictionary);
     }
 
     internal static void Register(IDictionary<string, GeneratorFactory.IXmlFeatureGeneratorFactory> factoryMap)
@@ -54,27 +50,30 @@ public class WordClusterFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFe
         factoryMap.Put("wordcluster", new WordClusterFeatureGeneratorFactory());
     }
 
-    public override IAdaptiveFeatureGenerator Create()
+    public override IAdaptiveFeatureGenerator? Create()
     {
-
         // if resourceManager is null, we don't instantiate
         if (resourceManager == null)
             return null;
+
         string dictResourceKey = GetStr("dict");
         bool lowerCaseDictionary = GetBool("lowerCase");
-        object dictResource = resourceManager(dictResourceKey);
-        if (!(dictResource is WordClusterDictionary))
+        object? dictResource = resourceManager(dictResourceKey);
+        if (dictResource is not WordClusterDictionary dict)
         {
             throw new InvalidFormatException("Not a WordClusterDictionary resource for key: " + dictResourceKey);
         }
 
-        return new WordClusterFeatureGenerator((WordClusterDictionary)dictResource, dictResourceKey, lowerCaseDictionary);
+        return new WordClusterFeatureGenerator(dict, dictResourceKey, lowerCaseDictionary);
     }
 
-    public override JCG.Dictionary<string, IArtifactSerializer> GetArtifactSerializerMapping()
+    public override IDictionary<string, IArtifactSerializer> ArtifactSerializerMapping
     {
-        JCG.Dictionary<string, IArtifactSerializer> mapping = new JCG.Dictionary<string, IArtifactSerializer>();
-        mapping.Put(GetStr("dict"), new WordClusterDictionary.WordClusterDictionarySerializer());
-        return mapping;
+        get
+        {
+            JCG.Dictionary<string, IArtifactSerializer> mapping = new JCG.Dictionary<string, IArtifactSerializer>();
+            mapping.Put(GetStr("dict"), new WordClusterDictionary.WordClusterDictionarySerializer());
+            return mapping;
+        }
     }
 }

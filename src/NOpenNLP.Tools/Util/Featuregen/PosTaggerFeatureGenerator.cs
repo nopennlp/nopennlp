@@ -24,11 +24,12 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 
 public class PosTaggerFeatureGenerator : IAdaptiveFeatureGenerator
 {
-    private readonly string SB = "S=begin";
+    private const string SB = "S=begin";
+
     public virtual void CreateFeatures(IList<string> features, string[] tokens, int index, string[] tags)
     {
-        string prev, prevprev = null;
-        string tagprev, tagprevprev;
+        string? prev, prevprev = null;
+        string? tagprev, tagprevprev;
         tagprev = tagprevprev = null;
         if (index - 1 >= 0)
         {
@@ -48,7 +49,6 @@ public class PosTaggerFeatureGenerator : IAdaptiveFeatureGenerator
         {
             prev = SB;
         }
-
 
         // add the words and pos's of the surrounding context
         if (prev != null)

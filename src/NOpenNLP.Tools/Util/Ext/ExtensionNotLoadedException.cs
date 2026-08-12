@@ -30,20 +30,17 @@ public class ExtensionNotLoadedException : Exception
 
     public ExtensionNotLoadedException(string message) : base(message)
     {
-        isOSGiEnvironment = ExtensionLoader.IsOSGiAvailable();
+        isOSGiEnvironment = ExtensionLoader.IsOSGiAvailable;
     }
 
     public ExtensionNotLoadedException(Exception t) : base(null, t)
     {
-        isOSGiEnvironment = ExtensionLoader.IsOSGiAvailable();
+        isOSGiEnvironment = ExtensionLoader.IsOSGiAvailable;
     }
 
     /// <summary>
     /// Indicates if OpenNLP is running in an OSGi environment or not.
     /// </summary>
     /// <returns>true if running in an OSGi environment</returns>
-    public virtual bool IsOSGiEnvironment()
-    {
-        return isOSGiEnvironment;
-    }
+    public virtual bool IsOSGiEnvironment => isOSGiEnvironment;
 }

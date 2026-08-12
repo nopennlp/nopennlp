@@ -39,9 +39,9 @@ public class AggregatedFeatureGenerator : IAdaptiveFeatureGenerator
     /// Initializes the current instance.
     /// </summary>
     /// <param name="generators">array of generators, null values are not permitted</param>
-    public AggregatedFeatureGenerator(params IAdaptiveFeatureGenerator[] generators)
+    public AggregatedFeatureGenerator(params IAdaptiveFeatureGenerator?[] generators)
     {
-        foreach (IAdaptiveFeatureGenerator generator in generators)
+        foreach (var generator in generators)
         {
             // NOpenNLP: ArgumentNullException.ThrowIfNull is net6.0+.
             if (generator is null)
@@ -50,11 +50,12 @@ public class AggregatedFeatureGenerator : IAdaptiveFeatureGenerator
             }
         }
 
-        this.generators = new List<IAdaptiveFeatureGenerator>(generators);
+        this.generators = new List<IAdaptiveFeatureGenerator>(generators!); // [!]: null validated above
         this.generators = this.generators.AsReadOnly();
     }
 
-    public AggregatedFeatureGenerator(ICollection<IAdaptiveFeatureGenerator> generators) : this([.. generators])
+    public AggregatedFeatureGenerator(ICollection<IAdaptiveFeatureGenerator> generators)
+        : this([.. generators])
     {
     }
 
@@ -64,7 +65,7 @@ public class AggregatedFeatureGenerator : IAdaptiveFeatureGenerator
     /// </summary>
     public virtual void ClearAdaptiveData()
     {
-        foreach (IAdaptiveFeatureGenerator generator in generators)
+        foreach (var generator in generators)
         {
             generator.ClearAdaptiveData();
         }
@@ -76,7 +77,7 @@ public class AggregatedFeatureGenerator : IAdaptiveFeatureGenerator
     /// </summary>
     public virtual void CreateFeatures(IList<string> features, string[] tokens, int index, string[] previousOutcomes)
     {
-        foreach (IAdaptiveFeatureGenerator generator in generators)
+        foreach (var generator in generators)
         {
             generator.CreateFeatures(features, tokens, index, previousOutcomes);
         }
@@ -88,7 +89,7 @@ public class AggregatedFeatureGenerator : IAdaptiveFeatureGenerator
     /// </summary>
     public virtual void UpdateAdaptiveData(string[] tokens, string[] outcomes)
     {
-        foreach (IAdaptiveFeatureGenerator generator in generators)
+        foreach (var generator in generators)
         {
             generator.UpdateAdaptiveData(tokens, outcomes);
         }
@@ -99,8 +100,5 @@ public class AggregatedFeatureGenerator : IAdaptiveFeatureGenerator
     /// <see cref="IAdaptiveFeatureGenerator"/>s.
     /// </summary>
     /// <returns>all aggregated generators</returns>
-    public virtual ICollection<IAdaptiveFeatureGenerator> GetGenerators()
-    {
-        return generators;
-    }
+    public virtual ICollection<IAdaptiveFeatureGenerator> Generators => generators;
 }

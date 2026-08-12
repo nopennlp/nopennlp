@@ -28,20 +28,16 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// <seealso cref="WindowFeatureGenerator"/>
 public class WindowFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
-    public WindowFeatureGeneratorFactory() : base()
-    {
-    }
-
     public virtual IAdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
     {
-        XmlElement nestedGeneratorElement = null;
+        XmlElement? nestedGeneratorElement = null;
         XmlNodeList kids = generatorElement.ChildNodes;
         for (int i = 0; i < kids.Count; i++)
         {
-            XmlNode childNode = kids.Item(i);
-            if (childNode is XmlElement)
+            XmlNode? childNode = kids.Item(i);
+            if (childNode is XmlElement node)
             {
-                nestedGeneratorElement = (XmlElement)childNode;
+                nestedGeneratorElement = node;
                 break;
             }
         }
@@ -51,7 +47,7 @@ public class WindowFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeature
             throw new InvalidFormatException("window feature generator must contain" + " an aggregator element");
         }
 
-        IAdaptiveFeatureGenerator nestedGenerator = GeneratorFactory.CreateGenerator(nestedGeneratorElement, resourceManager);
+        IAdaptiveFeatureGenerator? nestedGenerator = GeneratorFactory.CreateGenerator(nestedGeneratorElement, resourceManager);
         string prevLengthString = generatorElement.GetAttribute("prevLength");
         int prevLength;
         try
@@ -90,6 +86,6 @@ public class WindowFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeature
             throw new InvalidFormatException("window feature generator must contain" + " an aggregator element");
         }
 
-        return new WindowFeatureGenerator(generator, GetInt("prevLength"), GetInt("nextLength"));
+        return new WindowFeatureGenerator(generator, GetInt32("prevLength"), GetInt32("nextLength"));
     }
 }

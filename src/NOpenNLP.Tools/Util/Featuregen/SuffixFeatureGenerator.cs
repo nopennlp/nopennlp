@@ -22,23 +22,19 @@ using System.Collections.Generic;
 
 namespace NOpenNLP.Tools.Util.Featuregen;
 
-public class SuffixFeatureGenerator : IAdaptiveFeatureGenerator
+public class SuffixFeatureGenerator(int suffixLength) : IAdaptiveFeatureGenerator
 {
-    public static readonly int DEFAULT_MAX_LENGTH = 4;
-    private readonly int suffixLength;
-    public SuffixFeatureGenerator()
-    {
-        suffixLength = DEFAULT_MAX_LENGTH;
-    }
+    public const int DEFAULT_MAX_LENGTH = 4;
 
-    public SuffixFeatureGenerator(int suffixLength)
+    public SuffixFeatureGenerator()
+        : this(DEFAULT_MAX_LENGTH)
     {
-        this.suffixLength = suffixLength;
     }
 
     public virtual void CreateFeatures(IList<string> features, string[] tokens, int index, string[] previousOutcomes)
     {
         string[] suffs = GetSuffixes(tokens[index]);
+
         foreach (string suff in suffs)
         {
             features.Add("suf=" + suff);
@@ -49,9 +45,10 @@ public class SuffixFeatureGenerator : IAdaptiveFeatureGenerator
     {
         int suffixes = Math.Min(suffixLength, lex.Length);
         string[] suffs = new string[suffixes];
+
         for (int li = 0; li < suffixes; li++)
         {
-            suffs[li] = lex.Substring(Math.Max(lex.Length - li - 1, 0));
+            suffs[li] = lex[Math.Max(lex.Length - li - 1, 0)..];
         }
 
         return suffs;

@@ -30,17 +30,13 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// <seealso cref="AggregatedFeatureGenerator"/>
 public class AggregatedFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
-    public AggregatedFeatureGeneratorFactory() : base()
-    {
-    }
-
     public virtual IAdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
     {
         ICollection<IAdaptiveFeatureGenerator> aggregatedGenerators = new LinkedList<IAdaptiveFeatureGenerator>();
         XmlNodeList childNodes = generatorElement.ChildNodes;
         for (int i = 0; i < childNodes.Count; i++)
         {
-            XmlNode childNode = childNodes.Item(i);
+            XmlNode? childNode = childNodes.Item(i);
 
             if (childNode is XmlElement aggregatedGeneratorElement)
             {
@@ -59,7 +55,7 @@ public class AggregatedFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFea
     public override IAdaptiveFeatureGenerator Create()
     {
         IList<IAdaptiveFeatureGenerator> aggregatedGenerators = new List<IAdaptiveFeatureGenerator>();
-        foreach (KeyValuePair<string, object> arg in args)
+        foreach (var arg in args)
         {
             if (arg.Key.StartsWith("generator#", StringComparison.Ordinal))
             {

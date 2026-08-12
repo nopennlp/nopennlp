@@ -28,16 +28,8 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// generate features about each token.
 /// The minimum and maximum length can be specified.
 /// </summary>
-public class CharacterNgramFeatureGenerator : IAdaptiveFeatureGenerator
+public class CharacterNgramFeatureGenerator(int minLength, int maxLength) : IAdaptiveFeatureGenerator
 {
-    private readonly int minLength;
-    private readonly int maxLength;
-    public CharacterNgramFeatureGenerator(int minLength, int maxLength)
-    {
-        this.minLength = minLength;
-        this.maxLength = maxLength;
-    }
-
     /// <summary>
     /// Initializes the current instance with min 2 length and max 5 length of ngrams.
     /// </summary>

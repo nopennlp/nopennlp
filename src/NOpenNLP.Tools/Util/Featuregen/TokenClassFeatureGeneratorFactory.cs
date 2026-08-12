@@ -29,10 +29,6 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// <seealso cref="TokenClassFeatureGenerator"/>
 public class TokenClassFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
-    public TokenClassFeatureGeneratorFactory() : base()
-    {
-    }
-
     public virtual IAdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
     {
         string attribute = generatorElement.GetAttribute("wordAndClass");
@@ -58,7 +54,5 @@ public class TokenClassFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFea
     }
 
     public override IAdaptiveFeatureGenerator Create()
-    {
-        return new TokenClassFeatureGenerator(GetBool("wordAndClass", true));
-    }
+        => new TokenClassFeatureGenerator(GetBool("wordAndClass", true));
 }

@@ -17,13 +17,13 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Util.Model;
 using System;
 using System.Text.RegularExpressions;
 using System.IO;
-using System.Collections.Generic;
 using System.Text;
+using NOpenNLP.Tools.Support;
+using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Util.Featuregen;
 
@@ -57,7 +57,7 @@ public class BrownCluster : ISerializableArtifact
         object IArtifactSerializer.Create(Stream @in) => Create(@in);
     }
 
-    private readonly Dictionary<string, string> tokenToClusterMap = new Dictionary<string, string>(); // NOpenNLP: made readonly
+    private readonly JCG.Dictionary<string, string> tokenToClusterMap = new(); // NOpenNLP: made readonly
 
     /// <summary>
     /// Generates the token to cluster map from Brown cluster input file.
@@ -92,9 +92,9 @@ public class BrownCluster : ISerializableArtifact
     /// </summary>
     /// <param name="string">the token to look-up</param>
     /// <returns>the brown class if such token is in the brown cluster map</returns>
-    public virtual string LookupToken(string @string)
+    public virtual string? LookupToken(string @string)
     {
-        return tokenToClusterMap.TryGetValue(@string, out string value) ? value : null;
+        return tokenToClusterMap.TryGetValue(@string, out var value) ? value : null;
     }
 
     // NOpenNLP: serialization is not supported; inference only.

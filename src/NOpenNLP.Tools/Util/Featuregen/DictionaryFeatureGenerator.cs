@@ -35,6 +35,7 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 public class DictionaryFeatureGenerator : IAdaptiveFeatureGenerator
 {
     private InSpanGenerator isg;
+
     public DictionaryFeatureGenerator(NOpenNLP.Tools.Dictionary.Dictionary dict) : this("", dict)
     {
     }

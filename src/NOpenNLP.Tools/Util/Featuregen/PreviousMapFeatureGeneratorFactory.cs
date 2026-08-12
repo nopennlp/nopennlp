@@ -28,14 +28,8 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// <seealso cref="PreviousMapFeatureGenerator"/>
 public class PreviousMapFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
-    public PreviousMapFeatureGeneratorFactory() : base()
-    {
-    }
-
     public virtual IAdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
-    {
-        return new PreviousMapFeatureGenerator();
-    }
+        => new PreviousMapFeatureGenerator();
 
     internal static void Register(IDictionary<string, GeneratorFactory.IXmlFeatureGeneratorFactory> factoryMap)
     {
@@ -43,7 +37,5 @@ public class PreviousMapFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFe
     }
 
     public override IAdaptiveFeatureGenerator Create()
-    {
-        return new PreviousMapFeatureGenerator();
-    }
+        => new PreviousMapFeatureGenerator();
 }

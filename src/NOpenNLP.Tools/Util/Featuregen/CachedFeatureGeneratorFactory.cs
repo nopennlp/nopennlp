@@ -29,20 +29,16 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// <seealso cref="CachedFeatureGenerator"/>
 public class CachedFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
-    public CachedFeatureGeneratorFactory() : base()
-    {
-    }
-
     public virtual IAdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
     {
-        XmlElement cachedGeneratorElement = null;
+        XmlElement? cachedGeneratorElement = null;
         XmlNodeList kids = generatorElement.ChildNodes;
         for (int i = 0; i < kids.Count; i++)
         {
-            XmlNode childNode = kids.Item(i);
-            if (childNode is XmlElement)
+            XmlNode? childNode = kids.Item(i);
+            if (childNode is XmlElement node)
             {
-                cachedGeneratorElement = (XmlElement)childNode;
+                cachedGeneratorElement = node;
                 break;
             }
         }
@@ -52,7 +48,7 @@ public class CachedFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeature
             throw new InvalidFormatException("Could not find containing generator element!");
         }
 
-        IAdaptiveFeatureGenerator cachedGenerator = GeneratorFactory.CreateGenerator(cachedGeneratorElement, resourceManager);
+        IAdaptiveFeatureGenerator? cachedGenerator = GeneratorFactory.CreateGenerator(cachedGeneratorElement, resourceManager);
         return new CachedFeatureGenerator(cachedGenerator);
     }
 
@@ -63,8 +59,7 @@ public class CachedFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeature
 
     public override IAdaptiveFeatureGenerator Create()
     {
-        IAdaptiveFeatureGenerator generator = (IAdaptiveFeatureGenerator)args["generator#0"];
-        if (generator == null)
+        if (args["generator#0"] is not IAdaptiveFeatureGenerator generator)
         {
             throw new InvalidFormatException("Could not find containing generator element!");
         }

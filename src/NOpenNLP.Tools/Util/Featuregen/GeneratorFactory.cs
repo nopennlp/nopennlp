@@ -76,7 +76,7 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// created generators are added to a new instance of the
 /// <see cref="AggregatedFeatureGenerator"/> which is then returned.
 /// </summary>
-public class GeneratorFactory
+public static class GeneratorFactory // NOpenNLP: made static
 {
     /// <summary>
     /// The <see cref="IXmlFeatureGeneratorFactory"/> is responsible to construct
@@ -93,43 +93,34 @@ public class GeneratorFactory
         /// <param name="resourceManager">the resource manager which could be used
         ///     to access referenced resources</param>
         /// <returns>the configured <see cref="IAdaptiveFeatureGenerator"/></returns>
-        IAdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager);
+        IAdaptiveFeatureGenerator? Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager);
     }
 
     public abstract class AbstractXmlFeatureGeneratorFactory
     {
-        protected XmlElement generatorElement;
-        protected FeatureGeneratorResourceProvider resourceManager;
+        protected XmlElement? generatorElement;
+        protected FeatureGeneratorResourceProvider? resourceManager;
         // to respect the order <generator/> in AggregatedFeatureGenerator, let's use LinkedHashMap
-        protected readonly LinkedDictionary<string, object> args; // NOpenNLP: made readonly
+        protected readonly LinkedDictionary<string, object> args = new(); // NOpenNLP: made readonly
 
-        public AbstractXmlFeatureGeneratorFactory()
-        {
-            args = new LinkedDictionary<string, object>();
-        }
+        public virtual IDictionary<string, IArtifactSerializer>? ArtifactSerializerMapping => null;
 
-        public virtual JCG.Dictionary<string, IArtifactSerializer> GetArtifactSerializerMapping()
-        {
-            return null;
-        }
-
-        internal void Init(XmlElement element, FeatureGeneratorResourceProvider resourceManager)
+        internal void Init(XmlElement element, FeatureGeneratorResourceProvider? resourceManager)
         {
             this.generatorElement = element;
             this.resourceManager = resourceManager;
-            IList<IAdaptiveFeatureGenerator> generators = new JCG.List<IAdaptiveFeatureGenerator>();
+            IList<IAdaptiveFeatureGenerator?> generators = new JCG.List<IAdaptiveFeatureGenerator?>();
             XmlNodeList childNodes = generatorElement.ChildNodes;
             for (int i = 0; i < childNodes.Count; i++)
             {
-                XmlNode childNode = childNodes.Item(i);
-                if (childNode is XmlElement)
+                XmlNode? childNode = childNodes.Item(i);
+                if (childNode is XmlElement elem)
                 {
-                    XmlElement elem = (XmlElement)childNode;
                     string type = elem.Name;
                     if (type.Equals("generator"))
                     {
                         string key = "generator#" + generators.Count;
-                        IAdaptiveFeatureGenerator afg = BuildGenerator(elem, resourceManager);
+                        var afg = BuildGenerator(elem, resourceManager);
                         generators.Add(afg);
                         if (afg != null)
                             args.Put(key, afg);
@@ -174,16 +165,16 @@ public class GeneratorFactory
             }
         }
 
-        public virtual int GetInt(string name)
+        public virtual int GetInt32(string name)
         {
-            args.TryGetValue(name, out object value);
+            args.TryGetValue(name, out object? value);
             if (value == null)
             {
                 throw new InvalidFormatException("parameter " + name + " must be set!");
             }
-            else if (value is int)
+            else if (value is int i)
             {
-                return (int)value;
+                return i;
             }
             else
             {
@@ -191,16 +182,16 @@ public class GeneratorFactory
             }
         }
 
-        public virtual int GetInt(string name, int defValue)
+        public virtual int GetInt32(string name, int defValue)
         {
-            args.TryGetValue(name, out object value);
+            args.TryGetValue(name, out object? value);
             if (value == null)
             {
                 return defValue;
             }
-            else if (value is int)
+            else if (value is int i)
             {
-                return (int)value;
+                return i;
             }
             else
             {
@@ -208,16 +199,16 @@ public class GeneratorFactory
             }
         }
 
-        public virtual long GetLong(string name)
+        public virtual long GetInt64(string name)
         {
-            args.TryGetValue(name, out object value);
+            args.TryGetValue(name, out object? value);
             if (value == null)
             {
                 throw new InvalidFormatException("parameter " + name + " must be set!");
             }
-            else if (value is long)
+            else if (value is long l)
             {
-                return (long)value;
+                return l;
             }
             else
             {
@@ -225,16 +216,16 @@ public class GeneratorFactory
             }
         }
 
-        public virtual long GetLong(string name, long defValue)
+        public virtual long GetInt64(string name, long defValue)
         {
-            args.TryGetValue(name, out object value);
+            args.TryGetValue(name, out object? value);
             if (value == null)
             {
                 return defValue;
             }
-            else if (value is long)
+            else if (value is long l)
             {
-                return (long)value;
+                return l;
             }
             else
             {
@@ -242,16 +233,16 @@ public class GeneratorFactory
             }
         }
 
-        public virtual float GetFloat(string name)
+        public virtual float GetSingle(string name)
         {
-            args.TryGetValue(name, out object value);
+            args.TryGetValue(name, out object? value);
             if (value == null)
             {
                 throw new InvalidFormatException("parameter " + name + " must be set!");
             }
-            else if (value is float)
+            else if (value is float f)
             {
-                return (float)value;
+                return f;
             }
             else
             {
@@ -259,16 +250,16 @@ public class GeneratorFactory
             }
         }
 
-        public virtual float GetFloat(string name, float defValue)
+        public virtual float GetSingle(string name, float defValue)
         {
-            args.TryGetValue(name, out object value);
+            args.TryGetValue(name, out object? value);
             if (value == null)
             {
                 return defValue;
             }
-            else if (value is float)
+            else if (value is float f)
             {
-                return (float)value;
+                return f;
             }
             else
             {
@@ -278,14 +269,14 @@ public class GeneratorFactory
 
         public virtual double GetDouble(string name)
         {
-            args.TryGetValue(name, out object value);
+            args.TryGetValue(name, out object? value);
             if (value == null)
             {
                 throw new InvalidFormatException("parameter " + name + " must be set!");
             }
-            else if (value is double)
+            else if (value is double d)
             {
-                return (double)value;
+                return d;
             }
             else
             {
@@ -295,14 +286,14 @@ public class GeneratorFactory
 
         public virtual double GetDouble(string name, double defValue)
         {
-            args.TryGetValue(name, out object value);
+            args.TryGetValue(name, out object? value);
             if (value == null)
             {
                 return defValue;
             }
-            else if (value is double)
+            else if (value is double d)
             {
-                return (double)value;
+                return d;
             }
             else
             {
@@ -312,14 +303,14 @@ public class GeneratorFactory
 
         public virtual string GetStr(string name)
         {
-            args.TryGetValue(name, out object value);
+            args.TryGetValue(name, out object? value);
             if (value == null)
             {
                 throw new InvalidFormatException("parameter " + name + " must be set!");
             }
-            else if (value is string)
+            else if (value is string s)
             {
-                return (string)value;
+                return s;
             }
             else
             {
@@ -329,14 +320,14 @@ public class GeneratorFactory
 
         public virtual string GetStr(string name, string defValue)
         {
-            args.TryGetValue(name, out object value);
+            args.TryGetValue(name, out object? value);
             if (value == null)
             {
                 return defValue;
             }
-            else if (value is string)
+            else if (value is string s)
             {
-                return (string)value;
+                return s;
             }
             else
             {
@@ -346,14 +337,14 @@ public class GeneratorFactory
 
         public virtual bool GetBool(string name)
         {
-            args.TryGetValue(name, out object value);
+            args.TryGetValue(name, out object? value);
             if (value == null)
             {
                 throw new InvalidFormatException("parameter " + name + " must be set!");
             }
-            else if (value is bool)
+            else if (value is bool b)
             {
-                return (bool)value;
+                return b;
             }
             else
             {
@@ -363,14 +354,14 @@ public class GeneratorFactory
 
         public virtual bool GetBool(string name, bool defValue)
         {
-            args.TryGetValue(name, out object value);
+            args.TryGetValue(name, out object? value);
             if (value == null)
             {
                 return defValue;
             }
-            else if (value is bool)
+            else if (value is bool b)
             {
-                return (bool)value;
+                return b;
             }
             else
             {
@@ -382,7 +373,7 @@ public class GeneratorFactory
         /// </summary>
         /// <returns>null if the subclass uses <c>resourceManager</c> to instantiate</returns>
         /// <exception cref="InvalidFormatException"></exception>
-        public abstract IAdaptiveFeatureGenerator Create();
+        public abstract IAdaptiveFeatureGenerator? Create();
     }
 
     // TODO: We have to support custom resources here. How does it work ?!
@@ -393,15 +384,14 @@ public class GeneratorFactory
     // When training, the descriptor could be consulted first to register the serializers, and afterwards
     // they are stored in the model.
     // TODO: (OPENNLP-1174) just remove this class when back-compat is no longer needed
-    class CustomFeatureGeneratorFactory : IXmlFeatureGeneratorFactory
+    internal class CustomFeatureGeneratorFactory : IXmlFeatureGeneratorFactory
     {
-        public virtual IAdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
+        public virtual IAdaptiveFeatureGenerator? Create(XmlElement generatorElement, FeatureGeneratorResourceProvider? resourceManager)
         {
             string featureGeneratorClassName = generatorElement.GetAttribute("class");
-            IAdaptiveFeatureGenerator generator = ExtensionLoader.InstantiateExtension<IAdaptiveFeatureGenerator>(featureGeneratorClassName);
-            if (generator is CustomFeatureGenerator)
+            IAdaptiveFeatureGenerator? generator = ExtensionLoader.InstantiateExtension<IAdaptiveFeatureGenerator>(featureGeneratorClassName);
+            if (generator is CustomFeatureGenerator customGenerator)
             {
-                CustomFeatureGenerator customGenerator = (CustomFeatureGenerator)generator;
                 JCG.Dictionary<string, string> properties = new JCG.Dictionary<string, string>();
                 XmlAttributeCollection attributes = generatorElement.Attributes;
                 for (int i = 0; i < attributes.Count; i++)
@@ -429,7 +419,7 @@ public class GeneratorFactory
     }
 
     // TODO: (OPENNLP-1174) just remove when back-compat is no longer needed
-    private static readonly JCG.Dictionary<string, IXmlFeatureGeneratorFactory> factories = new JCG.Dictionary<string, IXmlFeatureGeneratorFactory>(); // NOpenNLP: made readonly
+    private static readonly JCG.Dictionary<string, IXmlFeatureGeneratorFactory> factories = new(); // NOpenNLP: made readonly
 
     // TODO: (OPENNLP-1174) just remove when back-compat is no longer needed
     static GeneratorFactory()
@@ -467,21 +457,20 @@ public class GeneratorFactory
     /// <param name="generatorElement"></param>
     /// <param name="resourceManager"></param>
     /// <returns></returns>
-    internal static IAdaptiveFeatureGenerator? CreateGenerator(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
+    internal static IAdaptiveFeatureGenerator? CreateGenerator(XmlElement generatorElement, FeatureGeneratorResourceProvider? resourceManager)
     {
         string elementName = generatorElement.Name;
 
         // check it is new format?
         if (elementName.Equals("featureGenerators"))
         {
-            IList<IAdaptiveFeatureGenerator> generators = new JCG.List<IAdaptiveFeatureGenerator>();
+            IList<IAdaptiveFeatureGenerator?> generators = new JCG.List<IAdaptiveFeatureGenerator?>();
             XmlNodeList childNodes = generatorElement.ChildNodes;
             for (int i = 0; i < childNodes.Count; i++)
             {
-                XmlNode childNode = childNodes.Item(i);
-                if (childNode is XmlElement)
+                XmlNode? childNode = childNodes.Item(i);
+                if (childNode is XmlElement elem)
                 {
-                    XmlElement elem = (XmlElement)childNode;
                     string type = elem.Name;
                     if (type.Equals("generator"))
                     {
@@ -514,7 +503,7 @@ public class GeneratorFactory
         {
 
             // support classic format
-            IXmlFeatureGeneratorFactory generatorFactory = factories[elementName];
+            IXmlFeatureGeneratorFactory? generatorFactory = factories[elementName];
             if (generatorFactory != null)
             {
                 return generatorFactory.Create(generatorElement, resourceManager);
@@ -524,14 +513,14 @@ public class GeneratorFactory
         }
     }
 
-    internal static XmlElement GetFirstChild(XmlElement elem)
+    internal static XmlElement? GetFirstChild(XmlElement elem)
     {
         XmlNodeList nodes = elem.ChildNodes;
         for (int i = 0; i < nodes.Count; i++)
         {
             if (nodes.Item(i) is XmlElement)
             {
-                return (XmlElement)nodes.Item(i);
+                return (XmlElement?)nodes.Item(i);
             }
         }
 
@@ -547,10 +536,10 @@ public class GeneratorFactory
     /// <param name="generatorElement"></param>
     /// <param name="resourceManager"></param>
     /// <returns></returns>
-    internal static IAdaptiveFeatureGenerator BuildGenerator(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
+    internal static IAdaptiveFeatureGenerator? BuildGenerator(XmlElement generatorElement, FeatureGeneratorResourceProvider? resourceManager)
     {
         string className = generatorElement.GetAttribute("class");
-        if (className == null)
+        if (string.IsNullOrEmpty(className))
         {
             throw new InvalidFormatException("generator must have class attribute");
         }
@@ -558,7 +547,7 @@ public class GeneratorFactory
         {
             // NOpenNLP: Type.GetType() returns null rather than throwing
             // ClassNotFoundException, so we check for null explicitly.
-            Type factoryClass = ExtensionLoader.ResolveType(className);
+            Type? factoryClass = ExtensionLoader.ResolveType(className);
             if (factoryClass is null)
             {
                 throw new TypeLoadException("Could not load type: " + className);
@@ -632,7 +621,7 @@ public class GeneratorFactory
     public static IAdaptiveFeatureGenerator? Create(Stream xmlDescriptorIn, FeatureGeneratorResourceProvider resourceManager)
     {
         XmlDocument xmlDescriptorDOM = CreateDOM(xmlDescriptorIn);
-        XmlElement generatorElement = xmlDescriptorDOM.DocumentElement;
+        XmlElement? generatorElement = xmlDescriptorDOM.DocumentElement;
 
         // TODO: (OPENNLP-1174) use #buildGenerator() after back-compat support is gone
         return CreateGenerator(generatorElement, resourceManager);
@@ -641,7 +630,7 @@ public class GeneratorFactory
     public static JCG.Dictionary<string, IArtifactSerializer> ExtractArtifactSerializerMappings(Stream xmlDescriptorIn)
     {
         XmlDocument xmlDescriptorDOM = CreateDOM(xmlDescriptorIn);
-        XmlElement element = xmlDescriptorDOM.DocumentElement;
+        XmlElement? element = xmlDescriptorDOM.DocumentElement;
         string elementName = element.Name;
 
         // check it is new format?
@@ -653,7 +642,7 @@ public class GeneratorFactory
             {
                 if (nodes.Item(i) is XmlElement)
                 {
-                    XmlElement childElem = (XmlElement)nodes.Item(i);
+                    XmlElement? childElem = (XmlElement?)nodes.Item(i);
                     if (childElem.Name.Equals("generator"))
                     {
                         ExtractArtifactSerializerMappings(mapping, childElem);
@@ -672,11 +661,11 @@ public class GeneratorFactory
     internal static void ExtractArtifactSerializerMappings(JCG.Dictionary<string, IArtifactSerializer> mapping, XmlElement element)
     {
         string className = element.GetAttribute("class");
-        if (className != null)
+        if (string.IsNullOrEmpty(className))
         {
             // NOpenNLP: Type.GetType() returns null rather than throwing
             // ClassNotFoundException, so we check for null explicitly.
-            Type factoryClass = ExtensionLoader.ResolveType(className);
+            Type? factoryClass = ExtensionLoader.ResolveType(className);
             if (factoryClass is null)
             {
                 throw new TypeLoadException("Could not load type: " + className);
@@ -686,7 +675,7 @@ public class GeneratorFactory
             {
                 AbstractXmlFeatureGeneratorFactory factory = (AbstractXmlFeatureGeneratorFactory)Activator.CreateInstance(factoryClass);
                 factory.Init(element, null);
-                JCG.Dictionary<string, IArtifactSerializer> map = factory.GetArtifactSerializerMapping();
+                var map = factory.ArtifactSerializerMapping;
                 if (map != null)
                     mapping.PutAll(map);
             }
@@ -727,7 +716,7 @@ public class GeneratorFactory
         {
             if (nodes.Item(i) is XmlElement)
             {
-                XmlElement childElem = (XmlElement)nodes.Item(i);
+                XmlElement? childElem = (XmlElement?)nodes.Item(i);
                 if (childElem.Name.Equals("generator"))
                 {
                     ExtractArtifactSerializerMappings(mapping, childElem);
@@ -740,7 +729,7 @@ public class GeneratorFactory
     {
         JCG.Dictionary<string, IArtifactSerializer> mapping = new JCG.Dictionary<string, IArtifactSerializer>();
         //Xpath xPath = XPathFactory.NewInstance().NewXPath();
-        XmlNodeList customElements;
+        XmlNodeList? customElements;
         try
         {
             customElements = elem.SelectNodes("//custom");
@@ -754,20 +743,19 @@ public class GeneratorFactory
         {
             if (customElements.Item(i) is XmlElement)
             {
-                XmlElement customElement = (XmlElement)customElements.Item(i);
+                XmlElement? customElement = (XmlElement?)customElements.Item(i);
 
                 // Note: The resource provider is not available at that point, to provide
                 // resources they need to be loaded first!
                 IAdaptiveFeatureGenerator generator = CreateGenerator(customElement, null);
-                if (generator is IArtifactToSerializerMapper)
+                if (generator is IArtifactToSerializerMapper mapper)
                 {
-                    IArtifactToSerializerMapper mapper = (IArtifactToSerializerMapper)generator;
-                    mapping.PutAll(mapper.GetArtifactSerializerMapping());
+                    mapping.PutAll(mapper.ArtifactSerializerMapping);
                 }
             }
         }
 
-        XmlNodeList allElements;
+        XmlNodeList? allElements;
         try
         {
             allElements = elem.SelectNodes("//*");
@@ -781,9 +769,9 @@ public class GeneratorFactory
         {
             if (allElements.Item(i) is XmlElement)
             {
-                XmlElement xmlElement = (XmlElement)allElements.Item(i);
+                XmlElement? xmlElement = (XmlElement)allElements.Item(i);
                 string dictName = xmlElement.GetAttribute("dict");
-                if (dictName != null)
+                if (string.IsNullOrEmpty(dictName))
                 {
                     switch (xmlElement.Name)
                     {
@@ -806,7 +794,7 @@ public class GeneratorFactory
                 }
 
                 string modelName = xmlElement.GetAttribute("model");
-                if (modelName != null)
+                if (string.IsNullOrEmpty(modelName))
                 {
                     switch (xmlElement.Name)
                     {

@@ -29,8 +29,8 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 public class POSTaggerNameFeatureGenerator : IAdaptiveFeatureGenerator
 {
     private readonly IPOSTagger posTagger; // NOpenNLP: made readonly
-    private string[] cachedTokens;
-    private string[] cachedTags;
+    private string[]? cachedTokens;
+    private string[]? cachedTags;
 
     /// <summary>
     /// Initializes a new instance.

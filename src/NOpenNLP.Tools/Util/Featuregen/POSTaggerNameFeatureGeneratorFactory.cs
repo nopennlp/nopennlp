@@ -31,10 +31,6 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// <seealso cref="POSTaggerNameFeatureGenerator"/>
 public class POSTaggerNameFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
-    public POSTaggerNameFeatureGeneratorFactory() : base()
-    {
-    }
-
     public virtual IAdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
     {
         string modelResourceKey = generatorElement.GetAttribute("model");
@@ -47,21 +43,24 @@ public class POSTaggerNameFeatureGeneratorFactory : GeneratorFactory.AbstractXml
         factoryMap.Put("tokenpos", new POSTaggerNameFeatureGeneratorFactory());
     }
 
-    public override IAdaptiveFeatureGenerator Create()
+    public override IAdaptiveFeatureGenerator? Create()
     {
-
         // if resourceManager is null, we don't instantiate
         if (resourceManager == null)
             return null;
+
         string modelResourceKey = GetStr("model");
         POSModel model = (POSModel)resourceManager(modelResourceKey);
         return new POSTaggerNameFeatureGenerator(model);
     }
 
-    public override JCG.Dictionary<string, IArtifactSerializer> GetArtifactSerializerMapping()
+    public override IDictionary<string, IArtifactSerializer> ArtifactSerializerMapping
     {
-        JCG.Dictionary<string, IArtifactSerializer> mapping = new JCG.Dictionary<string, IArtifactSerializer>();
-        mapping.Put(GetStr("model"), new POSModelSerializer());
-        return mapping;
+        get
+        {
+            JCG.Dictionary<string, IArtifactSerializer> mapping = new JCG.Dictionary<string, IArtifactSerializer>();
+            mapping.Put(GetStr("model"), new POSModelSerializer());
+            return mapping;
+        }
     }
 }

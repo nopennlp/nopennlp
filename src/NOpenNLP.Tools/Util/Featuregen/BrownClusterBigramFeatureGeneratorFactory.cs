@@ -30,20 +30,16 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// </summary>
 public class BrownClusterBigramFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
-    public BrownClusterBigramFeatureGeneratorFactory() : base()
-    {
-    }
-
     public virtual IAdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
     {
         string dictResourceKey = generatorElement.GetAttribute("dict");
-        object dictResource = resourceManager(dictResourceKey);
-        if (!(dictResource is BrownCluster))
+        object? dictResource = resourceManager(dictResourceKey);
+        if (dictResource is not BrownCluster cluster)
         {
-            throw new InvalidFormatException("Not a BrownLexicon resource for key: " + dictResourceKey);
+            throw new InvalidFormatException($"Not a BrownLexicon resource for key: {dictResourceKey}");
         }
 
-        return new BrownBigramFeatureGenerator((BrownCluster)dictResource);
+        return new BrownBigramFeatureGenerator(cluster);
     }
 
     internal static void Register(IDictionary<string, GeneratorFactory.IXmlFeatureGeneratorFactory> factoryMap)
@@ -51,25 +47,28 @@ public class BrownClusterBigramFeatureGeneratorFactory : GeneratorFactory.Abstra
         factoryMap.Put("brownclusterbigram", new BrownClusterBigramFeatureGeneratorFactory());
     }
 
-    public override IAdaptiveFeatureGenerator Create()
+    public override IAdaptiveFeatureGenerator? Create()
     {
         // if resourceManager is null, we don't instantiate
         if (resourceManager == null)
             return null;
         string dictResourceKey = GetStr("dict");
-        object dictResource = resourceManager(dictResourceKey);
-        if (!(dictResource is BrownCluster))
+        object? dictResource = resourceManager(dictResourceKey);
+        if (dictResource is not BrownCluster cluster)
         {
-            throw new InvalidFormatException("Not a BrownLexicon resource for key: " + dictResourceKey);
+            throw new InvalidFormatException($"Not a BrownLexicon resource for key: {dictResourceKey}");
         }
 
-        return new BrownBigramFeatureGenerator((BrownCluster)dictResource);
+        return new BrownBigramFeatureGenerator(cluster);
     }
 
-    public override JCG.Dictionary<string, IArtifactSerializer> GetArtifactSerializerMapping()
+    public override IDictionary<string, IArtifactSerializer> ArtifactSerializerMapping
     {
-        JCG.Dictionary<string, IArtifactSerializer> mapping = new JCG.Dictionary<string, IArtifactSerializer>();
-        mapping.Put(GetStr("dict"), new BrownCluster.BrownClusterSerializer());
-        return mapping;
+        get
+        {
+            JCG.Dictionary<string, IArtifactSerializer> mapping = new JCG.Dictionary<string, IArtifactSerializer>();
+            mapping.Put(GetStr("dict"), new BrownCluster.BrownClusterSerializer());
+            return mapping;
+        }
     }
 }

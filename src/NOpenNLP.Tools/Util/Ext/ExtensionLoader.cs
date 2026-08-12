@@ -46,14 +46,14 @@ public class ExtensionLoader
     /// translated to the corresponding ported type by title-casing each segment
     /// and searching this assembly.
     /// </summary>
-    internal static Type ResolveType(string className)
+    internal static Type? ResolveType(string? className)
     {
         if (className is null)
         {
             return null;
         }
 
-        Type type = Type.GetType(className);
+        Type? type = Type.GetType(className);
         if (type != null)
         {
             return type;
@@ -67,7 +67,7 @@ public class ExtensionLoader
         {
             if (parts[i].Length > 0 && char.IsLower(parts[i][0]))
             {
-                parts[i] = char.ToUpperInvariant(parts[i][0]) + parts[i].Substring(1);
+                parts[i] = char.ToUpperInvariant(parts[i][0]) + parts[i][1..];
             }
         }
 
@@ -81,8 +81,8 @@ public class ExtensionLoader
 
         // Fall back to matching on the simple type name, which covers cases where
         // the Java package does not line up with the ported namespace.
-        string simpleName = parts[parts.Length - 1];
-        foreach (Type candidate in typeof(ExtensionLoader).Assembly.GetTypes())
+        string simpleName = parts[^1];
+        foreach (var candidate in typeof(ExtensionLoader).Assembly.GetTypes())
         {
             if (string.Equals(candidate.Name, simpleName, StringComparison.Ordinal))
             {
@@ -93,14 +93,10 @@ public class ExtensionLoader
         return null;
     }
 
-    internal static bool IsOSGiAvailable()
+    internal static bool IsOSGiAvailable
     {
-        return isOsgiAvailable;
-    }
-
-    internal static void SetOSGiAvailable()
-    {
-        isOsgiAvailable = true;
+        get => isOsgiAvailable;
+        set => isOsgiAvailable = value;
     }
 
     // Pass in the type (interface) of the class to load
@@ -125,7 +121,7 @@ public class ExtensionLoader
         try
         {
             var extClazz = ResolveType(extensionClassName);
-            if (typeof(T).IsAssignableFrom(extClazz))
+            if (extClazz != null && typeof(T).IsAssignableFrom(extClazz))
             {
                 try
                 {
@@ -138,7 +134,7 @@ public class ExtensionLoader
                 catch (MethodAccessException e)
                 {
                     // constructor is private. Try to load using INSTANCE
-                    FieldInfo instanceField;
+                    FieldInfo? instanceField;
                     try
                     {
                         instanceField = extClazz.GetField("INSTANCE", BindingFlags.DeclaredOnly);
@@ -173,13 +169,12 @@ public class ExtensionLoader
             }
             else
             {
-                throw new ExtensionNotLoadedException("Extension class '" + extClazz.Name + "' needs to have type: " + typeof(T).Name);
+                throw new ExtensionNotLoadedException($"Extension class '{extClazz?.Name ?? "null"}' needs to have type: {typeof(T).Name}");
             }
         }
-        catch (ClassNotFoundException e)
+        catch (ClassNotFoundException)
         {
         }
-
 
         // Loading from class path failed
         // Either something is wrong with the class name or OpenNLP is
@@ -190,7 +185,6 @@ public class ExtensionLoader
         // Now load class which depends on OSGi API
         if (isOsgiAvailable)
         {
-
             // The OSGIExtensionLoader class will be loaded when the next line
             // is executed, but not prior, and that is why it is safe to directly
             // reference it here.
@@ -200,6 +194,6 @@ public class ExtensionLoader
             // return extLoader.GetExtension(clazz, extensionClassName);
         }
 
-        throw new ExtensionNotLoadedException("Unable to find implementation for " + typeof(T).Name + ", the class or service " + extensionClassName + " could not be located!");
+        throw new ExtensionNotLoadedException($"Unable to find implementation for {typeof(T).Name}, the class or service {extensionClassName} could not be located!");
     }
 }

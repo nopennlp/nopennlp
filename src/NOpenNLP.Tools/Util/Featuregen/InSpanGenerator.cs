@@ -30,8 +30,9 @@ public class InSpanGenerator : IAdaptiveFeatureGenerator
 {
     private readonly string prefix;
     private readonly ITokenNameFinder finder;
-    private string[] currentSentence;
-    private Span[] currentNames;
+    private string[]? currentSentence;
+    private Span[]? currentNames;
+
     /// <summary>
     /// Initializes the current instance.
     /// </summary>
@@ -46,14 +47,12 @@ public class InSpanGenerator : IAdaptiveFeatureGenerator
 
     public virtual void CreateFeatures(IList<string> features, string[] tokens, int index, string[] preds)
     {
-
         // cache results for sentence
         if (currentSentence != tokens)
         {
             currentSentence = tokens;
             currentNames = finder.Find(tokens);
         }
-
 
         // iterate over names and check if a span is contained
         foreach (Span currentName in currentNames)

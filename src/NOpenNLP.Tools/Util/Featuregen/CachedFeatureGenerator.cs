@@ -29,26 +29,26 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 public class CachedFeatureGenerator : IAdaptiveFeatureGenerator
 {
     private readonly IAdaptiveFeatureGenerator generator;
-    private string[] prevTokens;
-    private readonly Cache<int, IList<string>> contextsCache; // NOpenNLP: made readonly
+    private string[]? prevTokens;
+    private readonly Cache<int, IList<string>?> contextsCache; // NOpenNLP: made readonly
     private long numberOfCacheHits;
     private long numberOfCacheMisses;
 
     public CachedFeatureGenerator(params IAdaptiveFeatureGenerator[] generators)
     {
         this.generator = new AggregatedFeatureGenerator(generators);
-        contextsCache = new Cache<int, IList<string>>(100);
+        contextsCache = new Cache<int, IList<string>?>(100);
     }
 
     public CachedFeatureGenerator(IAdaptiveFeatureGenerator generator)
     {
         this.generator = generator;
-        contextsCache = new Cache<int, IList<string>>(100);
+        contextsCache = new Cache<int, IList<string>?>(100);
     }
 
     public virtual void CreateFeatures(IList<string> features, string[] tokens, int index, string[] previousOutcomes)
     {
-        IList<string> cacheFeatures;
+        IList<string>? cacheFeatures;
         if (tokens == prevTokens)
         {
             cacheFeatures = contextsCache[index];
@@ -86,27 +86,24 @@ public class CachedFeatureGenerator : IAdaptiveFeatureGenerator
     /// Retrieves the number of times a cache hit occurred.
     /// </summary>
     /// <returns>number of cache hits</returns>
-    public virtual long GetNumberOfCacheHits()
-    {
-        return numberOfCacheHits;
-    }
+    public virtual long NumberOfCacheHits => numberOfCacheHits;
 
     /// <summary>
     /// Retrieves the number of times a cache miss occurred.
     /// </summary>
     /// <returns>number of cache misses</returns>
-    public virtual long GetNumberOfCacheMisses()
-    {
-        return numberOfCacheMisses;
-    }
+    public virtual long NumberOfCacheMisses => numberOfCacheMisses;
 
     public override string ToString()
     {
-        return base.ToString() + ": hits=" + numberOfCacheHits + " misses=" + numberOfCacheMisses + " hit%" + (numberOfCacheHits > 0 ? (double)numberOfCacheHits / (numberOfCacheMisses + numberOfCacheHits) : 0);
+        return $"{base.ToString()}: hits={numberOfCacheHits} misses={numberOfCacheMisses} hit%{(numberOfCacheHits > 0 ? (double)numberOfCacheHits / (numberOfCacheMisses + numberOfCacheHits) : 0)}";
     }
 
-    public virtual IAdaptiveFeatureGenerator GetCachedFeatureGenerator()
-    {
-        return generator;
-    }
+    /// <summary>
+    /// Gets the cached feature generator.
+    /// </summary>
+    /// <remarks>
+    /// NOpenNLP: this was <c>cachedFeatureGenerator()</c> in Java.
+    /// </remarks>
+    public virtual IAdaptiveFeatureGenerator CachedFeatureGeneratorValue => generator;
 }

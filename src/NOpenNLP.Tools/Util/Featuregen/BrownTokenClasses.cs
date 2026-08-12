@@ -26,7 +26,7 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// Obtain the paths listed in the pathLengths array from the Brown class.
 /// This class is not to be instantiated.
 /// </summary>
-public class BrownTokenClasses
+public static class BrownTokenClasses // NOpenNLP: made static
 {
     public static readonly int[] pathLengths =
     [
@@ -35,6 +35,7 @@ public class BrownTokenClasses
         10,
         20
     ];
+
     /// <summary>
     /// It provides a list containing the pathLengths for a token if found
     /// in the Map:token,BrownClass.
@@ -44,20 +45,19 @@ public class BrownTokenClasses
     /// <returns>the list of the paths for a token</returns>
     public static IList<string> GetWordClasses(string token, BrownCluster brownLexicon)
     {
-        if (brownLexicon.LookupToken(token) == null)
+        if (brownLexicon.LookupToken(token) is not { } brownClass)
         {
             return new List<string>(0);
         }
         else
         {
-            string brownClass = brownLexicon.LookupToken(token);
             IList<string> pathLengthsList = new List<string>();
-            pathLengthsList.Add(brownClass.Substring(0, Math.Min(brownClass.Length, pathLengths[0])));
+            pathLengthsList.Add(brownClass[..Math.Min(brownClass.Length, pathLengths[0])]);
             for (int i = 1; i < pathLengths.Length; i++)
             {
                 if (pathLengths[i - 1] < brownClass.Length)
                 {
-                    pathLengthsList.Add(brownClass.Substring(0, Math.Min(brownClass.Length, pathLengths[i])));
+                    pathLengthsList.Add(brownClass[..Math.Min(brownClass.Length, pathLengths[i])]);
                 }
             }
 

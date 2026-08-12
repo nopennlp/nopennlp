@@ -28,14 +28,8 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// <seealso cref="TokenPatternFeatureGenerator"/>
 public class TokenPatternFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
-    public TokenPatternFeatureGeneratorFactory() : base()
-    {
-    }
-
     public virtual IAdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
-    {
-        return new TokenPatternFeatureGenerator();
-    }
+        => new TokenPatternFeatureGenerator();
 
     internal static void Register(IDictionary<string, GeneratorFactory.IXmlFeatureGeneratorFactory> factoryMap)
     {
@@ -43,7 +37,5 @@ public class TokenPatternFeatureGeneratorFactory : GeneratorFactory.AbstractXmlF
     }
 
     public override IAdaptiveFeatureGenerator Create()
-    {
-        return new TokenPatternFeatureGenerator();
-    }
+        => new TokenPatternFeatureGenerator();
 }

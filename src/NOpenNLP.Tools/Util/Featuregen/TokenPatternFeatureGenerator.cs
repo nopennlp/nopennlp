@@ -80,7 +80,7 @@ public class TokenPatternFeatureGenerator : IAdaptiveFeatureGenerator
             }
         }
 
-        feats.Add("pta=" + pattern.ToString());
+        feats.Add("pta=" + pattern);
     }
 
     // NOpenNLP: IAdaptiveFeatureGenerator declares these as Java 8 default

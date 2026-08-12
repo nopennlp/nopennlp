@@ -28,10 +28,6 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// <seealso cref="PrefixFeatureGenerator"/>
 public class PrefixFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
-    public PrefixFeatureGeneratorFactory() : base()
-    {
-    }
-
     public virtual IAdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
     {
         string attribute = generatorElement.GetAttribute("length");
@@ -50,7 +46,5 @@ public class PrefixFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeature
     }
 
     public override IAdaptiveFeatureGenerator Create()
-    {
-        return new PrefixFeatureGenerator(GetInt("length", PrefixFeatureGenerator.DEFAULT_MAX_LENGTH));
-    }
+        => new PrefixFeatureGenerator(GetInt32("length", PrefixFeatureGenerator.DEFAULT_MAX_LENGTH));
 }

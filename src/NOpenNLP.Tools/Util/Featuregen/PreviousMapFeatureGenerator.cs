@@ -20,6 +20,7 @@
 
 using NOpenNLP.Tools.Support;
 using System.Collections.Generic;
+using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Util.Featuregen;
 
@@ -29,7 +30,7 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// </summary>
 public class PreviousMapFeatureGenerator : IAdaptiveFeatureGenerator
 {
-    private readonly Dictionary<string, string> previousMap = new Dictionary<string, string>(); // NOpenNLP: made readonly
+    private readonly JCG.Dictionary<string, string> previousMap = new(); // NOpenNLP: made readonly
 
     public virtual void CreateFeatures(IList<string> features, string[] tokens, int index, string[] preds)
     {

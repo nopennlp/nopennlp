@@ -22,23 +22,19 @@ using System.Collections.Generic;
 
 namespace NOpenNLP.Tools.Util.Featuregen;
 
-public class PrefixFeatureGenerator : IAdaptiveFeatureGenerator
+public class PrefixFeatureGenerator(int prefixLength) : IAdaptiveFeatureGenerator
 {
-    public static readonly int DEFAULT_MAX_LENGTH = 4;
-    private readonly int prefixLength;
-    public PrefixFeatureGenerator()
-    {
-        prefixLength = DEFAULT_MAX_LENGTH;
-    }
+    public const int DEFAULT_MAX_LENGTH = 4;
 
-    public PrefixFeatureGenerator(int prefixLength)
+    public PrefixFeatureGenerator()
+        : this(DEFAULT_MAX_LENGTH)
     {
-        this.prefixLength = prefixLength;
     }
 
     public virtual void CreateFeatures(IList<string> features, string[] tokens, int index, string[] previousOutcomes)
     {
         string[] prefs = GetPrefixes(tokens[index]);
+
         foreach (string pref in prefs)
         {
             features.Add("pre=" + pref);
@@ -49,9 +45,10 @@ public class PrefixFeatureGenerator : IAdaptiveFeatureGenerator
     {
         int prefixes = Math.Min(prefixLength, lex.Length);
         string[] prefs = new string[prefixes];
+
         for (int li = 0; li < prefixes; li++)
         {
-            prefs[li] = lex.Substring(0, Math.Min(li + 1, lex.Length));
+            prefs[li] = lex[..Math.Min(li + 1, lex.Length)];
         }
 
         return prefs;

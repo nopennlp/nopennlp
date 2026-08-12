@@ -17,6 +17,7 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
+
 using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Util.Model;
 using JCG = J2N.Collections.Generic;
@@ -30,20 +31,16 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// </summary>
 public class BrownClusterTokenClassFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
-    public BrownClusterTokenClassFeatureGeneratorFactory() : base()
-    {
-    }
-
     public virtual IAdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
     {
         string dictResourceKey = generatorElement.GetAttribute("dict");
-        object dictResource = resourceManager(dictResourceKey);
-        if (!(dictResource is BrownCluster))
+        object? dictResource = resourceManager(dictResourceKey);
+        if (dictResource is not BrownCluster cluster)
         {
-            throw new InvalidFormatException("Not a BrownLexicon resource for key: " + dictResourceKey);
+            throw new InvalidFormatException($"Not a BrownLexicon resource for key: {dictResourceKey}");
         }
 
-        return new BrownTokenClassFeatureGenerator((BrownCluster)dictResource);
+        return new BrownTokenClassFeatureGenerator(cluster);
     }
 
     internal static void Register(IDictionary<string, GeneratorFactory.IXmlFeatureGeneratorFactory> factoryMap)
@@ -51,25 +48,28 @@ public class BrownClusterTokenClassFeatureGeneratorFactory : GeneratorFactory.Ab
         factoryMap.Put("brownclustertokenclass", new BrownClusterTokenClassFeatureGeneratorFactory());
     }
 
-    public override IAdaptiveFeatureGenerator Create()
+    public override IAdaptiveFeatureGenerator? Create()
     {
         // if resourceManager is null, we don't instantiate
         if (resourceManager == null)
             return null;
         string dictResourceKey = GetStr("dict");
-        object dictResource = resourceManager(dictResourceKey);
-        if (!(dictResource is BrownCluster))
+        object? dictResource = resourceManager(dictResourceKey);
+        if (dictResource is not BrownCluster cluster)
         {
-            throw new InvalidFormatException("Not a BrownLexicon resource for key: " + dictResourceKey);
+            throw new InvalidFormatException($"Not a BrownLexicon resource for key: {dictResourceKey}");
         }
 
-        return new BrownTokenClassFeatureGenerator((BrownCluster)dictResource);
+        return new BrownTokenClassFeatureGenerator(cluster);
     }
 
-    public override JCG.Dictionary<string, IArtifactSerializer> GetArtifactSerializerMapping()
+    public override IDictionary<string, IArtifactSerializer> ArtifactSerializerMapping
     {
-        JCG.Dictionary<string, IArtifactSerializer> mapping = new JCG.Dictionary<string, IArtifactSerializer>();
-        mapping.Put(GetStr("dict"), new BrownCluster.BrownClusterSerializer());
-        return mapping;
+        get
+        {
+            JCG.Dictionary<string, IArtifactSerializer> mapping = new JCG.Dictionary<string, IArtifactSerializer>();
+            mapping.Put(GetStr("dict"), new BrownCluster.BrownClusterSerializer());
+            return mapping;
+        }
     }
 }

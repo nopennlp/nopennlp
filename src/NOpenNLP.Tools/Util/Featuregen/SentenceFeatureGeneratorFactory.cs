@@ -28,10 +28,6 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 /// <seealso cref="SentenceFeatureGenerator"/>
 public class SentenceFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
-    public SentenceFeatureGeneratorFactory() : base()
-    {
-    }
-
     public virtual IAdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
     {
         string beginFeatureString = generatorElement.GetAttribute("begin");

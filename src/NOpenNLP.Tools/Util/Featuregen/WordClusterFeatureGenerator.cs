@@ -27,7 +27,7 @@ public class WordClusterFeatureGenerator(WordClusterDictionary dict, string dict
 {
     public virtual void CreateFeatures(IList<string> features, string[] tokens, int index, string[] previousOutcomes)
     {
-        string clusterId;
+        string? clusterId;
         if (lowerCaseDictionary)
         {
             clusterId = dict.LookupToken(StringUtil.ToLowerCase(tokens[index]));
