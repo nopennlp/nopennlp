@@ -22,12 +22,21 @@ env:
   NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
 
 jobs:
-  # Populates the model cache exactly once. Without this the nine test legs all
-  # start on a cold cache at the same time and every one of them downloads ~46 MB
-  # from the Apache OpenNLP servers before any of them has written the cache.
+  # Populates the model cache once per operating system. Without this the three
+  # test legs on an OS all start on a cold cache at the same time and every one
+  # of them downloads ~46 MB from the Apache OpenNLP servers before any of them
+  # has written the cache.
+  #
+  # Actions caches are not portable across operating systems, so a single entry
+  # saved on Linux cannot be restored by the Windows or macOS legs. The key
+  # carries runner.os and this job runs on each OS to populate all three.
   models:
-    name: Fetch test models
-    runs-on: ubuntu-latest
+    name: Fetch test models (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -37,7 +46,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: testdata
-          key: testmodels-${{ hashFiles('build/download-test-models.ps1') }}
+          key: testmodels-${{ runner.os }}-${{ hashFiles('build/download-test-models.ps1') }}
 
       - name: Download test models
         if: steps.cache-models.outputs.cache-hit != 'true'
@@ -83,16 +92,17 @@ jobs:
           key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', '**/*.slnx') }}
           restore-keys: nuget-${{ runner.os }}-
 
-      # Restores what the models job already downloaded. The key is the download
-      # script, which pins each file's SHA-256, so the cache is reused until the
-      # model set itself changes; no restore-keys, so a stale entry can never
-      # satisfy a changed list.
+      # Restores what the models job for this OS already downloaded. The key is
+      # the runner OS plus the download script, which pins each file's SHA-256,
+      # so the cache is reused until the model set itself changes; no
+      # restore-keys, so a stale entry can never satisfy a changed list. Keep
+      # this key identical to the one in the models job.
       - name: Restore test models
         id: cache-models
         uses: actions/cache/restore@v4
         with:
           path: testdata
-          key: testmodels-${{ hashFiles('build/download-test-models.ps1') }}
+          key: testmodels-${{ runner.os }}-${{ hashFiles('build/download-test-models.ps1') }}
 
       # Should not normally run: the models job populates the cache first. This
       # only covers a cache entry evicted between that job and this one, and the
