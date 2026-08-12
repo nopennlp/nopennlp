@@ -127,9 +127,22 @@ When adding coverage:
   benchmark body, unless loading is the thing being measured — which
   `ModelLoadingBenchmarks` does separately, because it is a distinct code path
   and the cost every short-lived process pays.
-- **Reset per-document state identically on both sides.** `NameFinderME`
-  accumulates adaptive state; it is cleared per iteration in both harnesses.
+- **Avoid `[IterationSetup]` / `[IterationCleanup]` on microbenchmarks.** They
+  force BenchmarkDotNet to `InvocationCount=1, UnrollFactor=1`, so one call is
+  timed per iteration and the result is swamped by timer and setup overhead. The
+  name finder benchmark originally cleared adaptive state that way and reported
+  ~390 us/op against a true cost near 36 us/op — a fake 13x gap against real
+  Java. If a benchmark's number looks anomalous next to its neighbours, check
+  the `InvocationCount` in the run log before believing it.
+- **Handle per-document state identically on both sides, and prefer handling it
+  in the input.** `NameFinderME` accumulates adaptive state, but every
+  invocation replays the same sentence, so the state saturates after the first
+  call and clearing changes nothing measurable. Neither harness clears it now.
   State handling that differs between the two makes the numbers incomparable.
+- **Sanity-check a surprising result against a plain stopwatch loop** before
+  reporting it as a finding. A twenty-line console app that calls the same
+  method in a loop settles whether a number is the code or the harness, and it
+  is the fastest way to tell those apart.
 - **Do not add these to CI.** The IKVM dependency unpacks to over 4 GB, and
   benchmark numbers from a shared runner are too noisy to gate on. CI restores
   the library and test projects individually, not the solution — keep it that

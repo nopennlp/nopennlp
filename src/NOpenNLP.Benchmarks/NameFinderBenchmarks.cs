@@ -51,33 +51,28 @@ public class NameFinderBenchmarks
         nameFinder = new NameFinderME(new TokenNameFinderModel(new FileInfo(path)));
     }
 
-    /// <summary>
-    /// Resets the adaptive feature state between iterations.
-    /// </summary>
-    /// <remarks>
-    /// <c>NameFinderME</c> carries state across calls that upstream expects a
-    /// caller to clear at each document boundary — chiefly the previous-decision
-    /// map, which makes a feature fire on the second and later sightings of a
-    /// token that did not fire on the first.
-    /// <para/>
-    /// Because every invocation here re-runs the same sentence, that map fills
-    /// on the first call and then stays fixed, so what is measured is the
-    /// warm-cache case, not a cold document. That is a deliberate choice: it is
-    /// the steady state, and it is stable, whereas measuring the cold case would
-    /// need a clear before every single invocation, which BenchmarkDotNet cannot
-    /// do without also timing the clear.
-    /// <para/>
-    /// Clearing per iteration rather than never keeps the two harnesses aligned:
-    /// the JMH counterpart does the same at <c>Level.Iteration</c>, so both
-    /// measure the same thing. If these numbers are ever used to reason about
-    /// first-document latency, that is the wrong benchmark to read.
-    /// </remarks>
-    [IterationCleanup]
-    public void ClearAdaptiveData()
-    {
-        javaNameFinder.clearAdaptiveData();
-        nameFinder.ClearAdaptiveData();
-    }
+    //
+    // There is deliberately no [IterationCleanup] clearing the adaptive state,
+    // even though NameFinderME carries per-document state that upstream expects
+    // a caller to clear at a document boundary.
+    //
+    // Adding one costs an order of magnitude in apparent time, and none of it is
+    // real: an iteration-level hook forces BenchmarkDotNet to InvocationCount=1,
+    // UnrollFactor=1, so a single call is timed per iteration and the result is
+    // swamped by timer and setup overhead. The first version of this file did
+    // that and reported ~390 us/op against a true cost near 35 us/op.
+    //
+    // Clearing also changes nothing here. Every invocation re-runs the same
+    // sentence, so the previous-decision map fills on the first call and is
+    // identical from then on; measured directly, clearing per call and never
+    // clearing agree to within noise (35.4 vs 35.6 us/op), and the clear itself
+    // costs 0.03 us. What is measured either way is the warm case. Reading these
+    // numbers as first-document latency would be wrong, but that is true with or
+    // without the hook.
+    //
+    // The JMH counterpart drops its @TearDown for the same reason, so the two
+    // harnesses still measure the same thing.
+    //
 
     [Benchmark(Baseline = true, Description = "Java (IKVM)")]
     public opennlp.tools.util.Span[] JavaFind()

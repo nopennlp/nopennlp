@@ -24,14 +24,12 @@ import opennlp.tools.util.Span;
 
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
-import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.annotations.TearDown;
 
 /**
  * Named entity recognition over {@link BenchmarkData#ENTITY_TOKENS}.
@@ -59,28 +57,22 @@ public class NameFinderBenchmark {
             new TokenNameFinderModel(BenchmarkData.modelFile("en-ner-" + type + ".bin")));
     }
 
-    /**
-     * Resets the adaptive feature state between iterations.
-     *
-     * <p>{@code NameFinderME} carries state across calls that upstream expects
-     * a caller to clear at each document boundary — chiefly the previous-decision
-     * map, which makes a feature fire on the second and later sightings of a
-     * token that did not fire on the first.
-     *
-     * <p>Because every invocation here re-runs the same sentence, that map fills
-     * on the first call and then stays fixed, so what is measured is the
-     * warm-cache case, not a cold document. That is deliberate: it is the steady
-     * state, and it is stable.
-     *
-     * <p>Clearing per iteration matches the {@code [IterationCleanup]} in the
-     * BenchmarkDotNet counterpart, so both harnesses measure the same thing. If
-     * these numbers are ever used to reason about first-document latency, that
-     * is the wrong benchmark to read.
-     */
-    @TearDown(Level.Iteration)
-    public void clearAdaptiveData() {
-        nameFinder.clearAdaptiveData();
-    }
+    //
+    // There is deliberately no @TearDown clearing the adaptive state, even
+    // though NameFinderME carries per-document state that upstream expects a
+    // caller to clear at a document boundary.
+    //
+    // Every invocation re-runs the same sentence, so the previous-decision map
+    // fills on the first call and is identical from then on; clearing per call
+    // and never clearing agree to within noise. What is measured either way is
+    // the warm case, so reading these numbers as first-document latency would be
+    // wrong.
+    //
+    // JMH would tolerate the hook — it is the BenchmarkDotNet counterpart where
+    // an iteration-level hook is actively harmful, because it forces
+    // InvocationCount=1 and inflates the result by an order of magnitude. The
+    // hook is dropped on both sides so the two harnesses measure the same thing.
+    //
 
     @Benchmark
     public Span[] find() {

@@ -87,9 +87,13 @@ the point of the project. Change both together.
 
 The same applies to the benchmark classes themselves — each one here has a
 counterpart in the .NET project, named the same way and measuring the same call.
-Notably, `NameFinderBenchmark` clears the name finder's adaptive state between
-iterations in both harnesses; without that the state grows without bound over a
-benchmark loop and the measurement drifts away from what a caller would see.
+Notably, neither `NameFinderBenchmark` nor its .NET counterpart clears the name
+finder's adaptive state, even though upstream expects a caller to clear it at a
+document boundary. Every invocation replays the same sentence, so the state
+saturates after the first call and clearing makes no measurable difference — and
+on the BenchmarkDotNet side an iteration-level hook forces `InvocationCount=1`,
+which inflated the reported cost by an order of magnitude. Both harnesses
+therefore measure the warm case; do not read these as first-document latency.
 
 ## Not wired into CI
 
