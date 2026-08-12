@@ -27,8 +27,9 @@ public class TokenTag
 {
     private readonly string token;
     private readonly string tag;
-    private readonly string[] addtionalData;
-    public TokenTag(string token, string tag, string[] addtionalData)
+    private readonly string[]? addtionalData;
+
+    public TokenTag(string token, string tag, string[]? addtionalData)
     {
         this.token = token;
         this.tag = tag;
@@ -42,27 +43,19 @@ public class TokenTag
         }
     }
 
-    public virtual string GetToken()
-    {
-        return token;
-    }
+    public virtual string Token => token;
 
-    public virtual string GetTag()
-    {
-        return tag;
-    }
+    public virtual string Tag => tag;
 
-    public virtual string[] GetAddtionalData()
-    {
-        return addtionalData;
-    }
+    public virtual string[]? AddtionalData => addtionalData;
 
     public static string[] ExtractTokens(TokenTag[] tuples)
     {
         string[] tokens = new string[tuples.Length];
+
         for (int i = 0; i < tuples.Length; i++)
         {
-            tokens[i] = tuples[i].GetToken();
+            tokens[i] = tuples[i].Token;
         }
 
         return tokens;
@@ -73,7 +66,7 @@ public class TokenTag
         string[] tags = new string[tuples.Length];
         for (int i = 0; i < tuples.Length; i++)
         {
-            tags[i] = tuples[i].GetTag();
+            tags[i] = tuples[i].Tag;
         }
 
         return tags;
@@ -90,7 +83,7 @@ public class TokenTag
         return tuples;
     }
 
-    public override bool Equals(object o)
+    public override bool Equals(object? o)
     {
         if (this == o)
         {
@@ -104,13 +97,7 @@ public class TokenTag
         return false;
     }
 
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(token, tag, addtionalData);
-    }
+    public override int GetHashCode() => HashCode.Combine(token, tag, addtionalData);
 
-    public override string ToString()
-    {
-        return token + "_" + tag;
-    }
+    public override string ToString() => $"{token}_{tag}";
 }

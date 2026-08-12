@@ -103,7 +103,7 @@ public class LemmatizerME : ILemmatizer
     public virtual string[] PredictSES(string[] toks, string[] tags)
     {
         bestSequence = model.BestSequence(toks, [tags], contextGenerator, sequenceValidator);
-        IList<string> ses = bestSequence.GetOutcomes();
+        IList<string> ses = bestSequence.Outcomes;
         return [.. ses];
     }
 
@@ -120,7 +120,7 @@ public class LemmatizerME : ILemmatizer
         string[][] allLemmas = new string[bestSequences.Length][];
         for (int i = 0; i < allLemmas.Length; i++)
         {
-            IList<string> ses = bestSequences[i].GetOutcomes();
+            IList<string> ses = bestSequences[i].Outcomes;
             string[] sesArray = [.. ses];
             allLemmas[i] = DecodeLemmas(toks, sesArray);
         }
@@ -206,7 +206,7 @@ public class LemmatizerME : ILemmatizer
             throw new InvalidOperationException($"You must call {nameof(PredictSES)} before calling {nameof(Probs)}");
         }
 
-        return bestSequence.GetProbs();
+        return bestSequence.Probs;
     }
 
     // public static LemmatizerModel Train(string languageCode, ObjectStream<LemmaSample> samples, TrainingParameters trainParams, LemmatizerFactory posFactory)

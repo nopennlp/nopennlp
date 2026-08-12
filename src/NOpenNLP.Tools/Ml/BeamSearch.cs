@@ -98,7 +98,7 @@ public class BeamSearch<T> : BeamSearch, ISequenceClassificationModel<T>
             for (int sc = 0; prev.Count > 0 && sc < sz; sc++)
             {
                 Sequence top = prev.Dequeue();
-                IList<string> tmpOutcomes = top.GetOutcomes();
+                IList<string> tmpOutcomes = top.Outcomes;
                 string[] outcomes = [.. tmpOutcomes];
                 string[] contexts = cg.GetContext(i, sequence, outcomes, additionalContext);
                 double[] scores;
@@ -123,7 +123,7 @@ public class BeamSearch<T> : BeamSearch, ISequenceClassificationModel<T>
                         if (validator.ValidSequence(i, sequence, outcomes, @out))
                         {
                             Sequence ns = new Sequence(top, @out, scores[p]);
-                            if (ns.GetScore() > minSequenceScore)
+                            if (ns.Score > minSequenceScore)
                             {
                                 next.Add(ns);
                             }
@@ -140,7 +140,7 @@ public class BeamSearch<T> : BeamSearch, ISequenceClassificationModel<T>
                         if (validator.ValidSequence(i, sequence, outcomes, @out))
                         {
                             Sequence ns = new Sequence(top, @out, scores[p]);
-                            if (ns.GetScore() > minSequenceScore)
+                            if (ns.Score > minSequenceScore)
                             {
                                 next.Add(ns);
                             }

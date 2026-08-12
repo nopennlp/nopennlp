@@ -94,14 +94,13 @@ public class Sequence : IComparable<Sequence>
             score);
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (this == obj)
             return true;
-        if (obj is Sequence)
+        if (obj is Sequence other)
         {
-            Sequence other = (Sequence)obj;
-            double epsilon = 1E-07;
+            const double epsilon = 1E-07;
             // NOpenNLP: Java's Objects.equals delegates to List.equals, which is
             // element-wise. J2N's ListEqualityComparer restores those semantics;
             // object.Equals would compare references and never match.
@@ -129,30 +128,27 @@ public class Sequence : IComparable<Sequence>
     /// Returns a list of outcomes for this sequence.
     /// </summary>
     /// <returns>a list of outcomes.</returns>
-    public virtual IList<string> GetOutcomes()
-    {
-        return outcomes;
-    }
+    public virtual IList<string> Outcomes => outcomes;
 
     /// <summary>
     /// Returns an array of probabilities associated with the outcomes of this sequence.
     /// </summary>
     /// <returns>an array of probabilities.</returns>
-    public virtual double[] GetProbs()
+    public virtual double[] Probs
     {
-        double[] ps = new double[probs.Count];
-        GetProbs(ps);
-        return ps;
+        get
+        {
+            double[] ps = new double[probs.Count];
+            GetProbs(ps);
+            return ps;
+        }
     }
 
     /// <summary>
     /// Returns the score of this sequence.
     /// </summary>
     /// <returns>The score of this sequence.</returns>
-    public virtual double GetScore()
-    {
-        return score;
-    }
+    public virtual double Score => score;
 
     /// <summary>
     /// Populates  an array with the probabilities associated with the outcomes of this sequence.
@@ -167,8 +163,5 @@ public class Sequence : IComparable<Sequence>
         }
     }
 
-    public override string ToString()
-    {
-        return score + " " + outcomes;
-    }
+    public override string ToString() => $"{score} {outcomes}";
 }

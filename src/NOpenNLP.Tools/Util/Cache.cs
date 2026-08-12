@@ -35,22 +35,15 @@ namespace NOpenNLP.Tools.Util;
 /// access-order), so the eviction policy is really first-in-first-out; that
 /// behavior is preserved here.
 /// </summary>
-public class Cache<K, V> : LinkedDictionary<K, V>
+public class Cache<K, V>(int capacity) : LinkedDictionary<K, V?>
 {
-    private readonly int capacity;
-
-    public Cache(int capacity)
-    {
-        this.capacity = capacity;
-    }
-
     private void EvictIfNecessary()
     {
         // NOpenNLP: mirrors "return this.size() > this.capacity" in
         // removeEldestEntry, which evicts at most one entry per insertion.
-        if (this.Count > this.capacity)
+        if (this.Count > capacity)
         {
-            foreach (K eldest in this.Keys)
+            foreach (var eldest in this.Keys)
             {
                 this.Remove(eldest);
                 break;
@@ -58,12 +51,12 @@ public class Cache<K, V> : LinkedDictionary<K, V>
         }
     }
 
-    public new V this[K key]
+    public new V? this[K key]
     {
         // NOpenNLP: Java's Map.get() returns null for an absent key, whereas the
         // .NET indexer throws KeyNotFoundException. Callers ported from Java rely
         // on the null-return behavior to detect a cache miss.
-        get => base.TryGetValue(key, out V value) ? value : default;
+        get => base.TryGetValue(key, out var value) ? value : default;
         set
         {
             base[key] = value;
@@ -83,18 +76,18 @@ public class Cache<K, V> : LinkedDictionary<K, V>
     /// which would otherwise assign through the interface indexer and bypass
     /// the eviction above.
     /// </summary>
-    public V Put(K key, V value)
+    public V? Put(K key, V value)
     {
-        base.TryGetValue(key, out V oldValue);
+        base.TryGetValue(key, out var oldValue);
         base[key] = value;
         EvictIfNecessary();
         return oldValue;
     }
 
     // NOpenNLP specific method from HashMap in Java
-    public V ComputeIfAbsent(K key, Func<K, V> func)
+    public V? ComputeIfAbsent(K key, Func<K, V> func)
     {
-        if (this.TryGetValue(key, out V value))
+        if (this.TryGetValue(key, out var value))
         {
             return value;
         }

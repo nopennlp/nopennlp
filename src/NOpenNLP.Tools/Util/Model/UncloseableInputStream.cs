@@ -28,15 +28,8 @@ namespace NOpenNLP.Tools.Util.Model;
 /// NOpenNLP: upstream extends java.io.FilterInputStream, which has no direct
 /// .NET equivalent, so this delegates to the wrapped <see cref="Stream"/>.
 /// </summary>
-public class UncloseableInputStream : Stream
+public class UncloseableInputStream(Stream @in) : Stream
 {
-    private readonly Stream @in;
-
-    public UncloseableInputStream(Stream @in)
-    {
-        this.@in = @in ?? throw new ArgumentNullException(nameof(@in));
-    }
-
     public override bool CanRead => @in.CanRead;
 
     public override bool CanSeek => @in.CanSeek;

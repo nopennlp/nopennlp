@@ -30,6 +30,7 @@ namespace NOpenNLP.Tools.Util;
 public class StringList : IEnumerable<string>
 {
     private readonly string[] tokens;
+
     /// <summary>
     /// Initializes the current instance.
     ///
@@ -59,12 +60,14 @@ public class StringList : IEnumerable<string>
         {
             throw new ArgumentNullException(nameof(tokens), "tokens must not be null");
         }
+
         if (tokens.Length == 0)
         {
             throw new ArgumentException("tokens must not be empty");
         }
 
         this.tokens = new string[tokens.Length];
+
         for (int i = 0; i < tokens.Length; i++)
         {
             this.tokens[i] = string.Intern(tokens[i]);
@@ -76,43 +79,21 @@ public class StringList : IEnumerable<string>
     /// </summary>
     /// <param name="index"></param>
     /// <returns>token at the given index</returns>
-    public virtual string GetToken(int index)
-    {
-        return tokens[index];
-    }
+    public virtual string GetToken(int index) => tokens[index];
 
     /// <summary>
     /// Retrieves the number of tokens inside this list.
     /// </summary>
     /// <returns>number of tokens</returns>
-    public virtual int Size()
-    {
-        return tokens.Length;
-    }
-
-    /// <summary>
-    /// Gets the number of tokens inside this list.
-    /// </summary>
-    public int Count => tokens.Length;
+    public virtual int Count => tokens.Length;
 
     /// <summary>
     /// Retrieves an <see cref="System.Collections.Generic.IEnumerator{T}"/> over all tokens.
     /// </summary>
     /// <returns>iterator over tokens</returns>
-    public virtual IEnumerator<string> Iterator()
-    {
-        return new AnonymousIEnumerator(this);
-    }
+    public virtual IEnumerator<string> GetEnumerator() => new AnonymousIEnumerator(this);
 
-    public IEnumerator<string> GetEnumerator()
-    {
-        return Iterator();
-    }
-
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return GetEnumerator();
-    }
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     private sealed class AnonymousIEnumerator(StringList parent) : IEnumerator<string>
     {
@@ -156,9 +137,9 @@ public class StringList : IEnumerable<string>
     /// <returns>true if identically with ignore the case otherwise false</returns>
     public virtual bool CompareToIgnoreCase(StringList tokens)
     {
-        if (Size() == tokens.Size())
+        if (Count == tokens.Count)
         {
-            for (int i = 0; i < Size(); i++)
+            for (int i = 0; i < Count; i++)
             {
                 if (string.Compare(GetToken(i), tokens.GetToken(i), StringComparison.OrdinalIgnoreCase) != 0)
                 {
@@ -177,14 +158,16 @@ public class StringList : IEnumerable<string>
     public override int GetHashCode()
     {
         var hash = new HashCode();
+
         foreach (string token in tokens)
         {
             hash.Add(token);
         }
+
         return hash.ToHashCode();
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (ReferenceEquals(this, obj))
         {
@@ -214,10 +197,10 @@ public class StringList : IEnumerable<string>
     {
         StringBuilder sb = new StringBuilder();
         sb.Append('[');
-        for (int i = 0; i < Size(); i++)
+        for (int i = 0; i < Count; i++)
         {
             sb.Append(GetToken(i));
-            if (i < Size() - 1)
+            if (i < Count - 1)
             {
                 sb.Append(',');
             }

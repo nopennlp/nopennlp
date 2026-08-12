@@ -43,9 +43,7 @@ public class StringUtil
     /// <param name="charCode"></param>
     /// <returns>true if white space otherwise false</returns>
     public static bool IsWhitespace(char charCode)
-    {
-        return Character.IsWhiteSpace(charCode) || Character.GetType(charCode) == UnicodeCategory.SpaceSeparator;
-    }
+        => Character.IsWhiteSpace(charCode) || Character.GetType(charCode) == UnicodeCategory.SpaceSeparator;
 
     /// <summary>
     /// Determines if the specified character is a whitespace.
@@ -64,9 +62,7 @@ public class StringUtil
     /// <param name="charCode"></param>
     /// <returns>true if white space otherwise false</returns>
     public static bool IsWhitespace(int charCode)
-    {
-        return Character.IsWhiteSpace(charCode) || Character.GetType(charCode) == UnicodeCategory.SpaceSeparator;
-    }
+        => Character.IsWhiteSpace(charCode) || Character.GetType(charCode) == UnicodeCategory.SpaceSeparator;
 
     /// <summary>
     /// Converts to lower case independent of the current locale via
@@ -112,9 +108,7 @@ public class StringUtil
     ///         <c>false</c></returns>
     /// <remarks>Since 1.5.1.</remarks>
     public static bool IsEmpty(string theString)
-    {
-        return theString.Length == 0;
-    }
+        => theString.Length == 0;
 
     /// <summary>
     /// Get mininum of three values.
@@ -166,20 +160,17 @@ public class StringUtil
             return distance;
         }
 
-
         //fill in the rows of column 0
         for (int i = 0; i <= wordLength; i++)
         {
             distance[i, 0] = i;
         }
 
-
         //fill in the columns of row 0
         for (int j = 0; j <= lemmaLength; j++)
         {
             distance[0, j] = j;
         }
-
 
         //fill in the rest of the matrix calculating the minimum distance
         for (int i = 1; i <= wordLength; i++)
@@ -195,7 +186,6 @@ public class StringUtil
                 {
                     cost = 1;
                 }
-
 
                 //obtain minimum distance from calculating deletion, insertion, substitution
                 distance[i,j] = Minimum(distance[i - 1,j] + 1, distance[i,j - 1] + 1, distance[i - 1,j - 1] + cost);
@@ -285,7 +275,6 @@ public class StringUtil
             {
                 break;
             }
-
 
             //read first letter of permutation string
             char nextOperation = permutations[permIndex];

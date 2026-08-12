@@ -45,10 +45,12 @@ public class Version
     private const string DEV_VERSION_STRING = "0.0.0-SNAPSHOT";
     private const string SNAPSHOT_MARKER = "-SNAPSHOT";
     public static readonly Version DEV_VERSION = Version.Parse(DEV_VERSION_STRING);
+
     private readonly int major;
     private readonly int minor;
     private readonly int revision;
     private readonly bool snapshot;
+
     /// <summary>
     /// Initializes the current instance with the provided
     /// versions.
@@ -80,33 +82,21 @@ public class Version
     /// Retrieves the major version.
     /// </summary>
     /// <returns>major version</returns>
-    public virtual int GetMajor()
-    {
-        return major;
-    }
+    public virtual int Major => major;
 
     /// <summary>
     /// Retrieves the minor version.
     /// </summary>
     /// <returns>minor version</returns>
-    public virtual int GetMinor()
-    {
-        return minor;
-    }
+    public virtual int Minor => minor;
 
     /// <summary>
     /// Retrieves the revision version.
     /// </summary>
     /// <returns>revision version</returns>
-    public virtual int GetRevision()
-    {
-        return revision;
-    }
+    public virtual int Revision => revision;
 
-    public virtual bool IsSnapshot()
-    {
-        return snapshot;
-    }
+    public virtual bool IsSnapshot => snapshot;
 
     /// <summary>
     /// Retrieves the version string.
@@ -115,27 +105,23 @@ public class Version
     /// of <see cref="Version"/> with the returned version value string.
     /// </summary>
     /// <returns>the version value string</returns>
-    public override string ToString()
-    {
-        return GetMajor() + "." + GetMinor() + "." + GetRevision() + (IsSnapshot() ? SNAPSHOT_MARKER : "");
-    }
+    public override string ToString() => $"{Major}.{Minor}.{Revision}{(IsSnapshot ? SNAPSHOT_MARKER : "")}";
 
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(GetMajor(), GetMinor(), GetRevision(), IsSnapshot());
-    }
+    public override int GetHashCode() => HashCode.Combine(Major, Minor, Revision, IsSnapshot);
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (obj == this)
         {
             return true;
         }
 
-        if (obj is Version)
+        if (obj is Version version)
         {
-            Version version = (Version)obj;
-            return GetMajor() == version.GetMajor() && GetMinor() == version.GetMinor() && GetRevision() == version.GetRevision() && IsSnapshot() == version.IsSnapshot();
+            return Major == version.Major
+                   && Minor == version.Minor
+                   && Revision == version.Revision
+                   && IsSnapshot == version.IsSnapshot;
         }
 
         return false;
@@ -172,7 +158,10 @@ public class Version
         bool snapshot = version.EndsWith(SNAPSHOT_MARKER, StringComparison.Ordinal);
         // NOpenNLP: Java's substring(begin, end) takes an end index, while .NET's
         // Substring(start, length) takes a length, so the lengths are computed here.
-        return new Version(int.Parse(version.Substring(0, indexFirstDot)), int.Parse(version.Substring(indexFirstDot + 1, indexSecondDot - (indexFirstDot + 1))), int.Parse(version.Substring(indexSecondDot + 1, versionEnd - (indexSecondDot + 1))), snapshot);
+        return new Version(int.Parse(version[..indexFirstDot]),
+            int.Parse(version.Substring(indexFirstDot + 1, indexSecondDot - (indexFirstDot + 1))),
+            int.Parse(version.Substring(indexSecondDot + 1, versionEnd - (indexSecondDot + 1))),
+            snapshot);
     }
 
     /// <summary>
@@ -198,7 +187,7 @@ public class Version
             // Ignore
         }
 
-        string versionString = manifest.GetProperty("OpenNLP-Version", DEV_VERSION_STRING);
+        string? versionString = manifest.GetProperty("OpenNLP-Version", DEV_VERSION_STRING);
         if (versionString.Equals("${pom.version}"))
             versionString = DEV_VERSION_STRING;
         return Version.Parse(versionString);

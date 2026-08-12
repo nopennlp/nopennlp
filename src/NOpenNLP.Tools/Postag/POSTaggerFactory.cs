@@ -266,7 +266,7 @@ public class POSTaggerFactory : BaseToolFactory
         {
             Properties manifest = artifactProvider.GetArtifact<Properties>("manifest.properties");
             string version = manifest.GetProperty("OpenNLP-Version");
-            if (NOpenNLP.Tools.Util.Version.Parse(version).GetMinor() < 8)
+            if (Util.Version.Parse(version).Minor < 8)
             {
                 return new DefaultPOSContextGenerator(cacheSize, GetDictionary());
             }

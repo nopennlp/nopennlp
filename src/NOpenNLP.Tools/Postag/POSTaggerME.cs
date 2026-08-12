@@ -107,7 +107,7 @@ public class POSTaggerME : IPOSTagger
     public virtual string[] Tag(string[] sentence, object[]? additionalContext)
     {
         bestSequence = model.BestSequence(sentence, additionalContext, contextGen, sequenceValidator);
-        IList<string> t = bestSequence.GetOutcomes();
+        IList<string> t = bestSequence.Outcomes;
         return [.. t];
     }
 
@@ -123,7 +123,7 @@ public class POSTaggerME : IPOSTagger
         string[][] tags = new string[bestSequences.Length][];
         for (int si = 0; si < tags.Length; si++)
         {
-            IList<string> t = bestSequences[si].GetOutcomes();
+            IList<string> t = bestSequences[si].Outcomes;
             tags[si] = [.. t];
         }
 
@@ -166,7 +166,7 @@ public class POSTaggerME : IPOSTagger
             throw new InvalidOperationException($"You must call {nameof(Tag)} before calling {nameof(Probs)}");
         }
 
-        return bestSequence.GetProbs();
+        return bestSequence.Probs;
     }
 
     public virtual string[] GetOrderedTags(IList<string> words, IList<string> tags, int index)

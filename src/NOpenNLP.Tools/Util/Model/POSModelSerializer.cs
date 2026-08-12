@@ -33,7 +33,7 @@ public class POSModelSerializer : IArtifactSerializer<POSModel>
         // In 1.5.x the parser configured the beam size when the model was loaded,
         // this is not possible anymore with the new APIs
         Version version = posModel.Version;
-        if (version.GetMajor() == 1 && version.GetMinor() == 5)
+        if (version is { Major: 1, Minor: 5 })
         {
             if (posModel.GetManifestProperty(BeamSearch.BEAM_SIZE_PARAMETER) == null)
             {

@@ -23,7 +23,7 @@ namespace NOpenNLP.Tools.Util;
 /// <summary>
 /// Interface for context generators used with a sequence beam search.
 /// </summary>
-public interface IBeamSearchContextGenerator<T>
+public interface IBeamSearchContextGenerator<in T> // NOpenNLP: made contravariant
 {
     /// <summary>
     /// Returns the context for the specified position in the specified sequence (list).

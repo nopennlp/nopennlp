@@ -94,8 +94,7 @@ public class ChunkerModel : BaseModel
         // declares a not default factory, and if yes, check if it was created before 1.8
         if (GetManifestProperty(FACTORY_NAME) != null
             && !string.Equals(GetManifestProperty(FACTORY_NAME), "opennlp.tools.chunker.ChunkerFactory")
-            && Version.GetMajor() <= 1
-            && Version.GetMinor() < 8)
+            && Version is { Major: <= 1, Minor: < 8 })
         {
             throw new InvalidFormatException($"The IChunker factory '{GetManifestProperty(FACTORY_NAME)}' is no longer compatible. Please update it to match the latest ChunkerFactory.");
         }

@@ -104,7 +104,7 @@ public class ChunkerME : IChunker
     {
         TokenTag[] tuples = TokenTag.Create(toks, tags);
         bestSequence = model.BestSequence(tuples, [], contextGenerator, sequenceValidator);
-        IList<string> c = bestSequence.GetOutcomes();
+        IList<string> c = bestSequence.Outcomes;
         return [.. c];
     }
 
@@ -158,7 +158,7 @@ public class ChunkerME : IChunker
             throw new InvalidOperationException($"You must call {nameof(Chunk)} before calling {nameof(Probs)}");
         }
 
-        return bestSequence.GetProbs();
+        return bestSequence.Probs;
     }
 
     // public static ChunkerModel Train(string lang, ObjectStream<ChunkSample> @in, TrainingParameters mlParams, ChunkerFactory factory)

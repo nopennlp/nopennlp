@@ -28,12 +28,8 @@ namespace NOpenNLP.Tools.Util.Model;
 /// <summary>
 /// Utility class for handling of <see cref="IMaxentModel"/>s.
 /// </summary>
-public sealed class ModelUtil
+public static class ModelUtil // NOpenNLP: made static
 {
-    private ModelUtil()
-    {
-    }
-
     // /// <summary>
     // /// Writes the given model to the given {@link OutputStream}.
     // ///

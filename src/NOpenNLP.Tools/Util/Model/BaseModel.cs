@@ -181,7 +181,6 @@ public abstract class BaseModel : IArtifactProvider
         //     @in = new BufferedInputStream(@in);
         // }
 
-
         // TODO: Discuss this solution, the buffering should
         // int MODEL_BUFFER_SIZE_LIMIT = int.MaxValue;
         // @in.Mark(MODEL_BUFFER_SIZE_LIMIT);
@@ -199,9 +198,8 @@ public abstract class BaseModel : IArtifactProvider
         {
             if ("manifest.properties".Equals(entry.Name))
             {
-
                 // TODO: Probably better to use the serializer here directly!
-                IArtifactSerializer factory = artifactSerializers["properties"];
+                IArtifactSerializer? factory = artifactSerializers["properties"];
                 using (var entryStream = entry.Open())
                 {
                     artifactMap.Put(entry.Name, factory.Create(entryStream));
@@ -291,7 +289,7 @@ public abstract class BaseModel : IArtifactProvider
             }
             else
             {
-                throw new InvalidFormatException("Unknown artifact format: " + extension);
+                throw new InvalidFormatException($"Unknown artifact format: {extension}");
             }
 
             //zip.CloseEntry();
@@ -311,11 +309,11 @@ public abstract class BaseModel : IArtifactProvider
     {
         int extensionIndex = entry.LastIndexOf('.') + 1;
         if (extensionIndex == -1 || extensionIndex >= entry.Length)
-            throw new InvalidFormatException("Entry name must have type extension: " + entry);
+            throw new InvalidFormatException($"Entry name must have type extension: {entry}");
         return entry[extensionIndex..];
     }
 
-    public virtual IArtifactSerializer GetArtifactSerializer(string resourceName)
+    public virtual IArtifactSerializer? GetArtifactSerializer(string resourceName)
     {
         try
         {
@@ -359,7 +357,7 @@ public abstract class BaseModel : IArtifactProvider
             serializers.PutAll(this.toolFactory.CreateArtifactSerializersMap());
     }
 
-    private void CreateBaseArtifactSerializers(JCG.Dictionary<string, IArtifactSerializer> serializers)
+    private static void CreateBaseArtifactSerializers(JCG.Dictionary<string, IArtifactSerializer> serializers) // NOpenNLP: made static
     {
         serializers.PutAll(CreateArtifactSerializers());
     }
@@ -375,11 +373,11 @@ public abstract class BaseModel : IArtifactProvider
     /// <exception cref="InvalidFormatException"></exception>
     protected virtual void ValidateArtifactMap()
     {
-        if (!(artifactMap[MANIFEST_ENTRY] is Properties))
-            throw new InvalidFormatException("Missing the " + MANIFEST_ENTRY + "!");
+        if (artifactMap[MANIFEST_ENTRY] is not Properties)
+            throw new InvalidFormatException($"Missing the {MANIFEST_ENTRY}!");
 
         // First check version, everything else might change in the future
-        string versionString = GetManifestProperty(VERSION_PROPERTY);
+        string? versionString = GetManifestProperty(VERSION_PROPERTY);
         if (versionString != null)
         {
             Version version;
@@ -387,61 +385,57 @@ public abstract class BaseModel : IArtifactProvider
             {
                 version = Version.Parse(versionString);
             }
-            catch (System.FormatException e)
+            catch (FormatException e)
             {
-                throw new InvalidFormatException("Unable to parse model version '" + versionString + "'!", e);
+                throw new InvalidFormatException($"Unable to parse model version '{versionString}'!", e);
             }
-
 
             // Version check is only performed if current version is not the dev/debug version
             if (!Version.CurrentVersion().Equals(Version.DEV_VERSION))
             {
-
                 // Major and minor version must match, revision might be
                 // this check allows for the use of models of n minor release behind current minor release
-                if (Version.CurrentVersion().GetMajor() != version.GetMajor() || Version.CurrentVersion().GetMinor() - 4 > version.GetMinor())
+                if (Version.CurrentVersion().Major != version.Major || Version.CurrentVersion().Minor - 4 > version.Minor)
                 {
-                    throw new InvalidFormatException("Model version " + version + " is not supported by this (" + Version.CurrentVersion() + ") version of OpenNLP!");
+                    throw new InvalidFormatException($"Model version {version} is not supported by this ({Version.CurrentVersion()}) version of OpenNLP!");
                 }
 
-
                 // Reject loading a snapshot model with a non-snapshot version
-                if (!Version.CurrentVersion().IsSnapshot() && version.IsSnapshot())
+                if (!Version.CurrentVersion().IsSnapshot && version.IsSnapshot)
                 {
-                    throw new InvalidFormatException("Model version " + version + " is a snapshot - snapshot models are not supported by this non-snapshot version (" + Version.CurrentVersion() + ") of OpenNLP!");
+                    throw new InvalidFormatException($"Model version {version} is a snapshot - snapshot models are not supported by this non-snapshot version ({Version.CurrentVersion()}) of OpenNLP!");
                 }
             }
         }
         else
         {
-            throw new InvalidFormatException("Missing " + VERSION_PROPERTY + " property in " + MANIFEST_ENTRY + "!");
+            throw new InvalidFormatException($"Missing {VERSION_PROPERTY} property in {MANIFEST_ENTRY}!");
         }
 
         if (GetManifestProperty(COMPONENT_NAME_PROPERTY) == null)
-            throw new InvalidFormatException("Missing " + COMPONENT_NAME_PROPERTY + " property in " + MANIFEST_ENTRY + "!");
+            throw new InvalidFormatException($"Missing {COMPONENT_NAME_PROPERTY} property in {MANIFEST_ENTRY}!");
         if (!GetManifestProperty(COMPONENT_NAME_PROPERTY).Equals(componentName))
-            throw new InvalidFormatException("The " + componentName + " cannot load a model for the " + GetManifestProperty(COMPONENT_NAME_PROPERTY) + "!");
+            throw new InvalidFormatException($"The {componentName} cannot load a model for the {GetManifestProperty(COMPONENT_NAME_PROPERTY)}!");
         if (GetManifestProperty(LANGUAGE_PROPERTY) == null)
-            throw new InvalidFormatException("Missing " + LANGUAGE_PROPERTY + " property in " + MANIFEST_ENTRY + "!");
+            throw new InvalidFormatException($"Missing {LANGUAGE_PROPERTY} property in {MANIFEST_ENTRY}!");
 
         // Validate the factory. We try to load it using the ExtensionLoader. It
         // will return the factory, null or raise an exception
-        string factoryName = GetManifestProperty(FACTORY_NAME);
+        string? factoryName = GetManifestProperty(FACTORY_NAME);
         if (factoryName != null)
         {
             try
             {
                 if (ExtensionLoader.InstantiateExtension<BaseToolFactory>(factoryName) == null)
                 {
-                    throw new InvalidFormatException("Could not load an user extension specified by the model: " + factoryName);
+                    throw new InvalidFormatException($"Could not load an user extension specified by the model: {factoryName}");
                 }
             }
             catch (Exception e)
             {
-                throw new InvalidFormatException("Could not load an user extension specified by the model: " + factoryName, e);
+                throw new InvalidFormatException($"Could not load an user extension specified by the model: {factoryName}", e);
             }
         }
-
 
         // validate artifacts declared by the factory
         if (toolFactory != null)
@@ -462,6 +456,7 @@ public abstract class BaseModel : IArtifactProvider
     {
         if (!finishedLoadingArtifacts)
             throw new InvalidOperationException("The method BaseModel.finishLoadingArtifacts(..) was not called by BaseModel sub-class.");
+
         try
         {
             ValidateArtifactMap();
@@ -581,12 +576,13 @@ public abstract class BaseModel : IArtifactProvider
     //     Serialize(new FileInfo(model));
     // }
 
-    public virtual T GetArtifact<T>(string key)
+    public virtual T? GetArtifact<T>(string key)
     {
         // NOpenNLP: Java's Map.get() returns null for an absent key, whereas the
         // .NET indexer throws KeyNotFoundException, so TryGetValue is used here.
         if (!artifactMap.TryGetValue(key, out object artifact) || artifact is null)
             return default;
+
         return (T)artifact;
     }
 

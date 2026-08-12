@@ -46,10 +46,10 @@ public class PortRegressionTest
     {
         Version current = Version.CurrentVersion();
 
-        ClassicAssert.AreEqual(1, current.GetMajor());
-        ClassicAssert.AreEqual(9, current.GetMinor());
-        ClassicAssert.AreEqual(1, current.GetRevision());
-        ClassicAssert.IsFalse(current.IsSnapshot());
+        ClassicAssert.AreEqual(1, current.Major);
+        ClassicAssert.AreEqual(9, current.Minor);
+        ClassicAssert.AreEqual(1, current.Revision);
+        ClassicAssert.IsFalse(current.IsSnapshot);
         ClassicAssert.AreEqual("1.9.1", current.ToString());
     }
 
@@ -61,8 +61,7 @@ public class PortRegressionTest
     public void TestPropertiesAcceptsJavaSeparators()
     {
         var properties = new Properties();
-        using (var stream = new System.IO.MemoryStream(System.Text.Encoding.UTF8.GetBytes(
-            "# a comment\n! another comment\nequals=1\ncolon: 2\nspace 3\n")))
+        using (var stream = new System.IO.MemoryStream([.. "# a comment\n! another comment\nequals=1\ncolon: 2\nspace 3\n"u8]))
         {
             properties.Load(stream);
         }

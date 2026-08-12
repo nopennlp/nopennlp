@@ -28,7 +28,7 @@ public interface IArtifactProvider
     /// <summary>
     /// Gets an artifact by name
     /// </summary>
-    T GetArtifact<T>(string key);
+    T? GetArtifact<T>(string key);
 
     /// <summary>
     /// Retrieves the value to the given key from the manifest.properties

@@ -91,7 +91,7 @@ public class NameFinderME : ITokenNameFinder
     {
         additionalContextFeatureGenerator.SetCurrentContext(additionalContext);
         bestSequence = model.BestSequence(tokens, additionalContext, contextGenerator, sequenceValidator);
-        IList<string> c = bestSequence.GetOutcomes();
+        IList<string> c = bestSequence.Outcomes;
         contextGenerator.UpdateAdaptiveData(tokens, [.. c]);
         Span[] spans = seqCodec.Decode(c);
         spans = SetProbs(spans);
@@ -128,10 +128,7 @@ public class NameFinderME : ITokenNameFinder
     /// </summary>
     /// <returns>An array with the same number of probabilities as tokens were sent
     ///     to <see cref="Find(string[], string[][])"/> when it was last called.</returns>
-    public virtual double[] Probs()
-    {
-        return bestSequence.GetProbs();
-    }
+    public virtual double[] Probs() => bestSequence.Probs;
 
     /// <summary>
     /// sets the probs for the spans
@@ -163,7 +160,7 @@ public class NameFinderME : ITokenNameFinder
     public virtual double[] Probs(Span[] spans)
     {
         double[] sprobs = new double[spans.Length];
-        double[] probs = bestSequence.GetProbs();
+        double[] probs = bestSequence.Probs;
         for (int si = 0; si < spans.Length; si++)
         {
             double p = 0;

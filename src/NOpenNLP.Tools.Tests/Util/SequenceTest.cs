@@ -39,17 +39,17 @@ public class SequenceTest
 
         Sequence copy = new Sequence(sequence);
 
-        CollectionAssert.AreEqual(sequence.GetOutcomes(), copy.GetOutcomes());
+        CollectionAssert.AreEqual(sequence.Outcomes, copy.Outcomes);
         // NOpenNLP: upstream uses assertArrayEquals(double[], double[], delta).
         // ClassicAssert.AreEqual's delta overload is scalar-only, so the array
         // comparison goes through the constraint model with a tolerance.
-        Assert.That(copy.GetProbs(), Is.EqualTo(sequence.GetProbs()).Within(0.0));
+        Assert.That(copy.Probs, Is.EqualTo(sequence.Probs).Within(0.0));
         ClassicAssert.IsTrue(sequence.CompareTo(copy) == 0);
     }
 
     /// <summary>
     /// Tests <see cref="Sequence.Add(string, double)"/>, also
-    /// tests <see cref="Sequence.GetOutcomes()"/> and <see cref="Sequence.GetProbs()"/>.
+    /// tests <see cref="Sequence.Outcomes"/> and <see cref="Sequence.Probs"/>.
     /// </summary>
     [Test]
     public void TestAddMethod()
@@ -58,8 +58,8 @@ public class SequenceTest
         sequence.Add("a", 10d);
 
         // check if insert was successful
-        ClassicAssert.AreEqual("a", sequence.GetOutcomes()[0]);
-        ClassicAssert.AreEqual(10d, sequence.GetProbs()[0], 0d);
+        ClassicAssert.AreEqual("a", sequence.Outcomes[0]);
+        ClassicAssert.AreEqual(10d, sequence.Probs[0], 0d);
     }
 
     /// <summary>
