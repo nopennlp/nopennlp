@@ -34,7 +34,11 @@ public class PreviousMapFeatureGenerator : IAdaptiveFeatureGenerator
 
     public virtual void CreateFeatures(IList<string> features, string[] tokens, int index, string[] preds)
     {
-        features.Add("pd=" + previousMap[tokens[index]]);
+        // NOpenNLP: Java's Map.get returns null for an absent key, which string
+        // concatenation renders as "null". The C# indexer throws instead, so the
+        // lookup goes through TryGetValue and reproduces the "null" text.
+        string value = previousMap.TryGetValue(tokens[index], out string? previous) ? previous : "null";
+        features.Add("pd=" + value);
     }
 
     /// <summary>

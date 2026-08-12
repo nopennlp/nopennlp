@@ -17,6 +17,7 @@
 
 // This file has been modified from the original Apache OpenNLP 1.9.1 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
+using System;
 using System.Text;
 
 namespace NOpenNLP.Tools.Ml.Model;
@@ -25,9 +26,22 @@ namespace NOpenNLP.Tools.Ml.Model;
 /// The context of a decision point during training.  This includes
 /// contextual predicates and an outcome.
 /// </summary>
-// NOpenNLP: used optional parameter instead of ctor overload
-public class Event(string outcome, string[] context, float[]? values = null)
+public class Event
 {
+    private readonly string outcome;
+    private readonly string[] context;
+    private readonly float[]? values;
+
+    // NOpenNLP: used optional parameter instead of ctor overload
+    public Event(string outcome, string[] context, float[]? values = null)
+    {
+        // NOpenNLP: upstream uses Objects.requireNonNull; ArgumentNullException
+        // is the .NET counterpart of the NullPointerException it throws.
+        this.outcome = outcome ?? throw new ArgumentNullException(nameof(outcome), "outcome must not be null");
+        this.context = context ?? throw new ArgumentNullException(nameof(context), "context must not be null");
+        this.values = values;
+    }
+
     public virtual string Outcome => outcome;
 
     public virtual string[] Context => context;
