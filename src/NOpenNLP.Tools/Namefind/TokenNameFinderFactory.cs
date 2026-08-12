@@ -64,7 +64,12 @@ public class TokenNameFinderFactory : BaseToolFactory
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         try
         {
-            using var @in = typeof(TokenNameFinderFactory).FindAndGetManifestResourceStream("/opennlp/tools/namefind/ner-default-features.xml");
+            // NOpenNLP: upstream resolves the classpath path
+            // "/opennlp/tools/namefind/ner-default-features.xml". The .NET
+            // counterpart is an embedded resource, and J2N resolves a bare file
+            // name relative to the requesting type's namespace, so the file lives
+            // beside this class and is named without a path.
+            using var @in = typeof(TokenNameFinderFactory).FindAndGetManifestResourceStream("ner-default-features.xml");
 
             if (@in == null)
             {

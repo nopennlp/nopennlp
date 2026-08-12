@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 using NOpenNLP.Tools.Ml.Naivebayes;
+using NOpenNLP.Tools.Namefind;
+using NOpenNLP.Tools.Postag;
 using NOpenNLP.Tools.Util;
+using NOpenNLP.Tools.Util.Featuregen;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
 using Version = NOpenNLP.Tools.Util.Version;
@@ -126,5 +129,43 @@ public class PortRegressionTest
         pair.Set("y", 0.75d);
         ClassicAssert.AreEqual(0.25d, pair.Get("x").Value, 1e-12);
         ClassicAssert.AreEqual(0.75d, pair.Get("y").Value, 1e-12);
+    }
+
+    /// <summary>
+    /// The default feature descriptors were missing from the port entirely, and
+    /// the code loading them passed a Java classpath path
+    /// ("/opennlp/tools/namefind/ner-default-features.xml") to J2N, which resolves
+    /// a bare file name relative to the requesting type's namespace and returns
+    /// null for a slash path. Either fault alone makes the default feature
+    /// generators unreachable.
+    /// </summary>
+    /// <remarks>
+    /// Upstream covers this only indirectly through training tests, which are not
+    /// ported, so nothing else pins it.
+    /// </remarks>
+    [Test]
+    public void TestTokenNameFinderFactoryLoadsDefaultFeatureDescriptor()
+    {
+        // No descriptor supplied, so the factory must fall back to the embedded
+        // default. Before the fix this threw InvalidOperationException.
+        IAdaptiveFeatureGenerator? generator = new TokenNameFinderFactory().CreateFeatureGenerators();
+
+        ClassicAssert.IsNotNull(generator);
+    }
+
+    /// <summary>
+    /// The POS default descriptor had the same two faults as the NER one, plus a
+    /// third: the lookup passed typeof(TokenNameFinderFactory), which resolves
+    /// against the Namefind namespace and so could never locate a Postag resource.
+    /// </summary>
+    [Test]
+    public void TestPOSTaggerFactoryLoadsDefaultFeatureDescriptor()
+    {
+        // Passing null feature generator bytes forces the embedded default to load.
+        POSTaggerFactory factory = new POSTaggerFactory(null, [], null);
+
+        IAdaptiveFeatureGenerator generator = factory.CreateFeatureGenerators();
+
+        ClassicAssert.IsNotNull(generator);
     }
 }

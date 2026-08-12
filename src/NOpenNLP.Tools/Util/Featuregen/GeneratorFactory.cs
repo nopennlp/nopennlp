@@ -503,7 +503,11 @@ public static class GeneratorFactory // NOpenNLP: made static
         {
 
             // support classic format
-            IXmlFeatureGeneratorFactory? generatorFactory = factories[elementName];
+            // NOpenNLP: Java's Map.get returns null for an unregistered element
+            // name, which selects the InvalidFormatException below. The C# indexer
+            // throws KeyNotFoundException instead, which made that branch — the
+            // reported "Unexpected element" error — unreachable.
+            factories.TryGetValue(elementName, out IXmlFeatureGeneratorFactory? generatorFactory);
             if (generatorFactory != null)
             {
                 return generatorFactory.Create(generatorElement, resourceManager);
@@ -787,7 +791,13 @@ public static class GeneratorFactory // NOpenNLP: made static
             {
                 XmlElement? xmlElement = (XmlElement)allElements.Item(i);
                 string dictName = xmlElement.GetAttribute("dict");
-                if (string.IsNullOrEmpty(dictName))
+
+                // NOpenNLP: upstream guards this with "dictName != null", i.e. it
+                // runs when the attribute is present. GetAttribute returns the
+                // empty string rather than null for an absent attribute, so the
+                // check is for a non-empty name; otherwise the serializer would be
+                // registered under an empty key for elements without a dict.
+                if (!string.IsNullOrEmpty(dictName))
                 {
                     switch (xmlElement.Name)
                     {
@@ -810,7 +820,10 @@ public static class GeneratorFactory // NOpenNLP: made static
                 }
 
                 string modelName = xmlElement.GetAttribute("model");
-                if (string.IsNullOrEmpty(modelName))
+
+                // NOpenNLP: see the "dict" attribute above; upstream's guard is
+                // "modelName != null", which is a non-empty check here.
+                if (!string.IsNullOrEmpty(modelName))
                 {
                     switch (xmlElement.Name)
                     {

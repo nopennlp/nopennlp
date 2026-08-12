@@ -53,9 +53,19 @@
     <PackageReference Include="PolySharp" Version="1.16.0" />
   </ItemGroup>
 
+  <!--
+    Embedded resources are looked up with J2N's FindAndGetManifestResourceStream,
+    which resolves a bare file name relative to the requesting type's namespace.
+    Keeping each file beside the type that loads it is what makes that work, so
+    move the lookup and the file together if either one relocates.
+  -->
   <ItemGroup>
     <None Remove="Util\opennlp.version" />
     <EmbeddedResource Include="Util\opennlp.version" />
+    <None Remove="Namefind\ner-default-features.xml" />
+    <EmbeddedResource Include="Namefind\ner-default-features.xml" />
+    <None Remove="Postag\pos-default-features.xml" />
+    <EmbeddedResource Include="Postag\pos-default-features.xml" />
   </ItemGroup>
 
   <!-- Lets the tests reach the internal Support helpers. -->

@@ -19,7 +19,6 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using NOpenNLP.Tools.Ml.Model;
-using NOpenNLP.Tools.Namefind;
 using NOpenNLP.Tools.Util;
 using NOpenNLP.Tools.Util.Ext;
 using NOpenNLP.Tools.Util.Featuregen;
@@ -95,7 +94,14 @@ public class POSTaggerFactory : BaseToolFactory
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         try
         {
-            using var @in = typeof(TokenNameFinderFactory).FindAndGetManifestResourceStream("/opennlp/tools/postag/pos-default-features.xml");
+            // NOpenNLP: upstream resolves the classpath path
+            // "/opennlp/tools/postag/pos-default-features.xml". The .NET
+            // counterpart is an embedded resource, and J2N resolves a bare file
+            // name relative to the requesting type's namespace, so the file lives
+            // beside this class and is named without a path. The requesting type
+            // must be POSTaggerFactory; TokenNameFinderFactory would resolve
+            // against the Namefind namespace and never find this resource.
+            using var @in = typeof(POSTaggerFactory).FindAndGetManifestResourceStream("pos-default-features.xml");
 
             if (@in == null)
             {

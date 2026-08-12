@@ -69,6 +69,8 @@
                       LogicalName="opennlp.tools.lemmatizer.smalldictionarymulti.dict" />
     <EmbeddedResource Include="Util\Featuregen\*.xml"
                       LogicalName="opennlp.tools.util.featuregen.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Formats\brown-cluster.txt"
+                      LogicalName="opennlp.tools.formats.brown-cluster.txt" />
   </ItemGroup>
 
 </Project>
