@@ -14,3 +14,8 @@ testresults/
 TestResults/
 *.trx
 .DS_Store
+
+# Integration test data: pre-trained models downloaded from the Apache OpenNLP
+# SourceForge site, and the optional Leipzig corpus. Downloaded on demand and
+# cached; never committed. See src/NOpenNLP.Tools.Tests/Integration/README.md.
+testdata/

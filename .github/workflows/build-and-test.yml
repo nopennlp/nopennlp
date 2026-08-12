@@ -22,9 +22,31 @@ env:
   NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
 
 jobs:
+  # Populates the model cache exactly once. Without this the nine test legs all
+  # start on a cold cache at the same time and every one of them downloads ~46 MB
+  # from the Apache OpenNLP servers before any of them has written the cache.
+  models:
+    name: Fetch test models
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache test models
+        id: cache-models
+        uses: actions/cache@v4
+        with:
+          path: testdata
+          key: testmodels-${{ hashFiles('build/download-test-models.sh') }}
+
+      - name: Download test models
+        if: steps.cache-models.outputs.cache-hit != 'true'
+        run: build/download-test-models.sh
+
   test:
     name: ${{ matrix.os }} / ${{ matrix.framework }}
     runs-on: ${{ matrix.os }}
+    needs: models
     strategy:
       fail-fast: false
       matrix:
@@ -59,6 +81,25 @@ jobs:
           path: ${{ env.NUGET_PACKAGES }}
           key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', '**/*.slnx') }}
           restore-keys: nuget-${{ runner.os }}-
+
+      # Restores what the models job already downloaded. The key is the download
+      # script, which pins each file's SHA-256, so the cache is reused until the
+      # model set itself changes; no restore-keys, so a stale entry can never
+      # satisfy a changed list.
+      - name: Restore test models
+        id: cache-models
+        uses: actions/cache/restore@v4
+        with:
+          path: testdata
+          key: testmodels-${{ hashFiles('build/download-test-models.sh') }}
+
+      # Should not normally run: the models job populates the cache first. This
+      # only covers a cache entry evicted between that job and this one, and the
+      # script skips files already present.
+      - name: Download test models (fallback)
+        if: steps.cache-models.outputs.cache-hit != 'true'
+        shell: bash
+        run: build/download-test-models.sh
 
       - name: Restore
         run: dotnet restore NOpenNLP.slnx -p:TestFrameworks=true
