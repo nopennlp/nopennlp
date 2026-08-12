@@ -1,0 +1,22 @@
+# Store every text file with LF in the repository. Windows working copies still
+# get CRLF where the platform expects it, via core.autocrlf on checkout.
+* text=auto
+
+# Scripts stay LF even in a Windows working copy.
+#
+# The CI model cache keys off hashFiles('build/download-test-models.ps1'), and
+# hashFiles reads the working tree, not the stored blob. Under text=auto alone a
+# Windows runner would check the script out as CRLF, compute a different key
+# from the Linux job that populated the cache, miss it, and re-download the
+# models on every build. PowerShell and bash both handle LF on Windows.
+*.ps1 text eol=lf
+*.sh text eol=lf
+
+# Never touch the bytes of binary files.
+*.bin binary
+*.zip binary
+*.gz binary
+*.png binary
+*.jpg binary
+*.ico binary
+*.snk binary
