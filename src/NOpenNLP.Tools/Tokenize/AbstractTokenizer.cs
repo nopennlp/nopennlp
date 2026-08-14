@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
-// This file has been modified from the original Apache OpenNLP 1.9.4 source:
+// This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using J2N.Text;
 using NOpenNLP.Tools.Util;
 
 namespace NOpenNLP.Tools.Tokenize;
 
-// NOpenNLP: this type is package-private in Apache OpenNLP 1.9.4. C# has no
+// NOpenNLP: this type is package-private in Apache OpenNLP. C# has no
 // equivalent accessibility, and a public class may not derive from a less
 // accessible base (CS0060), so the public TokenizerME, SimpleTokenizer and
 // WhitespaceTokenizer subclasses require this to be public.
