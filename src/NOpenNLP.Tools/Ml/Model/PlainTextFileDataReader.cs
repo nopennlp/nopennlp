@@ -1,0 +1,85 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// This file has been modified from the original Apache OpenNLP 1.9.1 source:
+// translated from Java to C# and adapted for .NET. See NOTICE.
+
+using System;
+using System.IO;
+using System.IO.Compression;
+
+namespace NOpenNLP.Tools.Ml.Model;
+
+public class PlainTextFileDataReader : IDataReader
+{
+    private readonly StreamReader input; // NOpenNLP: made readonly
+
+    public PlainTextFileDataReader(FileInfo f)
+    {
+        if (f.Name.EndsWith(".gz", StringComparison.Ordinal))
+        {
+            input = new StreamReader(new GZipStream(f.OpenRead(), CompressionMode.Decompress));
+        }
+        else
+        {
+            input = new StreamReader(f.OpenRead());
+        }
+    }
+
+    public PlainTextFileDataReader(Stream @in)
+    {
+        input = new StreamReader(@in);
+    }
+
+    public PlainTextFileDataReader(StreamReader @in)
+    {
+        input = @in;
+    }
+
+    public virtual double ReadDouble()
+    {
+        // NOpenNLP: validate we're not at the end of the stream
+        if (input.ReadLine() is not { } line)
+        {
+            throw new EndOfStreamException();
+        }
+
+        return double.Parse(line);
+    }
+
+    public virtual int ReadInt32()
+    {
+        // NOpenNLP: validate we're not at the end of the stream
+        if (input.ReadLine() is not { } line)
+        {
+            throw new EndOfStreamException();
+        }
+
+        return int.Parse(line);
+    }
+
+    public virtual string ReadUTF()
+    {
+        // NOpenNLP: validate we're not at the end of the stream
+        if (input.ReadLine() is not { } line)
+        {
+            throw new EndOfStreamException();
+        }
+
+        return line;
+    }
+}

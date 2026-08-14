@@ -1,0 +1,176 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// This file has been modified from the original Apache OpenNLP 1.9.1 source:
+// translated from Java to C# and adapted for .NET. See NOTICE.
+
+using J2N;
+using NOpenNLP.Tools.Ml.Model;
+using System.Collections.Generic;
+
+namespace NOpenNLP.Tools.Ml.Naivebayes;
+
+/// <summary>
+/// Class implementing the multinomial Naive Bayes classifier model.
+/// </summary>
+public class NaiveBayesModel : AbstractModel
+{
+    protected readonly double[] outcomeTotals; // NOpenNLP: made readonly
+    protected long vocabulary;
+
+    internal NaiveBayesModel(Context[] @params, string[] predLabels, Dictionary<string, Context> pmap, string[] outcomeNames) : base(@params, predLabels, pmap, outcomeNames)
+    {
+        outcomeTotals = InitOutcomeTotals(outcomeNames, @params);
+        this.evalParams = new NaiveBayesEvalParameters(@params, outcomeNames.Length, outcomeTotals, predLabels.Length);
+        modelType = ModelType.NaiveBayes;
+    }
+
+    public NaiveBayesModel(Context[] @params, string[] predLabels, string[] outcomeNames) : base(@params, predLabels, outcomeNames)
+    {
+        outcomeTotals = InitOutcomeTotals(outcomeNames, @params);
+        this.evalParams = new NaiveBayesEvalParameters(@params, outcomeNames.Length, outcomeTotals, predLabels.Length);
+        modelType = ModelType.NaiveBayes;
+    }
+
+    protected virtual double[] InitOutcomeTotals(string[] outcomeNames, Context[] @params)
+    {
+        double[] outcomeTotals = new double[outcomeNames.Length];
+        for (int i = 0; i < @params.Length; ++i)
+        {
+            Context context = @params[i];
+            for (int j = 0; j < context.Outcomes.Length; ++j)
+            {
+                int outcome = context.Outcomes[j];
+                double count = context.Parameters[j];
+                outcomeTotals[outcome] += count;
+            }
+        }
+
+        return outcomeTotals;
+    }
+
+    public override double[] Eval(string[] context)
+    {
+        return Eval(context, new double[evalParams.GetNumOutcomes()]);
+    }
+
+    public override double[] Eval(string[] context, float[] values)
+    {
+        return Eval(context, values, new double[evalParams.GetNumOutcomes()]);
+    }
+
+    public override double[] Eval(string[] context, double[] probs)
+    {
+        return Eval(context, null, probs);
+    }
+
+    public virtual double[] Eval(string[] context, float[]? values, double[] outsums)
+    {
+        Context[] scontexts = new Context[context.Length];
+        outsums.Fill(0);
+        for (int i = 0; i < context.Length; i++)
+        {
+            // NOpenNLP: Java's Map.get() returns null for an absent key; the .NET indexer throws.
+            pmap.TryGetValue(context[i], out Context ctx);
+            scontexts[i] = ctx;
+        }
+
+        return Eval(scontexts, values, outsums, evalParams, true);
+    }
+
+    public static double[] Eval(int[] context, double[] prior, EvalParameters model)
+    {
+        return Eval(context, null, prior, model, true);
+    }
+
+    internal static double[] Eval(Context?[] context, float[]? values, double[] prior, EvalParameters model, bool normalize)
+    {
+        Probabilities<int> probabilities = new LogProbabilities<int>();
+        double[] outcomeTotals = model is NaiveBayesEvalParameters naiveBayesEvalParameters ? naiveBayesEvalParameters.OutcomeTotals : new double[prior.Length];
+        long vocabulary = model is NaiveBayesEvalParameters naiveBayesEvalParameters2 ? naiveBayesEvalParameters2.Vocabulary : 0;
+        double[] activeParameters;
+        int[] activeOutcomes;
+        double value = 1;
+        for (int ci = 0; ci < context.Length; ci++)
+        {
+            if (context[ci] is { } predParams)
+            {
+                activeOutcomes = predParams.Outcomes;
+                activeParameters = predParams.Parameters;
+                if (values != null)
+                {
+                    value = values[ci];
+                }
+
+                int ai = 0;
+                for (int i = 0; i < outcomeTotals.Length && ai < activeOutcomes.Length; ++i)
+                {
+                    int oid = activeOutcomes[ai];
+                    double numerator = oid == i ? activeParameters[ai++] * value : 0;
+                    double denominator = outcomeTotals[i];
+                    probabilities.AddIn(i, GetProbability(numerator, denominator, vocabulary, true), 1);
+                }
+            }
+        }
+
+        double total = 0;
+        for (int i = 0; i < outcomeTotals.Length; ++i)
+        {
+            total += outcomeTotals[i];
+        }
+
+        for (int i = 0; i < outcomeTotals.Length; ++i)
+        {
+            double numerator = outcomeTotals[i];
+            probabilities.AddIn(i, numerator / total, 1);
+        }
+
+        for (int i = 0; i < outcomeTotals.Length; ++i)
+        {
+            prior[i] = probabilities.Get(i).GetValueOrDefault(); // NOpenNLP TODO: confirm GetValueOrDefault() is appropriate, it seems upstream would just throw
+        }
+
+        return prior;
+    }
+
+    internal static double[] Eval(int[] context, float[]? values, double[] prior, EvalParameters model, bool normalize)
+    {
+        Context[] scontexts = new Context[context.Length];
+        for (int i = 0; i < context.Length; i++)
+        {
+            scontexts[i] = model.GetParams()[context[i]];
+        }
+
+        return Eval(scontexts, values, prior, model, normalize);
+    }
+
+    private static double GetProbability(double numerator, double denominator, double vocabulary, bool isSmoothed)
+    {
+        if (isSmoothed)
+            return GetSmoothedProbability(numerator, denominator, vocabulary);
+        else if (denominator is 0 or < double.MinValue)
+            return 0;
+        else
+            return 1 * numerator / denominator;
+    }
+
+    private static double GetSmoothedProbability(double numerator, double denominator, double vocabulary)
+    {
+        const double delta = 0.05; // Lidstone smoothing
+        return 1 * (numerator + delta) / (denominator + delta * vocabulary);
+    }
+}

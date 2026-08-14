@@ -1,0 +1,17 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+  </Configurations>
+  <Folder Name="/src/">
+    <Project Path="src/NOpenNLP.Tools/NOpenNLP.Tools.csproj" />
+    <Project Path="src/NOpenNLP.Tools.Tests/NOpenNLP.Tools.Tests.csproj" />
+    <!--
+      NOpenNLP.Benchmarks is here so it opens with the solution, but CI restores
+      the library and test projects individually rather than the solution: this
+      project's IKVM dependency unpacks to over 4 GB in the NuGet cache, and a
+      solution-wide restore would pull it onto all nine test legs to build
+      something CI never runs. See the restore steps in build-and-test.yml.
+    -->
+    <Project Path="src/NOpenNLP.Benchmarks/NOpenNLP.Benchmarks.csproj" />
+  </Folder>
+</Solution>

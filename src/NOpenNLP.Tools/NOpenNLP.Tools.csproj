@@ -1,0 +1,81 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net10.0;net8.0;netstandard2.0</TargetFrameworks>
+    <LangVersion>12.0</LangVersion>
+    <RootNamespace>NOpenNLP.Tools</RootNamespace>
+    <AssemblyName>NOpenNLP.Tools</AssemblyName>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- 1591/1573: the ported Java doc comments do not cover every member or param. -->
+    <NoWarn>$(NoWarn);1591;1573</NoWarn>
+    <NeutralLanguage>en</NeutralLanguage>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Packaging">
+    <!--
+      No version properties are set here on purpose. Nerdbank.GitVersioning
+      derives Version, PackageVersion, AssemblyVersion, FileVersion and
+      AssemblyInformationalVersion from version.json plus the git height, and
+      overwrites any value set here without warning. VersionPrefix and
+      VersionSuffix are worse: nbgv never reads or clears them, so a stale value
+      would silently survive. Set the version in version.json instead.
+    -->
+    <PackageId>NOpenNLP.Tools</PackageId>
+    <Authors>NOpenNLP Contributors</Authors>
+    <Description>A C# port of the Apache OpenNLP 1.9.1 inference APIs (opennlp-tools). This product includes software developed at The Apache Software Foundation. Not affiliated with or endorsed by the Apache Software Foundation.</Description>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageTags>nlp;opennlp;tokenizer;pos;lemmatizer;chunker;ner;maxent</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="J2N" Version="2.1.0" />
+  </ItemGroup>
+
+  <!--
+    Derives the version from version.json plus the git commit height. Build-time
+    only, so PrivateAssets keeps it out of the published dependency graph.
+  -->
+  <ItemGroup>
+    <PackageReference Include="Nerdbank.GitVersioning" Version="3.10.91">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- Functionality not part of netstandard2.0. -->
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <PackageReference Include="Microsoft.Bcl.HashCode" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Bcl.Memory" Version="10.0.10" />
+    <PackageReference Include="PolySharp" Version="1.16.0" />
+  </ItemGroup>
+
+  <!--
+    Embedded resources are looked up with J2N's FindAndGetManifestResourceStream,
+    which resolves a bare file name relative to the requesting type's namespace.
+    Keeping each file beside the type that loads it is what makes that work, so
+    move the lookup and the file together if either one relocates.
+  -->
+  <ItemGroup>
+    <None Remove="Util\opennlp.version" />
+    <EmbeddedResource Include="Util\opennlp.version" />
+    <None Remove="Namefind\ner-default-features.xml" />
+    <EmbeddedResource Include="Namefind\ner-default-features.xml" />
+    <None Remove="Postag\pos-default-features.xml" />
+    <EmbeddedResource Include="Postag\pos-default-features.xml" />
+  </ItemGroup>
+
+  <!-- Lets the tests reach the internal Support helpers. -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="NOpenNLP.Tools.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\NOTICE" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>
