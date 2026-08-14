@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// This file has been modified from the original Apache OpenNLP 1.9.1 source:
+// This file has been modified from the original Apache OpenNLP 1.9.4 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using NOpenNLP.Tools.Util.Ext;
@@ -308,7 +308,7 @@ public abstract class BaseModel : IArtifactProvider
     private static string GetEntryExtension(string entry) // NOpenNLP: made static
     {
         int extensionIndex = entry.LastIndexOf('.') + 1;
-        if (extensionIndex == -1 || extensionIndex >= entry.Length)
+        if (extensionIndex >= entry.Length)
             throw new InvalidFormatException($"Entry name must have type extension: {entry}");
         return entry[extensionIndex..];
     }

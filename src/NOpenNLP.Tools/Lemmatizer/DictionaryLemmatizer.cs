@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// This file has been modified from the original Apache OpenNLP 1.9.1 source:
+// This file has been modified from the original Apache OpenNLP 1.9.4 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using NOpenNLP.Tools.Support;
@@ -93,9 +93,7 @@ public class DictionaryLemmatizer : ILemmatizer
     /// <returns>returns the dictionary keys</returns>
     private static IList<string> GetDictKeys(string word, string postag) // NOpenNLP: made static
     {
-        var keys = new List<string>();
-        keys.AddRange([word.ToLower(), postag]);
-        return keys;
+        return new List<string>([word.ToLower(), postag]);
     }
 
     public virtual string[] Lemmatize(string[] tokens, string[] postags)

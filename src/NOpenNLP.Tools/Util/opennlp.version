@@ -15,4 +15,4 @@
 
 # Version is injected by the maven build, fall back version is 0.0.0-SNAPSHOT
 # NOpenNLP: hard coded to match OpenNLP dependency version
-OpenNLP-Version: 1.9.1
+OpenNLP-Version: 1.9.4

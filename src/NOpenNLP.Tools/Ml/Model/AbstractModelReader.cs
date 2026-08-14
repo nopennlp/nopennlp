@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// This file has been modified from the original Apache OpenNLP 1.9.1 source:
+// This file has been modified from the original Apache OpenNLP 1.9.4 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using System;
 using System.IO;
@@ -166,17 +166,17 @@ public abstract class AbstractModelReader
     {
         Context[] @params = new Context[NUM_PREDS];
         int pid = 0;
-        for (int i = 0; i < outcomePatterns.Length; i++)
+        foreach (int[] pattern in outcomePatterns)
         {
             //construct outcome pattern
-            int[] outcomePattern = new int[outcomePatterns[i].Length - 1];
-            Array.Copy(outcomePatterns[i], 1, outcomePattern, 0, outcomePatterns[i].Length - 1);
+            int[] outcomePattern = new int[pattern.Length - 1];
+            Array.Copy(pattern, 1, outcomePattern, 0, pattern.Length - 1);
 
             //populate parameters for each context which uses this outcome pattern.
-            for (int j = 0; j < outcomePatterns[i][0]; j++)
+            for (int j = 0; j < pattern[0]; j++)
             {
-                double[] contextParameters = new double[outcomePatterns[i].Length - 1];
-                for (int k = 1; k < outcomePatterns[i].Length; k++)
+                double[] contextParameters = new double[pattern.Length - 1];
+                for (int k = 1; k < pattern.Length; k++)
                 {
                     contextParameters[k - 1] = ReadDouble();
                 }

@@ -24,7 +24,7 @@
     -->
     <PackageId>NOpenNLP.Tools</PackageId>
     <Authors>NOpenNLP Contributors</Authors>
-    <Description>A C# port of the Apache OpenNLP 1.9.1 inference APIs (opennlp-tools). This product includes software developed at The Apache Software Foundation. Not affiliated with or endorsed by the Apache Software Foundation.</Description>
+    <Description>A C# port of the Apache OpenNLP 1.9.4 inference APIs (opennlp-tools). This product includes software developed at The Apache Software Foundation. Not affiliated with or endorsed by the Apache Software Foundation.</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageTags>nlp;opennlp;tokenizer;pos;lemmatizer;chunker;ner;maxent</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -33,7 +33,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="J2N" Version="2.1.0" />
+    <!--
+      TODO: pin to J2N 2.2.0 final before releasing the 1.9.4 port. The prerelease
+      is required for J2N.Collections.Generic.OrderedDictionary, which backs the
+      insertion-ordered maps OpenNLP 1.9.4 switched to LinkedHashMap (OPENNLP-1321).
+    -->
+    <PackageReference Include="J2N" Version="2.2.0-alpha-0048" />
   </ItemGroup>
 
   <!--

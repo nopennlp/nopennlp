@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// This file has been modified from the original Apache OpenNLP 1.9.1 source:
+// This file has been modified from the original Apache OpenNLP 1.9.4 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using NOpenNLP.Tools.Util;
@@ -34,7 +34,9 @@ public class NGramModel : IEnumerable<StringList>
 {
     protected const string COUNT = "count";
 
-    private readonly JCG.Dictionary<StringList, int> mNGrams = new(); // NOpenNLP: made readonly
+    // NOpenNLP: made readonly. OrderedDictionary matches the LinkedHashMap upstream
+    // adopted in OPENNLP-1321, so iteration order is insertion order.
+    private readonly JCG.OrderedDictionary<StringList, int> mNGrams = new();
 
     /// <summary>
     /// Initializes an empty instance.

@@ -52,9 +52,9 @@ public class PortRegressionTest
 
         ClassicAssert.AreEqual(1, current.Major);
         ClassicAssert.AreEqual(9, current.Minor);
-        ClassicAssert.AreEqual(1, current.Revision);
+        ClassicAssert.AreEqual(4, current.Revision);
         ClassicAssert.IsFalse(current.IsSnapshot);
-        ClassicAssert.AreEqual("1.9.1", current.ToString());
+        ClassicAssert.AreEqual("1.9.4", current.ToString());
     }
 
     /// <summary>

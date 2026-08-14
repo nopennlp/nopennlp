@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// This file has been modified from the original Apache OpenNLP 1.9.1 source:
+// This file has been modified from the original Apache OpenNLP 1.9.4 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using System;
@@ -76,8 +76,7 @@ public class LemmatizerME : ILemmatizer
     public virtual string[] Lemmatize(string[] toks, string[] tags)
     {
         string[] ses = PredictSES(toks, tags);
-        string[] lemmas = DecodeLemmas(toks, ses);
-        return lemmas;
+        return DecodeLemmas(toks, ses);
     }
 
     public virtual IList<IList<string>> Lemmatize(IList<string> toks, IList<string> tags)
@@ -86,9 +85,9 @@ public class LemmatizerME : ILemmatizer
         string[] posTags = [.. tags];
         string[][] allLemmas = PredictLemmas(LEMMA_NUMBER, tokens, posTags);
         IList<IList<string>> predictedLemmas = new List<IList<string>>();
-        for (int i = 0; i < allLemmas.Length; i++)
+        foreach (string[] allLemma in allLemmas)
         {
-            predictedLemmas.Add(allLemmas[i]);
+            predictedLemmas.Add(allLemma);
         }
 
         return predictedLemmas;

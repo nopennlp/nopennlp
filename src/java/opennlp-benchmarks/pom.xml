@@ -41,13 +41,13 @@
       different OpenNLP release would make the two sets of numbers
       incomparable.
     -->
-    <opennlp.version>1.9.1</opennlp.version>
+    <opennlp.version>1.9.4</opennlp.version>
     <jmh.version>1.37</jmh.version>
 
     <!--
-      OpenNLP 1.9.1 is Java 8 bytecode, but -source/-target 8 is deprecated in
+      OpenNLP 1.9.4 is Java 8 bytecode, but -source/-target 8 is deprecated in
       current JDKs and slated for removal. 11 is the oldest release modern
-      javac supports without a deprecation warning, and it runs the 1.9.1
+      javac supports without a deprecation warning, and it runs the 1.9.4
       classes unchanged. Nothing here uses a language feature past 8 anyway.
     -->
     <maven.compiler.release>11</maven.compiler.release>

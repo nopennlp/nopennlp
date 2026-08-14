@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// This file has been modified from the original Apache OpenNLP 1.9.1 source:
+// This file has been modified from the original Apache OpenNLP 1.9.4 source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using NOpenNLP.Tools.Util;
@@ -166,15 +166,15 @@ public class DefaultPOSContextGenerator : IPOSContextGenerator
         {
             // do some basic suffix analysis
             string[] suffs = GetSuffixes(lex);
-            for (int i = 0; i < suffs.Length; i++)
+            foreach (string suff in suffs)
             {
-                e.Add("suf=" + suffs[i]);
+                e.Add("suf=" + suff);
             }
 
             string[] prefs = GetPrefixes(lex);
-            for (int i = 0; i < prefs.Length; i++)
+            foreach (string pref in prefs)
             {
-                e.Add("pre=" + prefs[i]);
+                e.Add("pre=" + pref);
             }
 
             // see if the word has any special characters

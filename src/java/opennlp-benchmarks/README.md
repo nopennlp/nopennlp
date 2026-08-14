@@ -1,6 +1,6 @@
 # JMH benchmarks for Apache OpenNLP
 
-Runs Apache OpenNLP 1.9.1 under [JMH](https://openjdk.org/projects/code-tools/jmh/)
+Runs Apache OpenNLP 1.9.4 under [JMH](https://openjdk.org/projects/code-tools/jmh/)
 on a real JVM, mirroring the BenchmarkDotNet benchmarks in
 [`src/NOpenNLP.Benchmarks`](../../NOpenNLP.Benchmarks/README.md) case for case.
 
@@ -19,7 +19,7 @@ any difference is the port and which part is IKVM.
 ## Prerequisites
 
 - **JDK 11 or later.** The build targets Java 11 bytecode (`maven.compiler.release`),
-  so the jar runs on 11, 17, 21 and 25 LTS alike. OpenNLP 1.9.1 is Java 8
+  so the jar runs on 11, 17, 21 and 25 LTS alike. OpenNLP 1.9.4 is Java 8
   bytecode, but `-source 8` is deprecated in current JDKs and slated for
   removal, and nothing here uses a language feature past 8 anyway.
 - **Maven 3.6 or later.**
