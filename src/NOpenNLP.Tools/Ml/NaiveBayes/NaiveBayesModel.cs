@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// This file has been modified from the original Apache OpenNLP 1.9.1 source:
+// This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using J2N;
@@ -32,7 +32,7 @@ public class NaiveBayesModel : AbstractModel
     protected readonly double[] outcomeTotals; // NOpenNLP: made readonly
     protected long vocabulary;
 
-    internal NaiveBayesModel(Context[] @params, string[] predLabels, Dictionary<string, Context> pmap, string[] outcomeNames) : base(@params, predLabels, pmap, outcomeNames)
+    internal NaiveBayesModel(Context[] @params, string[] predLabels, IDictionary<string, Context> pmap, string[] outcomeNames) : base(@params, predLabels, pmap, outcomeNames)
     {
         outcomeTotals = InitOutcomeTotals(outcomeNames, @params);
         this.evalParams = new NaiveBayesEvalParameters(@params, outcomeNames.Length, outcomeTotals, predLabels.Length);
@@ -49,9 +49,8 @@ public class NaiveBayesModel : AbstractModel
     protected virtual double[] InitOutcomeTotals(string[] outcomeNames, Context[] @params)
     {
         double[] outcomeTotals = new double[outcomeNames.Length];
-        for (int i = 0; i < @params.Length; ++i)
+        foreach (Context context in @params)
         {
-            Context context = @params[i];
             for (int j = 0; j < context.Outcomes.Length; ++j)
             {
                 int outcome = context.Outcomes[j];
@@ -128,9 +127,9 @@ public class NaiveBayesModel : AbstractModel
         }
 
         double total = 0;
-        for (int i = 0; i < outcomeTotals.Length; ++i)
+        foreach (double outcomeTotal in outcomeTotals)
         {
-            total += outcomeTotals[i];
+            total += outcomeTotal;
         }
 
         for (int i = 0; i < outcomeTotals.Length; ++i)

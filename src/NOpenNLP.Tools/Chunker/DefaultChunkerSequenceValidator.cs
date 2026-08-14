@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// This file has been modified from the original Apache OpenNLP 1.9.1 source:
+// This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using System;
 using NOpenNLP.Tools.Util;
@@ -40,10 +40,7 @@ public class DefaultChunkerSequenceValidator : ISequenceValidator<TokenTag>
                     return false;
                 }
 
-                if (!prevOutcome[2..].Equals(outcome[2..]))
-                {
-                    return false;
-                }
+                return prevOutcome[2..].Equals(outcome[2..]);
             }
         }
 

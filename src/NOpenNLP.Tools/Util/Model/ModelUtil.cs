@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// This file has been modified from the original Apache OpenNLP 1.9.1 source:
+// This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using NOpenNLP.Tools.Support;
@@ -70,8 +70,7 @@ public static class ModelUtil // NOpenNLP: made static
         bool result = true;
         if (expectedOutcomes.Length == model.NumOutcomes)
         {
-            var expectedOutcomesSet = new HashSet<string>();
-            expectedOutcomesSet.UnionWith(expectedOutcomes);
+            var expectedOutcomesSet = new HashSet<string>(expectedOutcomes);
             for (int i = 0; i < model.NumOutcomes; i++)
             {
                 if (!expectedOutcomesSet.Contains(model.GetOutcome(i)))

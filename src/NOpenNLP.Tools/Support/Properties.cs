@@ -63,7 +63,7 @@ internal class Properties : Dictionary<object, object>
             // NOpenNLP: Java's Properties.load accepts '=', ':' or whitespace as
             // the key/value separator, so all three are honored here. Splitting on
             // '=' alone would silently skip entries such as
-            // "OpenNLP-Version: 1.9.1" in the embedded opennlp.version resource.
+            // "OpenNLP-Version: 1.9.4" in the embedded opennlp.version resource.
             int separatorIndex = -1;
             for (int i = 0; i < line.Length; i++)
             {

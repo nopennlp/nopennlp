@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// This file has been modified from the original Apache OpenNLP 1.9.1 source:
+// This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using System;
 using System.Text;
@@ -207,7 +207,7 @@ public class Span : IComparable<Span>
     {
         if (End > text.Length)
         {
-            throw new ArgumentException("The span " + ToString() + " is outside the given text which has length " + text.Length + "!");
+            throw new ArgumentException("The span " + this + " is outside the given text which has length " + text.Length + "!");
         }
 
         // NOpenNLP: Subsequence takes (startIndex, length) here, whereas Java's

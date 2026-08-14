@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// This file has been modified from the original Apache OpenNLP 1.9.1 source:
+// This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using NOpenNLP.Tools.Ml.Model;
@@ -336,7 +336,7 @@ public class POSTaggerFactory : BaseToolFactory
                 }
             }
 
-            throw new InvalidFormatException("Tag dictionary contains tags " + "which are unknown by the model! The unknown tags are: " + unknownTag.ToString());
+            throw new InvalidFormatException("Tag dictionary contains tags " + "which are unknown by the model! The unknown tags are: " + unknownTag);
         }
     }
 

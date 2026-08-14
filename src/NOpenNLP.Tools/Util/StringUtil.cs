@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// This file has been modified from the original Apache OpenNLP 1.9.1 source:
+// This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using System.Globalization;
@@ -66,20 +66,27 @@ public class StringUtil
 
     /// <summary>
     /// Converts to lower case independent of the current locale via
-    /// <c>char.ToLowerInvariant(char)</c> which uses mapping information
+    /// <c>J2N.Character.ToLowerInvariant(int)</c> which uses mapping information
     /// from the UnicodeData file.
     /// </summary>
     /// <param name="string"></param>
     /// <returns>lower cased String</returns>
     public static string ToLowerCase(string @string)
     {
+        // NOpenNLP: upstream maps over the code point stream; enumerating code
+        // points by hand is the netstandard2.0-compatible equivalent. Lowercasing
+        // per char would mangle surrogate pairs, which is the defect OPENNLP-1268
+        // fixed. A lowercased code point never needs more UTF-16 units than the
+        // original, so the input length is a safe buffer size.
         char[] lowerCaseChars = new char[@string.Length];
-        for (int i = 0; i < @string.Length; i++)
+        int charIndex = 0;
+        for (int i = 0; i < @string.Length; i += Character.CharCount(Character.CodePointAt(@string, i)))
         {
-            lowerCaseChars[i] = char.ToLowerInvariant(@string[i]);
+            int lowerCodePoint = Character.ToLowerInvariant(Character.CodePointAt(@string, i));
+            charIndex += Character.ToChars(lowerCodePoint, lowerCaseChars, charIndex);
         }
 
-        return new string (lowerCaseChars);
+        return new string (lowerCaseChars, 0, charIndex);
     }
 
     /// <summary>

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// This file has been modified from the original Apache OpenNLP 1.9.1 source:
+// This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using System.Collections.Generic;
@@ -30,9 +30,9 @@ public class BrownTokenFeatureGenerator(BrownCluster dict) : IAdaptiveFeatureGen
     public virtual void CreateFeatures(IList<string> features, string[] tokens, int index, string[] previousOutcomes)
     {
         IList<string> wordClasses = BrownTokenClasses.GetWordClasses(tokens[index], dict);
-        for (int i = 0; i < wordClasses.Count; i++)
+        foreach (string wordClass in wordClasses)
         {
-            features.Add("browncluster" + "=" + wordClasses[i]);
+            features.Add("browncluster" + "=" + wordClass);
         }
     }
 

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// This file has been modified from the original Apache OpenNLP 1.9.1 source:
+// This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using NOpenNLP.Tools.Util;
@@ -87,11 +87,9 @@ public class BioCodec : ISequenceCodec<string>
     public virtual string[] Encode(Span[] names, int length)
     {
         string[] outcomes = new string[length];
-        for (int i = 0; i < outcomes.Length; i++)
-        {
-            outcomes[i] = OTHER;
-        }
-
+        // NOpenNLP: upstream uses Arrays.fill; Array.Fill is not in netstandard2.0,
+        // so the span overload stands in for it.
+        outcomes.AsSpan().Fill(OTHER);
         foreach (var name in names)
         {
             if (name.Type == null)
@@ -132,9 +130,8 @@ public class BioCodec : ISequenceCodec<string>
         // "cont" have a pair that ends with "start".
         IList<string> start = new List<string>();
         IList<string> cont = new List<string>();
-        for (int i = 0; i < outcomes.Length; i++)
+        foreach (string outcome in outcomes)
         {
-            string outcome = outcomes[i];
             if (outcome.EndsWith(START, StringComparison.Ordinal))
             {
                 start.Add(outcome[..^START.Length]);

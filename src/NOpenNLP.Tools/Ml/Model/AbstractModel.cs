@@ -15,12 +15,13 @@
  * limitations under the License.
  */
 
-// This file has been modified from the original Apache OpenNLP 1.9.1 source:
+// This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using NOpenNLP.Tools.Support;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Ml.Model;
 
@@ -29,7 +30,13 @@ public abstract class AbstractModel : IMaxentModel
     /// <summary>
     /// Mapping between predicates/contexts and an integer representing them.
     /// </summary>
-    protected Dictionary<string, Context> pmap;
+    /// <remarks>
+    /// Backed by <see cref="JCG.OrderedDictionary{TKey, TValue}"/> so iteration order
+    /// is insertion order, matching the <c>LinkedHashMap</c> upstream adopted in
+    /// OPENNLP-1321. Declared as <see cref="IDictionary{TKey, TValue}"/> to keep the
+    /// J2N type out of the exposed signature.
+    /// </remarks>
+    protected IDictionary<string, Context> pmap;
 
     /// <summary>
     /// The names of the outcomes.
@@ -59,7 +66,7 @@ public abstract class AbstractModel : IMaxentModel
     /// </summary>
     protected ModelType modelType;
 
-    protected AbstractModel(Context[] @params, string[] predLabels, Dictionary<string, Context> pmap, string[] outcomeNames)
+    protected AbstractModel(Context[] @params, string[] predLabels, IDictionary<string, Context> pmap, string[] outcomeNames)
     {
         this.pmap = pmap;
         this.outcomeNames = outcomeNames;
@@ -74,7 +81,7 @@ public abstract class AbstractModel : IMaxentModel
 
     private void Init(string[] predLabels, Context[] @params, string[] outcomeNames)
     {
-        this.pmap = new Dictionary<string, Context>(predLabels.Length);
+        this.pmap = new JCG.OrderedDictionary<string, Context>(predLabels.Length);
         for (int i = 0; i < predLabels.Length; i++)
         {
             pmap.Put(predLabels[i], @params[i]);

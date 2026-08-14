@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// This file has been modified from the original Apache OpenNLP 1.9.1 source:
+// This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using NOpenNLP.Tools.Util;
 using NUnit.Framework;
@@ -114,7 +114,7 @@ public class DefaultPOSContextGeneratorTest
 
     // NOpenNLP: upstream's multithreading() test demonstrates a concurrency defect
     // caused by the mutable wordsKey field, and was committed together with the fix
-    // that removes it. OpenNLP 1.9.1, the version this port targets, still has that
-    // field, so the port reproduces it faithfully and this test would fail by
-    // design. Port it when the upstream fix is picked up.
+    // that removes it. The version this port targets still has that field, so the
+    // port reproduces it faithfully and this test would fail by design. Port it
+    // when the upstream fix is picked up.
 }

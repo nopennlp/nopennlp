@@ -15,9 +15,12 @@
  * limitations under the License.
  */
 
-// This file has been modified from the original Apache OpenNLP 1.9.1 source:
+// This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using System;
+using System.Collections.Generic;
+using System.Text;
+using J2N;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
 
@@ -68,5 +71,39 @@ public class StringUtilTest
         // C# has no attribute equivalent, so the throw is asserted explicitly.
         // NullReferenceException is the .NET counterpart of NullPointerException.
         Assert.Throws<NullReferenceException>((Action)(() => StringUtil.IsEmpty(null)));
+    }
+
+    [Test]
+    public void TestLowercaseBeyondBMP()
+    {
+        int[] codePoints = [65, 66578, 67]; // A, Deseret capital BEE, C
+        int[] expectedCodePoints = [97, 66618, 99]; // a, Deseret lowercase b, c
+        string input = CodePointsToString(codePoints);
+        string lc = StringUtil.ToLowerCase(input);
+        CollectionAssert.AreEqual(expectedCodePoints, StringToCodePoints(lc));
+    }
+
+    // NOpenNLP: stands in for Java's new String(int[], int, int) and
+    // String.codePoints(), which have no direct .NET counterpart.
+    private static string CodePointsToString(int[] codePoints)
+    {
+        var buffer = new StringBuilder(codePoints.Length);
+        foreach (int codePoint in codePoints)
+        {
+            buffer.Append(Character.ToChars(codePoint));
+        }
+
+        return buffer.ToString();
+    }
+
+    private static int[] StringToCodePoints(string value)
+    {
+        var codePoints = new List<int>();
+        for (int i = 0; i < value.Length; i += Character.CharCount(Character.CodePointAt(value, i)))
+        {
+            codePoints.Add(Character.CodePointAt(value, i));
+        }
+
+        return codePoints.ToArray();
     }
 }

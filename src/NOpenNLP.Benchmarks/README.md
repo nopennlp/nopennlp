@@ -1,6 +1,6 @@
 # NOpenNLP benchmarks
 
-Measures the ported code against the Apache OpenNLP 1.9.1 it was ported from,
+Measures the ported code against the Apache OpenNLP 1.9.4 it was ported from,
 one operation at a time.
 
 There are two projects, and they answer different questions:

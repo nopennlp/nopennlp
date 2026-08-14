@@ -2,7 +2,7 @@
 
 [![Build and Test](https://github.com/nopennlp/nopennlp/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/nopennlp/nopennlp/actions/workflows/build-and-test.yml)
 
-A C# port of [Apache OpenNLP](https://opennlp.apache.org/) 1.9.1 — a machine
+A C# port of [Apache OpenNLP](https://opennlp.apache.org/) 1.9.4 — a machine
 learning toolkit for natural language processing.
 
 ## Status
@@ -60,7 +60,7 @@ dotnet test NOpenNLP.slnx -p:TestFrameworks=true
 
 ## Attribution
 
-This product contains a modified C# port of Apache OpenNLP 1.9.1, specifically
+This product contains a modified C# port of Apache OpenNLP 1.9.4, specifically
 the `opennlp-tools` module. The original Java source is:
 
 > Apache OpenNLP

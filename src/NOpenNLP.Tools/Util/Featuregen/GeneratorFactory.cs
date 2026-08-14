@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// This file has been modified from the original Apache OpenNLP 1.9.1 source:
+// This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using NOpenNLP.Tools.Support;
@@ -825,11 +825,9 @@ public static class GeneratorFactory // NOpenNLP: made static
                 // "modelName != null", which is a non-empty check here.
                 if (!string.IsNullOrEmpty(modelName))
                 {
-                    switch (xmlElement.Name)
+                    if ("tokenpos".Equals(xmlElement.Name))
                     {
-                        case "tokenpos":
-                            mapping.Put(modelName, new POSModelSerializer());
-                            break;
+                        mapping.Put(modelName, new POSModelSerializer());
                     }
                 }
             }

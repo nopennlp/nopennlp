@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// This file has been modified from the original Apache OpenNLP 1.9.1 source:
+// This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using System;
@@ -188,7 +188,7 @@ public class Version
         }
 
         string? versionString = manifest.GetProperty("OpenNLP-Version", DEV_VERSION_STRING);
-        if (versionString.Equals("${pom.version}"))
+        if (versionString.Equals("${project.version}"))
             versionString = DEV_VERSION_STRING;
         return Version.Parse(versionString);
     }
