@@ -37,7 +37,7 @@ public class BilouCodec : ISequenceCodec<string>
     {
         int start = -1;
         int end = -1;
-        IList<Span> spans = new List<Span>(c.Count);
+        IList<Span> spans = new JCG.List<Span>(c.Count);
         for (int li = 0; li < c.Count; li++)
         {
             string chunkTag = c[li];
