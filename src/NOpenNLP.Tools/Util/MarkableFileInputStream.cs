@@ -31,16 +31,11 @@ namespace NOpenNLP.Tools.Util;
 // seekable, so this type only tracks the marked position and seeks back to it.
 // Mark() and ResetToMark() keep the upstream names rather than mapping onto
 // Stream.Position, so ported callers read the same.
-internal class MarkableFileInputStream : Stream
+internal class MarkableFileInputStream(FileInfo file) : Stream
 {
-    private readonly FileStream @in;
+    private readonly FileStream @in = new(file.FullName, FileMode.Open, FileAccess.Read);
 
     private long markedPosition = -1;
-
-    internal MarkableFileInputStream(FileInfo file)
-    {
-        @in = new FileStream(file.FullName, FileMode.Open, FileAccess.Read);
-    }
 
     public void Mark()
     {

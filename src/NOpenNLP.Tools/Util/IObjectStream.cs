@@ -43,8 +43,7 @@ namespace NOpenNLP.Tools.Util;
 /// </list>
 /// </summary>
 // NOpenNLP: upstream extends AutoCloseable, whose close() maps onto IDisposable
-// so C# `using` works. Close() is kept as the name callers and subclasses use,
-// mirroring upstream, with Dispose() supplied by implementors to delegate to it.
+// so C# `using` works.
 public interface IObjectStream<out T> : IDisposable
 {
     /// <summary>
@@ -70,11 +69,5 @@ public interface IObjectStream<out T> : IDisposable
     // defaults for implementors that do not need to override them.
     void Reset();
 
-    /// <summary>
-    /// Closes the <see cref="IObjectStream{T}"/> and releases all allocated
-    /// resources. After close was called its not allowed to call
-    /// read or reset.
-    /// </summary>
-    /// <exception cref="IOException">if there is an error during closing the stream</exception>
-    void Close();
+    // NOpenNLP: omitted Close in favor of IDisposable.Dispose
 }

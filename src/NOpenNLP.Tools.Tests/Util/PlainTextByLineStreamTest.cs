@@ -43,7 +43,7 @@ public class PlainTextByLineStreamTest
     [Test]
     public void TestLineSegmentation()
     {
-        IObjectStream<string?> stream =
+        using IObjectStream<string?> stream =
                 new PlainTextByLineStream(new MockInputStreamFactory(TestString), Encoding.UTF8);
 
         ClassicAssert.AreEqual("line1", stream.Read());
@@ -51,14 +51,12 @@ public class PlainTextByLineStreamTest
         ClassicAssert.AreEqual("line3", stream.Read());
         ClassicAssert.AreEqual("line4", stream.Read());
         ClassicAssert.IsNull(stream.Read());
-
-        stream.Close();
     }
 
     [Test]
     public void TestReset()
     {
-        IObjectStream<string?> stream =
+        using IObjectStream<string?> stream =
                 new PlainTextByLineStream(new MockInputStreamFactory(TestString), Encoding.UTF8);
 
         ClassicAssert.AreEqual("line1", stream.Read());
@@ -71,7 +69,5 @@ public class PlainTextByLineStreamTest
         ClassicAssert.AreEqual("line3", stream.Read());
         ClassicAssert.AreEqual("line4", stream.Read());
         ClassicAssert.IsNull(stream.Read());
-
-        stream.Close();
     }
 }

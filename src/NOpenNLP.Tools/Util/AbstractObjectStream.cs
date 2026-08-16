@@ -33,5 +33,5 @@ public class AbstractObjectStream<T> : ObjectStreamBase<T>
 
     public override void Reset() => stream.Reset();
 
-    public override void Close() => stream.Close();
+    protected override void Dispose(bool disposing) => stream.Dispose();
 }

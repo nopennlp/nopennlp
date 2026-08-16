@@ -30,16 +30,11 @@ namespace NOpenNLP.Tools.Util;
 /// </summary>
 /// <typeparam name="S">the type of the source/input stream</typeparam>
 /// <typeparam name="T">the type of this stream</typeparam>
-public abstract class FilterObjectStream<S, T> : ObjectStreamBase<T>
+public abstract class FilterObjectStream<S, T>(IObjectStream<S> samples) : ObjectStreamBase<T>
 {
-    protected readonly IObjectStream<S> samples;
-
-    protected FilterObjectStream(IObjectStream<S> samples)
-    {
-        this.samples = samples ?? throw new ArgumentNullException(nameof(samples), "samples must not be null!");
-    }
+    protected readonly IObjectStream<S> samples = samples ?? throw new ArgumentNullException(nameof(samples), "samples must not be null!");
 
     public override void Reset() => samples.Reset();
 
-    public override void Close() => samples.Close();
+    protected override void Dispose(bool disposing) => samples.Dispose();
 }

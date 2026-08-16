@@ -58,11 +58,8 @@ public class PlainTextByLineStream : ObjectStreamBase<string?>
         @in = new StreamReader(inputStreamFactory.CreateInputStream(), encoding);
     }
 
-    public override void Close()
+    protected override void Dispose(bool disposing)
     {
-        if (@in != null)
-        {
-            @in.Dispose();
-        }
+        @in?.Dispose();
     }
 }

@@ -30,8 +30,8 @@ namespace NOpenNLP.Tools.Util;
 // as default methods, which C# cannot express on netstandard2.0. This base class
 // carries those defaults -- reset() throws UnsupportedOperationException, close()
 // does nothing -- so ported implementations that do not override them read the
-// same as upstream. It also maps Close() onto IDisposable for `using` support.
-// It adds no state and no behavior beyond those defaults.
+// same as upstream. It also maps Close() onto the IDisposable pattern for `using`
+// support. It adds no state and no behavior beyond those defaults.
 public abstract class ObjectStreamBase<T> : IObjectStream<T>
 {
     /// <inheritdoc/>
@@ -41,15 +41,18 @@ public abstract class ObjectStreamBase<T> : IObjectStream<T>
     public virtual void Reset() =>
         throw new NotSupportedException("reset is not supported on this stream");
 
-    /// <inheritdoc/>
-    public virtual void Close()
+    /// <summary>
+    /// Releases the resources from this object stream.
+    /// </summary>
+    /// <param name="disposing"></param>
+    protected virtual void Dispose(bool disposing)
     {
     }
 
     /// <inheritdoc/>
     public void Dispose()
     {
-        Close();
+        Dispose(true);
         GC.SuppressFinalize(this);
     }
 }

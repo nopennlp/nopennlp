@@ -49,7 +49,7 @@ public class ObjectStreamUtils
     public static IObjectStream<T?> ConcatenateObjectStream<T>(params IObjectStream<T?>[] streams)
         where T : class
     {
-        foreach (IObjectStream<T?> stream in streams)
+        foreach (var stream in streams)
         {
             if (stream == null)
             {
@@ -116,7 +116,7 @@ public class ObjectStreamUtils
 
         public override void Reset()
         {
-            foreach (IObjectStream<T?> stream in streams)
+            foreach (var stream in streams)
             {
                 stream.Reset();
             }
@@ -126,11 +126,11 @@ public class ObjectStreamUtils
             currentStream = iterator.MoveNext() ? iterator.Current : null;
         }
 
-        public override void Close()
+        protected override void Dispose(bool disposing)
         {
-            foreach (IObjectStream<T?> stream in streams)
+            foreach (var stream in streams)
             {
-                stream.Close();
+                stream.Dispose();
             }
 
             iterator.Dispose();

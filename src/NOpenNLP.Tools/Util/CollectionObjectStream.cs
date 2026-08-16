@@ -22,18 +22,10 @@ using System.Collections.Generic;
 
 namespace NOpenNLP.Tools.Util;
 
-public class CollectionObjectStream<E> : ObjectStreamBase<E?>
+public class CollectionObjectStream<E>(ICollection<E> collection) : ObjectStreamBase<E?>
     where E : class
 {
-    private readonly ICollection<E> collection; // NOpenNLP: made readonly
-
-    private IEnumerator<E> iterator;
-
-    public CollectionObjectStream(ICollection<E> collection)
-    {
-        this.collection = collection;
-        iterator = collection.GetEnumerator();
-    }
+    private IEnumerator<E> iterator = collection.GetEnumerator();
 
     // NOpenNLP: Java's Iterator.hasNext() peeks without advancing, while
     // IEnumerator.MoveNext() advances and reports in one call. Advancing first
@@ -46,5 +38,5 @@ public class CollectionObjectStream<E> : ObjectStreamBase<E?>
         iterator = collection.GetEnumerator();
     }
 
-    public override void Close() => iterator.Dispose();
+    protected override void Dispose(bool disposing) => iterator.Dispose();
 }

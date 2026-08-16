@@ -18,6 +18,7 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -30,17 +31,9 @@ namespace NOpenNLP.Tools.Util;
 // and returns. IEnumerator splits that into MoveNext() and Current, so the index
 // starts one past the first element and MoveNext() steps onto it, which yields
 // the same sequence.
-public class ReverseListIterator<T> : IEnumerator<T>
+public class ReverseListIterator<T>(IList<T> list) : IEnumerator<T>
 {
-    private readonly IList<T> list; // NOpenNLP: made readonly
-
-    private int index;
-
-    public ReverseListIterator(IList<T> list)
-    {
-        this.list = list;
-        index = list.Count;
-    }
+    private int index = list.Count;
 
     public T Current => list[index];
 
@@ -54,5 +47,6 @@ public class ReverseListIterator<T> : IEnumerator<T>
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
     }
 }

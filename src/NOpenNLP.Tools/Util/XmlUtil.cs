@@ -39,17 +39,15 @@ public class XmlUtil
     // are the .NET counterparts.
     public static XmlDocument CreateDocument(Stream input)
     {
-        XmlReaderSettings settings = CreateSecureReaderSettings();
+        var settings = CreateSecureReaderSettings();
 
         var document = new XmlDocument
         {
             XmlResolver = null,
         };
 
-        using (XmlReader reader = XmlReader.Create(input, settings))
-        {
-            document.Load(reader);
-        }
+        using var reader = XmlReader.Create(input, settings);
+        document.Load(reader);
 
         return document;
     }
