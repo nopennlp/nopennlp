@@ -17,6 +17,8 @@
 
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
+
+using System.Diagnostics.CodeAnalysis;
 using NOpenNLP.Tools.Util;
 
 namespace NOpenNLP.Tools.Namefind;
@@ -25,9 +27,10 @@ namespace NOpenNLP.Tools.Namefind;
 /// Name finding interface which processes an entire document allowing the name finder to use context
 /// from the entire document.
 /// <para/>
-/// <strong>EXPERIMENTAL</strong>.
+/// EXPERIMENTAL.
 /// This interface has been added as part of a work in progress and might change without notice.
 /// </summary>
+[Experimental("NONLPEXP0001")]
 public interface IDocumentNameFinder
 {
     /// <summary>

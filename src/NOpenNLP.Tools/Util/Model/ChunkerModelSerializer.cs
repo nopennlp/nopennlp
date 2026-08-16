@@ -26,7 +26,7 @@ public class ChunkerModelSerializer : IArtifactSerializer<ChunkerModel>
 {
     public virtual ChunkerModel Create(Stream @in)
     {
-        ChunkerModel model = new ChunkerModel(new UncloseableInputStream(@in));
+        var model = new ChunkerModel(new UncloseableInputStream(@in));
 
         Version version = model.Version;
         if (version is { Major: 1, Minor: 5 })

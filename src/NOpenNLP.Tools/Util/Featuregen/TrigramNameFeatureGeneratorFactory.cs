@@ -25,15 +25,8 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 
 public class TrigramNameFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeatureGeneratorFactory, GeneratorFactory.IXmlFeatureGeneratorFactory
 {
-    public TrigramNameFeatureGeneratorFactory()
-        : base()
-    {
-    }
-
     public virtual IAdaptiveFeatureGenerator Create(XmlElement generatorElement, FeatureGeneratorResourceProvider resourceManager)
-    {
-        return new TrigramNameFeatureGenerator();
-    }
+        => new TrigramNameFeatureGenerator();
 
     internal static void Register(IDictionary<string, GeneratorFactory.IXmlFeatureGeneratorFactory> factoryMap)
     {
@@ -41,7 +34,5 @@ public class TrigramNameFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFe
     }
 
     public override IAdaptiveFeatureGenerator Create()
-    {
-        return new TrigramNameFeatureGenerator();
-    }
+        => new TrigramNameFeatureGenerator();
 }

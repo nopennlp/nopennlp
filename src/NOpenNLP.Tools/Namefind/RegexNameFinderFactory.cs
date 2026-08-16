@@ -31,7 +31,7 @@ namespace NOpenNLP.Tools.Namefind;
 /// </summary>
 public class RegexNameFinderFactory
 {
-    private static readonly object syncLock = new object();
+    private static readonly object syncLock = new();
 
     /// <summary>
     /// Allows for use of selected defaults as well as regexes from external
@@ -43,7 +43,8 @@ public class RegexNameFinderFactory
     /// <param name="defaults">The OpenNLP default regexes.</param>
     /// <returns>A <see cref="RegexNameFinder"/>.</returns>
     public static RegexNameFinder GetDefaultRegexNameFinders(
-        IDictionary<string, Regex[]> config, params DefaultRegexNameFinder[] defaults)
+        IDictionary<string, Regex[]> config,
+        params DefaultRegexNameFinder[]? defaults)
     {
         if (config == null)
         {
@@ -52,13 +53,13 @@ public class RegexNameFinderFactory
 
         lock (syncLock)
         {
-            IDictionary<string, Regex[]> defaultsToMap = new JCG.Dictionary<string, Regex[]>();
+            JCG.Dictionary<string, Regex[]> defaultsToMap = new();
             if (defaults != null)
             {
                 defaultsToMap = DefaultsToMap(defaults);
             }
 
-            foreach (KeyValuePair<string, Regex[]> entry in config)
+            foreach (var entry in config)
             {
                 defaultsToMap.Put(entry.Key, entry.Value);
             }
@@ -85,14 +86,14 @@ public class RegexNameFinderFactory
         }
     }
 
-    private static IDictionary<string, Regex[]> DefaultsToMap(params DefaultRegexNameFinder[] defaults)
+    private static JCG.Dictionary<string, Regex[]> DefaultsToMap(params DefaultRegexNameFinder[] defaults)
     {
         lock (syncLock)
         {
-            IDictionary<string, Regex[]> regexMap = new JCG.Dictionary<string, Regex[]>();
-            foreach (DefaultRegexNameFinder def in defaults)
+            JCG.Dictionary<string, Regex[]> regexMap = new();
+            foreach (var def in defaults)
             {
-                foreach (KeyValuePair<string, Regex[]> entry in def.RegexMap)
+                foreach (var entry in def.RegexMap)
                 {
                     regexMap.Put(entry.Key, entry.Value);
                 }

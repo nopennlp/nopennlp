@@ -33,7 +33,7 @@ public class NewlineSentenceDetector : ISentenceDetector
 
     public virtual Span[] SentPosDetect(string s)
     {
-        JCG.List<Span> sentences = new JCG.List<Span>();
+        JCG.List<Span> sentences = [];
 
         int start = 0;
 
@@ -41,11 +41,11 @@ public class NewlineSentenceDetector : ISentenceDetector
         {
             char c = s[i];
 
-            if (c == '\n' || c == '\r')
+            if (c is '\n' or '\r')
             {
                 if (i - start > 0)
                 {
-                    Span span = new Span(start, i).Trim(s.AsCharSequence());
+                    var span = new Span(start, i).Trim(s.AsCharSequence());
                     if (span.Length > 0)
                     {
                         sentences.Add(span);
@@ -58,13 +58,13 @@ public class NewlineSentenceDetector : ISentenceDetector
 
         if (s.Length - start > 0)
         {
-            Span span = new Span(start, s.Length).Trim(s.AsCharSequence());
+            var span = new Span(start, s.Length).Trim(s.AsCharSequence());
             if (span.Length > 0)
             {
                 sentences.Add(span);
             }
         }
 
-        return sentences.ToArray();
+        return [.. sentences];
     }
 }

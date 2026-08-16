@@ -69,9 +69,9 @@ public sealed class RegexNameFinder : ITokenNameFinder
 
     public Span[] Find(string[] tokens)
     {
-        JCG.Dictionary<int, int> sentencePosTokenMap = new JCG.Dictionary<int, int>();
+        JCG.Dictionary<int, int> sentencePosTokenMap = new();
 
-        StringBuilder sentenceString = new StringBuilder(tokens.Length * 10);
+        StringBuilder sentenceString = new(tokens.Length * 10);
 
         for (int i = 0; i < tokens.Length; i++)
         {
@@ -89,22 +89,22 @@ public sealed class RegexNameFinder : ITokenNameFinder
             }
         }
 
-        ICollection<Span> annotations = new JCG.List<Span>();
+        JCG.List<Span> annotations = [];
 
         string text = sentenceString.ToString();
 
         if (regexMap != null)
         {
-            foreach (KeyValuePair<string, Regex[]> entry in regexMap)
+            foreach (var entry in regexMap)
             {
-                foreach (Regex mPattern in entry.Value)
+                foreach (var mPattern in entry.Value)
                 {
                     foreach (Match match in mPattern.Matches(text))
                     {
                         if (sentencePosTokenMap.TryGetValue(match.Index, out int tokenStartIndex)
                             && sentencePosTokenMap.TryGetValue(match.Index + match.Length, out int tokenEndIndex))
                         {
-                            Span annotation = new Span(tokenStartIndex, tokenEndIndex, entry.Key);
+                            var annotation = new Span(tokenStartIndex, tokenEndIndex, entry.Key);
                             annotations.Add(annotation);
                         }
                     }
@@ -113,21 +113,21 @@ public sealed class RegexNameFinder : ITokenNameFinder
         }
         else
         {
-            foreach (Regex mPattern in Patterns!)
+            foreach (var mPattern in Patterns!)
             {
                 foreach (Match match in mPattern.Matches(text))
                 {
                     if (sentencePosTokenMap.TryGetValue(match.Index, out int tokenStartIndex)
                         && sentencePosTokenMap.TryGetValue(match.Index + match.Length, out int tokenEndIndex))
                     {
-                        Span annotation = new Span(tokenStartIndex, tokenEndIndex, Type);
+                        var annotation = new Span(tokenStartIndex, tokenEndIndex, Type);
                         annotations.Add(annotation);
                     }
                 }
             }
         }
 
-        Span[] result = new Span[annotations.Count];
+        var result = new Span[annotations.Count];
         annotations.CopyTo(result, 0);
         return result;
     }
@@ -142,17 +142,17 @@ public sealed class RegexNameFinder : ITokenNameFinder
 
     private Span[] GetAnnotations(string text)
     {
-        ICollection<Span> annotations = new JCG.List<Span>();
+        JCG.List<Span> annotations = [];
 
         if (regexMap != null)
         {
-            foreach (KeyValuePair<string, Regex[]> entry in regexMap)
+            foreach (var entry in regexMap)
             {
-                foreach (Regex mPattern in entry.Value)
+                foreach (var mPattern in entry.Value)
                 {
                     foreach (Match match in mPattern.Matches(text))
                     {
-                        Span annotation = new Span(match.Index, match.Index + match.Length, entry.Key);
+                        var annotation = new Span(match.Index, match.Index + match.Length, entry.Key);
                         annotations.Add(annotation);
                     }
                 }
@@ -160,17 +160,17 @@ public sealed class RegexNameFinder : ITokenNameFinder
         }
         else
         {
-            foreach (Regex mPattern in Patterns!)
+            foreach (var mPattern in Patterns!)
             {
                 foreach (Match match in mPattern.Matches(text))
                 {
-                    Span annotation = new Span(match.Index, match.Index + match.Length, Type);
+                    var annotation = new Span(match.Index, match.Index + match.Length, Type);
                     annotations.Add(annotation);
                 }
             }
         }
 
-        Span[] result = new Span[annotations.Count];
+        var result = new Span[annotations.Count];
         annotations.CopyTo(result, 0);
         return result;
     }

@@ -31,19 +31,22 @@ namespace NOpenNLP.Tools.Dictionary;
 public class Index
 {
     // NOpenNLP: made readonly
-    private readonly JCG.HashSet<string> tokens = new JCG.HashSet<string>();
+    private readonly JCG.HashSet<string> tokens = [];
 
     /// <summary>
     /// Initializes the current instance with the given
-    /// <see cref="StringList"/> <see cref="IEnumerator{T}"/>.
+    /// <see cref="StringList"/> <see cref="IEnumerable{T}"/>.
     /// </summary>
     /// <param name="tokenLists">The token lists to index.</param>
-    public Index(IEnumerator<StringList> tokenLists)
+    /// <remarks>
+    /// NOpenNLP: this parameter was changed from <c>Iterator&gt;StringList&lt;</c> in Java.
+    /// While <see cref="IEnumerator{T}"/> would be the closer match, <see cref="IEnumerable{T}"/>
+    /// is more idiomatic C#/.NET to accept as a parameter.
+    /// </remarks>
+    public Index(IEnumerable<StringList> tokenLists)
     {
-        while (tokenLists.MoveNext())
+        foreach (var tokens in tokenLists)
         {
-            StringList tokens = tokenLists.Current;
-
             for (int i = 0; i < tokens.Count; i++)
             {
                 this.tokens.Add(tokens.GetToken(i));
