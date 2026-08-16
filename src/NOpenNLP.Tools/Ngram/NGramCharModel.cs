@@ -31,7 +31,8 @@ namespace NOpenNLP.Tools.Ngram;
 /// <seealso cref="NGramModel"/>
 public class NGramCharModel : IEnumerable<string>
 {
-    protected const string COUNT = "count";
+    // NOpenNLP: unused const; commented out
+    // protected const string COUNT = "count";
 
     // NOpenNLP: made readonly
     private readonly JCG.Dictionary<string, int> mNGrams = new();

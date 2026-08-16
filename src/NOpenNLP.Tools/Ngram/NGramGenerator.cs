@@ -53,7 +53,7 @@ public static class NGramGenerator
             }
 
             string gram = sb.ToString();
-            gram = gram.Substring(0, gram.LastIndexOf(separator, System.StringComparison.Ordinal));
+            gram = gram[..gram.LastIndexOf(separator, System.StringComparison.Ordinal)];
             outGrams.Add(gram);
         }
 
@@ -82,7 +82,7 @@ public static class NGramGenerator
             }
 
             string gram = sb.ToString();
-            gram = gram.Substring(0, gram.LastIndexOf(separator, System.StringComparison.Ordinal));
+            gram = gram[..gram.LastIndexOf(separator, System.StringComparison.Ordinal)];
             outGrams.Add(gram);
         }
 

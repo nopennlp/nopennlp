@@ -189,7 +189,7 @@ public static class NGramUtils
             tokens[i] = ngram.GetToken(i);
         }
 
-        tokens[tokens.Length - 1] = word;
+        tokens[^1] = word;
         return new StringList(tokens);
     }
 
