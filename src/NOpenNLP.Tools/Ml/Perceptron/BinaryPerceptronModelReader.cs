@@ -19,7 +19,6 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using System.IO;
-using J2N.IO;
 using NOpenNLP.Tools.Ml.Model;
 
 namespace NOpenNLP.Tools.Ml.Perceptron;
@@ -27,11 +26,11 @@ namespace NOpenNLP.Tools.Ml.Perceptron;
 public class BinaryPerceptronModelReader : PerceptronModelReader
 {
     /// <summary>
-    /// Constructor which directly instantiates the DataInputStream containing
+    /// Constructor which directly instantiates the Stream containing
     /// the model contents.
     /// </summary>
-    /// <param name="dis">The DataInputStream containing the model information.</param>
-    public BinaryPerceptronModelReader(DataInputStream dis)
+    /// <param name="dis">The Stream containing the model information.</param>
+    public BinaryPerceptronModelReader(Stream dis)
         : base(new BinaryFileDataReader(dis))
     {
     }

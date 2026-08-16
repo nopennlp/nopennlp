@@ -21,48 +21,34 @@
 using System;
 using System.IO;
 using System.IO.Compression;
-using J2N.IO;
+using NOpenNLP.Tools.Support;
 
 namespace NOpenNLP.Tools.Ml.Model;
 
 public class BinaryFileDataReader : IDataReader
 {
-    private readonly DataInputStream input; // NOpenNLP: made readonly
+    private readonly Stream input; // NOpenNLP: made readonly
 
     public BinaryFileDataReader(FileInfo f)
     {
         if (f.Name.EndsWith(".gz", StringComparison.Ordinal))
         {
-            input = new DataInputStream(new GZipStream(f.OpenRead(), CompressionMode.Decompress, leaveOpen: true));
+            input = new GZipStream(f.OpenRead(), CompressionMode.Decompress, leaveOpen: true);
         }
         else
         {
-            input = new DataInputStream(f.OpenRead());
+            input = f.OpenRead();
         }
     }
 
     public BinaryFileDataReader(Stream @in)
     {
-        input = new DataInputStream(@in);
-    }
-
-    public BinaryFileDataReader(DataInputStream @in)
-    {
         input = @in;
     }
 
-    public virtual double ReadDouble()
-    {
-        return input.ReadDouble();
-    }
+    public virtual double ReadDouble() => input.ReadJavaDouble();
 
-    public virtual int ReadInt32()
-    {
-        return input.ReadInt32();
-    }
+    public virtual int ReadInt32() => input.ReadJavaInt32();
 
-    public virtual string ReadUTF()
-    {
-        return input.ReadUTF();
-    }
+    public virtual string ReadUTF() => input.ReadJavaUTF();
 }

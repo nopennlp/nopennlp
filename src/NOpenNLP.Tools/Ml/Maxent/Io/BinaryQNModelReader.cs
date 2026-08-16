@@ -18,7 +18,7 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
-using J2N.IO;
+using System.IO;
 using NOpenNLP.Tools.Ml.Model;
 
 namespace NOpenNLP.Tools.Ml.Maxent.Io;
@@ -29,11 +29,11 @@ namespace NOpenNLP.Tools.Ml.Maxent.Io;
 public class BinaryQNModelReader : QNModelReader
 {
     /// <summary>
-    /// Constructor which directly instantiates the DataInputStream containing the
+    /// Constructor which directly instantiates the Stream containing the
     /// model contents.
     /// </summary>
-    /// <param name="dis">The DataInputStream containing the model information.</param>
-    public BinaryQNModelReader(DataInputStream dis)
+    /// <param name="dis">The Stream containing the model information.</param>
+    public BinaryQNModelReader(Stream dis)
         : base(new BinaryFileDataReader(dis))
     {
     }

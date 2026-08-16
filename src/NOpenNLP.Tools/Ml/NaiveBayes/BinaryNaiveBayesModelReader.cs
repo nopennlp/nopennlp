@@ -19,7 +19,6 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using System.IO;
-using J2N.IO;
 using NOpenNLP.Tools.Ml.Model;
 
 namespace NOpenNLP.Tools.Ml.Naivebayes;
@@ -27,11 +26,11 @@ namespace NOpenNLP.Tools.Ml.Naivebayes;
 public class BinaryNaiveBayesModelReader : NaiveBayesModelReader
 {
     /// <summary>
-    /// Constructor which directly instantiates the DataInputStream containing
+    /// Constructor which directly instantiates the Stream containing
     /// the model contents.
     /// </summary>
-    /// <param name="dis">The DataInputStream containing the model information.</param>
-    public BinaryNaiveBayesModelReader(DataInputStream dis)
+    /// <param name="dis">The Stream containing the model information.</param>
+    public BinaryNaiveBayesModelReader(Stream dis)
         : base(new BinaryFileDataReader(dis))
     {
     }

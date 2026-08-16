@@ -18,34 +18,22 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
-using J2N.IO;
+using System.IO;
+using NOpenNLP.Tools.Support;
 
 namespace NOpenNLP.Tools.Ml.Model;
 
 // NOpenNLP: upstream wraps a java.io.ObjectInputStream, which has no .NET
-// counterpart. Only the three DataInput methods below are used, so this wraps
-// J2N's IDataInput — the interface ObjectInputStream implements for them.
-public class ObjectDataReader : IDataReader
+// counterpart. Only the three DataInput methods below are used, and those read
+// the same big-endian layout java.io.DataInputStream does, so this wraps a
+// plain Stream.
+public class ObjectDataReader(Stream ois) : IDataReader
 {
-    protected IDataInput ois;
+    protected readonly Stream ois = ois;
 
-    public ObjectDataReader(IDataInput ois)
-    {
-        this.ois = ois;
-    }
+    public virtual double ReadDouble() => ois.ReadJavaDouble();
 
-    public virtual double ReadDouble()
-    {
-        return ois.ReadDouble();
-    }
+    public virtual int ReadInt32() => ois.ReadJavaInt32();
 
-    public virtual int ReadInt32()
-    {
-        return ois.ReadInt32();
-    }
-
-    public virtual string ReadUTF()
-    {
-        return ois.ReadUTF();
-    }
+    public virtual string ReadUTF() => ois.ReadJavaUTF();
 }
