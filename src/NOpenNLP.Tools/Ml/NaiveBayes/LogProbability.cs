@@ -17,59 +17,39 @@
 
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
+
 using System;
-using System.Globalization;
 
 namespace NOpenNLP.Tools.Ml.Naivebayes;
-
-// NOpenNLP: non-generic base class
-public abstract class Probability
-{
-    /// <summary>
-    /// Gets the probability.
-    /// </summary>
-    /// <remarks>
-    /// NOpenNLP: This was <c>get()</c> in Java.
-    /// </remarks>
-    public abstract double Value { get; }
-
-    /// <summary>
-    /// Gets the log probability.
-    /// </summary>
-    /// <remarks>
-    /// NOpenNLP: This was <c>getLog()</c> in Java. It is declared here, rather
-    /// than only on <see cref="Probability{T}"/>, so that the methods taking a
-    /// <see cref="Probability"/> can read it the way Java's raw-typed
-    /// parameters do.
-    /// </remarks>
-    public abstract double Log { get; }
-}
 
 /// <summary>
 /// Class implementing the probability for a label.
 /// </summary>
 /// <typeparam name="T">the label (category) class</typeparam>
-public class Probability<T>(T label) : Probability
+public class LogProbability<T> : Probability<T>
 {
-    protected readonly T label = label; // NOpenNLP: made readonly
-    protected double probability = 1;
-
-    /// <summary>
-    /// Assigns a probability to a label, discarding any previously assigned probability.
-    /// </summary>
-    /// <param name="probability">the probability to assign</param>
-    public virtual void Set(double probability)
+    public LogProbability(T label)
+        : base(label)
     {
-        this.probability = probability;
+        Set(1.0);
     }
 
     /// <summary>
     /// Assigns a probability to a label, discarding any previously assigned probability.
     /// </summary>
     /// <param name="probability">the probability to assign</param>
-    public virtual void Set(Probability probability)
+    public override void Set(double probability)
     {
-        this.probability = probability.Value;
+        this.probability = Math.Log(probability);
+    }
+
+    /// <summary>
+    /// Assigns a probability to a label, discarding any previously assigned probability.
+    /// </summary>
+    /// <param name="probability">the probability to assign</param>
+    public override void Set(Probability probability)
+    {
+        this.probability = probability.Log;
     }
 
     /// <summary>
@@ -77,11 +57,12 @@ public class Probability<T>(T label) : Probability
     /// if the new probability is greater than the old one.
     /// </summary>
     /// <param name="probability">the probability to assign</param>
-    public virtual void SetIfLarger(double probability)
+    public override void SetIfLarger(double probability)
     {
-        if (this.probability < probability)
+        double logP = Math.Log(probability);
+        if (this.probability < logP)
         {
-            this.probability = probability;
+            this.probability = logP;
         }
     }
 
@@ -90,11 +71,11 @@ public class Probability<T>(T label) : Probability
     /// if the new probability is greater than the old one.
     /// </summary>
     /// <param name="probability">the probability to assign</param>
-    public virtual void SetIfLarger(Probability probability)
+    public override void SetIfLarger(Probability probability)
     {
-        if (this.probability < probability.Value)
+        if (this.probability < probability.Log)
         {
-            this.probability = probability.Value;
+            this.probability = probability.Log;
         }
     }
 
@@ -102,49 +83,48 @@ public class Probability<T>(T label) : Probability
     /// Checks if a probability is greater than the old one.
     /// </summary>
     /// <param name="probability">the probability to assign</param>
-    public virtual bool IsLarger(Probability probability)
+    public override bool IsLarger(Probability probability)
     {
-        return this.probability < probability.Value;
+        return this.probability < probability.Log;
     }
 
     /// <summary>
     /// Assigns a log probability to a label, discarding any previously assigned probability.
     /// </summary>
     /// <param name="probability">the log probability to assign</param>
-    public virtual void SetLog(double probability)
+    public override void SetLog(double probability)
     {
-        Set(Math.Exp(probability));
+        this.probability = probability;
     }
 
     /// <summary>
-    /// Compounds the existing probability mass on the label with the new probability passed in to the method.
+    /// Compounds the existing probability mass on the label with the new
+    /// probability passed in to the method.
     /// </summary>
     /// <param name="probability">the probability weight to add</param>
-    public virtual void AddIn(double probability)
+    public override void AddIn(double probability)
     {
-        Set(this.probability * probability);
+        SetLog(this.probability + Math.Log(probability));
     }
 
     /// <summary>
     /// Returns the probability associated with a label
     /// </summary>
     /// <returns>the probability associated with the label</returns>
-    public override double Value => probability;
+    public override double Value => Math.Exp(probability);
 
     /// <summary>
     /// Returns the log probability associated with a label
     /// </summary>
     /// <returns>the log probability associated with the label</returns>
-    public override double Log => Math.Log(Value);
+    public override double Log => probability;
 
     /// <summary>
     /// Returns the probabilities associated with all labels
     /// </summary>
     /// <returns>the HashMap of labels and their probabilities</returns>
-    public virtual T Label => label;
+    public override T Label => label;
 
-    public override string ToString()
-        => label == null
-            ? probability.ToString(CultureInfo.InvariantCulture)
-            : $"{label}:{probability}";
+    // NOpenNLP: upstream re-declares toString() here with a body identical to
+    // Probability.toString(); the inherited override already provides it.
 }
