@@ -25,33 +25,22 @@ namespace NOpenNLP.Tools.Langdetect;
 /// <summary>
 /// Class for holding the document language and its confidence.
 /// </summary>
-public class Language
+public class Language(string lang, double confidence = 0)
 {
-    public Language(string lang)
-        : this(lang, 0)
-    {
-    }
+    public string Lang { get; } = lang ?? throw new ArgumentNullException(nameof(lang), "lang must not be null");
 
-    public Language(string lang, double confidence)
-    {
-        Lang = lang ?? throw new ArgumentNullException(nameof(lang), "lang must not be null");
-        Confidence = confidence;
-    }
-
-    public string Lang { get; }
-
-    public double Confidence { get; }
+    public double Confidence { get; } = confidence;
 
     // NOpenNLP: J2N's Double.ToString reproduces Java's Double.toString, which
     // renders 0 as "0.0"; the .NET default would render it as "0".
     public override string ToString() =>
-        Lang + " (" + J2N.Numerics.Double.ToString(Confidence, "J", null) + ")";
+        $"{Lang} ({J2N.Numerics.Double.ToString(Confidence, "J", null)})";
 
     // NOpenNLP: upstream's hashCode includes the confidence while equals ignores
     // it, so two instances can be equal with differing hash codes. Ported as-is
     // because LanguageTest asserts both behaviours.
     public override int GetHashCode() =>
-        (Lang, Confidence).GetHashCode();
+        HashCode.Combine(Lang, Confidence);
 
     public override bool Equals(object? obj)
     {

@@ -26,12 +26,9 @@ namespace NOpenNLP.Tools.Util.Normalizer;
 public class AggregateCharSequenceNormalizer(params ICharSequenceNormalizer[] normalizers)
     : ICharSequenceNormalizer
 {
-    // NOpenNLP: made readonly
-    private readonly ICharSequenceNormalizer[] normalizers = normalizers;
-
     public string Normalize(string text)
     {
-        foreach (ICharSequenceNormalizer normalizer in normalizers)
+        foreach (var normalizer in normalizers)
         {
             text = normalizer.Normalize(text);
         }

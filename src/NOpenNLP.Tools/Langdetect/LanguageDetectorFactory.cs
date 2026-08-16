@@ -58,15 +58,14 @@ public class LanguageDetectorFactory : BaseToolFactory
 
         try
         {
-            LanguageDetectorFactory theFactory =
+            LanguageDetectorFactory? theFactory =
                 ExtensionLoader.InstantiateExtension<LanguageDetectorFactory>(subclassName);
             theFactory.Init();
             return theFactory;
         }
         catch (Exception e)
         {
-            string msg = "Could not instantiate the " + subclassName
-                + ". The initialization throw an exception.";
+            string msg = $"Could not instantiate the {subclassName}. The initialization throw an exception.";
             throw new InvalidFormatException(msg, e);
         }
     }

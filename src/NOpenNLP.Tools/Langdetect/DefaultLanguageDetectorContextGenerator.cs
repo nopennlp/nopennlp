@@ -18,9 +18,9 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
-using System.Collections.Generic;
 using NOpenNLP.Tools.Ngram;
 using NOpenNLP.Tools.Util.Normalizer;
+using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Langdetect;
 
@@ -58,9 +58,9 @@ public class DefaultLanguageDetectorContextGenerator : ILanguageDetectorContextG
     /// <returns>the generated context</returns>
     public virtual string[] GetContext(string document)
     {
-        ICollection<string> context = new List<string>();
+        JCG.List<string> context = [];
 
-        NGramCharModel model = new();
+        NGramCharModel model = [];
         model.Add(normalizer.Normalize(document), minLength, maxLength);
 
         foreach (string token in model)

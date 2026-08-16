@@ -52,7 +52,7 @@ namespace NOpenNLP.Tools.Langdetect;
 /// </summary>
 public class LanguageDetectorME : ILanguageDetector
 {
-    protected LanguageDetectorModel model;
+    protected readonly LanguageDetectorModel model; // NOpenNLP: made readonly
 
     // NOpenNLP: made readonly
     private readonly ILanguageDetectorContextGenerator mContextGenerator;
@@ -276,20 +276,20 @@ public class LanguageDetectorME : ILanguageDetector
     {
         if (start == 0 && chunkSize > content.Length)
         {
-            int codePointLength = Character.CodePointCount(content, 0, content.Length);
+            int codePointLength = content.CodePointCount(0, content.Length);
             return new StringCPLengthPair(content, codePointLength);
         }
 
-        int totalCodePoints = Character.CodePointCount(content, 0, content.Length);
+        int totalCodePoints = content.CodePointCount(0, content.Length);
         if (start >= totalCodePoints || chunkSize <= 0)
         {
             return new StringCPLengthPair(string.Empty, 0);
         }
 
-        int startIndex = Character.OffsetByCodePoints(content, 0, start);
+        int startIndex = content.OffsetByCodePoints(0, start);
         int available = totalCodePoints - start;
         int take = Math.Min(chunkSize, available);
-        int endIndex = Character.OffsetByCodePoints(content, startIndex, take);
+        int endIndex = content.OffsetByCodePoints(startIndex, take);
 
         return new StringCPLengthPair(content.Substring(startIndex, endIndex - startIndex), take);
     }
