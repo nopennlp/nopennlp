@@ -49,15 +49,10 @@ internal static class TestResources
         // translation itself, so the lookup is done against the dotted name.
         string manifestName = path.TrimStart('/').Replace('/', '.');
 
-        Stream? stream = typeof(TestResources).Assembly.GetManifestResourceStream(manifestName);
+        var stream = typeof(TestResources).Assembly.GetManifestResourceStream(manifestName);
 
-        if (stream == null)
-        {
-            throw new InvalidOperationException(
-                $"Test resource '{path}' (manifest name '{manifestName}') is not embedded in the test assembly. " +
-                "Add it as an EmbeddedResource with a matching LogicalName in NOpenNLP.Tools.Tests.csproj.");
-        }
-
-        return stream;
+        return stream ?? throw new InvalidOperationException(
+            $"Test resource '{path}' (manifest name '{manifestName}') is not embedded in the test assembly. " +
+            "Add it as an EmbeddedResource with a matching LogicalName in NOpenNLP.Tools.Tests.csproj.");
     }
 }

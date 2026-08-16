@@ -18,37 +18,31 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
-using System;
 using System.IO;
-using System.IO.Compression;
-using NOpenNLP.Tools.Support;
+using NOpenNLP.Tools.Ml.Model;
 
-namespace NOpenNLP.Tools.Ml.Model;
+namespace NOpenNLP.Tools.Ml.Perceptron;
 
-public class BinaryFileDataReader : IDataReader
+public class BinaryPerceptronModelReader : PerceptronModelReader
 {
-    private readonly Stream input; // NOpenNLP: made readonly
-
-    public BinaryFileDataReader(FileInfo f)
+    /// <summary>
+    /// Constructor which directly instantiates the Stream containing
+    /// the model contents.
+    /// </summary>
+    /// <param name="dis">The Stream containing the model information.</param>
+    public BinaryPerceptronModelReader(Stream dis)
+        : base(new BinaryFileDataReader(dis))
     {
-        if (f.Name.EndsWith(".gz", StringComparison.Ordinal))
-        {
-            input = new GZipStream(f.OpenRead(), CompressionMode.Decompress, leaveOpen: true);
-        }
-        else
-        {
-            input = f.OpenRead();
-        }
     }
 
-    public BinaryFileDataReader(Stream @in)
+    /// <summary>
+    /// Constructor which takes a File and creates a reader for it. Detects
+    /// whether the file is gzipped or not based on whether the suffix contains
+    /// ".gz"
+    /// </summary>
+    /// <param name="f">The File in which the model is stored.</param>
+    public BinaryPerceptronModelReader(FileInfo f)
+        : base(f)
     {
-        input = @in;
     }
-
-    public virtual double ReadDouble() => input.ReadJavaDouble();
-
-    public virtual int ReadInt32() => input.ReadJavaInt32();
-
-    public virtual string ReadUTF() => input.ReadJavaUTF();
 }

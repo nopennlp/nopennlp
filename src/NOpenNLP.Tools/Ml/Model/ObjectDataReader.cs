@@ -18,37 +18,22 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
-using System;
 using System.IO;
-using System.IO.Compression;
 using NOpenNLP.Tools.Support;
 
 namespace NOpenNLP.Tools.Ml.Model;
 
-public class BinaryFileDataReader : IDataReader
+// NOpenNLP: upstream wraps a java.io.ObjectInputStream, which has no .NET
+// counterpart. Only the three DataInput methods below are used, and those read
+// the same big-endian layout java.io.DataInputStream does, so this wraps a
+// plain Stream.
+public class ObjectDataReader(Stream ois) : IDataReader
 {
-    private readonly Stream input; // NOpenNLP: made readonly
+    protected readonly Stream ois = ois;
 
-    public BinaryFileDataReader(FileInfo f)
-    {
-        if (f.Name.EndsWith(".gz", StringComparison.Ordinal))
-        {
-            input = new GZipStream(f.OpenRead(), CompressionMode.Decompress, leaveOpen: true);
-        }
-        else
-        {
-            input = f.OpenRead();
-        }
-    }
+    public virtual double ReadDouble() => ois.ReadJavaDouble();
 
-    public BinaryFileDataReader(Stream @in)
-    {
-        input = @in;
-    }
+    public virtual int ReadInt32() => ois.ReadJavaInt32();
 
-    public virtual double ReadDouble() => input.ReadJavaDouble();
-
-    public virtual int ReadInt32() => input.ReadJavaInt32();
-
-    public virtual string ReadUTF() => input.ReadJavaUTF();
+    public virtual string ReadUTF() => ois.ReadJavaUTF();
 }
