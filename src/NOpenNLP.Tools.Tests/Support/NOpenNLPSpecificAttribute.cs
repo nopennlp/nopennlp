@@ -27,11 +27,4 @@ namespace NOpenNLP.Tools.Support;
 /// test in the <c>NOPENNLP</c> category, so port-specific tests can be
 /// included or excluded with a filter.
 /// </remarks>
-internal sealed class NOpenNLPSpecificAttribute : CategoryAttribute
-{
-    public NOpenNLPSpecificAttribute()
-        : base("NOPENNLP")
-    {
-        // nothing to do here but invoke the base constructor.
-    }
-}
+internal sealed class NOpenNLPSpecificAttribute() : CategoryAttribute("NOPENNLP");

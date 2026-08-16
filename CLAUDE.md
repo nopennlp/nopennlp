@@ -85,6 +85,14 @@ the targeted version. The conversion rules above apply to tests as well, plus:
   compile and pass on all three.
 - Tests covering defects specific to the port, which upstream does not cover, go
   in `Support/PortRegressionTest.cs` rather than alongside the ported tests.
+- Mark any test that does not exist in Apache OpenNLP with `[NOpenNLPSpecific]`
+  (`Support/NOpenNLPSpecificAttribute.cs`), which puts it in the `NOPENNLP`
+  category. This keeps the ported suite separable from what the port added:
+  `--filter TestCategory!=NOPENNLP` should leave only tests with an upstream
+  counterpart. Apply it to the class when every test in the file is
+  port-specific, or to the individual `[Test]` when a mostly-ported file gains
+  one. It marks *added* tests, not deviations — a ported test that differs from
+  upstream keeps its `// NOpenNLP:` comment and no attribute.
 
 ## Benchmarks
 

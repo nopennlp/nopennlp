@@ -35,7 +35,7 @@ namespace NOpenNLP.Tools.Support;
 [NOpenNLPSpecific]
 public class DataInputTest
 {
-    private static Stream Bytes(params byte[] bytes) => new MemoryStream(bytes);
+    private static MemoryStream Bytes(params byte[] bytes) => new(bytes);
 
     [Test]
     public void TestReadJavaInt32()
@@ -234,8 +234,8 @@ public class DataInputTest
         const int Length = 40000;
 
         byte[] bytes = new byte[Length + 2];
-        bytes[0] = (byte)((Length >> 8) & 0xFF);
-        bytes[1] = (byte)(Length & 0xFF);
+        bytes[0] = (Length >> 8) & 0xFF;
+        bytes[1] = Length & 0xFF;
         for (int i = 0; i < Length; i++)
         {
             bytes[i + 2] = (byte)'x';
@@ -284,8 +284,8 @@ public class DataInputTest
                 testBytes[random.Next(testBytes.Length)] = (byte)random.Next(256);
             }
 
-            testBytes[testBytes.Length - 1] = (byte)random.Next(256);
-            testBytes[testBytes.Length - 2] = (byte)random.Next(256);
+            testBytes[^1] = (byte)random.Next(256);
+            testBytes[^2] = (byte)random.Next(256);
 
             try
             {
