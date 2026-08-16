@@ -34,6 +34,7 @@ namespace NOpenNLP.Tools.Support;
 /// fails against the pre-fix code, unlike the ported upstream tests, which pass
 /// either way.
 /// </remarks>
+[NOpenNLPSpecific]
 public class PortRegressionTest
 {
     /// <summary>

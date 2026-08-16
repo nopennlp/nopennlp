@@ -18,6 +18,7 @@ using NOpenNLP.Tools.Chunker;
 using NOpenNLP.Tools.Namefind;
 using NOpenNLP.Tools.Postag;
 using NOpenNLP.Tools.Sentdetect;
+using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Tokenize;
 using NOpenNLP.Tools.Util;
 using NUnit.Framework;
@@ -47,6 +48,7 @@ namespace NOpenNLP.Tools.Integration;
 /// tests report inconclusive rather than failing; see <see cref="TestData"/>.
 /// </remarks>
 [Category("Integration")]
+[NOpenNLPSpecific]
 public class SourceForgeModelTest
 {
     /// <summary>

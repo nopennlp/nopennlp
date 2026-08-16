@@ -15,6 +15,7 @@
  */
 using System;
 using System.IO;
+using System.Text;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
 
@@ -31,6 +32,7 @@ namespace NOpenNLP.Tools.Support;
 /// <c>DataOutputStream</c>, so they pin the wire format itself rather than any
 /// one implementation of it.
 /// </remarks>
+[NOpenNLPSpecific]
 public class DataInputTest
 {
     private static Stream Bytes(params byte[] bytes) => new MemoryStream(bytes);
@@ -214,6 +216,128 @@ public class DataInputTest
 
         // A three-byte sequence cut short by the declared length.
         Assert.Throws<FormatException>((Action)(() => _ = Bytes(0x00, 0x02, 0xE2, 0x82).ReadJavaUTF()));
+    }
+
+    /// <summary>
+    /// A string long enough that the payload arrives over several reads, and
+    /// whose length prefix exceeds <see cref="short.MaxValue"/>. The prefix is
+    /// unsigned, so a signed read would go negative here and the allocation
+    /// would throw rather than the string decoding.
+    /// </summary>
+    /// <remarks>
+    /// NOpenNLP: adapted from J2N's TestDataInputStream, which exercises
+    /// lengths near 65535 for the same reason.
+    /// </remarks>
+    [Test]
+    public void TestReadJavaUTFReadsLongString()
+    {
+        const int Length = 40000;
+
+        byte[] bytes = new byte[Length + 2];
+        bytes[0] = (byte)((Length >> 8) & 0xFF);
+        bytes[1] = (byte)(Length & 0xFF);
+        for (int i = 0; i < Length; i++)
+        {
+            bytes[i + 2] = (byte)'x';
+        }
+
+        ClassicAssert.IsTrue(Length > short.MaxValue);
+
+        string value = Bytes(bytes).ReadJavaUTF();
+
+        ClassicAssert.AreEqual(Length, value.Length);
+        ClassicAssert.AreEqual(new string('x', Length), value);
+    }
+
+    /// <summary>
+    /// Corrupting encoded bytes at random must always end in either a decoded
+    /// string or a well-formed exception, never a hang, a stray exception type,
+    /// or a message-less throw that tells a caller nothing.
+    /// </summary>
+    /// <remarks>
+    /// NOpenNLP: adapted from J2N's TestDataInputStream.TestReadUTF, which
+    /// applies the same corruption strategy. The seed is fixed so a failure can
+    /// be reproduced, and the encoder below emits modified UTF-8 rather than
+    /// relying on a writer this project does not have.
+    /// </remarks>
+    [Test]
+    public void TestReadJavaUTFSurvivesCorruptedInput()
+    {
+        Random random = new Random(20260815);
+
+        for (int iteration = 0; iteration < 1000; iteration++)
+        {
+            int length = random.Next(64) + 1;
+            StringBuilder testBuffer = new StringBuilder(length);
+            for (int i = 0; i < length; i++)
+            {
+                testBuffer.Append((char)random.Next(char.MaxValue + 1));
+            }
+
+            byte[] testBytes = EncodeJavaUTF(testBuffer.ToString());
+
+            // Corrupt a few bytes at random, then mangle the last two so the
+            // input frequently ends in a partial character.
+            int corruptions = random.Next(3);
+            for (int i = 0; i < corruptions; i++)
+            {
+                testBytes[random.Next(testBytes.Length)] = (byte)random.Next(256);
+            }
+
+            testBytes[testBytes.Length - 1] = (byte)random.Next(256);
+            testBytes[testBytes.Length - 2] = (byte)random.Next(256);
+
+            try
+            {
+                Bytes(testBytes).ReadJavaUTF();
+            }
+            catch (FormatException e)
+            {
+                ClassicAssert.IsNotNull(e.Message, "vague exception thrown");
+                ClassicAssert.IsNotEmpty(e.Message, "vague exception thrown");
+            }
+            catch (EndOfStreamException)
+            {
+                // The corruption truncated a sequence; beyond the scope of the test.
+            }
+        }
+    }
+
+    /// <summary>
+    /// Encodes a string the way Java's <c>DataOutputStream.writeUTF</c> does,
+    /// so the corruption test has well-formed input to start from.
+    /// </summary>
+    private static byte[] EncodeJavaUTF(string value)
+    {
+        MemoryStream payload = new MemoryStream();
+        foreach (char c in value)
+        {
+            if (c > 0 && c <= 0x7F)
+            {
+                payload.WriteByte((byte)c);
+            }
+            else if (c <= 0x7FF)
+            {
+                // Includes U+0000, which is written as the two bytes C0 80.
+                payload.WriteByte((byte)(0xC0 | ((c >> 6) & 0x1F)));
+                payload.WriteByte((byte)(0x80 | (c & 0x3F)));
+            }
+            else
+            {
+                // Surrogate halves take this branch individually, which is what
+                // makes a non-BMP character six bytes rather than four.
+                payload.WriteByte((byte)(0xE0 | ((c >> 12) & 0x0F)));
+                payload.WriteByte((byte)(0x80 | ((c >> 6) & 0x3F)));
+                payload.WriteByte((byte)(0x80 | (c & 0x3F)));
+            }
+        }
+
+        byte[] body = payload.ToArray();
+        byte[] result = new byte[body.Length + 2];
+        result[0] = (byte)((body.Length >> 8) & 0xFF);
+        result[1] = (byte)(body.Length & 0xFF);
+        Array.Copy(body, 0, result, 2, body.Length);
+        return result;
     }
 
     /// <summary>
