@@ -209,8 +209,8 @@ public class Parse : ICloneable, IComparable<Parse>
         else
         {
             Parse c = (Parse)this.Clone();
-            Parse lc = c.Parts[Parts.Count - 1];
-            c.Parts[Parts.Count - 1] = lc.Clone(node);
+            Parse lc = c.Parts[^1];
+            c.Parts[^1] = lc.Clone(node);
             return c;
         }
     }
@@ -485,7 +485,7 @@ public class Parse : ICloneable, IComparable<Parse>
             if (index == 0 || index == Parts.Count)
             {
                 // size is orig last element
-                span = new Span(Parts[0].span.Start, Parts[Parts.Count - 1].span.End);
+                span = new Span(Parts[0].span.Start, Parts[^1].span.End);
             }
         }
     }
@@ -516,7 +516,7 @@ public class Parse : ICloneable, IComparable<Parse>
     /// <returns>The new parent node of this node and the specified sister node.</returns>
     public Parse Adjoin(Parse sister, IHeadRules rules)
     {
-        Parse lastChild = Parts[Parts.Count - 1];
+        Parse lastChild = Parts[^1];
         Parse adjNode = new(this.text,
             new Span(lastChild.Span.Start, sister.Span.End), lastChild.Type, 1,
             rules.GetHead([lastChild, sister], lastChild.Type));
@@ -527,7 +527,7 @@ public class Parse : ICloneable, IComparable<Parse>
         }
 
         adjNode.Parts.Add(sister);
-        Parts[Parts.Count - 1] = adjNode;
+        Parts[^1] = adjNode;
         this.span = new Span(span.Start, sister.Span.End);
         this.head = rules.GetHead(GetChildren(), type)!;
         this.headIndex = head.headIndex;
@@ -759,7 +759,7 @@ public class Parse : ICloneable, IComparable<Parse>
     }
 
     public void UpdateSpan() =>
-        span = new Span(Parts[0].span.Start, Parts[Parts.Count - 1].span.End);
+        span = new Span(Parts[0].span.Start, Parts[^1].span.End);
 
     /// <summary>
     /// Prune the specified sentence parse of vacuous productions.
@@ -868,7 +868,7 @@ public class Parse : ICloneable, IComparable<Parse>
             }
             else if (c == ')')
             {
-                Constituent con = stack[stack.Count - 1];
+                Constituent con = stack[^1];
                 stack.RemoveAt(stack.Count - 1);
                 int start = con.Span.Start;
                 if (start < offset)
@@ -1119,7 +1119,7 @@ public class Parse : ICloneable, IComparable<Parse>
                         {
                             Parse[] grandKids = kids[0].GetChildren();
                             if (grandKids.Length > 1
-                                && nameSpan.Contains(grandKids[grandKids.Length - 1].Span))
+                                && nameSpan.Contains(grandKids[^1].Span))
                             {
                                 commonParent.Insert(new Parse(commonParent.Text, commonParent.Span,
                                     tag, 1.0, commonParent.HeadIndex));

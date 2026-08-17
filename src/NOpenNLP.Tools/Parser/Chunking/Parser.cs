@@ -50,16 +50,11 @@ public class Parser : AbstractBottomUpParser
     private readonly int completeIndex; // NOpenNLP: made readonly
     private readonly int incompleteIndex; // NOpenNLP: made readonly
 
-    public Parser(ParserModel model, int beamSize, double advancePercentage)
+    public Parser(ParserModel model, int beamSize = defaultBeamSize, double advancePercentage = defaultAdvancePercentage)
         : this(model.BuildModel, model.CheckModel,
             new POSTaggerME(model.ParserTaggerModel),
             new ChunkerME(model.ParserChunkerModel),
             model.HeadRules, beamSize, advancePercentage)
-    {
-    }
-
-    public Parser(ParserModel model)
-        : this(model, defaultBeamSize, defaultAdvancePercentage)
     {
     }
 

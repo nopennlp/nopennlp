@@ -34,12 +34,7 @@ public class ChunkContextGenerator : IChunkerContextGenerator
     private readonly Cache<string, string[]>? contextsCache; // NOpenNLP: made readonly
     private object? wordsKey;
 
-    public ChunkContextGenerator()
-        : this(0)
-    {
-    }
-
-    public ChunkContextGenerator(int cacheSize)
+    public ChunkContextGenerator(int cacheSize = 0)
     {
         if (cacheSize > 0)
         {
@@ -170,10 +165,7 @@ public class ChunkContextGenerator : IChunkerContextGenerator
         features.Add(ct0 + "," + ctbo1);
         features.Add(ctbo0 + "," + ctbo1);
         string[] contexts = [.. features];
-        if (contextsCache != null)
-        {
-            contextsCache.Put(cacheKey, contexts);
-        }
+        contextsCache?.Put(cacheKey, contexts);
 
         return contexts;
     }

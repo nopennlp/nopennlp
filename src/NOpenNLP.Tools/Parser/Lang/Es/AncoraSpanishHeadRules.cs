@@ -70,8 +70,9 @@ public class AncoraSpanishHeadRules : IHeadRules, IGapLabeler, ISerializableArti
 
     private class HeadRule
     {
-        public bool leftToRight;
-        public string[] tags;
+        // NOpenNLP: made fields readonly
+        public readonly bool leftToRight;
+        public readonly string[] tags;
 
         public HeadRule(bool l2r, string[] tags)
         {
@@ -187,7 +188,7 @@ public class AncoraSpanishHeadRules : IHeadRules, IGapLabeler, ISerializableArti
                 }
             }
 
-            return constituents[constituents.Length - 1].Head;
+            return constituents[^1].Head;
         }
         // NOpenNLP: Java's Map.get returns null for an absent key; TryGetValue reproduces
         // the assign-and-test the upstream else-if performs.
@@ -228,7 +229,7 @@ public class AncoraSpanishHeadRules : IHeadRules, IGapLabeler, ISerializableArti
             }
         }
 
-        return constituents[constituents.Length - 1].Head;
+        return constituents[^1].Head;
     }
 
     // NOpenNLP-specific: Java's String.matches() anchors the pattern to the whole input,
@@ -273,10 +274,10 @@ public class AncoraSpanishHeadRules : IHeadRules, IGapLabeler, ISerializableArti
         if (stack.Count > 4)
         {
             //Constituent con0 = stack[stack.Count - 1];
-            Constituent con1 = stack[stack.Count - 2];
-            Constituent con2 = stack[stack.Count - 3];
-            Constituent con3 = stack[stack.Count - 4];
-            Constituent con4 = stack[stack.Count - 5];
+            Constituent con1 = stack[^2];
+            Constituent con2 = stack[^3];
+            Constituent con3 = stack[^4];
+            Constituent con4 = stack[^5];
 
             //subject extraction
             if (con1.Label.Equals("SN")

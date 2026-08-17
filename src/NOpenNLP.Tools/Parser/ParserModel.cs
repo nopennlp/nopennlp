@@ -38,11 +38,11 @@ public class ParserModel : BaseModel
 {
     private class HeadRulesSerializer : IArtifactSerializer<Lang.En.HeadRules>
     {
-        public virtual Lang.En.HeadRules Create(Stream @in) =>
+        public Lang.En.HeadRules Create(Stream @in) =>
             // NOpenNLP: Java wraps the stream in an InputStreamReader/BufferedReader; the
             // StreamReader here is left open so the caller keeps ownership of the stream,
             // matching the IArtifactSerializer contract.
-            new Lang.En.HeadRules(new StreamReader(@in, new UTF8Encoding(false), false, 1024, leaveOpen: true));
+            new(new StreamReader(@in, new UTF8Encoding(false), false, 1024, leaveOpen: true));
 
         // NOpenNLP: serialization is not supported; inference only.
         // public virtual void Serialize(Lang.En.HeadRules artifact, Stream @out)

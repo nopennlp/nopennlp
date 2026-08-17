@@ -576,7 +576,7 @@ public abstract class AbstractBottomUpParser : IParser
         }
 
         Parse[] kids = CollapsePunctuation(parent.GetChildren(), punctSet);
-        return kids[kids.Length - 1] == child;
+        return kids[^1] == child;
     }
 
     // NOpenNLP: buildDictionary is training-only -- it consumes an ObjectStream<Parse> of

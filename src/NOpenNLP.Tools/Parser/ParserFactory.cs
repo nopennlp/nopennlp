@@ -22,12 +22,8 @@ using System;
 
 namespace NOpenNLP.Tools.Parser;
 
-public class ParserFactory
+public static class ParserFactory // NOpenNLP: made static
 {
-    private ParserFactory()
-    {
-    }
-
     public static IParser Create(ParserModel model, int beamSize, double advancePercentage)
     {
         if (ParserType.CHUNKING.Equals(model.ParserTypeValue))

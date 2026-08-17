@@ -141,13 +141,13 @@ public class Parser : AbstractBottomUpParser
         {
             rf.Insert(0, top);
             Parse[] kids = top.GetChildren();
-            top = kids[kids.Length - 1];
+            top = kids[^1];
         }
 
         return new JCG.List<Parse>(rf);
     }
 
-    private void SetBuilt(Parse p)
+    private static void SetBuilt(Parse p) // NOpenNLP: made static
     {
         string? l = p.Label;
         if (l == null)
@@ -167,7 +167,7 @@ public class Parser : AbstractBottomUpParser
         }
     }
 
-    private void SetComplete(Parse p)
+    private static void SetComplete(Parse p) // NOpenNLP: made static
     {
         if (!IsBuilt(p))
         {
@@ -179,7 +179,7 @@ public class Parser : AbstractBottomUpParser
         }
     }
 
-    private void SetIncomplete(Parse p)
+    private static void SetIncomplete(Parse p) // NOpenNLP: made static
     {
         if (!IsBuilt(p))
         {
@@ -191,13 +191,13 @@ public class Parser : AbstractBottomUpParser
         }
     }
 
-    private bool IsBuilt(Parse p)
+    private static bool IsBuilt(Parse p) // NOpenNLP: made static
     {
         string? l = p.Label;
         return l != null && l.StartsWith(BUILT, StringComparison.Ordinal);
     }
 
-    private bool IsComplete(Parse p)
+    private static bool IsComplete(Parse p) // NOpenNLP: made static
     {
         string? l = p.Label;
         return l != null && l.EndsWith(COMPLETE, StringComparison.Ordinal);

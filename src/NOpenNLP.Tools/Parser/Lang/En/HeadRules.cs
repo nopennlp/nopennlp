@@ -56,8 +56,9 @@ public class HeadRules : IHeadRules, IGapLabeler, ISerializableArtifact
 
     private class HeadRule
     {
-        public bool leftToRight;
-        public string[] tags;
+        // NOpenNLP: made fields readonly
+        public readonly bool leftToRight;
+        public readonly string[] tags;
 
         public HeadRule(bool l2r, string[] tags)
         {
@@ -173,7 +174,7 @@ public class HeadRules : IHeadRules, IGapLabeler, ISerializableArtifact
                 }
             }
 
-            return constituents[constituents.Length - 1].Head;
+            return constituents[^1].Head;
         }
         // NOpenNLP: Java's Map.get returns null for an absent key; TryGetValue reproduces
         // the assign-and-test the upstream else-if performs.
@@ -214,7 +215,7 @@ public class HeadRules : IHeadRules, IGapLabeler, ISerializableArtifact
             }
         }
 
-        return constituents[constituents.Length - 1].Head;
+        return constituents[^1].Head;
     }
 
     private void ReadHeadRules(TextReader str)
@@ -252,10 +253,10 @@ public class HeadRules : IHeadRules, IGapLabeler, ISerializableArtifact
         if (stack.Count > 4)
         {
             //Constituent con0 = stack[stack.Count - 1];
-            Constituent con1 = stack[stack.Count - 2];
-            Constituent con2 = stack[stack.Count - 3];
-            Constituent con3 = stack[stack.Count - 4];
-            Constituent con4 = stack[stack.Count - 5];
+            Constituent con1 = stack[^2];
+            Constituent con2 = stack[^3];
+            Constituent con3 = stack[^4];
+            Constituent con4 = stack[^5];
             // Console.Error.WriteLine("con0=" + con0.Label + " con1=" + con1.Label + " con2="
             // + con2.Label + " con3=" + con3.Label + " con4=" + con4.Label);
             //subject extraction

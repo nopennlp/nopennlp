@@ -30,12 +30,7 @@ namespace NOpenNLP.Tools.Parser.Treeinsert;
 /// </summary>
 public class BuildContextGenerator : AbstractContextGenerator
 {
-    private readonly Parse?[] leftNodes; // NOpenNLP: made readonly
-
-    public BuildContextGenerator()
-    {
-        leftNodes = new Parse?[2];
-    }
+    private readonly Parse?[] leftNodes = new Parse?[2]; // NOpenNLP: made readonly
 
     /// <summary>
     /// Returns the contexts/features for the decision to build a new constituent for the specified parse

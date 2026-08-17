@@ -41,7 +41,7 @@ public class CheckContextGenerator : AbstractContextGenerator
         features.Add("default");
         Parse[] children = Parser.CollapsePunctuation(parent.GetChildren(), punctSet);
         Parse pstart = children[0];
-        Parse pend = children[children.Length - 1];
+        Parse pend = children[^1];
         string type = parent.Type;
         Checkcons(pstart, "begin", type, features);
         Checkcons(pend, "last", type, features);
