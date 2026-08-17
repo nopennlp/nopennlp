@@ -23,6 +23,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Dictionary;
 
@@ -81,7 +82,10 @@ public class Dictionary : IEnumerable<StringList> //, ISerializableArtifact
         public override string ToString() => stringList.ToString();
     }
 
-    private readonly HashSet<StringListWrapper> entrySet = []; // NOpenNLP: made readonly
+    // NOpenNLP: J2N's HashSet, not the BCL's, because Equals and GetHashCode below delegate to it.
+    // Java's AbstractSet defines both structurally, so two dictionaries holding equal entries are
+    // equal; the BCL HashSet inherits reference equality from object and would report them unequal.
+    private readonly JCG.HashSet<StringListWrapper> entrySet = []; // NOpenNLP: made readonly
     private readonly bool isCaseSensitive;
     private int minTokenCount = 99999;
     private int maxTokenCount /* = 0 */;
@@ -340,6 +344,52 @@ public class Dictionary : IEnumerable<StringList> //, ISerializableArtifact
         public bool Overlaps(IEnumerable<string> other) => throw new NotSupportedException();
 
         public bool SetEquals(IEnumerable<string> other) => throw new NotSupportedException();
+
+        // NOpenNLP: upstream's view extends Java's AbstractSet, which defines Equals as
+        // "same size, and contains every element of the other set" and GetHashCode as the sum
+        // of the element hash codes. A C# class inherits neither, so both are spelled out here;
+        // without them the view would fall back to reference equality and two views over equal
+        // dictionaries would compare unequal.
+        public override bool Equals(object? obj)
+        {
+            if (ReferenceEquals(obj, this))
+            {
+                return true;
+            }
+
+            if (obj is not ISet<string> other || other.Count != Count)
+            {
+                return false;
+            }
+
+            foreach (string item in other)
+            {
+                if (!Contains(item))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            // Java sums the element hash codes, so the result does not depend on iteration order.
+            // Overflow is part of that contract, and unchecked is the C# default, but it is
+            // written out because this is arithmetic that is meant to wrap.
+            unchecked
+            {
+                int hashCode = 0;
+
+                foreach (string item in this)
+                {
+                    hashCode += item?.GetHashCode() ?? 0;
+                }
+
+                return hashCode;
+            }
+        }
     }
 
     ///// <summary>
