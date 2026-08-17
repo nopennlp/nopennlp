@@ -148,7 +148,7 @@ public class TrainingParameters
             {
                 if (key.StartsWith(prefix, StringComparison.Ordinal))
                 {
-                    trainingParams[key.Substring(prefix.Length)] = GetStringValue(entry.Value);
+                    trainingParams[key[prefix.Length..]] = GetStringValue(entry.Value);
                 }
             }
             else
@@ -228,7 +228,7 @@ public class TrainingParameters
             {
                 if (key.StartsWith(prefix, StringComparison.Ordinal))
                 {
-                    trainingParams[key.Substring(prefix.Length)] = entry.Value;
+                    trainingParams[key[prefix.Length..]] = entry.Value;
                 }
             }
             else
@@ -304,10 +304,7 @@ public class TrainingParameters
     // an absent key alone matches. J2N's Dictionary has no putIfAbsent equivalent.
     private void PutIfAbsentInternal(string key, object value)
     {
-        if (!parameters.ContainsKey(key))
-        {
-            parameters[key] = value;
-        }
+        parameters.TryAdd(key, value);
     }
 
     public void Put(string? namespace_, string key, string value) =>

@@ -36,12 +36,12 @@ public abstract class Evaluator<T>
     // NOpenNLP: made readonly
     private readonly IList<IEvaluationMonitor<T>> listeners;
 
-    protected Evaluator(params IEvaluationMonitor<T>[]? aListeners)
+    protected Evaluator(params IEvaluationMonitor<T>?[]? aListeners)
     {
         if (aListeners != null)
         {
             JCG.List<IEvaluationMonitor<T>> listenersList = new(aListeners.Length);
-            foreach (IEvaluationMonitor<T> evaluationMonitor in aListeners)
+            foreach (var evaluationMonitor in aListeners)
             {
                 if (evaluationMonitor != null)
                 {
@@ -83,16 +83,16 @@ public abstract class Evaluator<T>
         {
             if (sample.Equals(predicted))
             {
-                foreach (IEvaluationMonitor<T> listener in listeners)
+                foreach (var listener in listeners)
                 {
                     listener.CorrectlyClassified(sample, predicted);
                 }
             }
             else
             {
-                foreach (IEvaluationMonitor<T> listener in listeners)
+                foreach (var listener in listeners)
                 {
-                    listener.Missclassified(sample, predicted);
+                    listener.Misclassified(sample, predicted);
                 }
             }
         }
@@ -107,8 +107,7 @@ public abstract class Evaluator<T>
     /// <exception cref="IOException">IOException</exception>
     public void Evaluate(IObjectStream<T?> samples)
     {
-        T? sample;
-        while ((sample = samples.Read()) != null)
+        while (samples.Read() is { } sample)
         {
             EvaluateSample(sample);
         }

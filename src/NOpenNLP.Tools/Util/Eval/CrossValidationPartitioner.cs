@@ -50,20 +50,14 @@ public class CrossValidationPartitioner<E>
     private sealed class TestSampleStream(IObjectStream<E?> sampleStream, int numberOfPartitions, int testIndex)
         : ObjectStreamBase<E?>
     {
-        private readonly IObjectStream<E?> sampleStream = sampleStream;
-
-        private readonly int numberOfPartitions = numberOfPartitions;
-
-        private readonly int testIndex = testIndex;
-
         private int index;
 
-        private bool isPoisened;
+        private bool isPoisoned;
 
         /// <inheritdoc/>
         public override E? Read()
         {
-            if (isPoisened)
+            if (isPoisoned)
             {
                 throw new InvalidOperationException();
             }
@@ -89,10 +83,10 @@ public class CrossValidationPartitioner<E>
         protected override void Dispose(bool disposing)
         {
             sampleStream.Dispose();
-            isPoisened = true;
+            isPoisoned = true;
         }
 
-        internal void Poison() => isPoisened = true;
+        internal void Poison() => isPoisoned = true;
     }
 
     /// <summary>
@@ -113,22 +107,16 @@ public class CrossValidationPartitioner<E>
     public class TrainingSampleStream(IObjectStream<E?> sampleStream, int numberOfPartitions, int testIndex)
         : ObjectStreamBase<E?>
     {
-        private readonly IObjectStream<E?> sampleStream = sampleStream;
-
-        private readonly int numberOfPartitions = numberOfPartitions;
-
-        private readonly int testIndex = testIndex;
-
         private int index;
 
-        private bool isPoisened;
+        private bool isPoisoned;
 
         private TestSampleStream? testSampleStream;
 
         /// <inheritdoc/>
         public override E? Read()
         {
-            if (testSampleStream != null || isPoisened)
+            if (testSampleStream != null || isPoisoned)
             {
                 throw new InvalidOperationException();
             }
@@ -154,13 +142,13 @@ public class CrossValidationPartitioner<E>
         /// <exception cref="IOException">if there is an error during resetting the stream</exception>
         public override void Reset()
         {
-            if (testSampleStream != null || isPoisened)
+            if (testSampleStream != null || isPoisoned)
             {
                 throw new InvalidOperationException();
             }
 
             this.index = 0;
-            this.sampleStream.Reset();
+            sampleStream.Reset();
         }
 
         /// <inheritdoc/>
@@ -172,7 +160,7 @@ public class CrossValidationPartitioner<E>
 
         internal void Poison()
         {
-            isPoisened = true;
+            isPoisoned = true;
             testSampleStream?.Poison();
         }
 
@@ -186,7 +174,7 @@ public class CrossValidationPartitioner<E>
         /// <exception cref="IOException">if there is an error during resetting the stream</exception>
         public IObjectStream<E?> GetTestSampleStream()
         {
-            if (isPoisened)
+            if (isPoisoned)
             {
                 throw new InvalidOperationException();
             }

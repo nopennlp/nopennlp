@@ -30,13 +30,10 @@ namespace NOpenNLP.Tools.Util;
 public class EventTraceStream(IObjectStream<Event?> stream, TextWriter writer)
     : FilterObjectStream<Event?, Event?>(stream)
 {
-    // NOpenNLP: made readonly
-    private readonly TextWriter writer = writer;
-
     /// <inheritdoc/>
     public override Event? Read()
     {
-        Event? @event = samples.Read();
+        var @event = samples.Read();
 
         if (@event != null)
         {

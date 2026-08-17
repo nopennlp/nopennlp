@@ -60,26 +60,29 @@ public abstract class AbstractEventStream<T> : ObjectStreamBase<Event?>
     /// <exception cref="IOException">if there is an error during reading</exception>
     public sealed override Event? Read()
     {
-        if (pending != null)
+        // NOpenNLP specific: tail-recursive call replaced with loop
+        while (true)
         {
-            Event next = pending;
-            pending = events.MoveNext() ? events.Current : null;
-            return next;
-        }
+            if (pending != null)
+            {
+                Event next = pending;
+                pending = events.MoveNext() ? events.Current : null;
+                return next;
+            }
 
-        T? sample;
-        while (pending == null && (sample = samples.Read()) != null)
-        {
-            events = CreateEvents(sample);
-            pending = events.MoveNext() ? events.Current : null;
-        }
+            while (pending == null && samples.Read() is { } sample)
+            {
+                events = CreateEvents(sample);
+                pending = events.MoveNext() ? events.Current : null;
+            }
 
-        if (pending != null)
-        {
-            return Read();
-        }
+            if (pending != null)
+            {
+                continue;
+            }
 
-        return null;
+            return null;
+        }
     }
 
     /// <inheritdoc/>

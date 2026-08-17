@@ -24,7 +24,6 @@ public interface IEvaluationMonitor<in T>
 {
     void CorrectlyClassified(T reference, T prediction);
 
-    // NOpenNLP: upstream spells this "missclassified"; the typo is preserved so the
-    // ported evaluators and their tests line up with the Java originals.
-    void Missclassified(T reference, T prediction);
+    // NOpenNLP: upstream spells this "missclassified"; the typo is fixed here
+    void Misclassified(T reference, T prediction);
 }
