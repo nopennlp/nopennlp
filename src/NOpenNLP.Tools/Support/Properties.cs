@@ -16,6 +16,7 @@
 #nullable enable
 using System;
 using System.IO;
+using System.Text;
 using J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Support;
@@ -49,7 +50,10 @@ internal class Properties : Dictionary<object, object>
 
     public void Load(Stream s)
     {
-        using var reader = new StreamReader(s);
+        // NOpenNLP: Java's Properties.load leaves the stream open, and callers such as
+        // PropertiesSerializer read further entries from it afterwards, so leaveOpen is required.
+        using var reader = new StreamReader(s, Encoding.UTF8, detectEncodingFromByteOrderMarks: true,
+            bufferSize: 1024, leaveOpen: true);
         while (reader.ReadLine() is { } line)
         {
             line = line.Trim();

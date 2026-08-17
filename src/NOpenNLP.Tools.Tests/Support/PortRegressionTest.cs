@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+using System.IO;
+using System.Text;
 using NOpenNLP.Tools.Ml.Naivebayes;
 using NOpenNLP.Tools.Chunker;
 using NOpenNLP.Tools.Namefind;
@@ -274,5 +276,26 @@ public class PortRegressionTest
 
         // ASCII digits are still replaced, as upstream does.
         ClassicAssert.AreEqual("a b", normalizer.Normalize("a12b"));
+    }
+
+    /// <summary>
+    /// Java's Properties.load leaves the stream open. The port wrapped the stream
+    /// in a StreamReader without leaveOpen, so loading closed the caller's stream.
+    /// </summary>
+    /// <remarks>
+    /// PropertiesSerializer.Create is contractually required to leave the stream
+    /// open, and EntityLinkerProperties documents the same, so a closing loader
+    /// breaks any caller that reads further from the stream afterwards.
+    /// </remarks>
+    [Test]
+    public void TestPropertiesLoadLeavesStreamOpen()
+    {
+        using var stream = new MemoryStream(Encoding.UTF8.GetBytes("key=value\n"));
+
+        var properties = new Properties();
+        properties.Load(stream);
+
+        ClassicAssert.AreEqual("value", properties.GetProperty("key"));
+        ClassicAssert.IsTrue(stream.CanRead, "Properties.Load must not close the caller's stream.");
     }
 }
