@@ -89,6 +89,8 @@
                       LogicalName="opennlp.tools.chunker.%(Filename)%(Extension)" />
     <EmbeddedResource Include="Tokenize\latin-detokenizer.xml"
                       LogicalName="opennlp.tools.tokenize.latin-detokenizer.xml" />
+    <EmbeddedResource Include="Parser\en_head_rules"
+                      LogicalName="opennlp.tools.parser.en_head_rules" />
   </ItemGroup>
 
 </Project>
