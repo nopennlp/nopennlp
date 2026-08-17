@@ -11,14 +11,25 @@
         net10.0     | net10.0
         net9.0      | netstandard2.0
         net8.0      | net8.0
+        net462      | netstandard2.0  (Windows only)
 
       netstandard2.0 has no runtime of its own, so net9.0 is designated as its
       test client (see SetTargetFramework below). Without this the netstandard2.0
       build would ship untested, and it is the leg most likely to break, since it
       lacks the BCL APIs the other targets have.
+
+      net462 tests the same netstandard2.0 build on .NET Framework, which is the
+      lowest target Lucene.NET supports and the consumer this port is for. It is
+      a second client for netstandard2.0 rather than a replacement for the net9.0
+      one: net9.0 catches missing BCL APIs, while net462 catches what only the
+      old runtime does differently (assembly binding of the polyfill packages,
+      culture and encoding behaviour, no Span intrinsics). .NET Framework only
+      runs on Windows, so this leg is conditioned on the host OS; on Linux and
+      macOS TestFrameworks=true yields the three cross-platform clients.
     -->
     <TargetFrameworks>net10.0</TargetFrameworks>
     <TargetFrameworks Condition=" '$(TestFrameworks)' == 'true' ">net10.0;net9.0;net8.0</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(TestFrameworks)' == 'true' and '$([MSBuild]::IsOSPlatform(Windows))' == 'true' ">$(TargetFrameworks);net462</TargetFrameworks>
     <LangVersion>12.0</LangVersion>
     <RootNamespace>NOpenNLP.Tools</RootNamespace>
     <AssemblyName>NOpenNLP.Tools.Tests</AssemblyName>
@@ -37,11 +48,14 @@
   <!--
     Points the net9.0 test client at the netstandard2.0 build of the library
     rather than letting NuGet resolution pick net8.0, which is what makes the
-    netstandard2.0 target testable at all.
+    netstandard2.0 target testable at all. net462 would resolve to netstandard2.0
+    on its own, being the only compatible target, but it is pinned here too so
+    the leg fails loudly rather than silently re-pointing if the library ever
+    adds a net4x target.
   -->
   <PropertyGroup Label="Mismatched Target Framework (to override the target framework under test)">
     <SetTargetFramework></SetTargetFramework>
-    <SetTargetFramework Condition=" '$(TargetFramework)' == 'net9.0' ">TargetFramework=netstandard2.0</SetTargetFramework>
+    <SetTargetFramework Condition=" '$(TargetFramework)' == 'net9.0' or '$(TargetFramework)' == 'net462' ">TargetFramework=netstandard2.0</SetTargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -55,13 +69,35 @@
     APIs are already in the framework, and so contributes no assembly for them.
     The result builds clean and then throws FileNotFoundException on first use at
     run time. Referencing them here puts the implementation assemblies in the
-    test output. Keep this list in sync with the netstandard2.0 ItemGroup in
-    NOpenNLP.Tools.csproj.
+    test output. net462 is listed for the same reason, and additionally needs
+    Microsoft.Bcl.Memory to compile at all: DataInputTest indexes from the end
+    (testBytes[^1]), and System.Index is not in net462's BCL — the package ships
+    a public one in lib/net462. PolySharp is not an alternative here, since its
+    polyfills are internal and so invisible from this assembly. Keep this list in
+    sync with the netstandard2.0 ItemGroup in NOpenNLP.Tools.csproj.
   -->
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net9.0' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net9.0' or '$(TargetFramework)' == 'net462' ">
     <PackageReference Include="Microsoft.Bcl.HashCode" Version="6.0.0" />
     <PackageReference Include="Microsoft.Bcl.Memory" Version="10.0.10" />
   </ItemGroup>
+
+  <!--
+    .NET Framework resolves assembly references by exact version at run time, and
+    the polyfill packages above drag in several System.* assemblies (Memory,
+    Runtime.CompilerServices.Unsafe, Buffers, Numerics.Vectors) at versions that
+    differ from what other references were built against. Without redirects the
+    tests build clean and then throw FileLoadException on first use, which is the
+    classic net4x failure this leg exists to catch — but in the harness rather
+    than in the port. AutoGenerateBindingRedirects writes them into the test
+    host's .config; GenerateBindingRedirectsOutputType puts them in the file
+    vstest actually loads. Both are required: dropping either one is a run-time
+    failure a green build will not warn about, so verify the leg still executes
+    tests (not merely compiles) before removing them.
+  -->
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net462' ">
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+  </PropertyGroup>
 
   <!--
     Test resources copied from opennlp-tools/src/test/resources upstream. The

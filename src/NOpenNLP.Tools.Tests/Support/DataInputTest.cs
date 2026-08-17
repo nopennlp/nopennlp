@@ -96,7 +96,11 @@ public class DataInputTest
         double value = Bytes(0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00).ReadJavaDouble();
 
         ClassicAssert.AreEqual(0.0, value);
-        ClassicAssert.IsTrue(double.IsNegative(value));
+
+        // NOpenNLP: the sign bit is read out of the bit pattern rather than via
+        // double.IsNegative, which does not exist on net462. Extracting it here
+        // says the same thing on every target without conditional compilation.
+        ClassicAssert.IsTrue(BitConverter.DoubleToInt64Bits(value) < 0);
     }
 
     [Test]
