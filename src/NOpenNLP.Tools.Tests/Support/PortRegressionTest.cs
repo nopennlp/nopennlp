@@ -19,6 +19,7 @@ using NOpenNLP.Tools.Namefind;
 using NOpenNLP.Tools.Postag;
 using NOpenNLP.Tools.Util;
 using NOpenNLP.Tools.Util.Featuregen;
+using NOpenNLP.Tools.Util.Normalizer;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
 using Version = NOpenNLP.Tools.Util.Version;
@@ -229,5 +230,49 @@ public class PortRegressionTest
 
         // A confident decision, not a near-tie that happened to fall the right way.
         ClassicAssert.Greater(chunker.Probs()[0], 0.9d);
+    }
+
+    /// <summary>
+    /// ShrinkCharSequenceNormalizer must trim as Java's String.trim() does,
+    /// removing only characters &lt;= U+0020. .NET's Trim() removes all Unicode
+    /// whitespace and would additionally strip a leading or trailing NBSP,
+    /// changing the character ngrams the language detector is given.
+    /// </summary>
+    /// <remarks>
+    /// Upstream's ShrinkCharSequenceNormalizerTest only uses ASCII spaces, so it
+    /// passes either way.
+    /// </remarks>
+    [Test]
+    public void TestShrinkNormalizerTrimsOnlyJavaWhitespace()
+    {
+        var normalizer = ShrinkCharSequenceNormalizer.GetInstance();
+
+        // U+00A0 NBSP is whitespace to .NET but not to Java's String.trim().
+        ClassicAssert.AreEqual(" hello ", normalizer.Normalize(" hello "));
+
+        // ASCII whitespace is still trimmed, as upstream does.
+        ClassicAssert.AreEqual("hello", normalizer.Normalize(" hello\t"));
+    }
+
+    /// <summary>
+    /// NumberCharSequenceNormalizer must match only ASCII digits, as Java's \d
+    /// does by default. .NET's \d is Unicode-aware and would also replace digits
+    /// from other scripts, discarding text upstream keeps.
+    /// </summary>
+    /// <remarks>
+    /// Upstream's NumberCharSequenceNormalizerTest only uses ASCII digits, so it
+    /// passes either way.
+    /// </remarks>
+    [Test]
+    public void TestNumberNormalizerMatchesAsciiDigitsOnly()
+    {
+        var normalizer = NumberCharSequenceNormalizer.GetInstance();
+
+        // Arabic-Indic digits are \d under .NET's Unicode-aware default, but not
+        // under Java's ASCII-only \d.
+        ClassicAssert.AreEqual("a١٢b", normalizer.Normalize("a١٢b"));
+
+        // ASCII digits are still replaced, as upstream does.
+        ClassicAssert.AreEqual("a b", normalizer.Normalize("a12b"));
     }
 }
