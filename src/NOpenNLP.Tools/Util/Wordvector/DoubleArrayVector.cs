@@ -19,9 +19,11 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NOpenNLP.Tools.Util.Wordvector;
 
+[Experimental("NONLPEXP0001")]
 internal class DoubleArrayVector(double[] vector) : IWordVector
 {
     public WordVectorType DataType => WordVectorType.Double;

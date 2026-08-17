@@ -70,9 +70,7 @@ public abstract class BaseLink
     public IDictionary<string, double> ScoreMap { get; set; } = new JCG.Dictionary<string, double>();
 
     public override string ToString() =>
-        "\tBaseLink" + "\n\titemParentID=" + ItemParentID + ", \n\titemID=" + ItemID
-        + ", \n\titemName=" + ItemName + ", \n\titemType=" + ItemType + ", \n\tscoreMap="
-        + ScoreMap + "\n";
+        $"\tBaseLink\n\titemParentID={ItemParentID}, \n\titemID={ItemID}, \n\titemName={ItemName}, \n\titemType={ItemType}, \n\tscoreMap={ScoreMap}\n";
 
     public override int GetHashCode() => HashCode.Combine(ItemParentID, ItemID, ItemName, ItemType);
 

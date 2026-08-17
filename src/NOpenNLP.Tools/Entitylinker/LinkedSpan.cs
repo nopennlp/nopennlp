@@ -75,8 +75,7 @@ public class LinkedSpan<T> : Span
     // NOpenNLP: Java renders the ArrayList as "[a, b]". Any IList<T> may be assigned here, and
     // the BCL List<T> would print its type name instead, so format the elements explicitly.
     public override string ToString() =>
-        "LinkedSpan\nsentenceid=" + SentenceId + "\nsearchTerm=" + SearchTerm
-        + "\nlinkedEntries=\n" + "[" + string.Join(", ", LinkedEntries) + "]" + "\n";
+        $"LinkedSpan\nsentenceid={SentenceId}\nsearchTerm={SearchTerm}\nlinkedEntries=\n[{string.Join(", ", LinkedEntries)}]\n";
 
     // NOpenNLP: Java hashes the ArrayList structurally. J2N's ListEqualityComparer gives the
     // same element-based hash, so equal spans keep equal hash codes.

@@ -19,6 +19,7 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NOpenNLP.Tools.Util.Wordvector;
 
@@ -27,6 +28,7 @@ namespace NOpenNLP.Tools.Util.Wordvector;
 /// <para/>
 /// Warning: Experimental new feature, see OPENNLP-1144 for details, the API might be changed anytime.
 /// </summary>
+[Experimental("NONLPEXP0001")]
 public interface IWordVector
 {
     /// <summary>

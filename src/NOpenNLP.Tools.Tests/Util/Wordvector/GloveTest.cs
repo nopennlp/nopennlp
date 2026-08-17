@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -33,6 +34,7 @@ namespace NOpenNLP.Tools.Util.Wordvector;
 /// were authored for the port to pin the parsing behavior the Java code implies.
 /// </remarks>
 [NOpenNLPSpecific]
+[Experimental("NONLPEXP0001")]
 public class GloveTest
 {
     private static Stream AsStream(string text) =>
@@ -79,7 +81,7 @@ public class GloveTest
         IWordVectorTable table = Glove.Parse(input);
 
         var tokens = new List<string>();
-        var enumerator = table.Tokens();
+        using var enumerator = table.GetEnumerator();
         while (enumerator.MoveNext())
         {
             tokens.Add(enumerator.Current);

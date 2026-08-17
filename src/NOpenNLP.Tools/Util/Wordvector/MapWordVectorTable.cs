@@ -18,16 +18,21 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NOpenNLP.Tools.Util.Wordvector;
 
+[Experimental("NONLPEXP0001")]
 internal class MapWordVectorTable(IDictionary<string, IWordVector> vectors) : IWordVectorTable
 {
     public IWordVector? Get(string token) =>
         vectors.TryGetValue(token, out var vector) ? vector : null;
 
-    public IEnumerator<string> Tokens() => vectors.Keys.GetEnumerator();
+    public IEnumerator<string> GetEnumerator() => vectors.Keys.GetEnumerator();
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     public int Count => vectors.Count;
 

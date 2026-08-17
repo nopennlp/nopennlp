@@ -18,6 +18,8 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace NOpenNLP.Tools.Util.Wordvector;
 
 /// <summary>
@@ -25,6 +27,7 @@ namespace NOpenNLP.Tools.Util.Wordvector;
 /// <para/>
 /// Warning: Experimental new feature, see OPENNLP-1144 for details, the API might be changed anytime.
 /// </summary>
+[Experimental("NONLPEXP0001")]
 public enum WordVectorType
 {
     Float,

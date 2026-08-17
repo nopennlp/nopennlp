@@ -19,6 +19,7 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NOpenNLP.Tools.Util.Wordvector;
 
@@ -27,7 +28,11 @@ namespace NOpenNLP.Tools.Util.Wordvector;
 /// <para/>
 /// Warning: Experimental new feature, see OPENNLP-1144 for details, the API might be changed anytime.
 /// </summary>
-public interface IWordVectorTable
+/// <remarks>
+/// NOpenNLP: <c>tokens()</c> method replaced with <see cref="IEnumerable{T}"/> implementation.
+/// </remarks>
+[Experimental("NONLPEXP0001")]
+public interface IWordVectorTable : IEnumerable<string>
 {
     // NOpenNLP: Java's Map.get returns null for an absent token; this returns null likewise
     // rather than throwing, so callers see the same behavior.
@@ -35,11 +40,6 @@ public interface IWordVectorTable
     /// Gets the vector for <paramref name="token"/>, or <c>null</c> if the token is not in the table.
     /// </summary>
     IWordVector? Get(string token);
-
-    /// <summary>
-    /// Gets an enumerator over the tokens in this table.
-    /// </summary>
-    IEnumerator<string> Tokens();
 
     /// <summary>
     /// Gets the number of tokens in this table.
