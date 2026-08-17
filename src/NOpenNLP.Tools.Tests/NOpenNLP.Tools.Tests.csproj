@@ -69,10 +69,12 @@
     APIs are already in the framework, and so contributes no assembly for them.
     The result builds clean and then throws FileNotFoundException on first use at
     run time. Referencing them here puts the implementation assemblies in the
-    test output. net462 is listed for the same reason: the assets it resolves are
-    its own, not the library's, so the polyfills have to be asked for here to land
-    in the test output. Keep this list in sync with the netstandard2.0 ItemGroup
-    in NOpenNLP.Tools.csproj.
+    test output. net462 is listed for the same reason, and additionally needs
+    Microsoft.Bcl.Memory to compile at all: DataInputTest indexes from the end
+    (testBytes[^1]), and System.Index is not in net462's BCL — the package ships
+    a public one in lib/net462. PolySharp is not an alternative here, since its
+    polyfills are internal and so invisible from this assembly. Keep this list in
+    sync with the netstandard2.0 ItemGroup in NOpenNLP.Tools.csproj.
   -->
   <ItemGroup Condition=" '$(TargetFramework)' == 'net9.0' or '$(TargetFramework)' == 'net462' ">
     <PackageReference Include="Microsoft.Bcl.HashCode" Version="6.0.0" />
@@ -88,7 +90,9 @@
     classic net4x failure this leg exists to catch — but in the harness rather
     than in the port. AutoGenerateBindingRedirects writes them into the test
     host's .config; GenerateBindingRedirectsOutputType puts them in the file
-    vstest actually loads.
+    vstest actually loads. Both are required: dropping either one is a run-time
+    failure a green build will not warn about, so verify the leg still executes
+    tests (not merely compiles) before removing them.
   -->
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net462' ">
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
