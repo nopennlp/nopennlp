@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using NOpenNLP.Tools.Ml.Naivebayes;
@@ -298,4 +299,103 @@ public class PortRegressionTest
         ClassicAssert.AreEqual("value", properties.GetProperty("key"));
         ClassicAssert.IsTrue(stream.CanRead, "Properties.Load must not close the caller's stream.");
     }
+
+    /// <summary>
+    /// Java's Properties.store leaves the stream open, the same as its load. The
+    /// port wrapped the stream in a StreamWriter without leaveOpen, so storing
+    /// closed the caller's stream.
+    /// </summary>
+    /// <remarks>
+    /// This is the write-side counterpart of
+    /// <see cref="TestPropertiesLoadLeavesStreamOpen"/>, which was fixed first.
+    /// TrainingParameters.Serialize writes through this method, and the model
+    /// serializers write several artifacts into a single zip stream in sequence,
+    /// so a closing writer truncates everything written after the first one.
+    /// </remarks>
+    [Test]
+    public void TestPropertiesStoreLeavesStreamOpen()
+    {
+        using var stream = new MemoryStream();
+
+        var properties = new Properties();
+        properties["key"] = "value";
+        properties.Store(stream, null);
+
+        ClassicAssert.IsTrue(stream.CanWrite, "Properties.Store must not close the caller's stream.");
+
+        // The entry is readable back off the same stream, which a closed writer
+        // would have prevented.
+        stream.Position = 0;
+        var roundTripped = new Properties();
+        roundTripped.Load(stream);
+        ClassicAssert.AreEqual("value", roundTripped.GetProperty("key"));
+    }
+
+    /// <summary>
+    /// TrainingParameters.Serialize must leave the caller's stream open, since
+    /// Java's Properties.store does.
+    /// </summary>
+    [Test]
+    public void TestTrainingParametersSerializeLeavesStreamOpen()
+    {
+        using var stream = new MemoryStream();
+
+        TrainingParameters parameters = TrainingParameters.DefaultParams();
+        parameters.Serialize(stream);
+
+        ClassicAssert.IsTrue(stream.CanWrite,
+            "TrainingParameters.Serialize must not close the caller's stream.");
+
+        stream.Position = 0;
+        TrainingParameters roundTripped = new(stream);
+
+        ClassicAssert.AreEqual("MAXENT", roundTripped.Algorithm());
+        ClassicAssert.AreEqual(100, roundTripped.GetIntParameter(TrainingParameters.ITERATIONS_PARAM, -1));
+        ClassicAssert.AreEqual(5, roundTripped.GetIntParameter(TrainingParameters.CUTOFF_PARAM, -1));
+    }
+
+    /// <summary>
+    /// The deprecated <see cref="TrainingParameters"/> string-map constructor infers
+    /// each value's type by trying Integer.parseInt, then Double.parseDouble, then
+    /// boolean, then string. The branch that claims a value decides the type stored,
+    /// which in turn decides how the value is rendered back into a model manifest.
+    /// </summary>
+    /// <remarks>
+    /// Java's Integer.parseInt does not skip surrounding whitespace, so " 100 "
+    /// falls through to the double branch and renders as "100.0". The port first
+    /// used NumberStyles.Integer, which allows whitespace, so it stored an int and
+    /// rendered "100" -- and GetDoubleParameter then threw where Java returned 100.0.
+    /// Verified against Integer.parseInt/Double.parseDouble on a JVM.
+    /// </remarks>
+    [Test]
+#pragma warning disable CS0618 // Type or member is obsolete
+    public void TestTrainingParametersInfersJavaTypesForNumericStrings()
+    {
+        TrainingParameters tp = new(new Dictionary<string, string>
+        {
+            ["plainInt"] = "100",
+            ["spacedInt"] = " 100 ",
+            ["suffixed"] = "1d",
+            ["hexFloat"] = "0x1.8p1",
+            ["notANumber"] = "1x",
+        });
+
+        IDictionary<string, string> settings = tp.GetSettings();
+
+        // Parsed as an int, rendered without a decimal point.
+        ClassicAssert.AreEqual("100", settings["plainInt"]);
+
+        // Integer.parseInt rejects the whitespace, so this is a double in Java.
+        ClassicAssert.AreEqual("100.0", settings["spacedInt"]);
+        ClassicAssert.AreEqual(100.0d, tp.GetDoubleParameter("spacedInt", -1), 0.001);
+
+        // Double.parseDouble accepts a "d"/"f" type suffix and hex-float notation,
+        // neither of which NumberStyles.Float allows.
+        ClassicAssert.AreEqual("1.0", settings["suffixed"]);
+        ClassicAssert.AreEqual("3.0", settings["hexFloat"]);
+
+        // Anything both parses reject stays a string.
+        ClassicAssert.AreEqual("1x", settings["notANumber"]);
+    }
+#pragma warning restore CS0618 // Type or member is obsolete
 }

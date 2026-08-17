@@ -104,7 +104,13 @@ internal class Properties : Dictionary<object, object>
 
     public void Store(Stream s, string? comments)
     {
-        using var writer = new StreamWriter(s);
+        // NOpenNLP: Java's Properties.store leaves the stream open, matching Load
+        // above. Without leaveOpen the StreamWriter would close the caller's stream
+        // on dispose, which breaks callers that write further entries afterwards --
+        // TrainingParameters.Serialize, and the model serializers that write several
+        // artifacts into a single zip stream.
+        using var writer = new StreamWriter(s, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false),
+            bufferSize: 1024, leaveOpen: true);
         if (!string.IsNullOrEmpty(comments))
         {
             writer.WriteLine("# " + comments);
