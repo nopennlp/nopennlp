@@ -15,8 +15,9 @@ Early work in progress. The port currently covers the **inference** APIs of the
 | Tokenization, sentence detection, POS tagging | Model training |
 | Lemmatization, chunking, name finding (NER) | Command-line tools |
 | Language detection, document categorization | Corpus format readers |
-| Maxent / Perceptron / Naive Bayes inference | Parser, stemmers |
+| Maxent / Perceptron / Naive Bayes inference | Stemmers |
 | Model loading and feature generation | |
+| Parsing, entity linking, word vectors | |
 
 ## Usage
 
