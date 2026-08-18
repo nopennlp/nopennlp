@@ -113,49 +113,34 @@ public class POSDictionary : IEnumerable<string>, IMutableTagDictionary, ISerial
         return tagString.ToString();
     }
 
-    ///// <summary>
-    ///// Writes the <see cref="POSDictionary"/> to the given <see cref="System.IO.Stream"/>;
-    ///// <para/>
-    ///// After the serialization is finished the provided
-    ///// <see cref="System.IO.Stream"/> remains open.
-    ///// </summary>
-    ///// <param name="out">
-    /////            the <see cref="System.IO.Stream"/> to write the dictionary into.</param>
-    ///// <exception cref="System.IO.IOException">
-    /////             if writing to the <see cref="System.IO.Stream"/> fails</exception>
-    // public virtual void Serialize(Stream @out)
-    // {
-    //     IEnumerator<Entry> entries = new AnonymousIEnumerator(this);
-    //     DictionaryEntryPersistor.Serialize(@out, entries, caseSensitive);
-    // }
+    /// <summary>
+    /// Writes the <see cref="POSDictionary"/> to the given <see cref="Stream"/>;
+    /// <para/>
+    /// After the serialization is finished the provided
+    /// <see cref="Stream"/> remains open.
+    /// </summary>
+    /// <param name="out">
+    ///            the <see cref="Stream"/> to write the dictionary into.</param>
+    /// <exception cref="IOException">
+    ///             if writing to the <see cref="Stream"/> fails</exception>
+    public virtual void Serialize(Stream @out)
+    {
+        // NOpenNLP: upstream builds an anonymous Iterator that wraps the key
+        // iterator; a C# iterator method expresses the same thing directly.
+        using IEnumerator<Entry> entries = CreateEntries();
+        DictionaryEntryPersistor.Serialize(@out, entries, caseSensitive);
+    }
 
-    // private sealed class AnonymousIEnumerator : IEnumerator
-    // {
-    //     public AnonymousIEnumerator(POSDictionary parent)
-    //     {
-    //         this.parent = parent;
-    //     }
-//
-    //     private readonly POSDictionary parent;
-    //     IEnumerator<string> iterator = dictionary.KeySet().Iterator();
-    //     public bool HasNext()
-    //     {
-    //         return iterator.HasNext();
-    //     }
-//
-    //     public Entry Next()
-    //     {
-    //         string word = iterator.Next();
-    //         Attributes tagAttribute = new Attributes();
-    //         tagAttribute.SetValue("tags", TagsToString(GetTags(word)));
-    //         return new Entry(new StringList(word), tagAttribute);
-    //     }
-//
-    //     public void Remove()
-    //     {
-    //         throw new NotSupportedException();
-    //     }
-    // }
+    private IEnumerator<Entry> CreateEntries()
+    {
+        foreach (string word in dictionary.Keys)
+        {
+            Attributes tagAttribute = new Attributes();
+            tagAttribute.SetValue("tags", TagsToString(GetTags(word)!));
+
+            yield return new Entry(new StringList(word), tagAttribute);
+        }
+    }
 
     public override int GetHashCode()
     {

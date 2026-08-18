@@ -21,6 +21,7 @@ using NOpenNLP.Tools.Util;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Xml;
 
 namespace NOpenNLP.Tools.Dictionary.Serializer;
@@ -153,22 +154,102 @@ public static class DictionaryEntryPersistor // NOpenNLP-specific: made static
         tokenList.Clear();
     }
 
-    // NOpenNLP: serialization is not supported; we only support inference
-    // of existing models. The upstream serialize/serializeEntry methods
-    // (which use javax.xml.transform SAXTransformerFactory) are omitted.
-    //
-    // public static void Serialize(Stream @out, IEnumerator<Entry> entries)
-    // {
-    //     DictionaryEntryPersistor.Serialize(@out, entries, true);
-    // }
-    //
-    // public static void Serialize(Stream @out, IEnumerator<Entry> entries, bool casesensitive)
-    // {
-    //     ...
-    // }
-    //
-    // private static void SerializeEntry(TransformerHandler hd, Entry entry)
-    // {
-    //     ...
-    // }
+    /// <summary>
+    /// Serializes the given entries to the given <see cref="Stream"/>.
+    /// <para/>
+    /// After the serialization is finished the provided
+    /// <see cref="Stream"/> remains open.
+    /// </summary>
+    /// <param name="out">stream to serialize to</param>
+    /// <param name="entries">entries to serialize</param>
+    /// <exception cref="IOException">If an I/O error occurs</exception>
+    /// <remarks>
+    /// Deprecated: Use <see cref="Serialize(Stream, IEnumerator{Entry}, bool)"/> instead.
+    /// </remarks>
+    [Obsolete("Use Serialize(Stream, IEnumerator<Entry>, bool) instead.")]
+    public static void Serialize(Stream @out, IEnumerator<Entry> entries)
+    {
+        Serialize(@out, entries, true);
+    }
+
+    /// <summary>
+    /// Serializes the given entries to the given <see cref="Stream"/>.
+    /// <para/>
+    /// After the serialization is finished the provided
+    /// <see cref="Stream"/> remains open.
+    /// </summary>
+    /// <param name="out">stream to serialize to</param>
+    /// <param name="entries">entries to serialize</param>
+    /// <param name="casesensitive">indicates if the written dictionary
+    /// should be case sensitive or case insensitive.</param>
+    /// <exception cref="IOException">If an I/O error occurs</exception>
+    public static void Serialize(Stream @out, IEnumerator<Entry> entries, bool casesensitive)
+    {
+        // NOpenNLP: upstream drives a SAX TransformerHandler, whose output properties
+        // are set to UTF-8 and indented. XmlWriter is the .NET counterpart, and mirrors
+        // the XmlReader the read path above uses. CloseOutput is false because this
+        // method documents that the stream stays open.
+        var settings = new XmlWriterSettings
+        {
+            Encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false),
+            Indent = true,
+            CloseOutput = false,
+        };
+
+        using var writer = XmlWriter.Create(@out, settings);
+
+        writer.WriteStartDocument();
+        writer.WriteStartElement(DICTIONARY_ELEMENT);
+        // NOpenNLP: Java writes String.valueOf(boolean), which is lowercase; C#'s
+        // bool.ToString() yields "True"/"False", which the reader's bool.TryParse
+        // would still accept but which would not match the dictionaries upstream
+        // writes, so the lowercase spelling is produced explicitly.
+        writer.WriteAttributeString(ATTRIBUTE_CASE_SENSITIVE, casesensitive ? "true" : "false");
+
+        while (entries.MoveNext())
+        {
+            Entry entry = entries.Current;
+
+            SerializeEntry(writer, entry);
+        }
+
+        writer.WriteEndElement();
+        writer.WriteEndDocument();
+
+        // NOpenNLP: upstream's endDocument() flushes through the transformer; XmlWriter
+        // buffers, so it is flushed here to make sure everything reaches the stream
+        // before the caller writes anything further to it.
+        writer.Flush();
+    }
+
+    private static void SerializeEntry(XmlWriter writer, Entry entry)
+    {
+        writer.WriteStartElement(ENTRY_ELEMENT);
+
+        // NOpenNLP: Attributes is optional on Entry, and the reader creates entries
+        // with a null Attributes when the element carries none, so a round-trip has
+        // to tolerate that; upstream's Entry always has one.
+        if (entry.Attributes is { } entryAttributes)
+        {
+            foreach (string key in entryAttributes)
+            {
+                string? value = entryAttributes.GetValue(key);
+                if (value != null)
+                {
+                    writer.WriteAttributeString(key, value);
+                }
+            }
+        }
+
+        StringList tokens = entry.Tokens;
+
+        foreach (string token in tokens)
+        {
+            writer.WriteStartElement(TOKEN_ELEMENT);
+            writer.WriteString(token);
+            writer.WriteEndElement();
+        }
+
+        writer.WriteEndElement();
+    }
 }

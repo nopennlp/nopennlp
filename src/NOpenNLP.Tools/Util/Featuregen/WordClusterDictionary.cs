@@ -36,15 +36,17 @@ public class WordClusterDictionary : ISerializableArtifact
             return new WordClusterDictionary(@in);
         }
 
-        // NOpenNLP: serialization is not supported; inference only.
-        // public virtual void Serialize(WordClusterDictionary artifact, Stream @out)
-        // {
-        //     artifact.Serialize(@out);
-        // }
+        public virtual void Serialize(WordClusterDictionary artifact, Stream @out)
+        {
+            artifact.Serialize(@out);
+        }
         // NOpenNLP: upstream relies on a default interface implementation to
         // bridge the non-generic IArtifactSerializer; DIMs are unavailable on
         // netstandard2.0/net462, so the bridge is explicit here.
         object IArtifactSerializer.Create(Stream @in) => Create(@in);
+
+        void IArtifactSerializer.Serialize(object artifact, Stream @out) =>
+            Serialize((WordClusterDictionary)artifact, @out);
     }
 
     private readonly JCG.Dictionary<string, string> tokenToClusterMap = new(); // NOpenNLP: made readonly
@@ -76,17 +78,30 @@ public class WordClusterDictionary : ISerializableArtifact
         return tokenToClusterMap[@string];
     }
 
-    // NOpenNLP: serialization is not supported; inference only.
-    // public virtual void Serialize(Stream @out)
-    // {
-    //     Writer writer = new BufferedWriter(new OutputStreamWriter(@out));
-    //     foreach (Map.Entry<String, String> entry in tokenToClusterMap.EntrySet())
-    //     {
-    //         writer.Write(entry.GetKey() + " " + entry.GetValue() + "\n");
-    //     }
-    //
-    //     writer.Flush();
-    // }
+    /// <summary>
+    /// Writes the cluster dictionary to the given <see cref="Stream"/>.
+    /// </summary>
+    /// <param name="out">the <see cref="Stream"/> to write the dictionary into.</param>
+    /// <exception cref="IOException"/>
+    public virtual void Serialize(Stream @out)
+    {
+        // NOpenNLP: upstream wraps the stream in an OutputStreamWriter with no charset,
+        // which takes the platform default; the reader side of this port already fixes
+        // UTF-8, so the writer does too, without a BOM. leaveOpen keeps the stream open
+        // for the caller, matching Java, where the writer is only flushed and never closed.
+        using var writer = new StreamWriter(@out, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false),
+            bufferSize: 1024, leaveOpen: true);
+
+        foreach (var entry in tokenToClusterMap)
+        {
+            // NOpenNLP: upstream writes "\n" literally rather than a platform newline,
+            // so the file is byte-identical across platforms; StreamWriter.WriteLine
+            // would emit Environment.NewLine instead.
+            writer.Write(entry.Key + " " + entry.Value + "\n");
+        }
+
+        writer.Flush();
+    }
 
     public virtual Type ArtifactSerializerClass => typeof(WordClusterDictionarySerializer);
 }

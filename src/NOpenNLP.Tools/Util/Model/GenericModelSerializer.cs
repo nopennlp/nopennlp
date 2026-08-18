@@ -31,10 +31,10 @@ public class GenericModelSerializer : IArtifactSerializer<AbstractModel>
         return new GenericModelReader(new BinaryFileDataReader(@in)).Model;
     }
 
-    // public virtual void Serialize(AbstractModel artifact, Stream @out)
-    // {
-    //     ModelUtil.WriteModel(artifact, @out);
-    // }
+    public virtual void Serialize(AbstractModel artifact, Stream @out)
+    {
+        ModelUtil.WriteModel(artifact, @out);
+    }
 
     public static void Register(IDictionary<string, IArtifactSerializer> factories)
     {
@@ -45,4 +45,7 @@ public class GenericModelSerializer : IArtifactSerializer<AbstractModel>
     // bridge the non-generic IArtifactSerializer; DIMs are unavailable on
     // netstandard2.0/net462, so the bridge is explicit here.
     object IArtifactSerializer.Create(Stream @in) => Create(@in);
+
+    void IArtifactSerializer.Serialize(object artifact, Stream @out) =>
+        Serialize((AbstractModel)artifact, @out);
 }

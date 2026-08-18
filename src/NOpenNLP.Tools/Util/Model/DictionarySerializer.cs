@@ -33,10 +33,10 @@ public class DictionarySerializer : IArtifactSerializer<NOpenNLP.Tools.Dictionar
         return new NOpenNLP.Tools.Dictionary.Dictionary(@in);
     }
 
-    // public virtual void Serialize(NOpenNLP.Tools.Dictionary.Dictionary dictionary, Stream @out)
-    // {
-    //     dictionary.Serialize(@out);
-    // }
+    public virtual void Serialize(NOpenNLP.Tools.Dictionary.Dictionary dictionary, Stream @out)
+    {
+        dictionary.Serialize(@out);
+    }
 
     public static void Register(IDictionary<string, IArtifactSerializer> factories)
     {
@@ -47,4 +47,7 @@ public class DictionarySerializer : IArtifactSerializer<NOpenNLP.Tools.Dictionar
     // bridge the non-generic IArtifactSerializer; DIMs are unavailable on
     // netstandard2.0/net462, so the bridge is explicit here.
     object IArtifactSerializer.Create(Stream @in) => Create(@in);
+
+    void IArtifactSerializer.Serialize(object artifact, Stream @out) =>
+        Serialize((NOpenNLP.Tools.Dictionary.Dictionary)artifact, @out);
 }

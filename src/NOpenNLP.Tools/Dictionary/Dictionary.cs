@@ -19,6 +19,7 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using NOpenNLP.Tools.Dictionary.Serializer;
 using NOpenNLP.Tools.Util;
+using NOpenNLP.Tools.Util.Model;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -30,20 +31,26 @@ namespace NOpenNLP.Tools.Dictionary;
 /// <summary>
 /// This class is a dictionary.
 /// </summary>
-public class Dictionary : IEnumerable<StringList> //, ISerializableArtifact
+public class Dictionary : IEnumerable<StringList>, ISerializableArtifact
 {
     private class StringListWrapper
     {
         private readonly StringList stringList;
-        // NOpenNLP: upstream is a Java non-static inner class that reads the
-        // outer Dictionary's isCaseSensitive field directly. C# inner classes
-        // have no implicit outer reference, so the flag is passed in instead.
-        private readonly bool isCaseSensitive;
+        // NOpenNLP: upstream is a Java non-static inner class, so Equals reads the
+        // outer Dictionary's isCaseSensitive field at comparison time. C# inner
+        // classes have no implicit outer reference, so the owner is held explicitly.
+        // Capturing the flag's value at construction instead would not be equivalent:
+        // the Dictionary(Stream) constructor inserts entries from inside
+        // DictionaryEntryPersistor.Create, before it can assign isCaseSensitive from
+        // that call's result, so every entry would be wrapped as case-insensitive
+        // while later lookups used the real value -- and a case-sensitive dictionary
+        // loaded from a stream would not find its own entries.
+        private readonly Dictionary owner;
 
-        internal StringListWrapper(StringList stringList, bool isCaseSensitive)
+        internal StringListWrapper(StringList stringList, Dictionary owner)
         {
             this.stringList = stringList;
-            this.isCaseSensitive = isCaseSensitive;
+            this.owner = owner;
         }
 
         internal StringList GetStringList()
@@ -61,7 +68,7 @@ public class Dictionary : IEnumerable<StringList> //, ISerializableArtifact
             }
             else if (obj is StringListWrapper other)
             {
-                result = isCaseSensitive
+                result = owner.isCaseSensitive
                     ? stringList.Equals(other.GetStringList())
                     : stringList.CompareToIgnoreCase(other.GetStringList());
             }
@@ -117,7 +124,7 @@ public class Dictionary : IEnumerable<StringList> //, ISerializableArtifact
     /// <param name="tokens">the new entry</param>
     public virtual void Put(StringList tokens)
     {
-        entrySet.Add(new StringListWrapper(tokens, isCaseSensitive));
+        entrySet.Add(new StringListWrapper(tokens, this));
         minTokenCount = Math.Min(minTokenCount, tokens.Count);
         maxTokenCount = Math.Max(maxTokenCount, tokens.Count);
     }
@@ -139,7 +146,7 @@ public class Dictionary : IEnumerable<StringList> //, ISerializableArtifact
     /// <returns>true if it contains the entry otherwise false</returns>
     public virtual bool Contains(StringList tokens)
     {
-        return entrySet.Contains(new StringListWrapper(tokens, isCaseSensitive));
+        return entrySet.Contains(new StringListWrapper(tokens, this));
     }
 
     /// <summary>
@@ -148,7 +155,7 @@ public class Dictionary : IEnumerable<StringList> //, ISerializableArtifact
     /// <param name="tokens">filter tokens</param>
     public virtual void Remove(StringList tokens)
     {
-        entrySet.Remove(new StringListWrapper(tokens, isCaseSensitive));
+        entrySet.Remove(new StringListWrapper(tokens, this));
     }
 
     /// <summary>
@@ -173,42 +180,26 @@ public class Dictionary : IEnumerable<StringList> //, ISerializableArtifact
     /// <returns>number of tokens</returns>
     public virtual int Count => entrySet.Count;
 
-    ///// <summary>
-    ///// Writes the current instance to the given <see cref="System.IO.Stream"/>.
-    ///// </summary>
-    ///// <param name="out"><see cref="System.IO.Stream"/></param>
-    ///// <exception cref="System.IO.IOException"></exception>
-    //public virtual void Serialize(OutputStream @out)
-    //{
-    //    IEnumerator<Entry> entryIterator = new AnonymousIEnumerator1(this);
-    //    DictionaryEntryPersistor.Serialize(@out, entryIterator, isCaseSensitive);
-    //}
+    /// <summary>
+    /// Writes the current instance to the given <see cref="Stream"/>.
+    /// </summary>
+    /// <param name="out"><see cref="Stream"/></param>
+    /// <exception cref="IOException"/>
+    public virtual void Serialize(Stream @out)
+    {
+        // NOpenNLP: upstream builds an anonymous Iterator over the dictionary's
+        // own iterator; a C# iterator method expresses the same thing directly.
+        using IEnumerator<Entry> entryIterator = CreateEntries();
+        DictionaryEntryPersistor.Serialize(@out, entryIterator, isCaseSensitive);
+    }
 
-    //private sealed class AnonymousIEnumerator1 : IEnumerator
-    //{
-    //    public AnonymousIEnumerator1(StringListWrapper parent)
-    //    {
-    //        this.parent = parent;
-    //    }
-
-    //    private readonly StringListWrapper parent;
-    //    private IEnumerator<StringList> dictionaryIterator = this.Iterator();
-    //    public bool HasNext()
-    //    {
-    //        return dictionaryIterator.HasNext();
-    //    }
-
-    //    public Entry Next()
-    //    {
-    //        StringList tokens = dictionaryIterator.Next();
-    //        return new Entry(tokens, new Attributes());
-    //    }
-
-    //    public void Remove()
-    //    {
-    //        throw new NotSupportedException();
-    //    }
-    //}
+    private IEnumerator<Entry> CreateEntries()
+    {
+        foreach (StringList tokens in this)
+        {
+            yield return new Entry(tokens, new Attributes());
+        }
+    }
 
     public override bool Equals(object? obj)
     {
@@ -270,18 +261,21 @@ public class Dictionary : IEnumerable<StringList> //, ISerializableArtifact
         // NOpenNLP: upstream returns an anonymous AbstractSet that implements
         // only iterator(), size() and contains(Object). The equivalent here is
         // a small read-only set view over the same entry set.
-        return new StringSetView(entrySet, isCaseSensitive);
+        return new StringSetView(this);
     }
 
     private sealed class StringSetView : ISet<string>
     {
-        private readonly ISet<StringListWrapper> entrySet;
-        private readonly bool isCaseSensitive;
+        // NOpenNLP: upstream's anonymous AbstractSet is an inner class, so it builds
+        // lookup wrappers against the live Dictionary. The owner is held here for the
+        // same reason StringListWrapper holds one.
+        private readonly Dictionary owner;
 
-        internal StringSetView(ISet<StringListWrapper> entrySet, bool isCaseSensitive)
+        private ISet<StringListWrapper> entrySet => owner.entrySet;
+
+        internal StringSetView(Dictionary owner)
         {
-            this.entrySet = entrySet;
-            this.isCaseSensitive = isCaseSensitive;
+            this.owner = owner;
         }
 
         public IEnumerator<string> GetEnumerator()
@@ -303,7 +297,7 @@ public class Dictionary : IEnumerable<StringList> //, ISerializableArtifact
                 return false;
             }
 
-            return entrySet.Contains(new StringListWrapper(new StringList(item), isCaseSensitive));
+            return entrySet.Contains(new StringListWrapper(new StringList(item), owner));
         }
 
         public bool IsReadOnly => true;
@@ -392,12 +386,9 @@ public class Dictionary : IEnumerable<StringList> //, ISerializableArtifact
         }
     }
 
-    ///// <summary>
-    ///// Gets the Serializer Class for <see cref="Dictionary"/>
-    ///// </summary>
-    ///// <returns><see cref="DictionarySerializer"/></returns>
-    //public virtual Class<TWildcardTodo> GetArtifactSerializerClass()
-    //{
-    //    return typeof(DictionarySerializer);
-    //}
+    /// <summary>
+    /// Gets the Serializer Class for <see cref="Dictionary"/>
+    /// </summary>
+    /// <returns><see cref="DictionarySerializer"/></returns>
+    public virtual Type ArtifactSerializerClass => typeof(DictionarySerializer);
 }

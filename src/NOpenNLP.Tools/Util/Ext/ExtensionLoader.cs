@@ -69,7 +69,14 @@ public class ExtensionLoader
         // Translate a Java package/class name to the ported namespace, e.g.
         // "opennlp.tools.sentdetect.SentenceDetectorFactory" ->
         // "NOpenNLP.Tools.Sentdetect.SentenceDetectorFactory".
-        string[] parts = className.Split('.');
+        //
+        // NOpenNLP: Java's Class.getName() separates a nested class from its outer
+        // class with '$', where .NET reflection uses '+'. Models record their artifact
+        // serializers by that name, and several of them are nested -- for example
+        // "opennlp.tools.postag.POSTaggerFactory$POSDictionarySerializer" -- so without
+        // this substitution a Java-trained model carrying a serializer-class- entry
+        // fails to load.
+        string[] parts = className.Replace('$', '+').Split('.');
         for (int i = 0; i < parts.Length; i++)
         {
             if (parts[i].Length > 0 && char.IsLower(parts[i][0]))
@@ -93,7 +100,10 @@ public class ExtensionLoader
 
         // Fall back to matching on the simple type name, which covers cases where
         // the Java package does not line up with the ported namespace.
-        string simpleName = parts[^1];
+        // NOpenNLP: for a nested type this must be the innermost name alone, since
+        // that is what Type.Name reports -- "POSDictionarySerializer", not
+        // "POSTaggerFactory+POSDictionarySerializer".
+        string simpleName = parts[^1].Split('+')[^1];
         foreach (Assembly assembly in GetSearchAssemblies())
         {
             Type[] candidates;
