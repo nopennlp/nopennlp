@@ -36,14 +36,13 @@ public class SentenceSampleStream(IObjectStream<string?> sentences)
 
     public override SentenceSample? Read()
     {
-        StringBuilder sentencesString = new StringBuilder();
+        var sentencesString = new StringBuilder();
 
         // NOpenNLP: upstream uses a LinkedList purely as an append-only list; J2N's
         // List provides the same ordering with an O(1) conversion to an array.
         JCG.List<Span> sentenceSpans = [];
 
-        string? sentence;
-        while ((sentence = samples.Read()) != null && !sentence.Equals(""))
+        while (samples.Read() is { } sentence && !sentence.Equals(""))
         {
             int begin = sentencesString.Length;
             sentence = sentence.Trim();

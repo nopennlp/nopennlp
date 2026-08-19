@@ -51,7 +51,7 @@ public class SentenceSample
         this.sentences = new ReadOnlyCollection<Span>(new JCG.List<Span>(sentences));
 
         // validate that all spans are inside the document text
-        foreach (Span sentence in sentences)
+        foreach (var sentence in sentences)
         {
             if (sentence.End > document.Length)
             {
@@ -64,9 +64,9 @@ public class SentenceSample
 
     public SentenceSample(IDetokenizer detokenizer, string[][] sentences)
     {
-        JCG.List<Span> spans = new JCG.List<Span>(sentences.Length);
+        var spans = new JCG.List<Span>(sentences.Length);
 
-        StringBuilder documentBuilder = new StringBuilder();
+        var documentBuilder = new StringBuilder();
 
         foreach (string[] sentenceTokens in sentences)
         {
@@ -92,7 +92,7 @@ public class SentenceSample
     /// </summary>
     public virtual Span[] GetSentences()
     {
-        Span[] result = new Span[sentences.Count];
+        var result = new Span[sentences.Count];
         sentences.CopyTo(result, 0);
         return result;
     }
@@ -100,8 +100,8 @@ public class SentenceSample
     // TODO: This one must output the tags!
     public override string ToString()
     {
-        StringBuilder documentBuilder = new StringBuilder();
-        foreach (Span sentSpan in sentences)
+        var documentBuilder = new StringBuilder();
+        foreach (var sentSpan in sentences)
         {
             documentBuilder.Append(sentSpan.GetCoveredText(document.AsCharSequence()).ToString()
                 .Replace("\r", "<CR>").Replace("\n", "<LF>"));

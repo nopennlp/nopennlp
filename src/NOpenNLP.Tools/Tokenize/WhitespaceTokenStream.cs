@@ -36,13 +36,13 @@ public class WhitespaceTokenStream(IObjectStream<TokenSample?> tokens)
     /// <exception cref="IOException">if there is an error during reading</exception>
     public override string? Read()
     {
-        TokenSample? tokenSample = samples.Read();
+        var tokenSample = samples.Read();
 
         if (tokenSample != null)
         {
-            StringBuilder whitespaceSeparatedTokenString = new StringBuilder();
+            var whitespaceSeparatedTokenString = new StringBuilder();
 
-            foreach (Span token in tokenSample.TokenSpans)
+            foreach (var token in tokenSample.TokenSpans)
             {
                 whitespaceSeparatedTokenString.Append(
                     token.GetCoveredText(tokenSample.Text.AsCharSequence()));
@@ -52,8 +52,7 @@ public class WhitespaceTokenStream(IObjectStream<TokenSample?> tokens)
             // Shorten string by one to get rid of last space
             if (whitespaceSeparatedTokenString.Length > 0)
             {
-                whitespaceSeparatedTokenString.Length =
-                    whitespaceSeparatedTokenString.Length - 1;
+                whitespaceSeparatedTokenString.Length -= 1;
             }
 
             return whitespaceSeparatedTokenString.ToString();

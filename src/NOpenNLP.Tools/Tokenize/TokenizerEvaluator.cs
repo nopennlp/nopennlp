@@ -34,7 +34,7 @@ namespace NOpenNLP.Tools.Tokenize;
 public class TokenizerEvaluator : Evaluator<TokenSample>
 {
     // NOpenNLP: made readonly
-    private readonly FMeasure fmeasure = new FMeasure();
+    private readonly FMeasure fmeasure = new();
 
     /// <summary>
     /// The <see cref="ITokenizer"/> used to create the predicted tokens.
@@ -53,7 +53,7 @@ public class TokenizerEvaluator : Evaluator<TokenSample>
 
     protected override TokenSample ProcessSample(TokenSample reference)
     {
-        Span[] predictions = tokenizer.TokenizePos(reference.Text);
+        var predictions = tokenizer.TokenizePos(reference.Text);
         fmeasure.UpdateScores(reference.TokenSpans, predictions);
 
         return new TokenSample(reference.Text, predictions);

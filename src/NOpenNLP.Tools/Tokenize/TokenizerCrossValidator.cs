@@ -24,26 +24,12 @@ using NOpenNLP.Tools.Util.Eval;
 
 namespace NOpenNLP.Tools.Tokenize;
 
-public class TokenizerCrossValidator
+public class TokenizerCrossValidator(
+    TrainingParameters trainParams,
+    TokenizerFactory factory,
+    params ITokenizerEvaluationMonitor?[]? listeners)
 {
-    // NOpenNLP: upstream names this field "params", which is a C# keyword;
-    // renamed to match TrainerFactory's spelling of the same concept.
-    private readonly TrainingParameters trainParams;
-
-    private readonly FMeasure fmeasure = new FMeasure();
-
-    // NOpenNLP: made readonly
-    private readonly ITokenizerEvaluationMonitor?[]? listeners;
-
-    private readonly TokenizerFactory factory;
-
-    public TokenizerCrossValidator(TrainingParameters trainParams,
-        TokenizerFactory factory, params ITokenizerEvaluationMonitor?[]? listeners)
-    {
-        this.trainParams = trainParams;
-        this.listeners = listeners;
-        this.factory = factory;
-    }
+    private readonly FMeasure fmeasure = new();
 
     /// <summary>
     /// Starts the evaluation.
@@ -57,11 +43,10 @@ public class TokenizerCrossValidator
 
         while (partitioner.HasNext)
         {
-            CrossValidationPartitioner<TokenSample>.TrainingSampleStream trainingSampleStream =
-                partitioner.Next();
+            var trainingSampleStream = partitioner.Next();
 
             // Maybe throws IOException if temporary file handling fails ...
-            TokenizerModel model = TokenizerME.Train(trainingSampleStream, this.factory, trainParams);
+            var model = TokenizerME.Train(trainingSampleStream, factory, trainParams);
 
             TokenizerEvaluator evaluator = new(new TokenizerME(model), listeners);
 

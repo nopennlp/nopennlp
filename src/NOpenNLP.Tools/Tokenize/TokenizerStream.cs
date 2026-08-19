@@ -31,9 +31,6 @@ namespace NOpenNLP.Tools.Tokenize;
 public class TokenizerStream(ITokenizer tokenizer, IObjectStream<string?> input)
     : ObjectStreamBase<TokenSample?>
 {
-    private readonly ITokenizer tokenizer = tokenizer; // NOpenNLP: made readonly
-    private readonly IObjectStream<string?> input = input; // NOpenNLP: made readonly
-
     /// <inheritdoc/>
     /// <exception cref="IOException">if there is an error during reading</exception>
     public override TokenSample? Read()
@@ -42,7 +39,7 @@ public class TokenizerStream(ITokenizer tokenizer, IObjectStream<string?> input)
 
         if (inputString != null)
         {
-            Span[] tokens = tokenizer.TokenizePos(inputString);
+            var tokens = tokenizer.TokenizePos(inputString);
 
             return new TokenSample(inputString, tokens);
         }

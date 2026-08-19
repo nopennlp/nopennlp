@@ -37,22 +37,13 @@ namespace NOpenNLP.Tools.Tokenize;
 /// <para/>
 /// The sequence must be unique in the input string and is not escaped.
 /// </summary>
-public class TokenSampleStream : FilterObjectStream<string?, TokenSample?>
+public class TokenSampleStream(IObjectStream<string?> sampleStrings,
+    string separatorChars = TokenSample.DEFAULT_SEPARATOR_CHARS)
+    : FilterObjectStream<string?, TokenSample?>(sampleStrings
+                                                ?? throw new ArgumentNullException(nameof(sampleStrings), "sampleStrings must not be null"))
 {
-    private readonly string separatorChars;
-
-    public TokenSampleStream(IObjectStream<string?> sampleStrings, string separatorChars)
-        : base(sampleStrings ?? throw new ArgumentNullException(nameof(sampleStrings),
-            "sampleStrings must not be null"))
-    {
-        this.separatorChars = separatorChars
-            ?? throw new ArgumentNullException(nameof(separatorChars), "separatorChars must not be null");
-    }
-
-    public TokenSampleStream(IObjectStream<string?> sentences)
-        : this(sentences, TokenSample.DEFAULT_SEPARATOR_CHARS)
-    {
-    }
+    private readonly string separatorChars = separatorChars
+                                             ?? throw new ArgumentNullException(nameof(separatorChars), "separatorChars must not be null");
 
     /// <inheritdoc/>
     /// <exception cref="IOException">if there is an error during reading</exception>

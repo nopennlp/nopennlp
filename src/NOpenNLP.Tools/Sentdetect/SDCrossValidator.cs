@@ -28,31 +28,13 @@ namespace NOpenNLP.Tools.Sentdetect;
 /// <summary>
 /// A cross validator for the sentence detector.
 /// </summary>
-public class SDCrossValidator
+public class SDCrossValidator(
+    string languageCode,
+    TrainingParameters trainParams,
+    SentenceDetectorFactory sdFactory,
+    params ISentenceDetectorEvaluationMonitor?[]? listeners)
 {
-    // NOpenNLP: made readonly
-    private readonly string languageCode;
-
-    // NOpenNLP: upstream names this field "params", which is a C# keyword;
-    // renamed to match TrainerFactory's spelling of the same concept.
-    private readonly TrainingParameters trainParams;
-
     private readonly FMeasure fmeasure = new FMeasure();
-
-    // NOpenNLP: made readonly
-    private readonly ISentenceDetectorEvaluationMonitor?[]? listeners;
-
-    // NOpenNLP: made readonly
-    private readonly SentenceDetectorFactory sdFactory;
-
-    public SDCrossValidator(string languageCode, TrainingParameters trainParams,
-        SentenceDetectorFactory sdFactory, params ISentenceDetectorEvaluationMonitor?[]? listeners)
-    {
-        this.languageCode = languageCode;
-        this.trainParams = trainParams;
-        this.listeners = listeners;
-        this.sdFactory = sdFactory;
-    }
 
     /// <summary>
     /// </summary>
@@ -100,11 +82,9 @@ public class SDCrossValidator
 
         while (partitioner.HasNext)
         {
-            CrossValidationPartitioner<SentenceSample>.TrainingSampleStream trainingSampleStream =
-                partitioner.Next();
+            var trainingSampleStream = partitioner.Next();
 
-            SentenceModel model = SentenceDetectorME.Train(languageCode, trainingSampleStream,
-                sdFactory, trainParams);
+            var model = SentenceDetectorME.Train(languageCode, trainingSampleStream, sdFactory, trainParams);
 
             // do testing
             SentenceDetectorEvaluator evaluator = new(new SentenceDetectorME(model), listeners);

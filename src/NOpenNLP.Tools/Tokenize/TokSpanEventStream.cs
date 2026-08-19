@@ -65,7 +65,7 @@ public class TokSpanEventStream : AbstractEventStream<TokenSample>
         bool skipAlphaNumerics, ITokenContextGenerator cg)
         : base(tokenSamples)
     {
-        Factory factory = new Factory();
+        var factory = new Factory();
         this.alphaNumeric = factory.GetAlphanumeric(null);
         this.skipAlphaNumerics = skipAlphaNumerics;
         this.cg = cg;
@@ -89,26 +89,26 @@ public class TokSpanEventStream : AbstractEventStream<TokenSample>
     /// <returns>The text of the tokens.</returns>
     protected override IEnumerable<Event> CreateEvents(TokenSample tokenSample)
     {
-        JCG.List<Event> events = new JCG.List<Event>(50);
+        var events = new JCG.List<Event>(50);
 
-        Span[] tokens = tokenSample.TokenSpans;
+        var tokens = tokenSample.TokenSpans;
         string text = tokenSample.Text;
 
         if (tokens.Length > 0)
         {
             int start = tokens[0].Start;
-            int end = tokens[tokens.Length - 1].End;
+            int end = tokens[^1].End;
 
             // NOpenNLP: Java substring(begin, end) takes an end index; .NET takes a length.
             string sent = text.Substring(start, end - start);
 
-            Span[] candTokens = WhitespaceTokenizer.INSTANCE.TokenizePos(sent);
+            var candTokens = WhitespaceTokenizer.INSTANCE.TokenizePos(sent);
 
             int firstTrainingToken = -1;
             int lastTrainingToken = -1;
-            foreach (Span candToken in candTokens)
+            foreach (var candToken in candTokens)
             {
-                Span cSpan = candToken;
+                var cSpan = candToken;
                 string ctok = sent.Substring(cSpan.Start, cSpan.End - cSpan.Start);
                 //adjust cSpan to text offsets
                 cSpan = new Span(cSpan.Start + start, cSpan.End + start);
@@ -152,7 +152,7 @@ public class TokSpanEventStream : AbstractEventStream<TokenSample>
                     {
                         for (int ti = firstTrainingToken; ti <= lastTrainingToken; ti++)
                         {
-                            Span tSpan = tokens[ti];
+                            var tSpan = tokens[ti];
                             int cStart = cSpan.Start;
                             for (int i = tSpan.Start + 1; i < tSpan.End; i++)
                             {

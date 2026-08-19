@@ -35,7 +35,7 @@ namespace NOpenNLP.Tools.Sentdetect;
 public class SentenceDetectorEvaluator : Evaluator<SentenceSample>
 {
     // NOpenNLP: made readonly
-    private readonly FMeasure fmeasure = new FMeasure();
+    private readonly FMeasure fmeasure = new();
 
     /// <summary>
     /// The <see cref="ISentenceDetector"/> used to predict sentences.
@@ -55,7 +55,7 @@ public class SentenceDetectorEvaluator : Evaluator<SentenceSample>
 
     private static Span[] TrimSpans(string document, Span[] spans)
     {
-        Span[] trimedSpans = new Span[spans.Length];
+        var trimedSpans = new Span[spans.Length];
 
         for (int i = 0; i < spans.Length; i++)
         {
@@ -67,9 +67,8 @@ public class SentenceDetectorEvaluator : Evaluator<SentenceSample>
 
     protected override SentenceSample ProcessSample(SentenceSample sample)
     {
-        Span[] predictions =
-            TrimSpans(sample.Document, sentenceDetector.SentPosDetect(sample.Document));
-        Span[] references = TrimSpans(sample.Document, sample.GetSentences());
+        var predictions = TrimSpans(sample.Document, sentenceDetector.SentPosDetect(sample.Document));
+        var references = TrimSpans(sample.Document, sample.GetSentences());
 
         fmeasure.UpdateScores(references, predictions);
 

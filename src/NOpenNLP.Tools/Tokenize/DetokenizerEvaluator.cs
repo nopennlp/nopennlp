@@ -35,7 +35,7 @@ namespace NOpenNLP.Tools.Tokenize;
 public class DetokenizerEvaluator : Evaluator<TokenSample>
 {
     // NOpenNLP: made readonly
-    private readonly FMeasure fmeasure = new FMeasure();
+    private readonly FMeasure fmeasure = new();
 
     /// <summary>
     /// The <see cref="IDetokenizer"/> used to create the predicted tokens.

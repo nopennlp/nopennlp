@@ -59,7 +59,7 @@ public class TokenSample
         this.text = text ?? throw new ArgumentNullException(nameof(text), "text must not be null");
         this.tokenSpans = new JCG.List<Span>(tokenSpans).AsReadOnly();
 
-        foreach (Span tokenSpan in tokenSpans)
+        foreach (var tokenSpan in tokenSpans)
         {
             if (tokenSpan.Start < 0 || tokenSpan.Start > text.Length ||
                 tokenSpan.End > text.Length || tokenSpan.End < 0)
@@ -72,9 +72,9 @@ public class TokenSample
 
     public TokenSample(IDetokenizer detokenizer, string[] tokens)
     {
-        StringBuilder sentence = new StringBuilder();
+        var sentence = new StringBuilder();
 
-        DetokenizationOperation[] operations = detokenizer.Detokenize(tokens);
+        var operations = detokenizer.Detokenize(tokens);
 
         JCG.List<Span> mergedTokenSpans = [];
 
@@ -118,10 +118,10 @@ public class TokenSample
 
     public override string ToString()
     {
-        StringBuilder sentence = new StringBuilder();
+        var sentence = new StringBuilder();
 
         int lastEndIndex = -1;
-        foreach (Span token in tokenSpans)
+        foreach (var token in tokenSpans)
         {
             if (lastEndIndex != -1)
             {
@@ -171,14 +171,14 @@ public class TokenSample
             throw new ArgumentNullException(nameof(separatorChars), "separatorChars must not be null");
         }
 
-        Span[] whitespaceTokenSpans = WhitespaceTokenizer.INSTANCE.TokenizePos(sampleString);
+        var whitespaceTokenSpans = WhitespaceTokenizer.INSTANCE.TokenizePos(sampleString);
 
         // Pre-allocate 20% for newly created tokens
-        JCG.List<Span> realTokenSpans = new JCG.List<Span>((int)(whitespaceTokenSpans.Length * 1.2d));
+        var realTokenSpans = new JCG.List<Span>((int)(whitespaceTokenSpans.Length * 1.2d));
 
-        StringBuilder untaggedSampleString = new StringBuilder();
+        var untaggedSampleString = new StringBuilder();
 
-        foreach (Span whiteSpaceTokenSpan in whitespaceTokenSpans)
+        foreach (var whiteSpaceTokenSpan in whitespaceTokenSpans)
         {
             string whitespaceToken = whiteSpaceTokenSpan.GetCoveredText(sampleString.AsCharSequence()).ToString();
 
