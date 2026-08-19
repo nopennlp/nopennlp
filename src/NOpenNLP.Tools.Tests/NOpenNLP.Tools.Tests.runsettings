@@ -28,11 +28,10 @@
   System.out/System.err call matching its Java counterpart, which is what makes
   the next 1.9.x rebase cheap.
 
-  Not applied automatically: dotnet test only reads this when pointed at it, so
-  CI and anyone who wants the full output are unaffected. Pass it with the
-  settings switch:
-
-    dotnet test src/NOpenNLP.Tools.Tests -s src/NOpenNLP.Tools.Tests/NOpenNLP.Tools.Tests.runsettings
+  Applied automatically. The test csproj points RunSettingsFilePath here, so a
+  plain "dotnet test" picks it up, CI included. To see the full console output
+  for a run, pass the adapter setting NUnit.ConsoleOut=1 as a runner argument,
+  after a bare double-dash separator on the dotnet test command line.
 -->
 <RunSettings>
 
