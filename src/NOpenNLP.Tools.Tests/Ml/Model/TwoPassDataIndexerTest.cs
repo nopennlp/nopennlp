@@ -25,6 +25,10 @@ using NUnit.Framework.Legacy;
 
 namespace NOpenNLP.Tools.Ml.Model;
 
+// NOpenNLP: upstream calls new TrainingParameters(Collections.emptyMap()), which
+// ports onto the deprecated string-map constructor. The obsoletion warning is
+// suppressed here rather than deviating from the upstream test.
+#pragma warning disable CS0618 // Type or member is obsolete
 public class TwoPassDataIndexerTest
 {
     [Test]
@@ -68,3 +72,4 @@ public class TwoPassDataIndexerTest
     // than stubbed. It should be added when NameSample and NameFinderEventStream
     // arrive.
 }
+#pragma warning restore CS0618 // Type or member is obsolete
