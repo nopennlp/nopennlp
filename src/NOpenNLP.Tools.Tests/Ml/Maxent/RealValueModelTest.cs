@@ -99,22 +99,4 @@ public class RealValueModelTest
             ClassicAssert.AreEqual(realResults[i], repeatResults[i], 0.01f);
         }
     }
-
-    // NOpenNLP-specific: the file-based event streams take a path, but the test
-    // corpora are embedded resources here, so one is materialized to a temp file
-    // for the duration of the test.
-    private sealed class TempResourceFile : IDisposable
-    {
-        public TempResourceFile(string resourcePath)
-        {
-            Path = System.IO.Path.GetTempFileName();
-            using Stream source = TestResources.OpenResource(resourcePath);
-            using FileStream target = File.Create(Path);
-            source.CopyTo(target);
-        }
-
-        public string Path { get; }
-
-        public void Dispose() => File.Delete(Path);
-    }
 }

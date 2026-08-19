@@ -56,3 +56,25 @@ internal static class TestResources
             "Add it as an EmbeddedResource with a matching LogicalName in NOpenNLP.Tools.Tests.csproj.");
     }
 }
+
+/// <summary>
+/// Materializes an embedded test resource to a temporary file for the duration of a test.
+/// </summary>
+/// <remarks>
+/// Authored for NOpenNLP; not part of the Apache OpenNLP source. The file-based event
+/// streams take a path, but the test corpora are embedded resources here.
+/// </remarks>
+internal sealed class TempResourceFile : IDisposable
+{
+    public TempResourceFile(string resourcePath)
+    {
+        Path = System.IO.Path.GetTempFileName();
+        using Stream source = TestResources.OpenResource(resourcePath);
+        using FileStream target = File.Create(Path);
+        source.CopyTo(target);
+    }
+
+    public string Path { get; }
+
+    public void Dispose() => File.Delete(Path);
+}

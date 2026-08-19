@@ -652,4 +652,34 @@ public class PortRegressionTest
             CultureInfo.CurrentCulture = original;
         }
     }
+
+    /// <summary>
+    /// A real-valued event line with trailing whitespace must not produce an extra,
+    /// empty predicate. Java's String.split discards trailing empty strings; .NET's
+    /// Split keeps them, so the port added an empty context to every such event.
+    /// </summary>
+    /// <remarks>
+    /// Several lines in the upstream real-valued training corpus end in a space. The
+    /// empty predicate inflated the model's predicate count, and with it the
+    /// dimension of the quasi-newton objective function.
+    /// </remarks>
+    [Test]
+    public void TestRealValueEventStreamIgnoresTrailingWhitespace()
+    {
+        string path = Path.GetTempFileName();
+        try
+        {
+            File.WriteAllText(path, "A feature1=4.0 feature2=2.0 \n", Encoding.UTF8);
+
+            using RealValueFileEventStream stream = new(path);
+            Event? read = stream.Read();
+
+            ClassicAssert.NotNull(read);
+            CollectionAssert.AreEqual(new[] { "feature1", "feature2" }, read!.Context);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
 }
