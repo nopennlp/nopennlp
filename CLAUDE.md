@@ -18,6 +18,13 @@ When converting the original Java code to C#, take care to:
 - Do not include more `using` declarations than needed
 - Use file-scoped namespaces
 - Replace `Iterable` with a proper `IEnumerable` implementation
+- Do not port `Iterator<T>` as `IEnumerator<T>`. Use `IEnumerable<T>` wherever
+  possible, in parameters, return types, and fields. It is far more common in
+  .NET, and it lets callers use `foreach` without having to dispose the
+  enumerator themselves. A method that upstream writes as an anonymous
+  `Iterator` becomes a C# iterator method returning `IEnumerable<T>`. Reach for
+  `IEnumerator<T>` only when the algorithm genuinely needs manual control over
+  advancing, such as lookahead across a `hasNext()`/`next()` pair.
 - Replace `static final` fields with `const` where possible; otherwise `static readonly`
 - Replace javadoc comments/tags with proper XML doc comment equivalents
 - Ensure XML doc comments are correctly formatted; i.e. `<br>` is invalid, it must be self-closing. `<p>` should be replaced with `<para/>`.

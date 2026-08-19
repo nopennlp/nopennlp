@@ -192,9 +192,7 @@ public abstract class BaseModel : IArtifactProvider
         // can be de-serialized.
         // The ordering of artifacts in a zip package is not guaranteed. The stream is first
         // read until the manifest appears, reseted, and read again to load all artifacts.
-        bool isSearchingForManifest = true;
-        using IEnumerator<ZipArchiveEntry> entries = zip.Entries.GetEnumerator();
-        while (entries.MoveNext() && entries.Current is { } entry && isSearchingForManifest)
+        foreach (var entry in zip.Entries)
         {
             if ("manifest.properties".Equals(entry.Name))
             {
@@ -204,7 +202,12 @@ public abstract class BaseModel : IArtifactProvider
                 {
                     artifactMap.Put(entry.Name, factory.Create(entryStream));
                 }
-                isSearchingForManifest = false;
+
+                // NOpenNLP: upstream stops reading once the manifest is found. Its
+                // loop also consumes one more entry before noticing, since the flag
+                // is only tested at the top; breaking here is equivalent, because
+                // nothing else in the loop body runs for a non-manifest entry.
+                break;
             }
 
             //zip.CloseEntry();

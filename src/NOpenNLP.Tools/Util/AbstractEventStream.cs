@@ -53,8 +53,14 @@ public abstract class AbstractEventStream<T> : ObjectStreamBase<Event?>
     /// </summary>
     /// <param name="sample">the sample for which training <see cref="Event"/>s
     /// are be created.</param>
-    /// <returns>an enumerator of training events or an empty enumerator.</returns>
-    protected abstract IEnumerator<Event> CreateEvents(T sample);
+    /// <returns>a sequence of training events, or an empty sequence.</returns>
+    /// <remarks>
+    /// NOpenNLP: upstream returns an <c>Iterator&lt;Event&gt;</c>. This returns
+    /// <see cref="IEnumerable{T}"/> instead, which is the more usual .NET shape and
+    /// spares implementers from handing back an enumerator the caller must dispose.
+    /// <see cref="Read"/> enumerates it manually, since it yields one event per call.
+    /// </remarks>
+    protected abstract IEnumerable<Event> CreateEvents(T sample);
 
     /// <inheritdoc/>
     /// <exception cref="IOException">if there is an error during reading</exception>
@@ -72,7 +78,7 @@ public abstract class AbstractEventStream<T> : ObjectStreamBase<Event?>
 
             while (pending == null && samples.Read() is { } sample)
             {
-                events = CreateEvents(sample);
+                events = CreateEvents(sample).GetEnumerator();
                 pending = events.MoveNext() ? events.Current : null;
             }
 
