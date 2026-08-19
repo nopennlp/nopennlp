@@ -91,11 +91,11 @@ public class StringList : IEnumerable<string>
     /// Retrieves an <see cref="System.Collections.Generic.IEnumerator{T}"/> over all tokens.
     /// </summary>
     /// <returns>iterator over tokens</returns>
-    public virtual IEnumerator<string> GetEnumerator() => new AnonymousIEnumerator(this);
+    public virtual IEnumerator<string> GetEnumerator() => new GetEnumeratorIEnumeratorAnonymousClass(this);
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-    private sealed class AnonymousIEnumerator(StringList parent) : IEnumerator<string>
+    private sealed class GetEnumeratorIEnumeratorAnonymousClass(StringList parent) : IEnumerator<string>
     {
         private int index = -1;
 
