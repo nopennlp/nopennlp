@@ -35,7 +35,7 @@ namespace NOpenNLP.Tools.Ml.Model;
 /// </summary>
 public class OnePassDataIndexer : AbstractDataIndexer
 {
-    public override void Index(IObjectStream<Event> eventStream)
+    public override void Index(IObjectStream<Event?> eventStream)
     {
         int cutoff = trainingParameters.GetIntParameter(CUTOFF_PARAM, CUTOFF_DEFAULT);
         bool sort = trainingParameters.GetBooleanParameter(SORT_PARAM, SORT_DEFAULT);
@@ -71,7 +71,7 @@ public class OnePassDataIndexer : AbstractDataIndexer
     /// <paramref name="cutoff"/> times are added to the <paramref name="predicatesInOut"/>
     /// map along with a unique integer index.
     /// </summary>
-    private JCG.List<Event> ComputeEventCounts(IObjectStream<Event> eventStream,
+    private JCG.List<Event> ComputeEventCounts(IObjectStream<Event?> eventStream,
         JCG.OrderedDictionary<string, int> predicatesInOut, int cutoff)
     {
         // NOpenNLP: insertion-ordered so the counter does not depend on hash order

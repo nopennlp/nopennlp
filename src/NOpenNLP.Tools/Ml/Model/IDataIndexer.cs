@@ -86,5 +86,5 @@ public interface IDataIndexer
     /// </summary>
     /// <param name="eventStream">a stream of events</param>
     /// <exception cref="IOException">if there is an error during reading</exception>
-    void Index(IObjectStream<Event> eventStream);
+    void Index(IObjectStream<Event?> eventStream);
 }

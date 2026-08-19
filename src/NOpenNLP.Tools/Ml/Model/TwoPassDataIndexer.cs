@@ -41,7 +41,7 @@ namespace NOpenNLP.Tools.Ml.Model;
 /// </summary>
 public class TwoPassDataIndexer : AbstractDataIndexer
 {
-    public override void Index(IObjectStream<Event> eventStream)
+    public override void Index(IObjectStream<Event?> eventStream)
     {
         int cutoff = trainingParameters.GetIntParameter(CUTOFF_PARAM, CUTOFF_DEFAULT);
         bool sort = trainingParameters.GetBooleanParameter(SORT_PARAM, SORT_DEFAULT);

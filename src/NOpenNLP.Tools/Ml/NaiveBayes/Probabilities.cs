@@ -108,9 +108,14 @@ public abstract class Probabilities<T>
     /// <returns>the probability associated with the label</returns>
     public virtual double? Get(T? t)
     {
-        double? d = Normalize()[t];
-        if (d == null)
+        // NOpenNLP: upstream is `normalize().get(t)`, which yields null for a label
+        // that is not in the map; the C# indexer throws instead, so the lookup goes
+        // through TryGetValue to keep the missing-label-means-zero behavior.
+        if (!Normalize().TryGetValue(t, out double? d) || d == null)
+        {
             return 0;
+        }
+
         return d;
     }
 
