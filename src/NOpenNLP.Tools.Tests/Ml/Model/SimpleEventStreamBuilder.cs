@@ -78,11 +78,11 @@ public class SimpleEventStreamBuilder
         return this;
     }
 
-    public IObjectStream<Event?> Build() => new SimpleEventStream(this);
+    public IObjectStream<Event?> Build() => new BuildObjectStreamBaseAnonymousClass(this);
 
     // NOpenNLP: upstream returns an anonymous ObjectStream; C# has no anonymous
     // classes, so this is a named private type reading the enclosing builder's list.
-    private sealed class SimpleEventStream(SimpleEventStreamBuilder owner) : ObjectStreamBase<Event?>
+    private sealed class BuildObjectStreamBaseAnonymousClass(SimpleEventStreamBuilder owner) : ObjectStreamBase<Event?>
     {
         public override Event? Read()
         {

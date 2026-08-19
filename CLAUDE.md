@@ -25,6 +25,14 @@ When converting the original Java code to C#, take care to:
   `Iterator` becomes a C# iterator method returning `IEnumerable<T>`. Reach for
   `IEnumerator<T>` only when the algorithm genuinely needs manual control over
   advancing, such as lookahead across a `hasNext()`/`next()` pair.
+- C# has no anonymous classes, so a Java anonymous class becomes a private
+  nested type named `{MethodOrTestName}{BaseClassOrInterfaceType}AnonymousClass`:
+  the member that returns it, then the type it extends or implements. An
+  anonymous `ObjectStream` returned from `build()` becomes
+  `BuildObjectStreamBaseAnonymousClass`. The name marks it as a stand-in rather
+  than a type upstream actually declares, and keeps it findable from the member
+  it belongs to. Where a C# iterator method or lambda expresses the same thing
+  directly, prefer that and skip the named type.
 - Replace `static final` fields with `const` where possible; otherwise `static readonly`
 - Replace javadoc comments/tags with proper XML doc comment equivalents
 - Ensure XML doc comments are correctly formatted; i.e. `<br>` is invalid, it must be self-closing. `<p>` should be replaced with `<para/>`.
