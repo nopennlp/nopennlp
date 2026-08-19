@@ -192,9 +192,7 @@ public abstract class BaseModel : IArtifactProvider
         // can be de-serialized.
         // The ordering of artifacts in a zip package is not guaranteed. The stream is first
         // read until the manifest appears, reseted, and read again to load all artifacts.
-        bool isSearchingForManifest = true;
-        using IEnumerator<ZipArchiveEntry> entries = zip.Entries.GetEnumerator();
-        while (entries.MoveNext() && entries.Current is { } entry && isSearchingForManifest)
+        foreach (var entry in zip.Entries)
         {
             if ("manifest.properties".Equals(entry.Name))
             {
@@ -204,7 +202,12 @@ public abstract class BaseModel : IArtifactProvider
                 {
                     artifactMap.Put(entry.Name, factory.Create(entryStream));
                 }
-                isSearchingForManifest = false;
+
+                // NOpenNLP: upstream stops reading once the manifest is found. Its
+                // loop also consumes one more entry before noticing, since the flag
+                // is only tested at the top; breaking here is equivalent, because
+                // nothing else in the loop body runs for a non-manifest entry.
+                break;
             }
 
             //zip.CloseEntry();
@@ -512,69 +515,87 @@ public abstract class BaseModel : IArtifactProvider
         }
     }
 
-    // /// <summary>
-    // /// Serializes the model to the given {@link OutputStream}.
-    // /// </summary>
-    // /// <param name="out">stream to write the model to</param>
-    // /// <exception cref="IOException"></exception>
-    // public void Serialize(Stream @out)
-    // {
-    //     if (!subclassSerializersInitiated)
-    //     {
-    //         throw new InvalidOperationException("The method BaseModel.loadArtifactSerializers() was not called by BaseModel subclass constructor.");
-    //     }
-    //
-    //     foreach (KeyValuePair<string, object> entry in artifactMap)
-    //     {
-    //         string name = entry.Key;
-    //         object artifact = entry.Value;
-    //         if (artifact is ISerializableArtifact)
-    //         {
-    //             ISerializableArtifact serializableArtifact = (ISerializableArtifact)artifact;
-    //             string artifactSerializerName = serializableArtifact.GetArtifactSerializerClass().GetName();
-    //             SetManifestProperty(SERIALIZER_CLASS_NAME_PREFIX + name, artifactSerializerName);
-    //         }
-    //     }
-    //
-    //     using var zip = new ZipArchive(@out, ZipArchiveMode.Create, leaveOpen: true);
-    //     foreach (KeyValuePair<string, object> entry in artifactMap)
-    //     {
-    //         string name = entry.Key;
-    //         var zipEntry = zip.CreateEntry(name);
-    //         object artifact = entry.Value;
-    //         IArtifactSerializer serializer = GetArtifactSerializer(name);
-    //
-    //         // If model is serialize-able always use the provided serializer
-    //         if (artifact is ISerializableArtifact)
-    //         {
-    //             ISerializableArtifact serializableArtifact = (ISerializableArtifact)artifact;
-    //             string artifactSerializerName = serializableArtifact.GetArtifactSerializerClass().GetName();
-    //             serializer = ExtensionLoader.InstantiateExtension<IArtifactSerializer>(artifactSerializerName);
-    //         }
-    //
-    //         if (serializer == null)
-    //         {
-    //             throw new InvalidOperationException("Missing serializer for " + name);
-    //         }
-    //
-    //         serializer.Serialize(artifactMap[name], zip);
-    //         //zip.CloseEntry();
-    //     }
-    //
-    //     // zip.Finish();
-    //     // zip.Flush();
-    //}
-    //
-    // public void Serialize(FileInfo model)
-    // {
-    //     using Stream @out = model.OpenWrite();
-    //     Serialize(@out);
-    // }
-    //
-    // public void Serialize(string model)
-    // {
-    //     Serialize(new FileInfo(model));
-    // }
+    /// <summary>
+    /// Serializes the model to the given <see cref="Stream"/>.
+    /// </summary>
+    /// <param name="out">stream to write the model to</param>
+    /// <exception cref="IOException"/>
+    public void Serialize(Stream @out)
+    {
+        if (!subclassSerializersInitiated)
+        {
+            throw new InvalidOperationException(
+                "The method BaseModel.LoadArtifactSerializers() was not called by BaseModel subclass constructor.");
+        }
+
+        foreach (KeyValuePair<string, object> entry in artifactMap)
+        {
+            string name = entry.Key;
+            object artifact = entry.Value;
+            if (artifact is ISerializableArtifact serializableArtifact)
+            {
+                // NOpenNLP: upstream records the Java class name here. The port already
+                // writes .NET type names for the factory entry, and ExtensionLoader
+                // resolves either spelling on the way back in, so Type.FullName is used
+                // for consistency with how the factory name is written.
+                string artifactSerializerName = serializableArtifact.ArtifactSerializerClass.FullName
+                    ?? throw new InvalidOperationException("Serializer class must have a full name");
+
+                SetManifestProperty(SERIALIZER_CLASS_NAME_PREFIX + name, artifactSerializerName);
+            }
+        }
+
+        // NOpenNLP: Java writes through a single ZipOutputStream, where putNextEntry
+        // positions the stream and the serializer writes into it directly. .NET's
+        // ZipArchive hands out a separate stream per entry instead, so each artifact is
+        // written to its own entry stream; closeEntry() becomes disposing that stream.
+        // leaveOpen keeps the caller's stream open, matching upstream, which only
+        // finishes and flushes the zip.
+        using var zip = new ZipArchive(@out, ZipArchiveMode.Create, leaveOpen: true);
+
+        foreach (KeyValuePair<string, object> entry in artifactMap)
+        {
+            string name = entry.Key;
+            object artifact = entry.Value;
+
+            IArtifactSerializer? serializer = GetArtifactSerializer(name);
+
+            // If model is serialize-able always use the provided serializer
+            if (artifact is ISerializableArtifact serializableArtifact)
+            {
+                string artifactSerializerName = serializableArtifact.ArtifactSerializerClass.FullName
+                    ?? throw new InvalidOperationException("Serializer class must have a full name");
+
+                serializer = ExtensionLoader.InstantiateExtension<IArtifactSerializer>(artifactSerializerName);
+            }
+
+            if (serializer == null)
+            {
+                throw new InvalidOperationException("Missing serializer for " + name);
+            }
+
+            var zipEntry = zip.CreateEntry(name);
+            using Stream entryStream = zipEntry.Open();
+            serializer.Serialize(artifact, entryStream);
+        }
+    }
+
+    /// <exception cref="IOException"/>
+    public void Serialize(FileInfo model)
+    {
+        // NOpenNLP: upstream opens a FileOutputStream, which truncates an existing
+        // file. FileInfo.OpenWrite uses FileMode.OpenOrCreate and does not, so
+        // overwriting a larger model would leave the tail of the old one behind and
+        // produce a corrupt archive. FileMode.Create restores the truncating behavior.
+        using Stream @out = new FileStream(model.FullName, FileMode.Create, FileAccess.Write);
+        Serialize(@out);
+    }
+
+    /// <exception cref="IOException"/>
+    public void Serialize(string model)
+    {
+        Serialize(new FileInfo(model));
+    }
 
     public virtual T? GetArtifact<T>(string key)
     {

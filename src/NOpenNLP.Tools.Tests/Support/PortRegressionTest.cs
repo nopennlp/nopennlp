@@ -332,6 +332,76 @@ public class PortRegressionTest
     }
 
     /// <summary>
+    /// Java's Properties.store writes ISO-8859-1 and escapes everything outside it as
+    /// \uXXXX, so the file is ASCII in practice. Writing raw UTF-8 instead produced a
+    /// manifest that Java's Properties.load decodes as ISO-8859-1 and turns into
+    /// mojibake. The expected bytes here are what a real JVM produced for the same
+    /// input, and Java reads them back to the original string.
+    /// </summary>
+    [Test]
+    public void TestPropertiesStoreEscapesLikeJava()
+    {
+        using var stream = new MemoryStream();
+
+        var properties = new Properties();
+        properties.SetProperty("Unicode", "caf\u00e9 \u4e2d\u6587");
+        properties.SetProperty("Weird", "value with = and : sep");
+        properties.Store(stream, null);
+
+        // Latin-1 rather than UTF-8, because the file must be ASCII-only by now.
+        string written = Encoding.GetEncoding(28591).GetString(stream.ToArray());
+
+        StringAssert.Contains("Unicode=caf\\u00E9 \\u4E2D\\u6587", written);
+        StringAssert.Contains("Weird=value with \\= and \\: sep", written);
+    }
+
+    /// <summary>
+    /// The escaping above has to survive a round-trip, so Load unescapes what Store
+    /// wrote and, in the other direction, reads a manifest Java produced.
+    /// </summary>
+    [Test]
+    public void TestPropertiesRoundTripsEscapedValues()
+    {
+        using var stream = new MemoryStream();
+
+        var properties = new Properties();
+        properties.SetProperty("Unicode", "caf\u00e9 \u4e2d\u6587");
+        properties.SetProperty("Weird", "value with = and : sep");
+        properties.Store(stream, null);
+
+        stream.Position = 0;
+        var roundTripped = new Properties();
+        roundTripped.Load(stream);
+
+        ClassicAssert.AreEqual("caf\u00e9 \u4e2d\u6587", roundTripped.GetProperty("Unicode"));
+        ClassicAssert.AreEqual("value with = and : sep", roundTripped.GetProperty("Weird"));
+    }
+
+    /// <summary>
+    /// The exact bytes java.util.Properties.store produced for the same entries,
+    /// captured from a JVM, must load back to the original strings.
+    /// </summary>
+    [Test]
+    public void TestPropertiesLoadsJavaWrittenEscapes()
+    {
+        const string javaWritten =
+            "#\n" +
+            "#Tue Aug 18 08:50:58 MDT 2026\n" +
+            "Language=en\n" +
+            "Unicode=caf\\u00E9 \\u4E2D\\u6587\n" +
+            "Weird=value with \\= and \\: sep\n";
+
+        using var stream = new MemoryStream(Encoding.GetEncoding(28591).GetBytes(javaWritten));
+
+        var properties = new Properties();
+        properties.Load(stream);
+
+        ClassicAssert.AreEqual("en", properties.GetProperty("Language"));
+        ClassicAssert.AreEqual("caf\u00e9 \u4e2d\u6587", properties.GetProperty("Unicode"));
+        ClassicAssert.AreEqual("value with = and : sep", properties.GetProperty("Weird"));
+    }
+
+    /// <summary>
     /// TrainingParameters.Serialize must leave the caller's stream open, since
     /// Java's Properties.store does.
     /// </summary>

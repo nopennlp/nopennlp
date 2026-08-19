@@ -103,24 +103,22 @@ public class AbstractEventStreamTest
         : AbstractEventStream<Result>(samples)
     {
         /// <summary>
-        /// Creates enumerators for testing.
+        /// Creates event sequences for testing.
         /// </summary>
         /// <param name="sample">parameter to specify the output</param>
-        /// <returns>it returns an enumerator which contains one
+        /// <returns>it returns a sequence which contains one
         /// <see cref="Event"/> object if the sample parameter equals
-        /// <c>Result.Events</c> or an empty enumerator if the sample
+        /// <c>Result.Events</c> or an empty sequence if the sample
         /// parameter equals <c>Result.Empty</c>.</returns>
-        protected override IEnumerator<Event> CreateEvents(Result sample)
+        protected override IEnumerable<Event> CreateEvents(Result sample)
         {
             if (Result.Events.Equals(sample))
             {
-                List<Event> events = [new Event("test", ["f1", "f2"])];
-
-                return events.GetEnumerator();
+                return [new Event("test", ["f1", "f2"])];
             }
             else if (Result.Empty.Equals(sample))
             {
-                return Enumerable.Empty<Event>().GetEnumerator();
+                return [];
             }
             else
             {

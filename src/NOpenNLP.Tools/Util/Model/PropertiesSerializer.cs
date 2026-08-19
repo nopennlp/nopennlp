@@ -33,18 +33,18 @@ internal class PropertiesSerializer : IArtifactSerializer<Properties>
         return properties;
     }
 
-    // public virtual void Serialize(Properties properties, Stream @out)
-    // {
-    //     properties.Store(@out, "");
-    // }
+    public virtual void Serialize(Properties properties, Stream @out)
+        => properties.Store(@out, "");
 
     public static void Register(IDictionary<string, IArtifactSerializer> factories)
-    {
-        factories.Put("properties", new PropertiesSerializer());
-    }
+        => factories.Put("properties", new PropertiesSerializer());
 
     // NOpenNLP: upstream relies on a default interface implementation to
     // bridge the non-generic IArtifactSerializer; DIMs are unavailable on
     // netstandard2.0/net462, so the bridge is explicit here.
-    object IArtifactSerializer.Create(Stream @in) => Create(@in);
+    object IArtifactSerializer.Create(Stream @in)
+        => Create(@in);
+
+    void IArtifactSerializer.Serialize(object artifact, Stream @out)
+        => Serialize((Properties)artifact, @out);
 }

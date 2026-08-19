@@ -44,16 +44,21 @@ public class ParserModel : BaseModel
             // matching the IArtifactSerializer contract.
             new(new StreamReader(@in, new UTF8Encoding(false), false, 1024, leaveOpen: true));
 
-        // NOpenNLP: serialization is not supported; inference only.
-        // public virtual void Serialize(Lang.En.HeadRules artifact, Stream @out)
-        // {
-        //     artifact.Serialize(new StreamWriter(@out, new UTF8Encoding(false), 1024, leaveOpen: true));
-        // }
+        public virtual void Serialize(Lang.En.HeadRules artifact, Stream @out)
+        {
+            // NOpenNLP: mirrors the StreamReader in Create above -- BOM-less UTF-8,
+            // left open so the caller keeps ownership of the stream, matching the
+            // IArtifactSerializer contract.
+            artifact.Serialize(new StreamWriter(@out, new UTF8Encoding(false), 1024, leaveOpen: true));
+        }
 
         // NOpenNLP: upstream relies on a default interface implementation to
         // bridge the non-generic IArtifactSerializer; DIMs are unavailable on
         // netstandard2.0/net462, so the bridge is explicit here.
         object IArtifactSerializer.Create(Stream @in) => Create(@in);
+
+        void IArtifactSerializer.Serialize(object artifact, Stream @out) =>
+            Serialize((Lang.En.HeadRules)artifact, @out);
     }
 
     private const string COMPONENT_NAME = "Parser";

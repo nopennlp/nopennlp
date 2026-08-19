@@ -18,10 +18,13 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
+using NOpenNLP.Tools.Dictionary.Serializer;
 using NOpenNLP.Tools.Util;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Ngram;
@@ -45,36 +48,42 @@ public class NGramModel : IEnumerable<StringList>
     {
     }
 
-    // /// <summary>
-    // /// Initializes the current instance.
-    // /// </summary>
-    // /// <param name="in">the serialized model stream</param>
-    // /// <exception cref="IOException"></exception>
-    //public NGramModel(System.IO.Stream @in)
-    //{
-    //    DictionaryEntryPersistor.Create(@in, (entry) =>
-    //    {
-    //        int count;
-    //        string countValueString = null;
-    //        try
-    //        {
-    //            countValueString = entry.GetAttributes().GetValue(COUNT);
-    //            if (countValueString == null)
-    //            {
-    //                throw new InvalidFormatException("The count attribute must be set!");
-    //            }
+    /// <summary>
+    /// Initializes the current instance.
+    /// </summary>
+    /// <param name="in">the serialized model stream</param>
+    /// <exception cref="IOException"/>
+    public NGramModel(Stream @in)
+    {
+        DictionaryEntryPersistor.Create(@in, entry =>
+        {
+            int count;
+            string? countValueString = null;
+            try
+            {
+                countValueString = entry.Attributes?.GetValue(COUNT);
+                if (countValueString == null)
+                {
+                    throw new InvalidFormatException("The count attribute must be set!");
+                }
 
-    //            count = int.Parse(countValueString);
-    //        }
-    //        catch (System.FormatException e)
-    //        {
-    //            throw new InvalidFormatException("The count attribute '" + countValueString + "' must be a number!", e);
-    //        }
+                // NOpenNLP: Java's Integer.parseInt is culture-invariant and rejects
+                // surrounding whitespace and group separators, so the styles and
+                // culture are given explicitly rather than taking int.Parse's
+                // current-culture defaults.
+                count = int.Parse(countValueString, NumberStyles.AllowLeadingSign,
+                    CultureInfo.InvariantCulture);
+            }
+            catch (FormatException e)
+            {
+                throw new InvalidFormatException(
+                    "The count attribute '" + countValueString + "' must be a number!", e);
+            }
 
-    //        Add(entry.GetTokens());
-    //        SetCount(entry.GetTokens(), count);
-    //    });
-    //}
+            Add(entry.Tokens);
+            SetCount(entry.Tokens, count);
+        });
+    }
 
     /// <summary>
     /// Retrieves the count of the given ngram.
@@ -274,60 +283,30 @@ public class NGramModel : IEnumerable<StringList>
         return dict;
     }
 
-    ///// <summary>
-    ///// Writes the ngram instance to the given <see cref="System.IO.Stream"/>.
-    ///// </summary>
-    ///// <param name="out"></param>
-    ///// <exception cref="System.IO.IOException">if an I/O Error during writing occurs</exception>
-    //public virtual void Serialize(System.IO.Stream @out)
-    //{
-    //    IEnumerator<Entry> entryIterator = new AnonymousIEnumerator(this);
-    //    DictionaryEntryPersistor.Serialize(@out, entryIterator, false);
-    //}
+    /// <summary>
+    /// Writes the ngram instance to the given <see cref="Stream"/>.
+    /// </summary>
+    /// <param name="out">the <see cref="Stream"/> to write the ngram instance into.</param>
+    /// <exception cref="IOException">if writing to the <see cref="Stream"/> fails</exception>
+    public virtual void Serialize(Stream @out)
+    {
+        // NOpenNLP: upstream builds an anonymous Iterator over this model's own
+        // iterator; a C# iterator method expresses the same thing directly.
+        var entryIterator = CreateEntries();
+        DictionaryEntryPersistor.Serialize(@out, entryIterator, false);
+    }
 
-    //private sealed class AnonymousIEnumerator : IEnumerator<Entry>
-    //{
-    //    public AnonymousIEnumerator(NGramModel parent)
-    //    {
-    //        this.parent = parent;
-    //        this.mDictionaryIterator = parent.Iterator();
-    //    }
+    private IEnumerable<Entry> CreateEntries()
+    {
+        foreach (var tokens in this)
+        {
+            var attributes = new Attributes();
 
-    //    private readonly NGramModel parent;
-    //    private IEnumerator<StringList> mDictionaryIterator;
+            attributes.SetValue(COUNT, GetCount(tokens).ToString(CultureInfo.InvariantCulture));
 
-    //    public Entry Current => Next();
-
-    //    object System.Collections.IEnumerator.Current => Current;
-
-    //    public bool MoveNext()
-    //    {
-    //        return mDictionaryIterator.MoveNext();
-    //    }
-
-    //    public Entry Next()
-    //    {
-    //        StringList tokens = mDictionaryIterator.Current;
-    //        Attributes attributes = new Attributes();
-    //        attributes.SetValue(COUNT, parent.GetCount(tokens).ToString());
-    //        return new Entry(tokens, attributes);
-    //    }
-
-    //    public void Reset()
-    //    {
-    //        mDictionaryIterator = parent.Iterator();
-    //    }
-
-    //    public void Dispose()
-    //    {
-    //        mDictionaryIterator?.Dispose();
-    //    }
-
-    //    public void Remove()
-    //    {
-    //        throw new NotSupportedException();
-    //    }
-    //}
+            yield return new Entry(tokens, attributes);
+        }
+    }
 
     public override bool Equals(object? obj)
     {

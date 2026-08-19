@@ -18,6 +18,7 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using System;
+using System.Collections.Generic;
 using System.IO;
 using NOpenNLP.Tools.Dictionary.Serializer;
 using NOpenNLP.Tools.Util;
@@ -213,14 +214,30 @@ public class DetokenizationDictionary
         return operationTable.TryGetValue(token, out DetokenizationOperationType operation) ? operation : null;
     }
 
-    // NOpenNLP: the upstream serialize method is omitted, because the ported
-    // DictionaryEntryPersistor does not implement serialization; the port
-    // supports inference against existing models rather than writing them. The
-    // ported Dictionary omits its serialize method for the same reason.
-    //
-    // public virtual void Serialize(Stream @out)
-    // {
-    //     ...
-    //     DictionaryEntryPersistor.Serialize(@out, entries, false);
-    // }
+    /// <summary>
+    /// Writes the current instance to the given <see cref="Stream"/>.
+    /// </summary>
+    /// <param name="out">the <see cref="Stream"/> to write the dictionary into.</param>
+    /// <exception cref="IOException"/>
+    public virtual void Serialize(Stream @out)
+    {
+        // NOpenNLP: upstream builds an anonymous Iterator over the operation
+        // table's keys; a C# iterator method expresses the same thing directly.
+        var entries = CreateEntries();
+        DictionaryEntryPersistor.Serialize(@out, entries, false);
+    }
+
+    private IEnumerable<Entry> CreateEntries()
+    {
+        foreach (string token in operationTable.Keys)
+        {
+            var attributes = new Attributes();
+            // NOpenNLP: upstream writes the operation's enum name via toString();
+            // the ported enum uses C# member casing, so ToOperationString emits the
+            // upstream constant name, which is what a dictionary actually stores.
+            attributes.SetValue("operation", operationTable[token].ToOperationString());
+
+            yield return new Entry(new StringList(token), attributes);
+        }
+    }
 }

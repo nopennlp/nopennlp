@@ -19,6 +19,7 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Util.Model;
 using NUnit.Framework;
@@ -95,9 +96,8 @@ public class GeneratorFactoryTest
         ClassicAssert.AreEqual(1, aggregatedGenerator.Generators.Count);
         // NOpenNLP: upstream compares Class.getName(); the ported counterpart is
         // the .NET type, so the generator's type is compared directly.
-        IEnumerator<IAdaptiveFeatureGenerator> it = aggregatedGenerator.Generators.GetEnumerator();
-        it.MoveNext();
-        ClassicAssert.AreEqual(typeof(TokenClassFeatureGenerator), it.Current.GetType());
+        ClassicAssert.AreEqual(typeof(TokenClassFeatureGenerator),
+            aggregatedGenerator.Generators.First().GetType());
     }
 
     [Test]

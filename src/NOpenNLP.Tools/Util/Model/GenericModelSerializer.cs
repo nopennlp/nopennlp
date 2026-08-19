@@ -27,22 +27,20 @@ namespace NOpenNLP.Tools.Util.Model;
 public class GenericModelSerializer : IArtifactSerializer<AbstractModel>
 {
     public virtual AbstractModel Create(Stream @in)
-    {
-        return new GenericModelReader(new BinaryFileDataReader(@in)).Model;
-    }
+        => new GenericModelReader(new BinaryFileDataReader(@in)).Model;
 
-    // public virtual void Serialize(AbstractModel artifact, Stream @out)
-    // {
-    //     ModelUtil.WriteModel(artifact, @out);
-    // }
+    public virtual void Serialize(AbstractModel artifact, Stream @out)
+        => ModelUtil.WriteModel(artifact, @out);
 
     public static void Register(IDictionary<string, IArtifactSerializer> factories)
-    {
-        factories["model"] = new GenericModelSerializer();
-    }
+        => factories["model"] = new GenericModelSerializer();
 
     // NOpenNLP: upstream relies on a default interface implementation to
     // bridge the non-generic IArtifactSerializer; DIMs are unavailable on
     // netstandard2.0/net462, so the bridge is explicit here.
-    object IArtifactSerializer.Create(Stream @in) => Create(@in);
+    object IArtifactSerializer.Create(Stream @in)
+        => Create(@in);
+
+    void IArtifactSerializer.Serialize(object artifact, Stream @out)
+        => Serialize((AbstractModel)artifact, @out);
 }

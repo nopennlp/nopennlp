@@ -36,28 +36,17 @@ public interface IArtifactSerializer<T> : IArtifactSerializer
     /// <returns>the artifact</returns>
     T Create(Stream @in);
 
-    // /// <summary>
-    // /// Serializes the artifact to the provided {@link OutputStream}.
-    // ///
-    // /// The {@link OutputStream} remains open.
-    // /// </summary>
-    // void Serialize(T artifact, Stream @out);
-
-    // void IArtifactSerializer.Serialize(object artifact, Stream @out)
-    // {
-    //     if (artifact is T typedArtifact)
-    //     {
-    //         Serialize(typedArtifact, @out);
-    //     }
-    //     else
-    //     {
-    //         throw new InvalidCastException($"Expected artifact of type {typeof(T)}, but got {artifact?.GetType()}");
-    //     }
-    // }
+    /// <summary>
+    /// Serializes the artifact to the provided <see cref="System.IO.Stream"/>.
+    /// <para/>
+    /// The <see cref="System.IO.Stream"/> remains open.
+    /// </summary>
+    void Serialize(T artifact, Stream @out);
 }
 
 public interface IArtifactSerializer
 {
     object? Create(Stream @in);
-    //void Serialize(object artifact, Stream @out);
+
+    void Serialize(object artifact, Stream @out);
 }

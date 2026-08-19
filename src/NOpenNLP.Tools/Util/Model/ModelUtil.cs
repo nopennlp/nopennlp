@@ -20,6 +20,7 @@
 
 using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Ml.Model;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -30,34 +31,36 @@ namespace NOpenNLP.Tools.Util.Model;
 /// </summary>
 public static class ModelUtil // NOpenNLP: made static
 {
-    // /// <summary>
-    // /// Writes the given model to the given {@link OutputStream}.
-    // ///
-    // /// This methods does not closes the provided stream.
-    // /// </summary>
-    // /// <param name="model">the model to be written</param>
-    // /// <param name="out">the stream the model should be written to</param>
-    // public static void WriteModel(IMaxentModel model, Stream @out)
-    // {
-    //     ArgumentNullException.ThrowIfNull(model);
-    //     ArgumentNullException.ThrowIfNull(@out);
-    //     GenericModelWriter modelWriter = new GenericModelWriter((AbstractModel)model, new DataOutputStream(new AnonymousOutputStream(this)));
-    //     modelWriter.Persist();
-    // }
-    //
-    // private sealed class AnonymousOutputStream : Stream
-    // {
-    //     public AnonymousOutputStream(ModelUtil parent)
-    //     {
-    //         this.parent = parent;
-    //     }
-    //
-    //     private readonly ModelUtil parent;
-    //     public void Write(int b)
-    //     {
-    //         @out.Write(b);
-    //     }
-    // }
+    /// <summary>
+    /// Writes the given model to the given <see cref="Stream"/>.
+    /// <para/>
+    /// This methods does not closes the provided stream.
+    /// </summary>
+    /// <param name="model">the model to be written</param>
+    /// <param name="out">the stream the model should be written to</param>
+    /// <exception cref="IOException"/>
+    /// <exception cref="ArgumentNullException">in case one of the parameters is null</exception>
+    public static void WriteModel(IMaxentModel model, Stream @out)
+    {
+        // NOpenNLP: ArgumentNullException.ThrowIfNull is net6.0+.
+        if (model is null)
+        {
+            throw new ArgumentNullException(nameof(model), "model parameter must not be null");
+        }
+
+        if (@out is null)
+        {
+            throw new ArgumentNullException(nameof(@out), "out parameter must not be null");
+        }
+
+        // NOpenNLP: upstream delegates to GenericModelWriter, which is part of the
+        // ml.model write path and is not ported yet. The null checks above are
+        // upstream's and run first, so the argument contract already matches; only
+        // the write itself is missing. Restoring GenericModelWriter is tracked
+        // separately, at which point this body becomes the delegation upstream has.
+        throw new NotSupportedException(
+            "Writing a MaxentModel requires GenericModelWriter, which is not ported yet.");
+    }
 
     /// <summary>
     /// Checks if the expected outcomes are all contained as outcomes in the given model.
@@ -116,18 +119,21 @@ public static class ModelUtil // NOpenNLP: made static
         manifestInfoEntries.Put(BaseModel.TRAINING_ITERATIONS_PROPERTY, iterations.ToString());
     }
 
-    // /// <summary>
-    // /// Creates the default training parameters in case they are not provided.
-    // ///
-    // /// Note: Do not use this method, internal use only!
-    // /// </summary>
-    // /// <returns>training parameters instance</returns>
-    // public static TrainingParameters CreateDefaultTrainingParameters()
-    // {
-    //     TrainingParameters mlParams = new TrainingParameters();
-    //     mlParams.Put(TrainingParameters.ALGORITHM_PARAM, GISTrainer.MAXENT_VALUE);
-    //     mlParams.Put(TrainingParameters.ITERATIONS_PARAM, 100);
-    //     mlParams.Put(TrainingParameters.CUTOFF_PARAM, 5);
-    //     return mlParams;
-    // }
+    /// <summary>
+    /// Creates the default training parameters in case they are not provided.
+    /// <para/>
+    /// Note: Do not use this method, internal use only!
+    /// </summary>
+    /// <returns>training parameters instance</returns>
+    public static TrainingParameters CreateDefaultTrainingParameters()
+    {
+        TrainingParameters mlParams = new TrainingParameters();
+        // NOpenNLP: upstream uses GISTrainer.MAXENT_VALUE, which is part of the
+        // trainer API and is not ported yet; the literal it is defined as is
+        // inlined here, matching TrainingParameters.DefaultParams().
+        mlParams.Put(TrainingParameters.ALGORITHM_PARAM, "MAXENT");
+        mlParams.Put(TrainingParameters.ITERATIONS_PARAM, 100);
+        mlParams.Put(TrainingParameters.CUTOFF_PARAM, 5);
+        return mlParams;
+    }
 }

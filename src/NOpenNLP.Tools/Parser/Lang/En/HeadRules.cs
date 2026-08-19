@@ -20,6 +20,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using J2N.Text;
@@ -42,16 +43,21 @@ public class HeadRules : IHeadRules, IGapLabeler, ISerializableArtifact
             // matching the ArtifactSerializer contract.
             new HeadRules(new StreamReader(@in, new UTF8Encoding(false), false, 1024, leaveOpen: true));
 
-        // NOpenNLP: serialization is not supported; inference only.
-        // public virtual void Serialize(HeadRules artifact, Stream @out)
-        // {
-        //     artifact.Serialize(new StreamWriter(@out, new UTF8Encoding(false), 1024, leaveOpen: true));
-        // }
+        public virtual void Serialize(HeadRules artifact, Stream @out)
+        {
+            // NOpenNLP: mirrors the StreamReader in Create above -- BOM-less UTF-8,
+            // left open so the caller keeps ownership of the stream, matching the
+            // IArtifactSerializer contract.
+            artifact.Serialize(new StreamWriter(@out, new UTF8Encoding(false), 1024, leaveOpen: true));
+        }
 
         // NOpenNLP: upstream relies on a default interface implementation to
         // bridge the non-generic IArtifactSerializer; DIMs are unavailable on
         // netstandard2.0/net462, so the bridge is explicit here.
         object IArtifactSerializer.Create(Stream @in) => Create(@in);
+
+        void IArtifactSerializer.Serialize(object artifact, Stream @out) =>
+            Serialize((HeadRules)artifact, @out);
     }
 
     private class HeadRule
@@ -278,49 +284,52 @@ public class HeadRules : IHeadRules, IGapLabeler, ISerializableArtifact
         }
     }
 
-    // NOpenNLP: writing head rules back out is part of training/serialization, which this
-    // inference-only port omits. Reading them (the constructor above) is retained.
-    // /// <summary>
-    // /// Writes the head rules to the writer in a format suitable for loading
-    // /// the head rules again with the constructor. The encoding must be
-    // /// taken into account while working with the writer and reader.
-    // /// <para/>
-    // /// After the entries have been written, the writer is flushed.
-    // /// The writer remains open after this method returns.
-    // /// </summary>
-    // public void Serialize(TextWriter writer)
-    // {
-    //     foreach (KeyValuePair<string, HeadRule> entry in headRules)
-    //     {
-    //         string type = entry.Key;
-    //         HeadRule headRule = entry.Value;
-    //
-    //         // write num of tags
-    //         writer.Write((headRule.tags.Length + 2).ToString());
-    //         writer.Write(' ');
-    //
-    //         // write type
-    //         writer.Write(type);
-    //         writer.Write(' ');
-    //
-    //         // write l2r true == 1
-    //         if (headRule.leftToRight)
-    //             writer.Write("1");
-    //         else
-    //             writer.Write("0");
-    //
-    //         // write tags
-    //         foreach (string tag in headRule.tags)
-    //         {
-    //             writer.Write(' ');
-    //             writer.Write(tag);
-    //         }
-    //
-    //         writer.Write('\n');
-    //     }
-    //
-    //     writer.Flush();
-    // }
+    /// <summary>
+    /// Writes the head rules to the writer in a format suitable for loading
+    /// the head rules again with the constructor. The encoding must be
+    /// taken into account while working with the writer and reader.
+    /// <para/>
+    /// After the entries have been written, the writer is flushed.
+    /// The writer remains open after this method returns.
+    /// </summary>
+    /// <exception cref="IOException"/>
+    public void Serialize(TextWriter writer)
+    {
+        foreach (KeyValuePair<string, HeadRule> entry in headRules)
+        {
+            string type = entry.Key;
+            HeadRule headRule = entry.Value;
+
+            // write num of tags
+            // NOpenNLP: Java's Integer.toString is culture-invariant; ToString() with
+            // no arguments would take the current culture instead.
+            writer.Write((headRule.tags.Length + 2).ToString(CultureInfo.InvariantCulture));
+            writer.Write(' ');
+
+            // write type
+            writer.Write(type);
+            writer.Write(' ');
+
+            // write l2r true == 1
+            if (headRule.leftToRight)
+                writer.Write("1");
+            else
+                writer.Write("0");
+
+            // write tags
+            foreach (string tag in headRule.tags)
+            {
+                writer.Write(' ');
+                writer.Write(tag);
+            }
+
+            // NOpenNLP: upstream writes '\n' literally rather than a platform newline,
+            // so head rules round-trip byte-identically across platforms.
+            writer.Write('\n');
+        }
+
+        writer.Flush();
+    }
 
     public override int GetHashCode() => HashCode.Combine(headRules, punctSet);
 

@@ -295,11 +295,10 @@ public class POSTaggerFactory : BaseToolFactory
             return POSDictionary.Create(new UncloseableInputStream(@in));
         }
 
-        // NOpenNLP: serialization is not supported; inference only.
-        // public virtual void Serialize(POSDictionary artifact, Stream @out)
-        // {
-        //     artifact.Serialize(@out);
-        // }
+        public virtual void Serialize(POSDictionary artifact, Stream @out)
+        {
+            artifact.Serialize(@out);
+        }
 
         internal static void Register(IDictionary<string, IArtifactSerializer> factories)
         {
@@ -309,6 +308,9 @@ public class POSTaggerFactory : BaseToolFactory
         // bridge the non-generic IArtifactSerializer; DIMs are unavailable on
         // netstandard2.0/net462, so the bridge is explicit here.
         object IArtifactSerializer.Create(Stream @in) => Create(@in);
+
+        void IArtifactSerializer.Serialize(object artifact, Stream @out) =>
+            Serialize((POSDictionary)artifact, @out);
     }
 
     protected virtual void ValidatePOSDictionary(POSDictionary posDict, AbstractModel posModel)
