@@ -189,13 +189,13 @@ public class Dictionary : IEnumerable<StringList>, ISerializableArtifact
     {
         // NOpenNLP: upstream builds an anonymous Iterator over the dictionary's
         // own iterator; a C# iterator method expresses the same thing directly.
-        using IEnumerator<Entry> entryIterator = CreateEntries();
+        var entryIterator = CreateEntries();
         DictionaryEntryPersistor.Serialize(@out, entryIterator, isCaseSensitive);
     }
 
-    private IEnumerator<Entry> CreateEntries()
+    private IEnumerable<Entry> CreateEntries()
     {
-        foreach (StringList tokens in this)
+        foreach (var tokens in this)
         {
             yield return new Entry(tokens, new Attributes());
         }

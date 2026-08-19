@@ -292,15 +292,15 @@ public class NGramModel : IEnumerable<StringList>
     {
         // NOpenNLP: upstream builds an anonymous Iterator over this model's own
         // iterator; a C# iterator method expresses the same thing directly.
-        using IEnumerator<Entry> entryIterator = CreateEntries();
+        var entryIterator = CreateEntries();
         DictionaryEntryPersistor.Serialize(@out, entryIterator, false);
     }
 
-    private IEnumerator<Entry> CreateEntries()
+    private IEnumerable<Entry> CreateEntries()
     {
-        foreach (StringList tokens in this)
+        foreach (var tokens in this)
         {
-            Attributes attributes = new Attributes();
+            var attributes = new Attributes();
 
             attributes.SetValue(COUNT, GetCount(tokens).ToString(CultureInfo.InvariantCulture));
 

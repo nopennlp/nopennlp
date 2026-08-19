@@ -29,25 +29,20 @@ public class DictionarySerializer : IArtifactSerializer<NOpenNLP.Tools.Dictionar
     // NOpenNLP: upstream serializes opennlp.tools.dictionary.Dictionary, not a
     // java.util.Dictionary; the converter had mapped this to IDictionary/Hashtable.
     public virtual NOpenNLP.Tools.Dictionary.Dictionary Create(Stream @in)
-    {
-        return new NOpenNLP.Tools.Dictionary.Dictionary(@in);
-    }
+        => new(@in);
 
     public virtual void Serialize(NOpenNLP.Tools.Dictionary.Dictionary dictionary, Stream @out)
-    {
-        dictionary.Serialize(@out);
-    }
+        => dictionary.Serialize(@out);
 
     public static void Register(IDictionary<string, IArtifactSerializer> factories)
-    {
-        factories.Put("dictionary", new DictionarySerializer());
-    }
+        => factories.Put("dictionary", new DictionarySerializer());
 
     // NOpenNLP: upstream relies on a default interface implementation to
     // bridge the non-generic IArtifactSerializer; DIMs are unavailable on
     // netstandard2.0/net462, so the bridge is explicit here.
-    object IArtifactSerializer.Create(Stream @in) => Create(@in);
+    object IArtifactSerializer.Create(Stream @in)
+        => Create(@in);
 
-    void IArtifactSerializer.Serialize(object artifact, Stream @out) =>
-        Serialize((NOpenNLP.Tools.Dictionary.Dictionary)artifact, @out);
+    void IArtifactSerializer.Serialize(object artifact, Stream @out)
+        => Serialize((NOpenNLP.Tools.Dictionary.Dictionary)artifact, @out);
 }

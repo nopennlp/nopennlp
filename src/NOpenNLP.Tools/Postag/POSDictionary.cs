@@ -127,15 +127,15 @@ public class POSDictionary : IEnumerable<string>, IMutableTagDictionary, ISerial
     {
         // NOpenNLP: upstream builds an anonymous Iterator that wraps the key
         // iterator; a C# iterator method expresses the same thing directly.
-        using IEnumerator<Entry> entries = CreateEntries();
+        var entries = CreateEntries();
         DictionaryEntryPersistor.Serialize(@out, entries, caseSensitive);
     }
 
-    private IEnumerator<Entry> CreateEntries()
+    private IEnumerable<Entry> CreateEntries()
     {
         foreach (string word in dictionary.Keys)
         {
-            Attributes tagAttribute = new Attributes();
+            var tagAttribute = new Attributes();
             tagAttribute.SetValue("tags", TagsToString(GetTags(word)!));
 
             yield return new Entry(new StringList(word), tagAttribute);

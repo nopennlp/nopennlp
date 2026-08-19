@@ -52,15 +52,14 @@ public class POSModelSerializer : IArtifactSerializer<POSModel>
     }
 
     public virtual void Serialize(POSModel artifact, Stream @out)
-    {
-        artifact.Serialize(@out);
-    }
+        => artifact.Serialize(@out);
 
     // NOpenNLP: upstream relies on a default interface implementation to
     // bridge the non-generic IArtifactSerializer; DIMs are unavailable on
     // netstandard2.0/net462, so the bridge is explicit here.
-    object IArtifactSerializer.Create(Stream @in) => Create(@in);
+    object IArtifactSerializer.Create(Stream @in)
+        => Create(@in);
 
-    void IArtifactSerializer.Serialize(object artifact, Stream @out) =>
-        Serialize((POSModel)artifact, @out);
+    void IArtifactSerializer.Serialize(object artifact, Stream @out)
+        => Serialize((POSModel)artifact, @out);
 }

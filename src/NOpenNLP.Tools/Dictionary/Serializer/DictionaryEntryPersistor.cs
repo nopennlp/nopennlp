@@ -164,10 +164,10 @@ public static class DictionaryEntryPersistor // NOpenNLP-specific: made static
     /// <param name="entries">entries to serialize</param>
     /// <exception cref="IOException">If an I/O error occurs</exception>
     /// <remarks>
-    /// Deprecated: Use <see cref="Serialize(Stream, IEnumerator{Entry}, bool)"/> instead.
+    /// Deprecated: Use <see cref="Serialize(Stream, IEnumerable{Entry}, bool)"/> instead.
     /// </remarks>
-    [Obsolete("Use Serialize(Stream, IEnumerator<Entry>, bool) instead.")]
-    public static void Serialize(Stream @out, IEnumerator<Entry> entries)
+    [Obsolete("Use Serialize(Stream, IEnumerable<Entry>, bool) instead.")]
+    public static void Serialize(Stream @out, IEnumerable<Entry> entries)
     {
         Serialize(@out, entries, true);
     }
@@ -183,7 +183,12 @@ public static class DictionaryEntryPersistor // NOpenNLP-specific: made static
     /// <param name="casesensitive">indicates if the written dictionary
     /// should be case sensitive or case insensitive.</param>
     /// <exception cref="IOException">If an I/O error occurs</exception>
-    public static void Serialize(Stream @out, IEnumerator<Entry> entries, bool casesensitive)
+    /// <remarks>
+    /// NOpenNLP: It is more common in .NET to pass <see cref="IEnumerable{T}"/> than
+    /// <see cref="IEnumerator{T}"/>, and this has the benefit of not making the caller
+    /// clean up the enumerator. This was <c>Iterator&gt;Entry&lt;</c> upstream.
+    /// </remarks>
+    public static void Serialize(Stream @out, IEnumerable<Entry> entries, bool casesensitive)
     {
         // NOpenNLP: upstream drives a SAX TransformerHandler, whose output properties
         // are set to UTF-8 and indented. XmlWriter is the .NET counterpart, and mirrors
@@ -206,10 +211,8 @@ public static class DictionaryEntryPersistor // NOpenNLP-specific: made static
         // writes, so the lowercase spelling is produced explicitly.
         writer.WriteAttributeString(ATTRIBUTE_CASE_SENSITIVE, casesensitive ? "true" : "false");
 
-        while (entries.MoveNext())
+        foreach (var entry in entries)
         {
-            Entry entry = entries.Current;
-
             SerializeEntry(writer, entry);
         }
 

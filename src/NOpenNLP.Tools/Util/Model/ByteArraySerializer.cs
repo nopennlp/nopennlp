@@ -25,20 +25,17 @@ namespace NOpenNLP.Tools.Util.Model;
 public class ByteArraySerializer : IArtifactSerializer<byte[]>
 {
     public virtual byte[] Create(Stream @in)
-    {
-        return ModelUtil.Read(@in);
-    }
+        => ModelUtil.Read(@in);
 
     public virtual void Serialize(byte[] artifact, Stream @out)
-    {
-        @out.Write(artifact, 0, artifact.Length);
-    }
+        => @out.Write(artifact, 0, artifact.Length);
 
     // NOpenNLP: upstream relies on a default interface implementation to
     // bridge the non-generic IArtifactSerializer; DIMs are unavailable on
     // netstandard2.0/net462, so the bridge is explicit here.
-    object IArtifactSerializer.Create(Stream @in) => Create(@in);
+    object IArtifactSerializer.Create(Stream @in)
+        => Create(@in);
 
-    void IArtifactSerializer.Serialize(object artifact, Stream @out) =>
-        Serialize((byte[])artifact, @out);
+    void IArtifactSerializer.Serialize(object artifact, Stream @out)
+        => Serialize((byte[])artifact, @out);
 }

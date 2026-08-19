@@ -31,23 +31,8 @@ namespace NOpenNLP.Tools.Dictionary.Serializer;
 /// <seealso cref="DictionaryEntryPersistor"/>
 /// <seealso cref="Attributes"/>
 /// </remarks>
-public class Entry
+public class Entry(StringList tokens, Attributes? attributes)
 {
-    // NOpenNLP-specific: made readonly
-    private readonly StringList tokens;
-    private readonly Attributes? attributes;
-
-    /// <summary>
-    /// Initializes the current instance.
-    /// </summary>
-    /// <param name="tokens"></param>
-    /// <param name="attributes"></param>
-    public Entry(StringList tokens, Attributes? attributes)
-    {
-        this.tokens = tokens;
-        this.attributes = attributes;
-    }
-
     /// <summary>
     /// Retrieves the tokens.
     /// </summary>

@@ -223,15 +223,15 @@ public class DetokenizationDictionary
     {
         // NOpenNLP: upstream builds an anonymous Iterator over the operation
         // table's keys; a C# iterator method expresses the same thing directly.
-        using IEnumerator<Entry> entries = CreateEntries();
+        var entries = CreateEntries();
         DictionaryEntryPersistor.Serialize(@out, entries, false);
     }
 
-    private IEnumerator<Entry> CreateEntries()
+    private IEnumerable<Entry> CreateEntries()
     {
         foreach (string token in operationTable.Keys)
         {
-            Attributes attributes = new Attributes();
+            var attributes = new Attributes();
             // NOpenNLP: upstream writes the operation's enum name via toString();
             // the ported enum uses C# member casing, so ToOperationString emits the
             // upstream constant name, which is what a dictionary actually stores.
