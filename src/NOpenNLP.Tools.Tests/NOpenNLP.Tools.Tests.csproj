@@ -37,6 +37,23 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+
+    <!--
+      Applies the runsettings without anyone having to pass -s, so a plain
+      "dotnet test" is quiet. See the comments in the file itself for what it
+      suppresses and why suppressing at the runner rather than at the ported
+      call sites is what keeps the next 1.9.x rebase cheap.
+
+      The full output is still one flag away: append the adapter setting
+      NUnit.ConsoleOut=1 as a runner argument, after a bare double-dash
+      separator on the dotnet test command line. That overrides what this file
+      sets, without needing a second runsettings file or a rebuild.
+
+      Pointing the settings switch at an empty or non-XML file is not an escape
+      hatch: VSTest rejects it outright ("Root element is missing") rather than
+      falling back to defaults.
+    -->
+    <RunSettingsFilePath>$(MSBuildProjectDirectory)/NOpenNLP.Tools.Tests.runsettings</RunSettingsFilePath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -113,16 +130,32 @@
                       LogicalName="opennlp.tools.postag.TagDictionaryCaseInsensitive.xml" />
     <EmbeddedResource Include="Postag\TagDictionaryWithoutCaseAttribute.xml"
                       LogicalName="opennlp.tools.postag.TagDictionaryWithoutCaseAttribute.xml" />
+    <EmbeddedResource Include="Postag\AnnotatedSentences.txt"
+                      LogicalName="opennlp.tools.postag.AnnotatedSentences.txt" />
+    <EmbeddedResource Include="Postag\AnnotatedSentencesInsufficient.txt"
+                      LogicalName="opennlp.tools.postag.AnnotatedSentencesInsufficient.txt" />
     <EmbeddedResource Include="Lemmatizer\smalldictionary.dict"
                       LogicalName="opennlp.tools.lemmatizer.smalldictionary.dict" />
     <EmbeddedResource Include="Lemmatizer\smalldictionarymulti.dict"
                       LogicalName="opennlp.tools.lemmatizer.smalldictionarymulti.dict" />
+    <EmbeddedResource Include="Lemmatizer\output.txt"
+                      LogicalName="opennlp.tools.lemmatizer.output.txt" />
+    <EmbeddedResource Include="Lemmatizer\trial.old.tsv"
+                      LogicalName="opennlp.tools.lemmatizer.trial.old.tsv" />
+    <EmbeddedResource Include="Lemmatizer\trial.old-insufficient.tsv"
+                      LogicalName="opennlp.tools.lemmatizer.trial.old-insufficient.tsv" />
     <EmbeddedResource Include="Util\Featuregen\*.xml"
                       LogicalName="opennlp.tools.util.featuregen.%(Filename)%(Extension)" />
     <EmbeddedResource Include="Formats\brown-cluster.txt"
                       LogicalName="opennlp.tools.formats.brown-cluster.txt" />
     <EmbeddedResource Include="Chunker\*.bin"
                       LogicalName="opennlp.tools.chunker.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Chunker\test.txt"
+                      LogicalName="opennlp.tools.chunker.test.txt" />
+    <EmbeddedResource Include="Chunker\test-insufficient.txt"
+                      LogicalName="opennlp.tools.chunker.test-insufficient.txt" />
+    <EmbeddedResource Include="Chunker\output.txt"
+                      LogicalName="opennlp.tools.chunker.output.txt" />
     <EmbeddedResource Include="Tokenize\latin-detokenizer.xml"
                       LogicalName="opennlp.tools.tokenize.latin-detokenizer.xml" />
     <EmbeddedResource Include="Tokenize\token.train"
@@ -135,6 +168,22 @@
                       LogicalName="opennlp.tools.sentdetect.Sentences.txt" />
     <EmbeddedResource Include="Sentdetect\SentencesInsufficient.txt"
                       LogicalName="opennlp.tools.sentdetect.SentencesInsufficient.txt" />
+    <EmbeddedResource Include="Namefind\AnnotatedSentences.txt"
+                      LogicalName="opennlp.tools.namefind.AnnotatedSentences.txt" />
+    <EmbeddedResource Include="Namefind\AnnotatedSentencesInsufficient.txt"
+                      LogicalName="opennlp.tools.namefind.AnnotatedSentencesInsufficient.txt" />
+    <EmbeddedResource Include="Namefind\AnnotatedSentencesWithTypes.txt"
+                      LogicalName="opennlp.tools.namefind.AnnotatedSentencesWithTypes.txt" />
+    <EmbeddedResource Include="Namefind\html1.train"
+                      LogicalName="opennlp.tools.namefind.html1.train" />
+    <EmbeddedResource Include="Namefind\OnlyWithEntitiesWithTypes.train"
+                      LogicalName="opennlp.tools.namefind.OnlyWithEntitiesWithTypes.train" />
+    <EmbeddedResource Include="Namefind\OnlyWithNames.train"
+                      LogicalName="opennlp.tools.namefind.OnlyWithNames.train" />
+    <EmbeddedResource Include="Namefind\OnlyWithNamesWithTypes.train"
+                      LogicalName="opennlp.tools.namefind.OnlyWithNamesWithTypes.train" />
+    <EmbeddedResource Include="Namefind\voa1.train"
+                      LogicalName="opennlp.tools.namefind.voa1.train" />
     <EmbeddedResource Include="Parser\en_head_rules"
                       LogicalName="opennlp.tools.parser.en_head_rules" />
     <!--

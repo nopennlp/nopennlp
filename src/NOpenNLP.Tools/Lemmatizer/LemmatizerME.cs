@@ -23,6 +23,8 @@ using NOpenNLP.Tools.Ml;
 using NOpenNLP.Tools.Ml.Model;
 using NOpenNLP.Tools.Util;
 using System.Collections.Generic;
+using static NOpenNLP.Tools.Ml.TrainerFactory;
+using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Lemmatizer;
 
@@ -208,48 +210,57 @@ public class LemmatizerME : ILemmatizer
         return bestSequence.Probs;
     }
 
-    // public static LemmatizerModel Train(string languageCode, ObjectStream<LemmaSample> samples, TrainingParameters trainParams, LemmatizerFactory posFactory)
-    // {
-    //     int beamSize = trainParams.GetIntParameter(BeamSearch.BEAM_SIZE_PARAMETER, LemmatizerME.DEFAULT_BEAM_SIZE);
-    //     ILemmatizerContextGenerator contextGenerator = posFactory.GetContextGenerator();
-    //     Dictionary<string, string> manifestInfoEntries = new HashMap();
-    //     TrainerType trainerType = TrainerFactory.GetTrainerType(trainParams);
-    //     IMaxentModel lemmatizerModel = null;
-    //     ISequenceClassificationModel<string> seqLemmatizerModel = null;
-    //     if (TrainerType.EVENT_MODEL_TRAINER.Equals(trainerType))
-    //     {
-    //         ObjectStream<Event> es = new LemmaSampleEventStream(samples, contextGenerator);
-    //         EventTrainer trainer = TrainerFactory.GetEventTrainer(trainParams, manifestInfoEntries);
-    //         lemmatizerModel = trainer.Train(es);
-    //     }
-    //     else if (TrainerType.EVENT_MODEL_SEQUENCE_TRAINER.Equals(trainerType))
-    //     {
-    //         LemmaSampleSequenceStream ss = new LemmaSampleSequenceStream(samples, contextGenerator);
-    //         EventModelSequenceTrainer trainer = TrainerFactory.GetEventModelSequenceTrainer(trainParams, manifestInfoEntries);
-    //         lemmatizerModel = trainer.Train(ss);
-    //     }
-    //     else if (TrainerType.SEQUENCE_TRAINER.Equals(trainerType))
-    //     {
-    //         SequenceTrainer trainer = TrainerFactory.GetSequenceModelTrainer(trainParams, manifestInfoEntries);
-    //
-    //         // TODO: This will probably cause issue, since the feature generator uses the outcomes array
-    //         LemmaSampleSequenceStream ss = new LemmaSampleSequenceStream(samples, contextGenerator);
-    //         seqLemmatizerModel = trainer.Train(ss);
-    //     }
-    //     else
-    //     {
-    //         throw new ArgumentException("Trainer type is not supported: " + trainerType);
-    //     }
-    //
-    //     if (lemmatizerModel != null)
-    //     {
-    //         return new LemmatizerModel(languageCode, lemmatizerModel, beamSize, manifestInfoEntries, posFactory);
-    //     }
-    //     else
-    //     {
-    //         return new LemmatizerModel(languageCode, seqLemmatizerModel, manifestInfoEntries, posFactory);
-    //     }
-    // }
+    public static LemmatizerModel Train(string languageCode, IObjectStream<LemmaSample?> samples,
+        TrainingParameters trainParams, LemmatizerFactory posFactory)
+    {
+        int beamSize = trainParams.GetIntParameter(BeamSearch.BEAM_SIZE_PARAMETER, DEFAULT_BEAM_SIZE);
+
+        ILemmatizerContextGenerator contextGenerator = posFactory.ContextGenerator;
+
+        IDictionary<string, string> manifestInfoEntries = new JCG.Dictionary<string, string>();
+
+        TrainerType? trainerType = TrainerFactory.GetTrainerType(trainParams);
+
+        IMaxentModel? lemmatizerModel = null;
+        ISequenceClassificationModel<string>? seqLemmatizerModel = null;
+        if (TrainerType.EVENT_MODEL_TRAINER.Equals(trainerType))
+        {
+            IObjectStream<Event?> es = new LemmaSampleEventStream(samples, contextGenerator);
+
+            IEventTrainer trainer = TrainerFactory.GetEventTrainer(trainParams, manifestInfoEntries);
+            lemmatizerModel = trainer.Train(es);
+        }
+        else if (TrainerType.EVENT_MODEL_SEQUENCE_TRAINER.Equals(trainerType))
+        {
+            var ss = new LemmaSampleSequenceStream(samples, contextGenerator);
+            IEventModelSequenceTrainer<LemmaSample> trainer =
+                TrainerFactory.GetEventModelSequenceTrainer<LemmaSample>(trainParams, manifestInfoEntries);
+            lemmatizerModel = trainer.Train(ss);
+        }
+        else if (TrainerType.SEQUENCE_TRAINER.Equals(trainerType))
+        {
+            ISequenceTrainer<LemmaSample> trainer =
+                TrainerFactory.GetSequenceModelTrainer<LemmaSample>(trainParams, manifestInfoEntries);
+
+            // TODO: This will probably cause issue, since the feature generator uses the outcomes array
+
+            var ss = new LemmaSampleSequenceStream(samples, contextGenerator);
+            seqLemmatizerModel = trainer.Train(ss);
+        }
+        else
+        {
+            throw new ArgumentException("Trainer type is not supported: " + trainerType);
+        }
+
+        if (lemmatizerModel != null)
+        {
+            return new LemmatizerModel(languageCode, lemmatizerModel, beamSize, manifestInfoEntries, posFactory);
+        }
+        else
+        {
+            return new LemmatizerModel(languageCode, seqLemmatizerModel!, manifestInfoEntries, posFactory);
+        }
+    }
 
     public virtual Sequence[] TopKLemmaClasses(string[] sentence, string[] tags)
         => model.BestSequences(DEFAULT_BEAM_SIZE, sentence, [tags], contextGenerator, sequenceValidator);

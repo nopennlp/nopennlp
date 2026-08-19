@@ -39,10 +39,10 @@ public class POSTaggerFactory : BaseToolFactory
 {
     private const string TAG_DICTIONARY_ENTRY_NAME = "tags.tagdict";
     private const string NGRAM_DICTIONARY_ENTRY_NAME = "ngram.dictionary";
-    protected NOpenNLP.Tools.Dictionary.Dictionary ngramDictionary;
-    private byte[] featureGeneratorBytes;
-    private Dictionary<string, object> resources;
-    protected ITagDictionary posDictionary;
+    protected NOpenNLP.Tools.Dictionary.Dictionary? ngramDictionary;
+    private byte[]? featureGeneratorBytes;
+    private IDictionary<string, object>? resources;
+    protected ITagDictionary? posDictionary;
 
     /// <summary>
     /// Creates a <see cref="POSTaggerFactory"/> that provides the default implementation
@@ -62,13 +62,13 @@ public class POSTaggerFactory : BaseToolFactory
     /// Deprecated: This constructor is here for backward compatibility and
     ///             is not functional anymore in the training of 1.8.x series models
     /// </remarks>
-    public POSTaggerFactory(NOpenNLP.Tools.Dictionary.Dictionary ngramDictionary, ITagDictionary posDictionary)
+    public POSTaggerFactory(NOpenNLP.Tools.Dictionary.Dictionary? ngramDictionary, ITagDictionary? posDictionary)
     {
         this.Init(ngramDictionary, posDictionary); // TODO: This could be made functional by creating some default feature generation
         // which uses the dictionary ...
     }
 
-    public POSTaggerFactory(byte[]? featureGeneratorBytes, Dictionary<string, object> resources, ITagDictionary posDictionary)
+    public POSTaggerFactory(byte[]? featureGeneratorBytes, IDictionary<string, object>? resources, ITagDictionary? posDictionary)
     {
         this.featureGeneratorBytes = featureGeneratorBytes ?? LoadDefaultFeatureGeneratorBytes();
 
@@ -76,13 +76,16 @@ public class POSTaggerFactory : BaseToolFactory
         this.posDictionary = posDictionary;
     }
 
-    protected virtual void Init(NOpenNLP.Tools.Dictionary.Dictionary ngramDictionary, ITagDictionary posDictionary)
+    protected virtual void Init(NOpenNLP.Tools.Dictionary.Dictionary? ngramDictionary, ITagDictionary? posDictionary)
     {
         this.ngramDictionary = ngramDictionary;
         this.posDictionary = posDictionary;
     }
 
-    protected virtual void Init(byte[] featureGeneratorBytes, Dictionary<string, object> resources, ITagDictionary posDictionary)
+    // NOpenNLP: protected upstream, where POSTaggerCrossValidator (same package)
+    // calls it between folds. Java's protected also grants package access, which
+    // C#'s does not, so protected internal is needed to keep that caller working.
+    protected internal virtual void Init(byte[]? featureGeneratorBytes, IDictionary<string, object>? resources, ITagDictionary? posDictionary)
     {
         this.featureGeneratorBytes = featureGeneratorBytes;
         this.resources = resources;
@@ -91,7 +94,7 @@ public class POSTaggerFactory : BaseToolFactory
 
     private static byte[] LoadDefaultFeatureGeneratorBytes()
     {
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        var bytes = new ByteArrayOutputStream();
         try
         {
             // NOpenNLP: upstream resolves the classpath path
@@ -209,62 +212,68 @@ public class POSTaggerFactory : BaseToolFactory
         return POSDictionary.Create(@in);
     }
 
-    public virtual void SetTagDictionary(ITagDictionary dictionary)
+    // NOpenNLP: upstream declares this protected, which POSModel (same package)
+    // reads when writing the training artifacts. Java's protected also grants package
+    // access; C#'s does not, so it is protected internal to keep POSModel able to call
+    // it while subclasses can still override.
+    protected internal virtual IDictionary<string, object> Resources
     {
-        if (artifactProvider != null)
+        get
         {
-            throw new InvalidOperationException("Can not set tag dictionary while using artifact provider.");
-        }
+            if (resources != null)
+            {
+                return resources;
+            }
 
-        this.posDictionary = dictionary;
+            return new Dictionary<string, object>();
+        }
     }
 
-    protected virtual Dictionary<string, object> GetResources()
+    // NOpenNLP: protected upstream; see GetResources above.
+    protected internal virtual byte[]? FeatureGenerator => featureGeneratorBytes;
+
+    public virtual ITagDictionary? TagDictionary
     {
-        if (resources != null)
+        get
         {
-            return resources;
+            if (this.posDictionary == null && artifactProvider != null)
+                this.posDictionary = artifactProvider.GetArtifact<ITagDictionary>(TAG_DICTIONARY_ENTRY_NAME);
+            return this.posDictionary;
         }
+        set
+        {
+            if (artifactProvider != null)
+            {
+                throw new InvalidOperationException("Can not set tag dictionary while using artifact provider.");
+            }
 
-        return new Dictionary<string, object>();
-    }
-
-    protected virtual byte[] GetFeatureGenerator()
-    {
-        return featureGeneratorBytes;
-    }
-
-    public virtual ITagDictionary GetTagDictionary()
-    {
-        if (this.posDictionary == null && artifactProvider != null)
-            this.posDictionary = artifactProvider.GetArtifact<ITagDictionary>(TAG_DICTIONARY_ENTRY_NAME);
-        return this.posDictionary;
+            this.posDictionary = value;
+        }
     }
 
     /// <summary>
     /// </summary>
     /// <remarks>Deprecated: This will be reduced in visibility and later removed</remarks>
-    public virtual NOpenNLP.Tools.Dictionary.Dictionary GetDictionary()
+    public virtual NOpenNLP.Tools.Dictionary.Dictionary? Dictionary
     {
-        if (this.ngramDictionary == null && artifactProvider != null)
-            this.ngramDictionary = artifactProvider.GetArtifact<NOpenNLP.Tools.Dictionary.Dictionary>(NGRAM_DICTIONARY_ENTRY_NAME);
-        return this.ngramDictionary;
-    }
-
-    public virtual void SetDictionary(NOpenNLP.Tools.Dictionary.Dictionary ngramDict)
-    {
-        if (artifactProvider != null)
+        get
         {
-            throw new InvalidOperationException("Can not set ngram dictionary while using artifact provider.");
+            if (this.ngramDictionary == null && artifactProvider != null)
+                this.ngramDictionary = artifactProvider.GetArtifact<NOpenNLP.Tools.Dictionary.Dictionary>(NGRAM_DICTIONARY_ENTRY_NAME);
+            return this.ngramDictionary;
         }
+        set
+        {
+            if (artifactProvider != null)
+            {
+                throw new InvalidOperationException("Can not set ngram dictionary while using artifact provider.");
+            }
 
-        this.ngramDictionary = ngramDict;
+            this.ngramDictionary = value;
+        }
     }
 
-    public virtual IPOSContextGenerator GetPOSContextGenerator()
-    {
-        return GetPOSContextGenerator(0);
-    }
+    public virtual IPOSContextGenerator POSContextGenerator => GetPOSContextGenerator(0);
 
     public virtual IPOSContextGenerator GetPOSContextGenerator(int cacheSize)
     {
@@ -274,17 +283,14 @@ public class POSTaggerFactory : BaseToolFactory
             string version = manifest.GetProperty("OpenNLP-Version");
             if (Util.Version.Parse(version).Minor < 8)
             {
-                return new DefaultPOSContextGenerator(cacheSize, GetDictionary());
+                return new DefaultPOSContextGenerator(cacheSize, Dictionary);
             }
         }
 
         return new ConfigurablePOSContextGenerator(cacheSize, CreateFeatureGenerators());
     }
 
-    public virtual ISequenceValidator<string> GetSequenceValidator()
-    {
-        return new DefaultPOSSequenceValidator(GetTagDictionary());
-    }
+    public virtual ISequenceValidator<string> SequenceValidator => new DefaultPOSSequenceValidator(TagDictionary);
 
     // TODO: This should not be done anymore for 8 models, they can just
     // use the ISerializableArtifact interface
@@ -344,7 +350,6 @@ public class POSTaggerFactory : BaseToolFactory
 
     public override void ValidateArtifactMap()
     {
-
         // Ensure that the tag dictionary is compatible with the model
         object tagdictEntry = this.artifactProvider.GetArtifact<object>(TAG_DICTIONARY_ENTRY_NAME);
         if (tagdictEntry != null)
@@ -371,7 +376,8 @@ public class POSTaggerFactory : BaseToolFactory
         }
     }
 
-    public static POSTaggerFactory Create(string subclassName, NOpenNLP.Tools.Dictionary.Dictionary ngramDictionary, ITagDictionary posDictionary)
+    public static POSTaggerFactory Create(string? subclassName,
+        NOpenNLP.Tools.Dictionary.Dictionary? ngramDictionary, ITagDictionary? posDictionary)
     {
         if (subclassName == null)
         {
@@ -393,7 +399,8 @@ public class POSTaggerFactory : BaseToolFactory
         }
     }
 
-    public static POSTaggerFactory Create(string subclassName, byte[] featureGeneratorBytes, Dictionary<string, object> resources, ITagDictionary posDictionary)
+    public static POSTaggerFactory Create(string? subclassName, byte[]? featureGeneratorBytes,
+        Dictionary<string, object>? resources, ITagDictionary? posDictionary)
     {
         POSTaggerFactory theFactory;
         if (subclassName == null)

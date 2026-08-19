@@ -18,12 +18,18 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.RegularExpressions;
+using NOpenNLP.Tools.Ml;
 using NOpenNLP.Tools.Ml.Model;
+using NOpenNLP.Tools.Ml.Perceptron;
 using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Util;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using NOpenNLP.Tools.Util.Featuregen;
+using JCG = J2N.Collections.Generic;
+using TrainerType = NOpenNLP.Tools.Ml.TrainerFactory.TrainerType;
 
 namespace NOpenNLP.Tools.Namefind;
 
@@ -176,50 +182,77 @@ public class NameFinderME : ITokenNameFinder
         return sprobs;
     }
 
-    // public static TokenNameFinderModel Train(string languageCode, string type, ObjectStream<NameSample> samples, TrainingParameters trainParams, TokenNameFinderFactory factory)
-    // {
-    //     trainParams.PutIfAbsent(TrainingParameters.ALGORITHM_PARAM, PerceptronTrainer.PERCEPTRON_VALUE);
-    //     trainParams.PutIfAbsent(TrainingParameters.CUTOFF_PARAM, 0);
-    //     trainParams.PutIfAbsent(TrainingParameters.ITERATIONS_PARAM, 300);
-    //     int beamSize = trainParams.GetIntParameter(BeamSearch.BEAM_SIZE_PARAMETER, NameFinderME.DEFAULT_BEAM_SIZE);
-    //     Dictionary<string, string> manifestInfoEntries = new Dictionary<string, string>();
-    //     IMaxentModel nameFinderModel = null;
-    //     ISequenceClassificationModel<string> seqModel = null;
-    //     TrainerType trainerType = TrainerFactory.GetTrainerType(trainParams);
-    //     if (TrainerType.EVENT_MODEL_TRAINER.Equals(trainerType))
-    //     {
-    //         ObjectStream<Event> eventStream = new NameFinderEventStream(samples, type, factory.CreateContextGenerator(), factory.CreateSequenceCodec());
-    //         EventTrainer trainer = TrainerFactory.GetEventTrainer(trainParams, manifestInfoEntries);
-    //         nameFinderModel = trainer.Train(eventStream);
-    //     } // TODO: Maybe it is not a good idea, that these two don't use the context generator ?!
-    //     else
-// // These also don't use the sequence codec ?!
-    //     if (TrainerType.EVENT_MODEL_SEQUENCE_TRAINER.Equals(trainerType))
-    //     {
-    //         NameSampleSequenceStream ss = new NameSampleSequenceStream(samples, factory.CreateContextGenerator());
-    //         EventModelSequenceTrainer trainer = TrainerFactory.GetEventModelSequenceTrainer(trainParams, manifestInfoEntries);
-    //         nameFinderModel = trainer.Train(ss);
-    //     }
-    //     else if (TrainerType.SEQUENCE_TRAINER.Equals(trainerType))
-    //     {
-    //         SequenceTrainer trainer = TrainerFactory.GetSequenceModelTrainer(trainParams, manifestInfoEntries);
-    //         NameSampleSequenceStream ss = new NameSampleSequenceStream(samples, factory.CreateContextGenerator(), false);
-    //         seqModel = trainer.Train(ss);
-    //     }
-    //     else
-    //     {
-    //         throw new InvalidOperationException("Unexpected trainer type!");
-    //     }
-//
-    //     if (seqModel != null)
-    //     {
-    //         return new TokenNameFinderModel(languageCode, seqModel, factory.GetFeatureGenerator(), factory.GetResources(), manifestInfoEntries, factory.GetSequenceCodec(), factory);
-    //     }
-    //     else
-    //     {
-    //         return new TokenNameFinderModel(languageCode, nameFinderModel, beamSize, factory.GetFeatureGenerator(), factory.GetResources(), manifestInfoEntries, factory.GetSequenceCodec(), factory);
-    //     }
-    // }
+    /// <summary>
+    /// Trains a name finder model.
+    /// </summary>
+    /// <param name="languageCode">the language of the training data</param>
+    /// <param name="type">null or an override type for all types in the training data</param>
+    /// <param name="samples">the training data</param>
+    /// <param name="trainParams">machine learning train parameters</param>
+    /// <param name="factory">a <see cref="TokenNameFinderFactory"/> to get resources from</param>
+    /// <returns>the trained <see cref="TokenNameFinderModel"/></returns>
+    /// <exception cref="IOException">if reading from the <see cref="IObjectStream{T}"/> fails</exception>
+    public static TokenNameFinderModel Train(string languageCode, string? type,
+        IObjectStream<NameSample?> samples, TrainingParameters trainParams,
+        TokenNameFinderFactory factory)
+    {
+        trainParams.PutIfAbsent(TrainingParameters.ALGORITHM_PARAM, PerceptronTrainer.PERCEPTRON_VALUE);
+        trainParams.PutIfAbsent(TrainingParameters.CUTOFF_PARAM, 0);
+        trainParams.PutIfAbsent(TrainingParameters.ITERATIONS_PARAM, 300);
+
+        int beamSize = trainParams.GetIntParameter(BeamSearch.BEAM_SIZE_PARAMETER,
+            DEFAULT_BEAM_SIZE);
+
+        IDictionary<string, string> manifestInfoEntries = new JCG.Dictionary<string, string>();
+
+        IMaxentModel? nameFinderModel = null;
+
+        ISequenceClassificationModel<string>? seqModel = null;
+
+        var trainerType = TrainerFactory.GetTrainerType(trainParams);
+
+        if (TrainerType.EVENT_MODEL_TRAINER.Equals(trainerType))
+        {
+            IObjectStream<Event?> eventStream = new NameFinderEventStream(samples, type,
+                factory.CreateContextGenerator(), factory.CreateSequenceCodec());
+
+            IEventTrainer trainer = TrainerFactory.GetEventTrainer(trainParams, manifestInfoEntries);
+            nameFinderModel = trainer.Train(eventStream);
+        } // TODO: Maybe it is not a good idea, that these two don't use the context generator ?!
+        // These also don't use the sequence codec ?!
+        else if (TrainerType.EVENT_MODEL_SEQUENCE_TRAINER.Equals(trainerType))
+        {
+            NameSampleSequenceStream ss = new(samples, factory.CreateContextGenerator());
+
+            var trainer = TrainerFactory.GetEventModelSequenceTrainer<NameSample>(
+                trainParams, manifestInfoEntries);
+            nameFinderModel = trainer.Train(ss);
+        }
+        else if (TrainerType.SEQUENCE_TRAINER.Equals(trainerType))
+        {
+            var trainer = TrainerFactory.GetSequenceModelTrainer<NameSample>(
+                trainParams, manifestInfoEntries);
+
+            NameSampleSequenceStream ss = new(samples, factory.CreateContextGenerator(), false);
+            seqModel = trainer.Train(ss);
+        }
+        else
+        {
+            throw new InvalidOperationException("Unexpected trainer type!");
+        }
+
+        if (seqModel != null)
+        {
+            return new TokenNameFinderModel(languageCode, seqModel, factory.FeatureGenerator,
+                factory.Resources, manifestInfoEntries, factory.SequenceCodec, factory);
+        }
+        else
+        {
+            return new TokenNameFinderModel(languageCode, nameFinderModel!, beamSize,
+                factory.FeatureGenerator, factory.Resources, manifestInfoEntries,
+                factory.SequenceCodec, factory);
+        }
+    }
 
     /// <summary>
     /// Gets the name type from the outcome

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Quiets the console output the ported code writes while tests run.
+
+  Upstream OpenNLP prints progress and diagnostics straight to System.out and
+  System.err: the trainers report iteration and parameter counts, the model
+  writers announce what they are writing, and the sample streams warn about
+  lines they skip. The port reproduces those calls faithfully, so a test run
+  inherits all of it.
+
+  Two things make that worse than it is under Maven. The VSTest MSBuild task
+  surfaces anything a test writes to stderr as a build *warning*, prefixed with
+  Microsoft.TestPlatform.targets(48,5) - a location in the SDK, not in this
+  repo, which makes the messages read like build problems they are not. And
+  several fixtures are read twice by design (LemmatizerEvaluatorTest builds a
+  predicted and an expected stream over the same file), so each message lands
+  more than once.
+
+  The noisiest single case is opennlp/tools/lemmatizer/output.txt, whose
+  sentence separator is a line holding one tab rather than an empty line.
+  DummyLemmaSampleStream only stops on "", so all 18 separators fall through to
+  its "Skipping corrupt line" branch. Upstream behaves the same way: Java's
+  "\t".split("\t") is length 0 and .NET's is length 2, and neither is the 4
+  fields the check wants, so this is upstream noise reproduced rather than a
+  defect. The fixture is byte-identical to upstream and stays that way.
+
+  Suppressing at this layer rather than in the ported code keeps every
+  System.out/System.err call matching its Java counterpart, which is what makes
+  the next 1.9.x rebase cheap.
+
+  Applied automatically. The test csproj points RunSettingsFilePath here, so a
+  plain "dotnet test" picks it up, CI included. To see the full console output
+  for a run, pass the adapter setting NUnit.ConsoleOut=1 as a runner argument,
+  after a bare double-dash separator on the dotnet test command line.
+-->
+<RunSettings>
+
+  <NUnit>
+    <!--
+      Stops the NUnit adapter forwarding what a test writes to Console.Out and
+      Console.Error into the runner output. This is the setting that does the
+      work: the platform's own RunConfiguration/CaptureTraceOutput was measured
+      against this suite and made no difference, because the output comes
+      through the adapter rather than through the platform's trace capture, so
+      it is deliberately not set here.
+
+      A failing test is unaffected, and was checked rather than assumed: a
+      deliberately failing probe still reported its assertion message, its stack
+      trace, and its own Standard Output. The suppression only takes effect for
+      tests that pass, so nothing is lost when debugging a failure.
+    -->
+    <ConsoleOut>0</ConsoleOut>
+  </NUnit>
+
+</RunSettings>

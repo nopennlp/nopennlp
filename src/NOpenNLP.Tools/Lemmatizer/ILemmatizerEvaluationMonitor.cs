@@ -17,25 +17,14 @@
 
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using NOpenNLP.Tools.Util;
 
-namespace NOpenNLP.Tools.Postag;
+using NOpenNLP.Tools.Util.Eval;
+
+namespace NOpenNLP.Tools.Lemmatizer;
 
 /// <summary>
-/// The interface for part of speech taggers.
+/// Interface for the lemmatizer evaluator.
 /// </summary>
-public interface IPOSTagger
+public interface ILemmatizerEvaluationMonitor : IEvaluationMonitor<LemmaSample>
 {
-    /// <summary>
-    /// Assigns the sentence of tokens pos tags.
-    /// </summary>
-    /// <param name="sentence">The sentece of tokens to be tagged.</param>
-    /// <returns>an array of pos tags for each token provided in sentence.</returns>
-    string[] Tag(string[] sentence);
-
-    string[] Tag(string[] sentence, object[]? additionalContext);
-
-    Sequence[] TopKSequences(string[] sentence);
-
-    Sequence[] TopKSequences(string[] sentence, object[]? additionaContext);
 }

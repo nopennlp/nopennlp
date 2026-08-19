@@ -20,10 +20,15 @@
 
 using NOpenNLP.Tools.Ml;
 using NOpenNLP.Tools.Ml.Model;
+using NOpenNLP.Tools.Ngram;
 using NOpenNLP.Tools.Util;
+using NOpenNLP.Tools.Util.Featuregen;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using static NOpenNLP.Tools.Ml.TrainerFactory;
+using JCG = J2N.Collections.Generic;
 
 // disable obsolete warnings
 #pragma warning disable CS0618
@@ -78,9 +83,9 @@ public class POSTaggerME : IPOSTagger
 
         modelPackage = model;
         contextGen = factory.GetPOSContextGenerator(beamSize);
-        tagDictionary = factory.GetTagDictionary();
+        tagDictionary = factory.TagDictionary;
         size = beamSize;
-        sequenceValidator = factory.GetSequenceValidator();
+        sequenceValidator = factory.SequenceValidator;
         if (model.PosSequenceModel is { } posSequenceModel)
         {
             this.model = posSequenceModel;
@@ -208,145 +213,175 @@ public class POSTaggerME : IPOSTagger
         }
     }
 
-    // public static POSModel Train(string languageCode, ObjectStream<POSSample> samples, TrainingParameters trainParams, POSTaggerFactory posFactory)
-    // {
-    //     int beamSize = trainParams.GetIntParameter(BeamSearch.BEAM_SIZE_PARAMETER, POSTaggerME.DEFAULT_BEAM_SIZE);
-    //     IPOSContextGenerator contextGenerator = posFactory.GetPOSContextGenerator();
-    //     Dictionary<string, string> manifestInfoEntries = new Dictionary<string, string>();
-    //     TrainerType trainerType = TrainerFactory.GetTrainerType(trainParams);
-    //     IMaxentModel posModel = null;
-    //     ISequenceClassificationModel<string> seqPosModel = null;
-    //     if (TrainerType.EVENT_MODEL_TRAINER.Equals(trainerType))
-    //     {
-    //         ObjectStream<Event> es = new POSSampleEventStream(samples, contextGenerator);
-    //         EventTrainer trainer = TrainerFactory.GetEventTrainer(trainParams, manifestInfoEntries);
-    //         posModel = trainer.Train(es);
-    //     }
-    //     else if (TrainerType.EVENT_MODEL_SEQUENCE_TRAINER.Equals(trainerType))
-    //     {
-    //         POSSampleSequenceStream ss = new POSSampleSequenceStream(samples, contextGenerator);
-    //         EventModelSequenceTrainer trainer = TrainerFactory.GetEventModelSequenceTrainer(trainParams, manifestInfoEntries);
-    //         posModel = trainer.Train(ss);
-    //     }
-    //     else if (TrainerType.SEQUENCE_TRAINER.Equals(trainerType))
-    //     {
-    //         SequenceTrainer trainer = TrainerFactory.GetSequenceModelTrainer(trainParams, manifestInfoEntries);
-//
-    //         // TODO: This will probably cause issue, since the feature generator uses the outcomes array
-    //         POSSampleSequenceStream ss = new POSSampleSequenceStream(samples, contextGenerator);
-    //         seqPosModel = trainer.Train(ss);
-    //     }
-    //     else
-    //     {
-    //         throw new ArgumentException("Trainer type is not supported: " + trainerType);
-    //     }
-//
-    //     if (posModel != null)
-    //     {
-    //         return new POSModel(languageCode, posModel, beamSize, manifestInfoEntries, posFactory);
-    //     }
-    //     else
-    //     {
-    //         return new POSModel(languageCode, seqPosModel, manifestInfoEntries, posFactory);
-    //     }
-    // }
+    /// <summary>
+    /// Trains a <see cref="POSModel"/>.
+    /// </summary>
+    /// <param name="languageCode">the language of the training data</param>
+    /// <param name="samples">the samples used for the training</param>
+    /// <param name="trainParams">the machine learning train parameters</param>
+    /// <param name="posFactory">a <see cref="POSTaggerFactory"/> to get resources from</param>
+    /// <returns>the trained <see cref="POSModel"/></returns>
+    /// <exception cref="IOException">if reading from the <see cref="IObjectStream{T}"/> fails.</exception>
+    public static POSModel Train(string languageCode, IObjectStream<POSSample?> samples,
+        TrainingParameters trainParams, POSTaggerFactory posFactory)
+    {
+        int beamSize = trainParams.GetIntParameter(BeamSearch.BEAM_SIZE_PARAMETER,
+            POSTaggerME.DEFAULT_BEAM_SIZE);
 
-    // public static NOpenNLP.Tools.Dictionary.Dictionary BuildNGramDictionary(ObjectStream<POSSample> samples, int cutoff)
-    // {
-    //     NGramModel ngramModel = new NGramModel();
-    //     POSSample sample;
-    //     while ((sample = samples.Read()) != null)
-    //     {
-    //         string[] words = sample.GetSentence();
-    //         if (words.Length > 0)
-    //             ngramModel.Add(new StringList(words), 1, 1);
-    //     }
-//
-    //     ngramModel.Cutoff(cutoff, int.MaxValue);
-    //     return ngramModel.ToDictionary(true);
-    // }
+        IPOSContextGenerator contextGenerator = posFactory.POSContextGenerator;
 
-    // public static void PopulatePOSDictionary(ObjectStream<POSSample> samples, IMutableTagDictionary dict, int cutoff)
-    // {
-    //     System.@out.Println("Expanding POS NOpenNLP.Tools.Dictionary.Dictionary ...");
-    //     long start = System.NanoTime();
-//
-    //     // the data structure will store the word, the tag, and the number of
-    //     // occurrences
-    //     Dictionary<string, Dictionary<string, AtomicInteger>> newEntries = new Dictionary<string, string>();
-    //     POSSample sample;
-    //     while ((sample = samples.Read()) != null)
-    //     {
-    //         string[] words = sample.GetSentence();
-    //         string[] tags = sample.GetTags();
-    //         for (int i = 0; i < words.Length; i++)
-    //         {
-//
-    //             // only store words
-    //             if (!StringPattern.Recognize(words[i]).ContainsDigit())
-    //             {
-    //                 string word;
-    //                 if (dict.IsCaseSensitive())
-    //                 {
-    //                     word = words[i];
-    //                 }
-    //                 else
-    //                 {
-    //                     word = StringUtil.ToLowerCase(words[i]);
-    //                 }
-//
-    //                 if (!newEntries.ContainsKey(word))
-    //                 {
-    //                     newEntries.Put(word, new Dictionary<string, string>());
-    //                 }
-//
-    //                 string[] dictTags = dict.GetTags(word);
-    //                 if (dictTags != null)
-    //                 {
-    //                     foreach (string tag in dictTags)
-    //                     {
-//
-    //                         // for this tags we start with the cutoff
-    //                         Dictionary<string, AtomicInteger> value = newEntries[word];
-    //                         if (!value.ContainsKey(tag))
-    //                         {
-    //                             value.Put(tag, new AtomicInteger(cutoff));
-    //                         }
-    //                     }
-    //                 }
-//
-    //                 if (!newEntries[word].ContainsKey(tags[i]))
-    //                 {
-    //                     newEntries[word].Put(tags[i], new AtomicInteger(1));
-    //                 }
-    //                 else
-    //                 {
-    //                     newEntries[word][tags[i]].IncrementAndGet();
-    //                 }
-    //             }
-    //         }
-    //     }
-//
-//
-    //     // now we check if the word + tag pairs have enough occurrences, if yes we
-    //     // add it to the dictionary
-    //     foreach (Entry<string, Dictionary<string, AtomicInteger>> wordEntry in newEntries.EntrySet())
-    //     {
-    //         IList<string> tagsForWord = new List<string>();
-    //         foreach (Entry<string, AtomicInteger> entry in wordEntry.GetValue().EntrySet())
-    //         {
-    //             if (entry.GetValue().Get() >= cutoff)
-    //             {
-    //                 tagsForWord.Add(entry.GetKey());
-    //             }
-    //         }
-//
-    //         if (tagsForWord.Count > 0)
-    //         {
-    //             dict.Put(wordEntry.GetKey(), tagsForWord.ToArray());
-    //         }
-    //     }
-//
-    //     System.@out.Println("... finished expanding POS Dictionary. [" + (System.NanoTime() - start) / 1000000 + "ms]");
-    // }
+        IDictionary<string, string> manifestInfoEntries = new JCG.Dictionary<string, string>();
+
+        TrainerType? trainerType = TrainerFactory.GetTrainerType(trainParams);
+
+        IMaxentModel? posModel = null;
+        ISequenceClassificationModel<string>? seqPosModel = null;
+        if (TrainerType.EVENT_MODEL_TRAINER.Equals(trainerType))
+        {
+            IObjectStream<Event?> es = new POSSampleEventStream(samples, contextGenerator);
+
+            IEventTrainer trainer = TrainerFactory.GetEventTrainer(trainParams, manifestInfoEntries);
+            posModel = trainer.Train(es);
+        }
+        else if (TrainerType.EVENT_MODEL_SEQUENCE_TRAINER.Equals(trainerType))
+        {
+            POSSampleSequenceStream ss = new(samples, contextGenerator);
+            IEventModelSequenceTrainer<POSSample> trainer =
+                TrainerFactory.GetEventModelSequenceTrainer<POSSample>(trainParams, manifestInfoEntries);
+            posModel = trainer.Train(ss);
+        }
+        else if (TrainerType.SEQUENCE_TRAINER.Equals(trainerType))
+        {
+            ISequenceTrainer<POSSample> trainer =
+                TrainerFactory.GetSequenceModelTrainer<POSSample>(trainParams, manifestInfoEntries);
+
+            // TODO: This will probably cause issue, since the feature generator uses the outcomes array
+
+            POSSampleSequenceStream ss = new(samples, contextGenerator);
+            seqPosModel = trainer.Train(ss);
+        }
+        else
+        {
+            throw new ArgumentException("Trainer type is not supported: " + trainerType);
+        }
+
+        if (posModel != null)
+        {
+            return new POSModel(languageCode, posModel, beamSize, manifestInfoEntries, posFactory);
+        }
+        else
+        {
+            return new POSModel(languageCode, seqPosModel!, manifestInfoEntries, posFactory);
+        }
+    }
+
+    /// <exception cref="IOException">if reading from the <see cref="IObjectStream{T}"/> fails.</exception>
+    public static NOpenNLP.Tools.Dictionary.Dictionary BuildNGramDictionary(
+        IObjectStream<POSSample?> samples, int cutoff)
+    {
+        NGramModel ngramModel = new();
+
+        while (samples.Read() is { } sample)
+        {
+            string[] words = sample.Sentence;
+
+            if (words.Length > 0)
+                ngramModel.Add(new StringList(words), 1, 1);
+        }
+
+        ngramModel.Cutoff(cutoff, int.MaxValue);
+
+        return ngramModel.ToDictionary(true);
+    }
+
+    /// <exception cref="IOException">if reading from the <see cref="IObjectStream{T}"/> fails.</exception>
+    public static void PopulatePOSDictionary(IObjectStream<POSSample?> samples,
+        IMutableTagDictionary dict, int cutoff)
+    {
+        Console.Out.WriteLine("Expanding POS Dictionary ...");
+        long start = Stopwatch.GetTimestamp();
+
+        // the data structure will store the word, the tag, and the number of
+        // occurrences
+        // NOpenNLP: upstream uses AtomicInteger purely as a mutable box, not for
+        // thread safety; MutableInt is the port's equivalent and is what the other
+        // ported counters use.
+        IDictionary<string, IDictionary<string, MutableInt>> newEntries =
+            new JCG.Dictionary<string, IDictionary<string, MutableInt>>();
+
+        while (samples.Read() is { } sample)
+        {
+            string[] words = sample.Sentence;
+            string[] tags = sample.Tags;
+
+            for (int i = 0; i < words.Length; i++)
+            {
+                // only store words
+                if (!StringPattern.Recognize(words[i]).ContainsDigit)
+                {
+                    string word;
+                    if (dict.IsCaseSensitive)
+                    {
+                        word = words[i];
+                    }
+                    else
+                    {
+                        word = StringUtil.ToLowerCase(words[i]);
+                    }
+
+                    if (!newEntries.TryGetValue(word, out IDictionary<string, MutableInt>? value))
+                    {
+                        value = new JCG.Dictionary<string, MutableInt>();
+                        newEntries[word] = value;
+                    }
+
+                    string[]? dictTags = dict.GetTags(word);
+                    if (dictTags != null)
+                    {
+                        foreach (string tag in dictTags)
+                        {
+                            // for this tags we start with the cutoff
+                            if (!value.ContainsKey(tag))
+                            {
+                                value[tag] = new MutableInt(cutoff);
+                            }
+                        }
+                    }
+
+                    if (!value.TryGetValue(tags[i], out MutableInt? count))
+                    {
+                        value[tags[i]] = new MutableInt(1);
+                    }
+                    else
+                    {
+                        count.Increment();
+                    }
+                }
+            }
+        }
+
+        // now we check if the word + tag pairs have enough occurrences, if yes we
+        // add it to the dictionary
+        foreach (KeyValuePair<string, IDictionary<string, MutableInt>> wordEntry in newEntries)
+        {
+            JCG.List<string> tagsForWord = [];
+            foreach (KeyValuePair<string, MutableInt> entry in wordEntry.Value)
+            {
+                if (entry.Value.Value >= cutoff)
+                {
+                    tagsForWord.Add(entry.Key);
+                }
+            }
+
+            if (tagsForWord.Count > 0)
+            {
+                dict.Put(wordEntry.Key, [.. tagsForWord]);
+            }
+        }
+
+        // NOpenNLP: upstream reports the elapsed time from System.nanoTime(); Stopwatch
+        // is the .NET equivalent clock, and its ticks are converted to milliseconds here.
+        long elapsedMs = (Stopwatch.GetTimestamp() - start) * 1000 / Stopwatch.Frequency;
+        Console.Out.WriteLine("... finished expanding POS Dictionary. [" + elapsedMs + "ms]");
+    }
 }

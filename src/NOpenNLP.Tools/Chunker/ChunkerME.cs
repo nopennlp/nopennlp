@@ -19,10 +19,12 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using System;
+using System.Collections.Generic;
+using System.IO;
 using NOpenNLP.Tools.Ml;
 using NOpenNLP.Tools.Ml.Model;
 using NOpenNLP.Tools.Util;
-using System.Collections.Generic;
+using TrainerType = NOpenNLP.Tools.Ml.TrainerFactory.TrainerType;
 
 namespace NOpenNLP.Tools.Chunker;
 
@@ -161,39 +163,56 @@ public class ChunkerME : IChunker
         return bestSequence.Probs;
     }
 
-    // public static ChunkerModel Train(string lang, ObjectStream<ChunkSample> @in, TrainingParameters mlParams, ChunkerFactory factory)
-    // {
-    //     int beamSize = mlParams.GetIntParameter(BeamSearch.BEAM_SIZE_PARAMETER, ChunkerME.DEFAULT_BEAM_SIZE);
-    //     Dictionary<string, string> manifestInfoEntries = new Dictionary<string, string>();
-    //     TrainerType trainerType = TrainerFactory.GetTrainerType(mlParams);
-    //     IMaxentModel chunkerModel = null;
-    //     ISequenceClassificationModel<string> seqChunkerModel = null;
-    //     if (TrainerType.EVENT_MODEL_TRAINER.Equals(trainerType))
-    //     {
-    //         ObjectStream<Event> es = new ChunkerEventStream(@in, factory.GetContextGenerator());
-    //         EventTrainer trainer = TrainerFactory.GetEventTrainer(mlParams, manifestInfoEntries);
-    //         chunkerModel = trainer.Train(es);
-    //     }
-    //     else if (TrainerType.SEQUENCE_TRAINER.Equals(trainerType))
-    //     {
-    //         SequenceTrainer trainer = TrainerFactory.GetSequenceModelTrainer(mlParams, manifestInfoEntries);
-    //
-    //         // TODO: This will probably cause issue, since the feature generator uses the outcomes array
-    //         ChunkSampleSequenceStream ss = new ChunkSampleSequenceStream(@in, factory.GetContextGenerator());
-    //         seqChunkerModel = trainer.Train(ss);
-    //     }
-    //     else
-    //     {
-    //         throw new ArgumentException("Trainer type is not supported: " + trainerType);
-    //     }
-    //
-    //     if (chunkerModel != null)
-    //     {
-    //         return new ChunkerModel(lang, chunkerModel, beamSize, manifestInfoEntries, factory);
-    //     }
-    //     else
-    //     {
-    //         return new ChunkerModel(lang, seqChunkerModel, manifestInfoEntries, factory);
-    //     }
-    // }
+    /// <summary>
+    /// Trains a model for the <see cref="ChunkerME"/>.
+    /// </summary>
+    /// <param name="lang">the language code of the training data</param>
+    /// <param name="in">the samples used for the training</param>
+    /// <param name="mlParams">the machine learning train parameters</param>
+    /// <param name="factory">a <see cref="ChunkerFactory"/> to get resources from</param>
+    /// <returns>the trained <see cref="ChunkerModel"/></returns>
+    /// <exception cref="IOException">if reading from the <see cref="IObjectStream{T}"/> fails</exception>
+    public static ChunkerModel Train(string lang, IObjectStream<ChunkSample?> @in,
+        TrainingParameters mlParams, ChunkerFactory factory)
+    {
+        int beamSize = mlParams.GetIntParameter(BeamSearch.BEAM_SIZE_PARAMETER, DEFAULT_BEAM_SIZE);
+
+        // NOpenNLP: ChunkerModel takes a BCL Dictionary, so the manifest map is one here.
+        Dictionary<string, string> manifestInfoEntries = [];
+
+        TrainerType? trainerType = TrainerFactory.GetTrainerType(mlParams);
+
+        IMaxentModel? chunkerModel = null;
+        ISequenceClassificationModel<string>? seqChunkerModel = null;
+
+        if (TrainerType.EVENT_MODEL_TRAINER.Equals(trainerType))
+        {
+            IObjectStream<Event?> es = new ChunkerEventStream(@in, factory.ContextGenerator);
+            IEventTrainer trainer = TrainerFactory.GetEventTrainer(mlParams, manifestInfoEntries);
+            chunkerModel = trainer.Train(es);
+        }
+        else if (TrainerType.SEQUENCE_TRAINER.Equals(trainerType))
+        {
+            ISequenceTrainer<ChunkSample> trainer =
+                TrainerFactory.GetSequenceModelTrainer<ChunkSample>(mlParams, manifestInfoEntries);
+
+            // TODO: This will probably cause issue, since the feature generator uses the outcomes array
+
+            ChunkSampleSequenceStream ss = new(@in, factory.ContextGenerator);
+            seqChunkerModel = trainer.Train(ss);
+        }
+        else
+        {
+            throw new ArgumentException("Trainer type is not supported: " + trainerType);
+        }
+
+        if (chunkerModel != null)
+        {
+            return new ChunkerModel(lang, chunkerModel, beamSize, manifestInfoEntries, factory);
+        }
+        else
+        {
+            return new ChunkerModel(lang, seqChunkerModel!, manifestInfoEntries, factory);
+        }
+    }
 }
