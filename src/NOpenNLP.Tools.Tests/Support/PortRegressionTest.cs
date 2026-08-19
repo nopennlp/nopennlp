@@ -13,15 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
-using NOpenNLP.Tools.Ml.Naivebayes;
 using NOpenNLP.Tools.Chunker;
+using NOpenNLP.Tools.Ml.Maxent;
+using NOpenNLP.Tools.Ml.Maxent.Io;
+using NOpenNLP.Tools.Ml.Model;
+using NOpenNLP.Tools.Ml.Naivebayes;
 using NOpenNLP.Tools.Namefind;
 using NOpenNLP.Tools.Postag;
 using NOpenNLP.Tools.Util;
 using NOpenNLP.Tools.Util.Featuregen;
+using NOpenNLP.Tools.Util.Model;
 using NOpenNLP.Tools.Util.Normalizer;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
@@ -468,4 +475,181 @@ public class PortRegressionTest
         ClassicAssert.AreEqual("1x", settings["notANumber"]);
     }
 #pragma warning restore CS0618 // Type or member is obsolete
+
+    /// <summary>
+    /// <see cref="PlainTextFileDataReader.ReadDouble"/> parsed with the current
+    /// culture. Under a locale whose decimal separator is ',' the '.' in a model
+    /// value is read as a group separator, so "-0.6931471805599453" loaded as
+    /// -6931471805599453 rather than throwing: a model read on such a machine
+    /// silently produced garbage predictions.
+    /// </summary>
+    [Test]
+    public void TestPlainTextDataReaderIsCultureInvariant()
+    {
+        RunUnderCulture("de-DE", () =>
+        {
+            using var input = new MemoryStream(
+                Encoding.UTF8.GetBytes("-0.6931471805599453\n1.0E-5\n-42\n"));
+            var reader = new PlainTextFileDataReader(input);
+
+            ClassicAssert.AreEqual(-0.6931471805599453d, reader.ReadDouble(), 1e-15);
+            ClassicAssert.AreEqual(1.0E-5d, reader.ReadDouble(), 1e-20);
+            ClassicAssert.AreEqual(-42, reader.ReadInt32());
+        });
+    }
+
+    /// <summary>
+    /// <see cref="Event.ToString"/> appended its float values with the current
+    /// culture and .NET's own format, yielding "0,5" under de-DE and "1E-05"
+    /// where Java writes "1.0E-5". <see cref="HashSumEventStream"/> hashes this
+    /// string and <see cref="TwoPassDataIndexer"/> compares the hash across its
+    /// two passes, so the text has to match Java's exactly.
+    /// </summary>
+    [Test]
+    public void TestEventToStringUsesJavaFloatFormat()
+    {
+        RunUnderCulture("de-DE", () =>
+        {
+            var ev = new Event("outcome", ["a", "b", "c"], [0.5f, 1e-5f, 2f]);
+            ClassicAssert.AreEqual("outcome [a=0.5 b=1.0E-5 c=2.0]", ev.ToString());
+        });
+    }
+
+    /// <summary>
+    /// The model writers group runs of equal-comparing predicates and write one
+    /// entry per run, so the sort feeding that grouping has to be stable the way
+    /// Java's <c>Arrays.sort(Object[])</c> is. <see cref="List{T}.Sort()"/> is an
+    /// unstable introsort and reorders names within a run, which changes the
+    /// bytes of the model file.
+    /// </summary>
+    [Test]
+    public void TestArraysSortIsStable()
+    {
+        // NOpenNLP: this needs to be well over 16 elements. List<T>.Sort switches
+        // to insertion sort for short runs, which happens to be stable, so a small
+        // array does not distinguish an unstable introsort from a stable merge.
+        // Two outcome patterns interleave so there are long runs of equal
+        // elements and the introsort's partitioning actually reorders them.
+        const int count = 200;
+        var preds = new ComparablePredicate[count];
+        for (int i = 0; i < count; i++)
+        {
+            int[] pattern = i % 2 == 0 ? [0, 1] : [0, 1, 2];
+            preds[i] = new ComparablePredicate(
+                i.ToString(CultureInfo.InvariantCulture), pattern, [i]);
+        }
+
+        // Only the relative order within each pattern group is preserved by a
+        // stable sort; the groups themselves move.
+        string[] expected = preds
+            .OrderBy(p => p.Outcomes.Length) // LINQ OrderBy is documented stable
+            .Select(p => p.Name)
+            .ToArray();
+
+        Arrays.Sort(preds);
+
+        CollectionAssert.AreEqual(expected, preds.Select(p => p.Name).ToArray());
+    }
+
+    /// <summary>
+    /// <c>Float.compare(-0.0f, 0.0f)</c> is -1 in Java but
+    /// <c>(-0.0f).CompareTo(0.0f)</c> is 0 in .NET, so
+    /// <see cref="ComparableEvent.CompareTo"/> has to use J2N rather than the
+    /// built-in comparison to order events the way upstream does.
+    /// </summary>
+    [Test]
+    public void TestComparableEventOrdersNegativeZeroLikeJava()
+    {
+        var negativeZero = new ComparableEvent(0, [1], [-0.0f]);
+        var positiveZero = new ComparableEvent(0, [1], [0.0f]);
+
+        ClassicAssert.IsTrue(negativeZero.CompareTo(positiveZero) < 0);
+        ClassicAssert.IsTrue(positiveZero.CompareTo(negativeZero) > 0);
+    }
+
+    /// <summary>
+    /// <see cref="AbstractModelWriter.Persist"/> ends by closing the stream, so a
+    /// writer used in a <c>using</c> block closed it a second time on the way out.
+    /// Java's <c>OutputStream.close()</c> is a no-op when already closed; .NET
+    /// throws <see cref="ObjectDisposedException"/>.
+    /// </summary>
+    [Test]
+    public void TestModelWriterCanBeDisposedAfterPersist()
+    {
+        var model = BuildModel();
+
+        // NOpenNLP: this needs a stream that rejects use after disposal.
+        // MemoryStream tolerates a second Flush, so it would not detect the
+        // double close; FileStream throws ObjectDisposedException, which is what
+        // a caller writing a model to disk would actually hit.
+        string path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        try
+        {
+            // The using block disposes the writer after Persist has already closed it.
+            using (var writer = new BinaryGISModelWriter(model, new FileInfo(path)))
+            {
+                writer.Persist();
+            }
+
+            ClassicAssert.Greater(new FileInfo(path).Length, 0);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    /// <summary>
+    /// The binary writers must reproduce Java's <c>DataOutputStream</c> layout, so
+    /// a model round-trips through the matching reader unchanged.
+    /// </summary>
+    [Test]
+    public void TestBinaryModelRoundTrips()
+    {
+        var model = BuildModel();
+        using var output = new MemoryStream();
+
+        using (var writer = new BinaryGISModelWriter(model, new UncloseableOutputStream(output)))
+        {
+            writer.Persist();
+        }
+
+        output.Position = 0;
+        var reloaded = new GISModelReader(new BinaryFileDataReader(output)).Model;
+
+        ClassicAssert.AreEqual(model.NumOutcomes, reloaded.NumOutcomes);
+        CollectionAssert.AreEqual(
+            model.Eval(["pred_a", "shared_x"]),
+            reloaded.Eval(["pred_a", "shared_x"]));
+    }
+
+    private static AbstractModel BuildModel()
+    {
+        string[] predLabels = ["pred_a", "pred_b", "shared_x"];
+        string[] outcomeLabels = ["other", "org-start", "org-cont"];
+        Context[] parameters =
+        [
+            new Context([0, 1], [0.5, -0.25]),
+            new Context([0, 1, 2], [1.5, 2.5, -3.5]),
+            new Context([0, 1], [7.0, 8.0]),
+        ];
+
+        return new GISModel(parameters, predLabels, outcomeLabels);
+    }
+
+    // NOpenNLP: several fixes here are about culture-sensitive formatting and
+    // parsing, which only misbehave when the current culture is not invariant.
+    private static void RunUnderCulture(string culture, Action action)
+    {
+        CultureInfo original = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = new CultureInfo(culture);
+            action();
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = original;
+        }
+    }
 }

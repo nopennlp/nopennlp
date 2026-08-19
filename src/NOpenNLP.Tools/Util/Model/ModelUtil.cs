@@ -53,13 +53,14 @@ public static class ModelUtil // NOpenNLP: made static
             throw new ArgumentNullException(nameof(@out), "out parameter must not be null");
         }
 
-        // NOpenNLP: upstream delegates to GenericModelWriter, which is part of the
-        // ml.model write path and is not ported yet. The null checks above are
-        // upstream's and run first, so the argument contract already matches; only
-        // the write itself is missing. Restoring GenericModelWriter is tracked
-        // separately, at which point this body becomes the delegation upstream has.
-        throw new NotSupportedException(
-            "Writing a MaxentModel requires GenericModelWriter, which is not ported yet.");
+        // NOpenNLP: upstream wraps `out` in an anonymous OutputStream that forwards
+        // writes but inherits OutputStream's no-op close(), so persist() closing
+        // the writer does not close the caller's stream. UncloseableOutputStream is
+        // that wrapper, named.
+        GenericModelWriter modelWriter = new GenericModelWriter((AbstractModel)model,
+            new UncloseableOutputStream(@out));
+
+        modelWriter.Persist();
     }
 
     /// <summary>

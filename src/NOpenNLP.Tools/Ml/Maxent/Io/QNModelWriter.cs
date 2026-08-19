@@ -1,0 +1,80 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// This file has been modified from the original Apache OpenNLP source:
+// translated from Java to C# and adapted for .NET. See NOTICE.
+
+using System.Collections.Generic;
+using System.Globalization;
+using NOpenNLP.Tools.Ml.Model;
+
+namespace NOpenNLP.Tools.Ml.Maxent.Io;
+
+public abstract class QNModelWriter : GISModelWriter
+{
+    protected QNModelWriter(AbstractModel model)
+        : base(model)
+    {
+    }
+
+    public override void Persist()
+    {
+        // the type of model (QN)
+        WriteUTF("QN");
+
+        // the mapping from outcomes to their integer indexes
+        WriteInt32(OUTCOME_LABELS.Length);
+
+        for (int i = 0; i < OUTCOME_LABELS.Length; i++)
+        {
+            WriteUTF(OUTCOME_LABELS[i]);
+        }
+
+        // the mapping from predicates to the outcomes they contributed to.
+        // The sorting is done so that we actually can write this out more
+        // compactly than as the entire list.
+        ComparablePredicate[] sorted = SortValues();
+        IList<IList<ComparablePredicate>> compressed = CompressOutcomes(sorted);
+
+        WriteInt32(compressed.Count);
+
+        for (int i = 0; i < compressed.Count; i++)
+        {
+            IList<ComparablePredicate> a = compressed[i];
+            WriteUTF(a.Count.ToString(CultureInfo.InvariantCulture) + a[0].ToString());
+        }
+
+        // the mapping from predicate names to their integer indexes
+        WriteInt32(PARAMS.Length);
+
+        for (int i = 0; i < sorted.Length; i++)
+        {
+            WriteUTF(sorted[i].Name);
+        }
+
+        // write out the parameters
+        for (int i = 0; i < sorted.Length; i++)
+        {
+            for (int j = 0; j < sorted[i].Params.Length; j++)
+            {
+                WriteDouble(sorted[i].Params[j]);
+            }
+        }
+
+        Close();
+    }
+}

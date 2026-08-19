@@ -62,6 +62,28 @@ internal static class DataInput
     }
 
     /// <summary>
+    /// Reads a big-endian IEEE 754 float, as <c>DataInput.readFloat()</c> does.
+    /// </summary>
+    /// <exception cref="EndOfStreamException">the stream ended mid-value.</exception>
+    public static float ReadJavaSingle(this Stream stream)
+    {
+        // NOpenNLP: netstandard2.0 has no BitConverter.Int32BitsToSingle, so the
+        // bytes are assembled in the platform's own order for BitConverter.
+        byte[] bytes = new byte[4];
+        for (int i = 0; i < 4; i++)
+        {
+            bytes[i] = (byte)ReadByteOrThrow(stream);
+        }
+
+        if (BitConverter.IsLittleEndian)
+        {
+            Array.Reverse(bytes);
+        }
+
+        return BitConverter.ToSingle(bytes, 0);
+    }
+
+    /// <summary>
     /// Reads a string in Java's <i>modified UTF-8</i> encoding, as
     /// <c>DataInput.readUTF()</c> does: a big-endian 2-byte unsigned byte count
     /// followed by that many bytes.
