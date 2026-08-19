@@ -24,23 +24,10 @@ namespace NOpenNLP.Tools.Ml.Model;
 /// Class which models a sequence.
 /// </summary>
 /// <typeparam name="T">The type of the object which is the source of this sequence.</typeparam>
-public class Sequence<T>
+/// <param name="events">The events of the sequence.</param>
+/// <param name="source">The source object for this sequence.</param>
+public class Sequence<T>(Event[] events, T source)
 {
-    private readonly Event[] events; // NOpenNLP: made readonly
-    private readonly T source; // NOpenNLP: made readonly
-
-    /// <summary>
-    /// Creates a new sequence made up of the specified events and derived from the
-    /// specified source.
-    /// </summary>
-    /// <param name="events">The events of the sequence.</param>
-    /// <param name="source">The source object for this sequence.</param>
-    public Sequence(Event[] events, T source)
-    {
-        this.events = events;
-        this.source = source;
-    }
-
     /// <summary>
     /// Gets the events which make up this sequence.
     /// </summary>

@@ -43,7 +43,7 @@ public class GenericModelWriter : AbstractModelWriter
         {
             os = new GZipStream(
                 new FileStream(file.FullName, FileMode.Create, FileAccess.Write), CompressionMode.Compress);
-            filename = filename.Substring(0, filename.Length - 3);
+            filename = filename[..^3];
         }
         else
         {

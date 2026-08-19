@@ -44,14 +44,14 @@ public abstract class PerceptronModelWriter : AbstractModelWriter
         this.numOutcomes = model.NumOutcomes;
         PARAMS = (Context[])data[0];
 
-        IDictionary<string, Context> pmap = (IDictionary<string, Context>)data[1];
+        var pmap = (IDictionary<string, Context>)data[1];
 
         OUTCOME_LABELS = (string[])data[2];
         PARAMS = new Context[pmap.Count];
         PRED_LABELS = new string[pmap.Count];
 
         int i = 0;
-        foreach (KeyValuePair<string, Context> pred in pmap)
+        foreach (var pred in pmap)
         {
             PRED_LABELS[i] = pred.Key;
             PARAMS[i] = pred.Value;
@@ -62,7 +62,7 @@ public abstract class PerceptronModelWriter : AbstractModelWriter
     protected virtual ComparablePredicate[] SortValues()
     {
         ComparablePredicate[] sortPreds;
-        ComparablePredicate[] tmpPreds = new ComparablePredicate[PARAMS.Length];
+        var tmpPreds = new ComparablePredicate[PARAMS.Length];
         int[] tmpOutcomes = new int[numOutcomes];
         double[] tmpParams = new double[numOutcomes];
         int numPreds = 0;
@@ -112,10 +112,10 @@ public abstract class PerceptronModelWriter : AbstractModelWriter
 
     protected virtual IList<IList<ComparablePredicate>> ComputeOutcomePatterns(ComparablePredicate[] sorted)
     {
-        ComparablePredicate cp = sorted[0];
+        var cp = sorted[0];
         IList<IList<ComparablePredicate>> outcomePatterns = [];
         List<ComparablePredicate> newGroup = [];
-        foreach (ComparablePredicate predicate in sorted)
+        foreach (var predicate in sorted)
         {
             if (cp.CompareTo(predicate) == 0)
             {
@@ -159,12 +159,12 @@ public abstract class PerceptronModelWriter : AbstractModelWriter
         // the mapping from predicates to the outcomes they contributed to.
         // The sorting is done so that we actually can write this out more
         // compactly than as the entire list.
-        ComparablePredicate[] sorted = SortValues();
-        IList<IList<ComparablePredicate>> compressed = ComputeOutcomePatterns(sorted);
+        var sorted = SortValues();
+        var compressed = ComputeOutcomePatterns(sorted);
 
         WriteInt32(compressed.Count);
 
-        foreach (IList<ComparablePredicate> a in compressed)
+        foreach (var a in compressed)
         {
             WriteUTF(a.Count.ToString(CultureInfo.InvariantCulture) + a[0].ToString());
         }
@@ -172,17 +172,17 @@ public abstract class PerceptronModelWriter : AbstractModelWriter
         // the mapping from predicate names to their integer indexes
         WriteInt32(sorted.Length);
 
-        foreach (ComparablePredicate s in sorted)
+        foreach (var s in sorted)
         {
             WriteUTF(s.Name);
         }
 
         // write out the parameters
-        for (int i = 0; i < sorted.Length; i++)
+        foreach (var t in sorted)
         {
-            for (int j = 0; j < sorted[i].Params.Length; j++)
+            foreach (var t1 in t.Params)
             {
-                WriteDouble(sorted[i].Params[j]);
+                WriteDouble(t1);
             }
         }
 

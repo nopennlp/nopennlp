@@ -18,19 +18,13 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
-using System.Collections.Generic;
 using System.Globalization;
 using NOpenNLP.Tools.Ml.Model;
 
 namespace NOpenNLP.Tools.Ml.Maxent.Io;
 
-public abstract class QNModelWriter : GISModelWriter
+public abstract class QNModelWriter(AbstractModel model) : GISModelWriter(model)
 {
-    protected QNModelWriter(AbstractModel model)
-        : base(model)
-    {
-    }
-
     public override void Persist()
     {
         // the type of model (QN)
@@ -39,39 +33,38 @@ public abstract class QNModelWriter : GISModelWriter
         // the mapping from outcomes to their integer indexes
         WriteInt32(OUTCOME_LABELS.Length);
 
-        for (int i = 0; i < OUTCOME_LABELS.Length; i++)
+        foreach (var t in OUTCOME_LABELS)
         {
-            WriteUTF(OUTCOME_LABELS[i]);
+            WriteUTF(t);
         }
 
         // the mapping from predicates to the outcomes they contributed to.
         // The sorting is done so that we actually can write this out more
         // compactly than as the entire list.
-        ComparablePredicate[] sorted = SortValues();
-        IList<IList<ComparablePredicate>> compressed = CompressOutcomes(sorted);
+        var sorted = SortValues();
+        var compressed = CompressOutcomes(sorted);
 
         WriteInt32(compressed.Count);
 
-        for (int i = 0; i < compressed.Count; i++)
+        foreach (var a in compressed)
         {
-            IList<ComparablePredicate> a = compressed[i];
             WriteUTF(a.Count.ToString(CultureInfo.InvariantCulture) + a[0].ToString());
         }
 
         // the mapping from predicate names to their integer indexes
         WriteInt32(PARAMS.Length);
 
-        for (int i = 0; i < sorted.Length; i++)
+        foreach (var t in sorted)
         {
-            WriteUTF(sorted[i].Name);
+            WriteUTF(t.Name);
         }
 
         // write out the parameters
-        for (int i = 0; i < sorted.Length; i++)
+        foreach (var t in sorted)
         {
-            for (int j = 0; j < sorted[i].Params.Length; j++)
+            foreach (var t1 in t.Params)
             {
-                WriteDouble(sorted[i].Params[j]);
+                WriteDouble(t1);
             }
         }
 

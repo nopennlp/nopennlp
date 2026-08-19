@@ -18,6 +18,7 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
+using System;
 using System.Collections.Generic;
 using NOpenNLP.Tools.Util;
 using NOpenNLP.Tools.Util.Ext;
@@ -37,26 +38,14 @@ public class DataIndexerFactory
         // allow the user to pass in a report map.  If the don't, create one.
         reportMap ??= new JCG.Dictionary<string, string>();
 
-        IDataIndexer indexer;
-        switch (indexerParam)
+        IDataIndexer indexer = indexerParam switch
         {
-            case AbstractEventTrainer.DATA_INDEXER_ONE_PASS_VALUE:
-                indexer = new OnePassDataIndexer();
-                break;
-
-            case AbstractEventTrainer.DATA_INDEXER_TWO_PASS_VALUE:
-                indexer = new TwoPassDataIndexer();
-                break;
-
-            case AbstractEventTrainer.DATA_INDEXER_ONE_PASS_REAL_VALUE:
-                indexer = new OnePassRealValueDataIndexer();
-                break;
-
-            default:
-                // if the user passes in a class name for the indexer, try to instantiate the class.
-                indexer = ExtensionLoader.InstantiateExtension<IDataIndexer>(indexerParam);
-                break;
-        }
+            AbstractEventTrainer.DATA_INDEXER_ONE_PASS_VALUE => new OnePassDataIndexer(),
+            AbstractEventTrainer.DATA_INDEXER_TWO_PASS_VALUE => new TwoPassDataIndexer(),
+            AbstractEventTrainer.DATA_INDEXER_ONE_PASS_REAL_VALUE => new OnePassRealValueDataIndexer(),
+            _ => ExtensionLoader.InstantiateExtension<IDataIndexer>(indexerParam)
+                 ?? throw new InvalidOperationException($"Could not instantiate extension for '{indexerParam}'")
+        };
 
         indexer.Init(parameters, reportMap);
 

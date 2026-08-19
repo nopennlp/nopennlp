@@ -35,10 +35,6 @@ namespace NOpenNLP.Tools.Ml.Model;
 /// </summary>
 public class OnePassDataIndexer : AbstractDataIndexer
 {
-    public OnePassDataIndexer()
-    {
-    }
-
     public override void Index(IObjectStream<Event> eventStream)
     {
         int cutoff = trainingParameters.GetIntParameter(CUTOFF_PARAM, CUTOFF_DEFAULT);
@@ -46,21 +42,20 @@ public class OnePassDataIndexer : AbstractDataIndexer
 
         // NOpenNLP: Stopwatch is the .NET equivalent of the two
         // System.currentTimeMillis() calls upstream uses to time the indexing.
-        Stopwatch start = Stopwatch.StartNew();
+        var start = Stopwatch.StartNew();
 
         Display("Indexing events with OnePass using cutoff of " + cutoff + "\n\n");
 
         Display("\tComputing event counts...  ");
-        IDictionary<string, int> predicateIndex = new JCG.OrderedDictionary<string, int>();
-        IList<Event> events = ComputeEventCounts(eventStream, predicateIndex, cutoff);
+        var predicateIndex = new JCG.OrderedDictionary<string, int>();
+        var events = ComputeEventCounts(eventStream, predicateIndex, cutoff);
         Display("done. " + events.Count + " events\n");
 
         Display("\tIndexing...  ");
         // NOpenNLP: upstream calls ObjectStreamUtils.createObjectStream(Collection);
         // the port omits that overload because C# would bind the collection to the
         // varargs one, so CollectionObjectStream is constructed directly.
-        IList<ComparableEvent?> eventsToCompare =
-            Index(new CollectionObjectStream<Event>(events), predicateIndex);
+        var eventsToCompare = Index(new CollectionObjectStream<Event>(events), predicateIndex);
 
         Display("done.\n");
 
@@ -76,16 +71,15 @@ public class OnePassDataIndexer : AbstractDataIndexer
     /// <paramref name="cutoff"/> times are added to the <paramref name="predicatesInOut"/>
     /// map along with a unique integer index.
     /// </summary>
-    private IList<Event> ComputeEventCounts(IObjectStream<Event> eventStream,
-        IDictionary<string, int> predicatesInOut, int cutoff)
+    private JCG.List<Event> ComputeEventCounts(IObjectStream<Event> eventStream,
+        JCG.OrderedDictionary<string, int> predicatesInOut, int cutoff)
     {
         // NOpenNLP: insertion-ordered so the counter does not depend on hash order
         // the way Java's HashMap does. The predicate set below is sorted anyway,
         // but the counts are read back through it.
-        IDictionary<string, int> counter = new JCG.OrderedDictionary<string, int>();
-        List<Event> events = [];
-        Event? ev;
-        while ((ev = eventStream.Read()) != null)
+        var counter = new JCG.OrderedDictionary<string, int>();
+        JCG.List<Event> events = [];
+        while (eventStream.Read() is { } ev)
         {
             events.Add(ev);
             Update(ev.Context, counter);

@@ -30,30 +30,18 @@ namespace NOpenNLP.Tools.Ml.Model;
 /// A maxent event representation which we can use to sort based on the
 /// predicates indexes contained in the events.
 /// </summary>
-public class ComparableEvent : IComparable<ComparableEvent>
+public class ComparableEvent(int oc, int[] pids, float[]? values = null) : IComparable<ComparableEvent>
 {
-    public int Outcome { get; set; }
+    public int Outcome { get; set; } = oc;
 
-    public int[] PredIndexes { get; set; }
+    public int[] PredIndexes { get; set; } = pids;
 
     /// <summary>
     /// The number of times this event has been seen.
     /// </summary>
     public int Seen { get; set; } = 1;
 
-    public float[]? Values { get; set; }
-
-    public ComparableEvent(int oc, int[] pids, float[]? values)
-    {
-        Outcome = oc;
-        Values = values;
-        PredIndexes = pids;
-    }
-
-    public ComparableEvent(int oc, int[] pids)
-        : this(oc, pids, null)
-    {
-    }
+    public float[]? Values { get; set; } = values;
 
     public int CompareTo(ComparableEvent? ce)
     {

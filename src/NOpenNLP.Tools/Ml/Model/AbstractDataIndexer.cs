@@ -158,7 +158,7 @@ public abstract class AbstractDataIndexer : IDataIndexer
         return numUniqueEvents;
     }
 
-    protected virtual IList<ComparableEvent?> Index(IObjectStream<Event> events,
+    protected virtual IList<ComparableEvent?> Index(IObjectStream<Event?> events,
         IDictionary<string, int> predicateIndex)
     {
         // NOpenNLP: insertion-ordered so the outcome indexes, and therefore the
@@ -167,8 +167,7 @@ public abstract class AbstractDataIndexer : IDataIndexer
 
         List<ComparableEvent?> eventsToCompare = [];
 
-        Event? ev;
-        while ((ev = events.Read()) != null)
+        while (events.Read() is { } ev)
         {
             if (!omap.ContainsKey(ev.Outcome))
             {

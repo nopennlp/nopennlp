@@ -108,8 +108,8 @@ public class RealValueFileEventStream : FileEventStream
         if ((line = reader.ReadLine()) != null)
         {
             int si = line.IndexOf(' ');
-            string outcome = line.Substring(0, si);
-            string[] contexts = line.Substring(si + 1).Split(' ');
+            string outcome = line[..si];
+            string[] contexts = line[(si + 1)..].Split(' ');
             float[]? values = ParseContexts(contexts);
             return new Event(outcome, contexts, values);
         }

@@ -41,10 +41,6 @@ namespace NOpenNLP.Tools.Ml.Model;
 /// </summary>
 public class TwoPassDataIndexer : AbstractDataIndexer
 {
-    public TwoPassDataIndexer()
-    {
-    }
-
     public override void Index(IObjectStream<Event> eventStream)
     {
         int cutoff = trainingParameters.GetIntParameter(CUTOFF_PARAM, CUTOFF_DEFAULT);
@@ -52,7 +48,7 @@ public class TwoPassDataIndexer : AbstractDataIndexer
 
         // NOpenNLP: Stopwatch is the .NET equivalent of the two
         // System.currentTimeMillis() calls upstream uses to time the indexing.
-        Stopwatch start = Stopwatch.StartNew();
+        var start = Stopwatch.StartNew();
 
         Display("Indexing events with TwoPass using cutoff of " + cutoff + "\n\n");
 
@@ -67,14 +63,13 @@ public class TwoPassDataIndexer : AbstractDataIndexer
         try
         {
             int numEvents;
-            BigInteger writeHash;
-            HashSumEventStream writeEventStream = new HashSumEventStream(eventStream); // do not close.
+            var writeEventStream = new HashSumEventStream(eventStream); // do not close.
             using (Stream dos = new FileStream(tmp, FileMode.Create, FileAccess.Write))
             {
                 numEvents = ComputeEventCounts(writeEventStream, dos, predicateIndex, cutoff);
             }
 
-            writeHash = writeEventStream.CalculateHashSum();
+            var writeHash = writeEventStream.CalculateHashSum();
 
             Display("done. " + numEvents + " events\n");
 
@@ -82,7 +77,7 @@ public class TwoPassDataIndexer : AbstractDataIndexer
 
             IList<ComparableEvent?> eventsToCompare;
             BigInteger readHash;
-            using (HashSumEventStream readStream = new HashSumEventStream(new EventStream(tmp)))
+            using (var readStream = new HashSumEventStream(new EventStream(tmp)))
             {
                 eventsToCompare = Index(readStream, predicateIndex);
                 readHash = readStream.CalculateHashSum();
@@ -141,11 +136,10 @@ public class TwoPassDataIndexer : AbstractDataIndexer
     {
         // NOpenNLP: insertion-ordered so the counter does not depend on hash order
         // the way Java's HashMap does.
-        IDictionary<string, int> counter = new JCG.OrderedDictionary<string, int>();
+        var counter = new JCG.OrderedDictionary<string, int>();
         int eventCount = 0;
 
-        Event? ev;
-        while ((ev = eventStream.Read()) != null)
+        while (eventStream.Read() is { } ev)
         {
             eventCount++;
 
@@ -192,14 +186,9 @@ public class TwoPassDataIndexer : AbstractDataIndexer
         return eventCount;
     }
 
-    private sealed class EventStream : ObjectStreamBase<Event?>
+    private sealed class EventStream(string file) : ObjectStreamBase<Event?>
     {
-        private readonly Stream inputStream;
-
-        public EventStream(string file)
-        {
-            inputStream = new FileStream(file, FileMode.Open, FileAccess.Read);
-        }
+        private readonly Stream inputStream = new FileStream(file, FileMode.Open, FileAccess.Read);
 
         public override Event? Read()
         {

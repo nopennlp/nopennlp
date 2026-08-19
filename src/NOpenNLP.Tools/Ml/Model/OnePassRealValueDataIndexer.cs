@@ -31,10 +31,6 @@ public class OnePassRealValueDataIndexer : OnePassDataIndexer
 {
     private float[][]? values;
 
-    public OnePassRealValueDataIndexer()
-    {
-    }
-
     public override float[][]? Values => values;
 
     protected override int SortAndMerge(IList<ComparableEvent?> eventsToCompare, bool sort)

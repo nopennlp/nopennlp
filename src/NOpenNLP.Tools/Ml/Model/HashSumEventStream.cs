@@ -26,17 +26,11 @@ using NOpenNLP.Tools.Util;
 
 namespace NOpenNLP.Tools.Ml.Model;
 
-public class HashSumEventStream : AbstractObjectStream<Event?>
+public class HashSumEventStream(IObjectStream<Event?> eventStream) : AbstractObjectStream<Event?>(eventStream)
 {
-    private readonly MD5 digest; // NOpenNLP: made readonly
-
-    public HashSumEventStream(IObjectStream<Event?> eventStream)
-        : base(eventStream)
-    {
-        // NOpenNLP: upstream catches NoSuchAlgorithmException here, which .NET
-        // does not have; MD5.Create is always available.
-        digest = MD5.Create();
-    }
+    // NOpenNLP: upstream catches NoSuchAlgorithmException here, which .NET
+    // does not have; MD5.Create is always available.
+    private readonly MD5 digest = MD5.Create(); // NOpenNLP: made readonly
 
     public override Event? Read()
     {

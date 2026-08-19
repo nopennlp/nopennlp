@@ -41,18 +41,13 @@ public class FileEventStream : ObjectStreamBase<Event?>
     /// <param name="fileName">the name of the file containing the events.</param>
     /// <param name="encoding">the encoding of the file, or <c>null</c> for the default.</param>
     /// <exception cref="IOException">When the specified file can not be read.</exception>
-    public FileEventStream(string fileName, Encoding? encoding)
+    public FileEventStream(string fileName, Encoding? encoding = null)
         // NOpenNLP: upstream's null encoding selects FileReader, which uses the
         // platform default charset. StreamReader's default is UTF-8, which is also
         // the modern JVM default and what the File overload below asks for.
         : this(encoding == null
             ? new StreamReader(fileName)
             : new StreamReader(fileName, encoding))
-    {
-    }
-
-    public FileEventStream(string fileName)
-        : this(fileName, null)
     {
     }
 
@@ -80,7 +75,7 @@ public class FileEventStream : ObjectStreamBase<Event?>
             // whitespace and skips runs of it. J2N's exposes only the enumerator
             // API, and there is no countTokens(), so the tokens are collected and
             // the first is taken as the outcome, which is what upstream computes.
-            using StringTokenizer st = new StringTokenizer(line);
+            using var st = new StringTokenizer(line);
             List<string> tokens = [];
             while (st.MoveNext())
             {

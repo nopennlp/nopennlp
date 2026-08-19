@@ -30,20 +30,13 @@ namespace NOpenNLP.Tools.Ml.Model;
 /// outcomes. This allows us to make the mapping of features to their parameters
 /// much more compact.
 /// </summary>
-public class ComparablePredicate : IComparable<ComparablePredicate>
+public class ComparablePredicate(string n, int[] ocs, double[] ps) : IComparable<ComparablePredicate>
 {
-    public string Name { get; set; }
+    public string Name { get; set; } = n;
 
-    public int[] Outcomes { get; set; }
+    public int[] Outcomes { get; set; } = ocs;
 
-    public double[] Params { get; set; }
-
-    public ComparablePredicate(string n, int[] ocs, double[] ps)
-    {
-        Name = n;
-        Outcomes = ocs;
-        Params = ps;
-    }
+    public double[] Params { get; set; } = ps;
 
     public int CompareTo(ComparablePredicate? cp)
     {

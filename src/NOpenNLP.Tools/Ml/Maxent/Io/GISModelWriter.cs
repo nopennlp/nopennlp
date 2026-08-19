@@ -85,12 +85,12 @@ public abstract class GISModelWriter : AbstractModelWriter
         // the mapping from predicates to the outcomes they contributed to.
         // The sorting is done so that we actually can write this out more
         // compactly than as the entire list.
-        ComparablePredicate[] sorted = SortValues();
-        IList<IList<ComparablePredicate>> compressed = CompressOutcomes(sorted);
+        var sorted = SortValues();
+        var compressed = CompressOutcomes(sorted);
 
         WriteInt32(compressed.Count);
 
-        foreach (IList<ComparablePredicate> aCompressed in compressed)
+        foreach (var aCompressed in compressed)
         {
             WriteUTF(aCompressed.Count.ToString(CultureInfo.InvariantCulture) + aCompressed[0].ToString());
         }
@@ -98,17 +98,17 @@ public abstract class GISModelWriter : AbstractModelWriter
         // the mapping from predicate names to their integer indexes
         WriteInt32(PARAMS.Length);
 
-        foreach (ComparablePredicate aSorted in sorted)
+        foreach (var aSorted in sorted)
         {
             WriteUTF(aSorted.Name);
         }
 
         // write out the parameters
-        foreach (ComparablePredicate aSorted in sorted)
+        foreach (var aSorted in sorted)
         {
-            for (int j = 0; j < aSorted.Params.Length; j++)
+            foreach (var t in aSorted.Params)
             {
-                WriteDouble(aSorted.Params[j]);
+                WriteDouble(t);
             }
         }
 
@@ -144,20 +144,20 @@ public abstract class GISModelWriter : AbstractModelWriter
         IList<IList<ComparablePredicate>> outcomePatterns = [];
         if (sorted.Length > 0)
         {
-            ComparablePredicate cp = sorted[0];
+            var cp = sorted[0];
             List<ComparablePredicate> newGroup = [];
-            for (int i = 0; i < sorted.Length; i++)
+            foreach (var t in sorted)
             {
-                if (cp.CompareTo(sorted[i]) == 0)
+                if (cp.CompareTo(t) == 0)
                 {
-                    newGroup.Add(sorted[i]);
+                    newGroup.Add(t);
                 }
                 else
                 {
-                    cp = sorted[i];
+                    cp = t;
                     outcomePatterns.Add(newGroup);
                     newGroup = [];
-                    newGroup.Add(sorted[i]);
+                    newGroup.Add(t);
                 }
             }
 

@@ -28,21 +28,10 @@ namespace NOpenNLP.Tools.Ml.Model;
 /// The context of a decision point during training.  This includes
 /// contextual predicates and an outcome.
 /// </summary>
-public class Event
+public class Event(string outcome, string[] context, float[]? values = null)
 {
-    private readonly string outcome;
-    private readonly string[] context;
-    private readonly float[]? values;
-
-    // NOpenNLP: used optional parameter instead of ctor overload
-    public Event(string outcome, string[] context, float[]? values = null)
-    {
-        // NOpenNLP: upstream uses Objects.requireNonNull; ArgumentNullException
-        // is the .NET counterpart of the NullPointerException it throws.
-        this.outcome = outcome ?? throw new ArgumentNullException(nameof(outcome), "outcome must not be null");
-        this.context = context ?? throw new ArgumentNullException(nameof(context), "context must not be null");
-        this.values = values;
-    }
+    private readonly string outcome = outcome ?? throw new ArgumentNullException(nameof(outcome), "outcome must not be null");
+    private readonly string[] context = context ?? throw new ArgumentNullException(nameof(context), "context must not be null");
 
     public virtual string Outcome => outcome;
 

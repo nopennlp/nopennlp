@@ -28,20 +28,13 @@ namespace NOpenNLP.Tools.Ml.Model;
 /// Class which turns a sequence stream into an event stream.
 /// </summary>
 /// <typeparam name="T">The type of the object which is the source of each sequence.</typeparam>
-public class SequenceStreamEventStream<T> : ObjectStreamBase<Event?>
+public class SequenceStreamEventStream<T>(ISequenceStream<T> sequenceStream) : ObjectStreamBase<Event?>
 {
-    private readonly ISequenceStream<T> sequenceStream;
-
     // NOpenNLP: this is one of the cases where IEnumerator<T> is the right type
     // rather than IEnumerable<T>: Read() hands back one event per call and has to
     // remember its position across calls, which is exactly the manual control over
     // advancing that an enumerator provides.
     private IEnumerator<Event> eventIt = Enumerable.Empty<Event>().GetEnumerator();
-
-    public SequenceStreamEventStream(ISequenceStream<T> sequenceStream)
-    {
-        this.sequenceStream = sequenceStream;
-    }
 
     public override Event? Read()
     {
@@ -50,7 +43,7 @@ public class SequenceStreamEventStream<T> : ObjectStreamBase<Event?>
         // condition becomes "could not advance" and the value is read from Current.
         while (!eventIt.MoveNext())
         {
-            Sequence<T>? sequence = sequenceStream.Read();
+            var sequence = sequenceStream.Read();
             if (sequence == null)
             {
                 return null;
