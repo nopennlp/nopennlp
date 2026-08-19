@@ -26,6 +26,7 @@ using NOpenNLP.Tools.Support;
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace NOpenNLP.Tools.Postag;
 
@@ -40,41 +41,53 @@ public sealed class POSModel : BaseModel, ISerializableArtifact
     internal const string POS_MODEL_ENTRY_NAME = "pos.model";
     internal const string GENERATOR_DESCRIPTOR_ENTRY_NAME = "generator.featuregen";
 
-    // NOpenNLP: these constructors are only used when training a new model,
-    // which is not supported; we only support inference of existing models.
-    // public POSModel(string languageCode, ISequenceClassificationModel<string> posModel, Dictionary<string, string> manifestInfoEntries, POSTaggerFactory posFactory) : base(COMPONENT_NAME, languageCode, manifestInfoEntries, posFactory)
-    // {
-    //     artifactMap.Put(POS_MODEL_ENTRY_NAME, posModel ?? throw new ArgumentNullException(nameof(posModel)));
-    //     artifactMap.Put(GENERATOR_DESCRIPTOR_ENTRY_NAME, posFactory.GetFeatureGenerator());
-    //     foreach (Map.Entry<String, Object> resource in posFactory.GetResources().EntrySet())
-    //     {
-    //         artifactMap.Put(resource.GetKey(), resource.GetValue());
-    //     } // TODO: This fails probably for the sequence model ... ?!
-    //     // checkArtifactMap();
-    // }
+    public POSModel(string languageCode, ISequenceClassificationModel<string> posModel,
+        IDictionary<string, string>? manifestInfoEntries, POSTaggerFactory posFactory)
+        : base(COMPONENT_NAME, languageCode, manifestInfoEntries, posFactory)
+    {
+        artifactMap.Put(POS_MODEL_ENTRY_NAME,
+            posModel ?? throw new ArgumentNullException(nameof(posModel), "posModel must not be null"));
 
-    // public POSModel(string languageCode, IMaxentModel posModel, Dictionary<string, string> manifestInfoEntries, POSTaggerFactory posFactory) : this(languageCode, posModel, POSTaggerME.DEFAULT_BEAM_SIZE, manifestInfoEntries, posFactory)
-    // {
-    // }
+        artifactMap.Put(GENERATOR_DESCRIPTOR_ENTRY_NAME, posFactory.GetFeatureGenerator());
 
-    // public POSModel(string languageCode, IMaxentModel posModel, int beamSize, Dictionary<string, string> manifestInfoEntries, POSTaggerFactory posFactory) : base(COMPONENT_NAME, languageCode, manifestInfoEntries, posFactory)
-    // {
-    //     if (posModel is null)
-    //     {
-    //         throw new ArgumentNullException(nameof(posModel));
-    //     }
-//
-    //     Properties manifest = (Properties)artifactMap[MANIFEST_ENTRY];
-    //     manifest.SetProperty(BeamSearch.BEAM_SIZE_PARAMETER, Convert.ToString(beamSize));
-    //     artifactMap.Put(POS_MODEL_ENTRY_NAME, posModel);
-    //     artifactMap.Put(GENERATOR_DESCRIPTOR_ENTRY_NAME, posFactory.GetFeatureGenerator());
-    //     foreach (Map.Entry<String, Object> resource in posFactory.GetResources().EntrySet())
-    //     {
-    //         artifactMap.Put(resource.GetKey(), resource.GetValue());
-    //     }
-//
-    //     CheckArtifactMap();
-    // }
+        foreach (KeyValuePair<string, object> resource in posFactory.GetResources())
+        {
+            artifactMap.Put(resource.Key, resource.Value);
+        }
+
+        // TODO: This fails probably for the sequence model ... ?!
+        // CheckArtifactMap();
+    }
+
+    public POSModel(string languageCode, IMaxentModel posModel,
+        IDictionary<string, string>? manifestInfoEntries, POSTaggerFactory posFactory)
+        : this(languageCode, posModel, POSTaggerME.DEFAULT_BEAM_SIZE, manifestInfoEntries, posFactory)
+    {
+    }
+
+    public POSModel(string languageCode, IMaxentModel posModel, int beamSize,
+        IDictionary<string, string>? manifestInfoEntries, POSTaggerFactory posFactory)
+        : base(COMPONENT_NAME, languageCode, manifestInfoEntries, posFactory)
+    {
+        if (posModel is null)
+        {
+            throw new ArgumentNullException(nameof(posModel), "posModel must not be null");
+        }
+
+        Properties manifest = (Properties)artifactMap[MANIFEST_ENTRY];
+        manifest.SetProperty(BeamSearch.BEAM_SIZE_PARAMETER, beamSize.ToString(CultureInfo.InvariantCulture));
+
+        artifactMap.Put(POS_MODEL_ENTRY_NAME, posModel);
+
+        artifactMap.Put(GENERATOR_DESCRIPTOR_ENTRY_NAME, posFactory.GetFeatureGenerator());
+
+        foreach (KeyValuePair<string, object> resource in posFactory.GetResources())
+        {
+            artifactMap.Put(resource.Key, resource.Value);
+        }
+
+        CheckArtifactMap();
+    }
 
     public POSModel(Stream @in)
         : base(COMPONENT_NAME, @in)

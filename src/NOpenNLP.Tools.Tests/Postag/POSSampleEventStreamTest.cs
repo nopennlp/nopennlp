@@ -17,25 +17,37 @@
 
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
+
+using NOpenNLP.Tools.Ml.Model;
 using NOpenNLP.Tools.Util;
+using NUnit.Framework;
+using NUnit.Framework.Legacy;
 
 namespace NOpenNLP.Tools.Postag;
 
 /// <summary>
-/// The interface for part of speech taggers.
+/// Tests for the <see cref="POSSampleEventStream"/> class.
 /// </summary>
-public interface IPOSTagger
+public class POSSampleEventStreamTest
 {
     /// <summary>
-    /// Assigns the sentence of tokens pos tags.
+    /// Tests that the outcomes for a single sentence match the
+    /// expected outcomes.
     /// </summary>
-    /// <param name="sentence">The sentece of tokens to be tagged.</param>
-    /// <returns>an array of pos tags for each token provided in sentence.</returns>
-    string[] Tag(string[] sentence);
+    [Test]
+    public void TestOutcomesForSingleSentence()
+    {
+        string sentence = "That_DT sounds_VBZ good_JJ ._.";
 
-    string[] Tag(string[] sentence, object[]? additionalContext);
+        POSSample sample = POSSample.Parse(sentence);
 
-    Sequence[] TopKSequences(string[] sentence);
+        using IObjectStream<Event?> eventStream = new POSSampleEventStream(
+            ObjectStreamUtils.CreateObjectStream(sample));
 
-    Sequence[] TopKSequences(string[] sentence, object[]? additionaContext);
+        ClassicAssert.AreEqual("DT", eventStream.Read()?.Outcome);
+        ClassicAssert.AreEqual("VBZ", eventStream.Read()?.Outcome);
+        ClassicAssert.AreEqual("JJ", eventStream.Read()?.Outcome);
+        ClassicAssert.AreEqual(".", eventStream.Read()?.Outcome);
+        ClassicAssert.IsNull(eventStream.Read());
+    }
 }

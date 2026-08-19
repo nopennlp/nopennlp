@@ -62,13 +62,13 @@ public class POSTaggerFactory : BaseToolFactory
     /// Deprecated: This constructor is here for backward compatibility and
     ///             is not functional anymore in the training of 1.8.x series models
     /// </remarks>
-    public POSTaggerFactory(NOpenNLP.Tools.Dictionary.Dictionary ngramDictionary, ITagDictionary posDictionary)
+    public POSTaggerFactory(NOpenNLP.Tools.Dictionary.Dictionary? ngramDictionary, ITagDictionary? posDictionary)
     {
         this.Init(ngramDictionary, posDictionary); // TODO: This could be made functional by creating some default feature generation
         // which uses the dictionary ...
     }
 
-    public POSTaggerFactory(byte[]? featureGeneratorBytes, Dictionary<string, object> resources, ITagDictionary posDictionary)
+    public POSTaggerFactory(byte[]? featureGeneratorBytes, Dictionary<string, object>? resources, ITagDictionary? posDictionary)
     {
         this.featureGeneratorBytes = featureGeneratorBytes ?? LoadDefaultFeatureGeneratorBytes();
 
@@ -76,13 +76,16 @@ public class POSTaggerFactory : BaseToolFactory
         this.posDictionary = posDictionary;
     }
 
-    protected virtual void Init(NOpenNLP.Tools.Dictionary.Dictionary ngramDictionary, ITagDictionary posDictionary)
+    protected virtual void Init(NOpenNLP.Tools.Dictionary.Dictionary? ngramDictionary, ITagDictionary? posDictionary)
     {
         this.ngramDictionary = ngramDictionary;
         this.posDictionary = posDictionary;
     }
 
-    protected virtual void Init(byte[] featureGeneratorBytes, Dictionary<string, object> resources, ITagDictionary posDictionary)
+    // NOpenNLP: protected upstream, where POSTaggerCrossValidator (same package)
+    // calls it between folds. Java's protected also grants package access, which
+    // C#'s does not, so protected internal is needed to keep that caller working.
+    protected internal virtual void Init(byte[]? featureGeneratorBytes, Dictionary<string, object>? resources, ITagDictionary? posDictionary)
     {
         this.featureGeneratorBytes = featureGeneratorBytes;
         this.resources = resources;
@@ -209,7 +212,7 @@ public class POSTaggerFactory : BaseToolFactory
         return POSDictionary.Create(@in);
     }
 
-    public virtual void SetTagDictionary(ITagDictionary dictionary)
+    public virtual void SetTagDictionary(ITagDictionary? dictionary)
     {
         if (artifactProvider != null)
         {
@@ -219,7 +222,11 @@ public class POSTaggerFactory : BaseToolFactory
         this.posDictionary = dictionary;
     }
 
-    protected virtual Dictionary<string, object> GetResources()
+    // NOpenNLP: upstream declares this protected, which POSModel (same package)
+    // reads when writing the training artifacts. Java's protected also grants package
+    // access; C#'s does not, so it is protected internal to keep POSModel able to call
+    // it while subclasses can still override.
+    protected internal virtual Dictionary<string, object> GetResources()
     {
         if (resources != null)
         {
@@ -229,7 +236,8 @@ public class POSTaggerFactory : BaseToolFactory
         return new Dictionary<string, object>();
     }
 
-    protected virtual byte[] GetFeatureGenerator()
+    // NOpenNLP: protected upstream; see GetResources above.
+    protected internal virtual byte[] GetFeatureGenerator()
     {
         return featureGeneratorBytes;
     }
@@ -371,7 +379,8 @@ public class POSTaggerFactory : BaseToolFactory
         }
     }
 
-    public static POSTaggerFactory Create(string subclassName, NOpenNLP.Tools.Dictionary.Dictionary ngramDictionary, ITagDictionary posDictionary)
+    public static POSTaggerFactory Create(string? subclassName,
+        NOpenNLP.Tools.Dictionary.Dictionary? ngramDictionary, ITagDictionary? posDictionary)
     {
         if (subclassName == null)
         {
@@ -393,7 +402,8 @@ public class POSTaggerFactory : BaseToolFactory
         }
     }
 
-    public static POSTaggerFactory Create(string subclassName, byte[] featureGeneratorBytes, Dictionary<string, object> resources, ITagDictionary posDictionary)
+    public static POSTaggerFactory Create(string? subclassName, byte[]? featureGeneratorBytes,
+        Dictionary<string, object>? resources, ITagDictionary? posDictionary)
     {
         POSTaggerFactory theFactory;
         if (subclassName == null)

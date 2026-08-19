@@ -47,12 +47,14 @@ public class TokenNameFinderFactory : BaseToolFactory
         this.seqCodec = new BioCodec();
     }
 
-    public TokenNameFinderFactory(byte[] featureGeneratorBytes, IDictionary<string, object> resources, ISequenceCodec<string> seqCodec)
+    public TokenNameFinderFactory(byte[]? featureGeneratorBytes, IDictionary<string, object>? resources,
+        ISequenceCodec<string> seqCodec)
     {
         Init(featureGeneratorBytes, resources, seqCodec);
     }
 
-    public virtual void Init(byte[] featureGeneratorBytes, IDictionary<string, object> resources, ISequenceCodec<string> seqCodec)
+    public virtual void Init(byte[]? featureGeneratorBytes, IDictionary<string, object>? resources,
+        ISequenceCodec<string> seqCodec)
     {
         this.featureGeneratorBytes = featureGeneratorBytes;
         this.resources = resources;
@@ -93,11 +95,15 @@ public class TokenNameFinderFactory : BaseToolFactory
 
     public virtual ISequenceCodec<string> SequenceCodec => seqCodec;
 
-    protected virtual IDictionary<string, object>? Resources => resources;
+    // NOpenNLP: upstream declares these `protected`, which in Java also grants
+    // access to the rest of the package -- NameFinderME.train() calls them.
+    // `protected internal` is the C# equivalent of that reach.
+    protected internal virtual IDictionary<string, object>? Resources => resources;
 
-    protected virtual byte[]? FeatureGenerator => featureGeneratorBytes;
+    protected internal virtual byte[]? FeatureGenerator => featureGeneratorBytes;
 
-    public static TokenNameFinderFactory Create(string? subclassName, byte[] featureGeneratorBytes, Dictionary<string, object> resources, ISequenceCodec<string> seqCodec)
+    public static TokenNameFinderFactory Create(string? subclassName, byte[]? featureGeneratorBytes,
+        IDictionary<string, object>? resources, ISequenceCodec<string> seqCodec)
     {
         TokenNameFinderFactory theFactory;
         if (subclassName == null)

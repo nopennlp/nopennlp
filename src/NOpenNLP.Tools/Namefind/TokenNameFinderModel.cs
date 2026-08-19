@@ -52,8 +52,8 @@ public class TokenNameFinderModel : BaseModel
 
     public TokenNameFinderModel(string languageCode,
         ISequenceClassificationModel<string> nameFinderModel,
-        byte[] generatorDescriptor,
-        IDictionary<string, object> resources,
+        byte[]? generatorDescriptor,
+        IDictionary<string, object>? resources,
         IDictionary<string, string> manifestInfoEntries,
         ISequenceCodec<string> seqCodec,
         TokenNameFinderFactory factory)
@@ -70,7 +70,7 @@ public class TokenNameFinderModel : BaseModel
         IMaxentModel nameFinderModel,
         int beamSize,
         byte[]? generatorDescriptor,
-        IDictionary<string, object> resources,
+        IDictionary<string, object>? resources,
         IDictionary<string, string> manifestInfoEntries,
         ISequenceCodec<string> seqCodec,
         TokenNameFinderFactory factory)
