@@ -18,9 +18,12 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
+using J2N.Globalization;
 using System;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
+using JDouble = J2N.Numerics.Double;
 
 namespace NOpenNLP.Tools.Ml.Model;
 
@@ -58,7 +61,11 @@ public class PlainTextFileDataReader : IDataReader
             throw new EndOfStreamException();
         }
 
-        return double.Parse(line);
+        // NOpenNLP: upstream uses Double.parseDouble, which is culture-invariant.
+        // double.Parse without a format provider uses the current culture, so a
+        // model written with '.' as the decimal separator fails to parse under a
+        // locale such as de-DE that expects ','. J2N accepts every form Java does.
+        return JDouble.Parse(line, NumberStyle.Float, CultureInfo.InvariantCulture);
     }
 
     public virtual int ReadInt32()
@@ -69,7 +76,8 @@ public class PlainTextFileDataReader : IDataReader
             throw new EndOfStreamException();
         }
 
-        return int.Parse(line);
+        // NOpenNLP: upstream uses Integer.parseInt, which is culture-invariant.
+        return int.Parse(line, CultureInfo.InvariantCulture);
     }
 
     public virtual string ReadUTF()

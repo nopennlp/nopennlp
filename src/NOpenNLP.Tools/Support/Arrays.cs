@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 using System;
+using System.Collections.Generic;
 using J2N.Collections;
 
 namespace NOpenNLP.Tools.Support;
@@ -45,6 +46,18 @@ internal static class Arrays
     /// </summary>
     public static int GetHashCode<T>(T[]? array) =>
         array is null ? 0 : ArrayEqualityComparer<T>.OneDimensional.GetHashCode(array);
+
+    /// <summary>
+    /// Sorts <paramref name="array"/> in place using the default comparer, as
+    /// Java's <c>Arrays.sort(Object[])</c> does.
+    /// </summary>
+    /// <remarks>
+    /// The sort is <i>stable</i>: elements that compare equal keep their relative
+    /// order. Java's object sort guarantees this and the model writers depend on
+    /// it, so <see cref="Array.Sort{T}(T[])"/>, which is an unstable introsort,
+    /// cannot be used. See <see cref="ListExtensions.Sort{T}(IList{T}, IComparer{T})"/>.
+    /// </remarks>
+    public static void Sort<T>(T[] array) => ListExtensions.Sort(array, Comparer<T>.Default);
 
     /// <summary>
     /// Returns a copy of <paramref name="original"/> truncated or zero-padded to

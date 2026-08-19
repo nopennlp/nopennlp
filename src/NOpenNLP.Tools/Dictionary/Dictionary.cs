@@ -261,10 +261,10 @@ public class Dictionary : IEnumerable<StringList>, ISerializableArtifact
         // NOpenNLP: upstream returns an anonymous AbstractSet that implements
         // only iterator(), size() and contains(Object). The equivalent here is
         // a small read-only set view over the same entry set.
-        return new StringSetView(this);
+        return new AsStringSetISetAnonymousClass(this);
     }
 
-    private sealed class StringSetView : ISet<string>
+    private sealed class AsStringSetISetAnonymousClass : ISet<string>
     {
         // NOpenNLP: upstream's anonymous AbstractSet is an inner class, so it builds
         // lookup wrappers against the live Dictionary. The owner is held here for the
@@ -273,7 +273,7 @@ public class Dictionary : IEnumerable<StringList>, ISerializableArtifact
 
         private ISet<StringListWrapper> entrySet => owner.entrySet;
 
-        internal StringSetView(Dictionary owner)
+        internal AsStringSetISetAnonymousClass(Dictionary owner)
         {
             this.owner = owner;
         }

@@ -18,7 +18,9 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using System;
+using System.Globalization;
 using System.Text;
+using JSingle = J2N.Numerics.Single;
 
 namespace NOpenNLP.Tools.Ml.Model;
 
@@ -26,21 +28,10 @@ namespace NOpenNLP.Tools.Ml.Model;
 /// The context of a decision point during training.  This includes
 /// contextual predicates and an outcome.
 /// </summary>
-public class Event
+public class Event(string outcome, string[] context, float[]? values = null)
 {
-    private readonly string outcome;
-    private readonly string[] context;
-    private readonly float[]? values;
-
-    // NOpenNLP: used optional parameter instead of ctor overload
-    public Event(string outcome, string[] context, float[]? values = null)
-    {
-        // NOpenNLP: upstream uses Objects.requireNonNull; ArgumentNullException
-        // is the .NET counterpart of the NullPointerException it throws.
-        this.outcome = outcome ?? throw new ArgumentNullException(nameof(outcome), "outcome must not be null");
-        this.context = context ?? throw new ArgumentNullException(nameof(context), "context must not be null");
-        this.values = values;
-    }
+    private readonly string outcome = outcome ?? throw new ArgumentNullException(nameof(outcome), "outcome must not be null");
+    private readonly string[] context = context ?? throw new ArgumentNullException(nameof(context), "context must not be null");
 
     public virtual string Outcome => outcome;
 
@@ -57,7 +48,14 @@ public class Event
             sb.Append(context[0]);
             if (values != null)
             {
-                sb.Append('=').Append(values[0]);
+                // NOpenNLP: upstream appends the float with Java's Float.toString.
+                // StringBuilder.Append(float) would use the current culture and
+                // .NET's own shortest-round-trip format, so a value like 1.0E-5
+                // would render as "1E-05", and as "1E-05" with a comma decimal
+                // separator under a locale such as de-DE. HashSumEventStream
+                // hashes this string and TwoPassDataIndexer compares the hash
+                // across two passes, so J2N is used to reproduce Java exactly.
+                sb.Append('=').Append(JSingle.ToString(values[0], CultureInfo.InvariantCulture));
             }
         }
 
@@ -66,7 +64,7 @@ public class Event
             sb.Append(' ').Append(context[ci]);
             if (values != null)
             {
-                sb.Append('=').Append(values[ci]);
+                sb.Append('=').Append(JSingle.ToString(values[ci], CultureInfo.InvariantCulture));
             }
         }
 

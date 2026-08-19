@@ -32,7 +32,7 @@ public class ObjectStreamUtils
     /// <returns>the object stream over the array elements</returns>
     public static IObjectStream<T?> CreateObjectStream<T>(params T[] array)
         where T : class =>
-        new ArrayObjectStream<T>(array);
+        new CreateObjectStreamObjectStreamBaseAnonymousClass<T>(array);
 
     // NOpenNLP: upstream also overloads createObjectStream and
     // concatenateObjectStream for a Collection. C# binds an ICollection<T>
@@ -57,19 +57,20 @@ public class ObjectStreamUtils
             }
         }
 
-        return new ConcatenatedObjectStream<T>(streams);
+        return new ConcatenateObjectStreamObjectStreamBaseAnonymousClass<T>(streams);
     }
 
     // NOpenNLP: upstream returns anonymous inner classes from each factory
-    // method; C# has no equivalent, so each becomes a private nested type.
-    private sealed class ArrayObjectStream<T> : ObjectStreamBase<T?>
+    // method; C# has no equivalent, so each becomes a private nested type named
+    // for the method that returns it and the type it stands in for.
+    private sealed class CreateObjectStreamObjectStreamBaseAnonymousClass<T> : ObjectStreamBase<T?>
         where T : class
     {
         private readonly T[] array;
 
         private int index;
 
-        internal ArrayObjectStream(T[] array)
+        internal CreateObjectStreamObjectStreamBaseAnonymousClass(T[] array)
         {
             this.array = array;
         }
@@ -82,7 +83,7 @@ public class ObjectStreamUtils
     // Backs both concatenate overloads: the varargs form differs from the
     // collection form upstream only in indexing an array instead of an
     // iterator, which an IEnumerable covers for both.
-    private sealed class ConcatenatedObjectStream<T> : ObjectStreamBase<T?>
+    private sealed class ConcatenateObjectStreamObjectStreamBaseAnonymousClass<T> : ObjectStreamBase<T?>
         where T : class
     {
         private readonly ICollection<IObjectStream<T?>> streams;
@@ -91,7 +92,7 @@ public class ObjectStreamUtils
 
         private IObjectStream<T?>? currentStream;
 
-        internal ConcatenatedObjectStream(ICollection<IObjectStream<T?>> streams)
+        internal ConcatenateObjectStreamObjectStreamBaseAnonymousClass(ICollection<IObjectStream<T?>> streams)
         {
             this.streams = streams;
             iterator = streams.GetEnumerator();
