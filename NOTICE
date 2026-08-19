@@ -15,5 +15,10 @@ The ported source has been modified from the original: translated from
 Java to C#, renamed to the NOpenNLP.Tools namespace, and adapted to .NET
 idioms and APIs.
 
+The test suite includes the Prepositional Phrase Attachment Dataset from
+Ratnaparkhi, Reynar, & Roukos, "A Maximum Entropy Model for Prepositional
+Phrase Attachment". ARPA HLT 1994. The data is licensed under the Apache
+License 2.0; please cite the above paper when the data is redistributed.
+
 NOpenNLP is not affiliated with, endorsed by, or a product of
 The Apache Software Foundation.

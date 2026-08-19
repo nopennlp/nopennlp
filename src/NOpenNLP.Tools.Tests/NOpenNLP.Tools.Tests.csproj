@@ -127,6 +127,22 @@
                       LogicalName="opennlp.tools.tokenize.latin-detokenizer.xml" />
     <EmbeddedResource Include="Parser\en_head_rules"
                       LogicalName="opennlp.tools.parser.en_head_rules" />
+    <!--
+      The Prepositional Phrase Attachment corpus, used by the *PrepAttachTest
+      trainer tests to check that training actually converges. Upstream also
+      ships a "bitstrings" file in this folder, which is 2.2 MB and which no
+      test reads, so it is not copied here. See Data/Ppa/NOTICE for attribution.
+    -->
+    <EmbeddedResource Include="Ml\Maxent\football.dat"
+                      LogicalName="opennlp.tools.ml.maxent.football.dat" />
+    <EmbeddedResource Include="Data\Opennlp\Maxent\real-valued-weights-training-data.txt"
+                      LogicalName="data.opennlp.maxent.real-valued-weights-training-data.txt" />
+    <EmbeddedResource Include="Data\Opennlp\Maxent\repeat-weighting-training-data.txt"
+                      LogicalName="data.opennlp.maxent.repeat-weighting-training-data.txt" />
+    <EmbeddedResource Include="Data\Ppa\training"
+                      LogicalName="data.ppa.training" />
+    <EmbeddedResource Include="Data\Ppa\devset"
+                      LogicalName="data.ppa.devset" />
   </ItemGroup>
 
 </Project>

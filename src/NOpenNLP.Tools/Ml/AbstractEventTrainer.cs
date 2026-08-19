@@ -18,16 +18,83 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
+using System.Collections.Generic;
+using NOpenNLP.Tools.Ml.Model;
+using NOpenNLP.Tools.Util;
+
 namespace NOpenNLP.Tools.Ml;
 
-// NOpenNLP: only the data-indexer constants are ported here. The rest of
-// AbstractEventTrainer belongs to the trainer API, which is ported separately.
-// The constants are declared in their upstream home because DataIndexerFactory
-// references them.
-public abstract class AbstractEventTrainer : AbstractTrainer
+/// <summary>
+/// Base class for trainers which produce a <see cref="IMaxentModel"/> from a stream of events.
+/// </summary>
+public abstract class AbstractEventTrainer : AbstractTrainer, IEventTrainer
 {
     public const string DATA_INDEXER_PARAM = "DataIndexer";
     public const string DATA_INDEXER_ONE_PASS_VALUE = "OnePass";
     public const string DATA_INDEXER_TWO_PASS_VALUE = "TwoPass";
     public const string DATA_INDEXER_ONE_PASS_REAL_VALUE = "OnePassRealValue";
+
+    protected AbstractEventTrainer()
+    {
+    }
+
+    protected AbstractEventTrainer(TrainingParameters parameters)
+        : base(parameters)
+    {
+    }
+
+    /// <summary>
+    /// Whether the data indexer should sort and merge the indexed events.
+    /// </summary>
+    public abstract bool IsSortAndMerge { get; }
+
+    /// <summary>
+    /// Creates and runs a data indexer over the given event stream.
+    /// </summary>
+    public virtual IDataIndexer GetDataIndexer(IObjectStream<Event?> events)
+    {
+        trainingParameters.Put(AbstractDataIndexer.SORT_PARAM, IsSortAndMerge);
+        // If the cutoff was set, don't overwrite the value.
+        if (trainingParameters.GetIntParameter(CUTOFF_PARAM, -1) == -1)
+        {
+            trainingParameters.Put(CUTOFF_PARAM, 5);
+        }
+
+        IDataIndexer indexer = DataIndexerFactory.GetDataIndexer(trainingParameters, reportMap);
+        indexer.Index(events);
+        return indexer;
+    }
+
+    /// <summary>
+    /// Trains a model from the given, already indexed, training data.
+    /// </summary>
+    public abstract IMaxentModel DoTrain(IDataIndexer indexer);
+
+    public IMaxentModel Train(IDataIndexer indexer)
+    {
+        Validate();
+
+        if (indexer.OutcomeLabels.Length <= 1)
+        {
+            throw new InsufficientTrainingDataException("Training data must contain more than one outcome");
+        }
+
+        IMaxentModel model = DoTrain(indexer);
+        AddToReport(TRAINER_TYPE_PARAM, EventTrainer.EVENT_VALUE);
+        return model;
+    }
+
+    public IMaxentModel Train(IObjectStream<Event?> events)
+    {
+        Validate();
+
+        HashSumEventStream hses = new(events);
+        IDataIndexer indexer = GetDataIndexer(hses);
+
+        // NOpenNLP: upstream is BigInteger.toString(16), which renders the
+        // magnitude in lowercase hex with no leading zeros. "x" would pad to a
+        // whole byte and keep a leading zero, so the padding is trimmed.
+        AddToReport("Training-Eventhash", hses.CalculateHashSum().ToString("x").TrimStart('0'));
+        return Train(indexer);
+    }
 }
