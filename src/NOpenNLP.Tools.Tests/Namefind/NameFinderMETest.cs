@@ -367,10 +367,11 @@ public class NameFinderMETest
         ClassicAssert.AreEqual("organization", names2[1].Type);
     }
 
-    // NOpenNLP: upstream splits with String.split("\\s+"); Split on the space
-    // character with RemoveEmptyEntries is the equivalent for these inputs.
+    // NOpenNLP: upstream splits on the regex "\\s+". Splitting on a space alone
+    // would agree on these inputs but not on a tab or newline, so the character
+    // set matches what Java's \\s does.
     private static string[] SplitOnWhitespace(string s) =>
-        s.Split([' '], System.StringSplitOptions.RemoveEmptyEntries);
+        s.Split([' ', '\t', '\n', '\r', '\f', '\v'], System.StringSplitOptions.RemoveEmptyEntries);
 
     // NOpenNLP: StandardCharsets.ISO_8859_1 has no named BCL counterpart that is
     // registered on every target, so the code page is used directly.
