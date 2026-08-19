@@ -48,9 +48,9 @@ public sealed class POSModel : BaseModel, ISerializableArtifact
         artifactMap.Put(POS_MODEL_ENTRY_NAME,
             posModel ?? throw new ArgumentNullException(nameof(posModel), "posModel must not be null"));
 
-        artifactMap.Put(GENERATOR_DESCRIPTOR_ENTRY_NAME, posFactory.GetFeatureGenerator());
+        artifactMap.Put(GENERATOR_DESCRIPTOR_ENTRY_NAME, posFactory.FeatureGenerator);
 
-        foreach (KeyValuePair<string, object> resource in posFactory.GetResources())
+        foreach (var resource in posFactory.Resources)
         {
             artifactMap.Put(resource.Key, resource.Value);
         }
@@ -79,9 +79,9 @@ public sealed class POSModel : BaseModel, ISerializableArtifact
 
         artifactMap.Put(POS_MODEL_ENTRY_NAME, posModel);
 
-        artifactMap.Put(GENERATOR_DESCRIPTOR_ENTRY_NAME, posFactory.GetFeatureGenerator());
+        artifactMap.Put(GENERATOR_DESCRIPTOR_ENTRY_NAME, posFactory.FeatureGenerator);
 
-        foreach (KeyValuePair<string, object> resource in posFactory.GetResources())
+        foreach (KeyValuePair<string, object> resource in posFactory.Resources)
         {
             artifactMap.Put(resource.Key, resource.Value);
         }
@@ -157,7 +157,7 @@ public sealed class POSModel : BaseModel, ISerializableArtifact
     /// Retrieves the ngram dictionary.
     /// </summary>
     /// <returns>ngram dictionary or null if not used</returns>
-    public NOpenNLP.Tools.Dictionary.Dictionary? NgramDictionary => Factory.GetDictionary();
+    public NOpenNLP.Tools.Dictionary.Dictionary? NgramDictionary => Factory.Dictionary;
 
     public Type ArtifactSerializerClass => typeof(POSModelSerializer);
 }

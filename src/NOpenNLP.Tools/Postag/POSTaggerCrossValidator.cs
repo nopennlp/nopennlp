@@ -91,15 +91,15 @@ public class POSTaggerCrossValidator
         {
             var trainingSampleStream = partitioner.Next();
 
-            if (this.tagDictionaryFile != null && this.factory!.GetTagDictionary() == null)
+            if (this.tagDictionaryFile != null && this.factory!.TagDictionary == null)
             {
-                this.factory.SetTagDictionary(this.factory.CreateTagDictionary(tagDictionaryFile));
+                this.factory.TagDictionary = this.factory.CreateTagDictionary(tagDictionaryFile);
             }
 
             ITagDictionary? dict = null;
             if (this.tagdicCutoff != null)
             {
-                dict = this.factory!.GetTagDictionary();
+                dict = this.factory!.TagDictionary;
                 if (dict == null)
                 {
                     dict = this.factory.CreateEmptyTagDictionary();
@@ -136,7 +136,7 @@ public class POSTaggerCrossValidator
 
             if (this.tagdicCutoff != null)
             {
-                this.factory.SetTagDictionary(null);
+                this.factory.TagDictionary = null;
             }
         }
     }

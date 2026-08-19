@@ -102,7 +102,7 @@ public class LemmatizerModel : BaseModel
             Properties manifest = (Properties)artifactMap[MANIFEST_ENTRY];
             if (artifactMap[LEMMATIZER_MODEL_ENTRY_NAME] is IMaxentModel)
             {
-                string beamSizeString = manifest.GetProperty(BeamSearch.BEAM_SIZE_PARAMETER);
+                string? beamSizeString = manifest.GetProperty(BeamSearch.BEAM_SIZE_PARAMETER);
                 int beamSize = LemmatizerME.DEFAULT_BEAM_SIZE;
                 if (beamSizeString != null)
                 {

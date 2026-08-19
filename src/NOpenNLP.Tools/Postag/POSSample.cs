@@ -40,17 +40,7 @@ public class POSSample
     private readonly IList<string> tags; // NOpenNLP: made readonly
     private readonly string[][]? additionalContext;
 
-    public POSSample(string[] sentence, string[] tags)
-        : this(sentence, tags, null)
-    {
-    }
-
-    public POSSample(IList<string> sentence, IList<string> tags)
-        : this(sentence, tags, null)
-    {
-    }
-
-    public POSSample(IList<string> sentence, IList<string> tags, string[][]? additionalContext)
+    public POSSample(IList<string> sentence, IList<string> tags, string[][]? additionalContext = null)
     {
         this.sentence = new JCG.List<string>(sentence).AsReadOnly();
         this.tags = new JCG.List<string>(tags).AsReadOnly();
@@ -76,7 +66,7 @@ public class POSSample
         this.additionalContext = ac;
     }
 
-    public POSSample(string[] sentence, string[] tags, string[][]? additionalContext)
+    public POSSample(string[] sentence, string[] tags, string[][]? additionalContext = null)
         : this((IList<string>)sentence, tags, additionalContext)
     {
     }
@@ -152,8 +142,8 @@ public class POSSample
             }
 
             // NOpenNLP: Java substring(begin, end) takes an end index; .NET takes a length.
-            sentence[i] = tokenTags[i].Substring(0, split);
-            tags[i] = tokenTags[i].Substring(split + 1);
+            sentence[i] = tokenTags[i][..split];
+            tags[i] = tokenTags[i][(split + 1)..];
         }
 
         return new POSSample(sentence, tags);

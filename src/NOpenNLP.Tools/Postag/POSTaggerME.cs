@@ -83,9 +83,9 @@ public class POSTaggerME : IPOSTagger
 
         modelPackage = model;
         contextGen = factory.GetPOSContextGenerator(beamSize);
-        tagDictionary = factory.GetTagDictionary();
+        tagDictionary = factory.TagDictionary;
         size = beamSize;
-        sequenceValidator = factory.GetSequenceValidator();
+        sequenceValidator = factory.SequenceValidator;
         if (model.PosSequenceModel is { } posSequenceModel)
         {
             this.model = posSequenceModel;
@@ -228,7 +228,7 @@ public class POSTaggerME : IPOSTagger
         int beamSize = trainParams.GetIntParameter(BeamSearch.BEAM_SIZE_PARAMETER,
             POSTaggerME.DEFAULT_BEAM_SIZE);
 
-        IPOSContextGenerator contextGenerator = posFactory.GetPOSContextGenerator();
+        IPOSContextGenerator contextGenerator = posFactory.POSContextGenerator;
 
         IDictionary<string, string> manifestInfoEntries = new JCG.Dictionary<string, string>();
 

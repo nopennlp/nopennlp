@@ -91,9 +91,7 @@ public class NameSample
                 {
                     // NOpenNLP: upstream throws RuntimeException; InvalidOperationException is
                     // the closest .NET counterpart for an unchecked programming-error throw.
-                    throw new InvalidOperationException(
-                        string.Format("name spans {0} and {1} are overlapped in file: {2}",
-                            this.names[i - 1], this.names[i], id));
+                    throw new InvalidOperationException($"name spans {this.names[i - 1]} and {this.names[i]} are overlapped in file: {id}");
                 }
             }
         }

@@ -88,6 +88,5 @@ public class POSEvaluator : Evaluator<POSSample>
     /// Represents this objects as human readable <see cref="string"/>.
     /// </summary>
     public override string ToString() =>
-        "Accuracy:" + wordAccuracy.Value +
-        " Number of Samples: " + wordAccuracy.Count;
+        $"Accuracy:{wordAccuracy.Value} Number of Samples: {wordAccuracy.Count}";
 }

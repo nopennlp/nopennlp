@@ -55,7 +55,7 @@ public class POSSampleSequenceStream : ObjectStreamBase<Sequence<POSSample>?>, I
         string[] sentence = sequence.Source.Sentence;
         object[]? ac = sequence.Source.AddictionalContext;
         string[] tags = tagger.Tag(sequence.Source.Sentence);
-        Event[] events = new Event[sentence.Length];
+        var events = new Event[sentence.Length];
         POSSampleEventStream.GenerateEvents(sentence, tags, ac, pcg).CopyTo(events, 0);
         return events;
     }
@@ -64,13 +64,13 @@ public class POSSampleSequenceStream : ObjectStreamBase<Sequence<POSSample>?>, I
     /// <exception cref="IOException">if there is an error during reading</exception>
     public override Sequence<POSSample>? Read()
     {
-        POSSample? sample = psi.Read();
+        var sample = psi.Read();
 
         if (sample != null)
         {
             string[] sentence = sample.Sentence;
             string[] tags = sample.Tags;
-            Event[] events = new Event[sentence.Length];
+            var events = new Event[sentence.Length];
 
             for (int i = 0; i < sentence.Length; i++)
             {

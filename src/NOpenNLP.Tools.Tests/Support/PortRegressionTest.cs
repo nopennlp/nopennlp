@@ -33,6 +33,7 @@ using NOpenNLP.Tools.Util.Normalizer;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
 using Version = NOpenNLP.Tools.Util.Version;
+using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Support;
 
@@ -175,7 +176,7 @@ public class PortRegressionTest
     public void TestPOSTaggerFactoryLoadsDefaultFeatureDescriptor()
     {
         // Passing null feature generator bytes forces the embedded default to load.
-        POSTaggerFactory factory = new POSTaggerFactory(null, [], null);
+        POSTaggerFactory factory = new POSTaggerFactory(null, new JCG.Dictionary<string, object>(), null);
 
         IAdaptiveFeatureGenerator generator = factory.CreateFeatureGenerators();
 

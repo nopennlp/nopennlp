@@ -46,7 +46,7 @@ public class ChunkerCrossValidator(
         {
             var trainingSampleStream = partitioner.Next();
 
-            ChunkerModel model = ChunkerME.Train(languageCode, trainingSampleStream, @params, factory);
+            var model = ChunkerME.Train(languageCode, trainingSampleStream, @params, factory);
 
             // do testing
             ChunkerEvaluator evaluator = new(new ChunkerME(model), listeners);

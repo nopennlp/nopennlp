@@ -40,16 +40,16 @@ public class DummyPOSTaggerFactory : POSTaggerFactory
         : base(null, null, null)
         => this.dict = posDictionary;
 
-    public override ISequenceValidator<string> GetSequenceValidator() =>
+    public override ISequenceValidator<string> SequenceValidator =>
         new DummyPOSSequenceValidator();
 
     // NOpenNLP: upstream narrows the return type to DummyPOSDictionary, which C#
     // does not allow when overriding; the declared type stays ITagDictionary and the
     // test asserts on the runtime type instead, exactly as upstream's test does.
-    public override ITagDictionary GetTagDictionary() =>
+    public override ITagDictionary TagDictionary =>
         artifactProvider!.GetArtifact<DummyPOSDictionary>(DUMMY_POSDICT)!;
 
-    public override IPOSContextGenerator GetPOSContextGenerator() =>
+    public override IPOSContextGenerator POSContextGenerator =>
         new DummyPOSContextGenerator(this.ngramDictionary);
 
     public override IDictionary<string, IArtifactSerializer> CreateArtifactSerializersMap()

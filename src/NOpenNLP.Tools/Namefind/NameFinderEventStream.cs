@@ -137,7 +137,7 @@ public class NameFinderEventStream : AbstractEventStream<NameSample>
             contextGenerator.ClearAdaptiveData();
         }
 
-        Span[] names = sample.Names;
+        var names = sample.Names;
         if (defaultType != null)
         {
             OverrideType(names);
@@ -162,7 +162,7 @@ public class NameFinderEventStream : AbstractEventStream<NameSample>
     {
         for (int i = 0; i < names.Length; i++)
         {
-            Span n = names[i];
+            var n = names[i];
             names[i] = new Span(n.Start, n.End, defaultType, n.Prob);
         }
     }

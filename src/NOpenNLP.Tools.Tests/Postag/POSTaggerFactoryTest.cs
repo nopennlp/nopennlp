@@ -59,9 +59,9 @@ public class POSTaggerFactoryTest
         POSModel posModel = TrainPOSModel(new DummyPOSTaggerFactory(posDict));
 
         POSTaggerFactory factory = posModel.Factory;
-        ClassicAssert.IsTrue(factory.GetTagDictionary() is DummyPOSDictionary);
-        ClassicAssert.IsTrue(factory.GetPOSContextGenerator() is DummyPOSContextGenerator);
-        ClassicAssert.IsTrue(factory.GetSequenceValidator() is DummyPOSSequenceValidator);
+        ClassicAssert.IsTrue(factory.TagDictionary is DummyPOSDictionary);
+        ClassicAssert.IsTrue(factory.POSContextGenerator is DummyPOSContextGenerator);
+        ClassicAssert.IsTrue(factory.SequenceValidator is DummyPOSSequenceValidator);
 
         MemoryStream @out = new MemoryStream();
         posModel.Serialize(@out);
@@ -70,9 +70,9 @@ public class POSTaggerFactoryTest
         POSModel fromSerialized = new POSModel(@in);
 
         factory = fromSerialized.Factory;
-        ClassicAssert.IsTrue(factory.GetTagDictionary() is DummyPOSDictionary);
-        ClassicAssert.IsTrue(factory.GetPOSContextGenerator() is DummyPOSContextGenerator);
-        ClassicAssert.IsTrue(factory.GetSequenceValidator() is DummyPOSSequenceValidator);
+        ClassicAssert.IsTrue(factory.TagDictionary is DummyPOSDictionary);
+        ClassicAssert.IsTrue(factory.POSContextGenerator is DummyPOSContextGenerator);
+        ClassicAssert.IsTrue(factory.SequenceValidator is DummyPOSSequenceValidator);
     }
 
     [Test]
@@ -84,9 +84,9 @@ public class POSTaggerFactoryTest
         POSModel posModel = TrainPOSModel(new POSTaggerFactory(null, null, posDict));
 
         POSTaggerFactory factory = posModel.Factory;
-        ClassicAssert.IsTrue(factory.GetTagDictionary() is POSDictionary);
-        ClassicAssert.IsTrue(factory.GetPOSContextGenerator() != null);
-        ClassicAssert.IsTrue(factory.GetSequenceValidator() is DefaultPOSSequenceValidator);
+        ClassicAssert.IsTrue(factory.TagDictionary is POSDictionary);
+        ClassicAssert.IsTrue(factory.POSContextGenerator != null);
+        ClassicAssert.IsTrue(factory.SequenceValidator is DefaultPOSSequenceValidator);
 
         MemoryStream @out = new MemoryStream();
         posModel.Serialize(@out);
@@ -95,9 +95,9 @@ public class POSTaggerFactoryTest
         POSModel fromSerialized = new POSModel(@in);
 
         factory = fromSerialized.Factory;
-        ClassicAssert.IsTrue(factory.GetTagDictionary() is POSDictionary);
-        ClassicAssert.IsTrue(factory.GetPOSContextGenerator() != null);
-        ClassicAssert.IsTrue(factory.GetSequenceValidator() is DefaultPOSSequenceValidator);
+        ClassicAssert.IsTrue(factory.TagDictionary is POSDictionary);
+        ClassicAssert.IsTrue(factory.POSContextGenerator != null);
+        ClassicAssert.IsTrue(factory.SequenceValidator is DefaultPOSSequenceValidator);
     }
 
     [Test]
