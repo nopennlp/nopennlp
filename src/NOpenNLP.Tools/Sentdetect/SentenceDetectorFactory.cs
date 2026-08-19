@@ -231,8 +231,11 @@ public class SentenceDetectorFactory : BaseToolFactory
         }
     }
 
+    // NOpenNLP: Java's String.valueOf(char[]) returns the array's contents. The
+    // closest-looking C# call, Convert.ToString(char[]), instead returns the type
+    // name "System.Char[]"; new string(char[]) is the actual counterpart.
     private static string EosCharArrayToString(char[] eosCharacters) // NOpenNLP: made static
-        => Convert.ToString(eosCharacters);
+        => new string(eosCharacters);
 
     private static char[] EosStringToCharArray(string eosCharacters) // NOpenNLP: made static
         => eosCharacters.ToCharArray();

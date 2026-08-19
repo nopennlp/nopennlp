@@ -125,6 +125,16 @@
                       LogicalName="opennlp.tools.chunker.%(Filename)%(Extension)" />
     <EmbeddedResource Include="Tokenize\latin-detokenizer.xml"
                       LogicalName="opennlp.tools.tokenize.latin-detokenizer.xml" />
+    <EmbeddedResource Include="Tokenize\token.train"
+                      LogicalName="opennlp.tools.tokenize.token.train" />
+    <EmbeddedResource Include="Tokenize\token-insufficient.train"
+                      LogicalName="opennlp.tools.tokenize.token-insufficient.train" />
+    <EmbeddedResource Include="Sentdetect\abb.xml"
+                      LogicalName="opennlp.tools.sentdetect.abb.xml" />
+    <EmbeddedResource Include="Sentdetect\Sentences.txt"
+                      LogicalName="opennlp.tools.sentdetect.Sentences.txt" />
+    <EmbeddedResource Include="Sentdetect\SentencesInsufficient.txt"
+                      LogicalName="opennlp.tools.sentdetect.SentencesInsufficient.txt" />
     <EmbeddedResource Include="Parser\en_head_rules"
                       LogicalName="opennlp.tools.parser.en_head_rules" />
     <!--

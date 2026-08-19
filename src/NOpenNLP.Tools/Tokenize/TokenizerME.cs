@@ -18,9 +18,11 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
+using NOpenNLP.Tools.Ml;
 using NOpenNLP.Tools.Ml.Model;
 using NOpenNLP.Tools.Tokenize.Lang;
 using NOpenNLP.Tools.Util;
+using System.IO;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using JCG = J2N.Collections.Generic;
@@ -43,8 +45,8 @@ namespace NOpenNLP.Tools.Tokenize;
 /// must be instantiated which can share one <code>TokenizerModel</code> instance
 /// to safe memory.
 /// <para/>
-/// To train a new model {<c>Train</c> method
-/// can be used.
+/// To train a new model the <see cref="Train(IObjectStream{TokenSample}, TokenizerFactory, TrainingParameters)"/>
+/// method can be used.
 /// <para/>
 /// Sample usage:
 /// <para/>
@@ -221,29 +223,27 @@ public class TokenizerME : AbstractTokenizer
         return [.. newTokens];
     }
 
-    // /// <summary>
-    // /// Trains a model for the {@link TokenizerME}.
-    // /// </summary>
-    // /// <param name="samples">
-    // ///          the samples used for the training.</param>
-    // /// <param name="factory">
-    // ///          a {@link TokenizerFactory} to get resources from</param>
-    // /// <param name="mlParams">
-    // ///          the machine learning train parameters</param>
-    // /// <returns>the trained {@link TokenizerModel}</returns>
-    // /// <exception cref="IOException">
-    // ///           it throws an {@link IOException} if an {@link IOException} is
-    // ///           thrown during IO operations on a temp file which is created
-    // ///           during training. Or if reading from the {@link ObjectStream}
-    // ///           fails.</exception>
-    // public static TokenizerModel Train(ObjectStream<TokenSample> samples, TokenizerFactory factory, TrainingParameters mlParams)
-    // {
-    //     Dictionary<string, string> manifestInfoEntries = new Dictionary<string, string>();
-    //     ObjectStream<Event> eventStream = new TokSpanEventStream(samples, factory.IsUseAlphaNumericOptmization(), factory.GetAlphaNumericPattern(), factory.GetContextGenerator());
-    //     EventTrainer trainer = TrainerFactory.GetEventTrainer(mlParams, manifestInfoEntries);
-    //     IMaxentModel maxentModel = trainer.Train(eventStream);
-    //     return new TokenizerModel(maxentModel, manifestInfoEntries, factory);
-    // }
+    /// <summary>
+    /// Trains a model for the <see cref="TokenizerME"/>.
+    /// </summary>
+    /// <param name="samples">the samples used for the training.</param>
+    /// <param name="factory">a <see cref="TokenizerFactory"/> to get resources from</param>
+    /// <param name="mlParams">the machine learning train parameters</param>
+    /// <returns>the trained <see cref="TokenizerModel"/></returns>
+    /// <exception cref="IOException">it throws an <see cref="IOException"/> if an
+    ///     <see cref="IOException"/> is thrown during IO operations on a temp file which is
+    ///     created during training. Or if reading from the <see cref="IObjectStream{T}"/>
+    ///     fails.</exception>
+    public static TokenizerModel Train(IObjectStream<TokenSample?> samples, TokenizerFactory factory,
+        TrainingParameters mlParams)
+    {
+        IDictionary<string, string> manifestInfoEntries = new JCG.Dictionary<string, string>();
+        IObjectStream<Event?> eventStream = new TokSpanEventStream(samples, factory.UseAlphaNumericOptmization,
+            factory.AlphaNumericPattern!, factory.ContextGenerator);
+        IEventTrainer trainer = TrainerFactory.GetEventTrainer(mlParams, manifestInfoEntries);
+        IMaxentModel maxentModel = trainer.Train(eventStream);
+        return new TokenizerModel(maxentModel, manifestInfoEntries, factory);
+    }
 
     /// <summary>
     /// Returns the value of the alpha-numeric optimization flag.

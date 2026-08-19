@@ -18,9 +18,11 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
+using NOpenNLP.Tools.Ml;
 using NOpenNLP.Tools.Ml.Model;
 using NOpenNLP.Tools.Sentdetect.Lang;
 using NOpenNLP.Tools.Util;
+using NOpenNLP.Tools.Util.Model;
 using J2N.Text;
 using System.Collections.Generic;
 using System.Text;
@@ -318,37 +320,39 @@ public class SentenceDetectorME : ISentenceDetector
     /// <returns>true if the break is acceptable</returns>
     protected virtual bool IsAcceptableBreak(string s, int fromIndex, int candidateIndex) => true;
 
-    // /// <summary>
-    // /// </summary>
-    // /// <remarks>
-    // /// Deprecated: Use <c>Train(string, ObjectStream, SentenceDetectorFactory, TrainingParameters)</c>
-    // ///             and pass in a <see cref="SentenceDetectorFactory"/>.
-    // /// </remarks>
-    // public static SentenceModel Train(string languageCode, ObjectStream<SentenceSample> samples, bool useTokenEnd, NOpenNLP.Tools.Dictionary.Dictionary abbreviations, TrainingParameters mlParams)
-    // {
-    //     SentenceDetectorFactory sdFactory = new SentenceDetectorFactory(languageCode, useTokenEnd, abbreviations, null);
-    //     return Train(languageCode, samples, sdFactory, mlParams);
-    // }
-    //
-    // public static SentenceModel Train(string languageCode, ObjectStream<SentenceSample> samples, SentenceDetectorFactory sdFactory, TrainingParameters mlParams)
-    // {
-    //     Dictionary<string, string> manifestInfoEntries = new Dictionary<string, string>();
-    //
-    //     // TODO: Fix the EventStream to throw exceptions when training goes wrong
-    //     ObjectStream<Event> eventStream = new SDEventStream(samples, sdFactory.GetSDContextGenerator(), sdFactory.GetEndOfSentenceScanner());
-    //     EventTrainer trainer = TrainerFactory.GetEventTrainer(mlParams, manifestInfoEntries);
-    //     IMaxentModel sentModel = trainer.Train(eventStream);
-    //     return new SentenceModel(languageCode, sentModel, manifestInfoEntries, sdFactory);
-    // }
-    //
-    // /// <summary>
-    // /// </summary>
-    // /// <remarks>
-    // /// Deprecated: Use <c>Train(string, ObjectStream, SentenceDetectorFactory, TrainingParameters)</c>
-    // ///             and pass in a <see cref="SentenceDetectorFactory"/>.
-    // /// </remarks>
-    // public static SentenceModel Train(string languageCode, ObjectStream<SentenceSample> samples, bool useTokenEnd, NOpenNLP.Tools.Dictionary.Dictionary abbreviations)
-    // {
-    //     return Train(languageCode, samples, useTokenEnd, abbreviations, ModelUtil.CreateDefaultTrainingParameters());
-    // }
+    /// <summary>
+    /// </summary>
+    /// <remarks>
+    /// Deprecated: Use <c>Train(string, IObjectStream, SentenceDetectorFactory, TrainingParameters)</c>
+    ///             and pass in a <see cref="SentenceDetectorFactory"/>.
+    /// </remarks>
+    public static SentenceModel Train(string languageCode, IObjectStream<SentenceSample?> samples,
+        bool useTokenEnd, NOpenNLP.Tools.Dictionary.Dictionary abbreviations, TrainingParameters mlParams)
+    {
+        SentenceDetectorFactory sdFactory = new SentenceDetectorFactory(languageCode, useTokenEnd, abbreviations, null);
+        return Train(languageCode, samples, sdFactory, mlParams);
+    }
+
+    public static SentenceModel Train(string languageCode, IObjectStream<SentenceSample?> samples,
+        SentenceDetectorFactory sdFactory, TrainingParameters mlParams)
+    {
+        IDictionary<string, string> manifestInfoEntries = new JCG.Dictionary<string, string>();
+
+        // TODO: Fix the EventStream to throw exceptions when training goes wrong
+        IObjectStream<Event?> eventStream = new SDEventStream(samples, sdFactory.GetSDContextGenerator(),
+            sdFactory.EndOfSentenceScanner);
+        IEventTrainer trainer = TrainerFactory.GetEventTrainer(mlParams, manifestInfoEntries);
+        IMaxentModel sentModel = trainer.Train(eventStream);
+        return new SentenceModel(languageCode, sentModel, manifestInfoEntries, sdFactory);
+    }
+
+    /// <summary>
+    /// </summary>
+    /// <remarks>
+    /// Deprecated: Use <c>Train(string, IObjectStream, SentenceDetectorFactory, TrainingParameters)</c>
+    ///             and pass in a <see cref="SentenceDetectorFactory"/>.
+    /// </remarks>
+    public static SentenceModel Train(string languageCode, IObjectStream<SentenceSample?> samples,
+        bool useTokenEnd, NOpenNLP.Tools.Dictionary.Dictionary abbreviations)
+        => Train(languageCode, samples, useTokenEnd, abbreviations, ModelUtil.CreateDefaultTrainingParameters());
 }
