@@ -21,6 +21,7 @@
 using System;
 using System.Collections.Generic;
 using NOpenNLP.Tools.Ml.Maxent;
+using NOpenNLP.Tools.Ml.Maxent.Quasinewton;
 using NOpenNLP.Tools.Ml.Naivebayes;
 using NOpenNLP.Tools.Ml.Perceptron;
 using NOpenNLP.Tools.Util;
@@ -54,6 +55,8 @@ public class TrainerFactory
                 new(TrainerType.EVENT_MODEL_TRAINER, _ => new PerceptronTrainer()),
             [NaiveBayesTrainer.NAIVE_BAYES_VALUE] =
                 new(TrainerType.EVENT_MODEL_TRAINER, _ => new NaiveBayesTrainer()),
+            [QNTrainer.MAXENT_QN_VALUE] =
+                new(TrainerType.EVENT_MODEL_TRAINER, _ => new QNTrainer()),
             [SimplePerceptronSequenceTrainer<object>.PERCEPTRON_SEQUENCE_VALUE] =
                 new(TrainerType.EVENT_MODEL_SEQUENCE_TRAINER,
                     sequenceType => Activator.CreateInstance(

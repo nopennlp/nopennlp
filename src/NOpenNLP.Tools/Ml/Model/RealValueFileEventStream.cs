@@ -109,11 +109,33 @@ public class RealValueFileEventStream : FileEventStream
         {
             int si = line.IndexOf(' ');
             string outcome = line[..si];
-            string[] contexts = line[(si + 1)..].Split(' ');
+            // NOpenNLP: Java's String.split discards trailing empty strings, so a line
+            // with trailing whitespace yields no empty final context. .NET's Split keeps
+            // them, which would add an empty predicate to the model.
+            string[] contexts = SplitDiscardingTrailingEmpty(line[(si + 1)..]);
             float[]? values = ParseContexts(contexts);
             return new Event(outcome, contexts, values);
         }
 
         return null;
+    }
+
+    private static string[] SplitDiscardingTrailingEmpty(string s)
+    {
+        string[] parts = s.Split(' ');
+        int end = parts.Length;
+        while (end > 0 && parts[end - 1].Length == 0)
+        {
+            end--;
+        }
+
+        if (end == parts.Length)
+        {
+            return parts;
+        }
+
+        string[] trimmed = new string[end];
+        Array.Copy(parts, trimmed, end);
+        return trimmed;
     }
 }

@@ -114,7 +114,8 @@ public class QNModel : AbstractModel
     /// <param name="parameters">
     ///          Model parameters</param>
     /// <returns>Normalized probabilities for the outcomes given the context.</returns>
-    internal static double[] Eval(int[] context, float[] values, double[] probs, int nOutcomes, int nPredLabels, double[] parameters)
+    internal static double[] Eval(int[] context, float[]? values, double[] probs, int nOutcomes,
+        int nPredLabels, double[] parameters)
     {
         for (int i = 0; i < context.Length; i++)
         {
