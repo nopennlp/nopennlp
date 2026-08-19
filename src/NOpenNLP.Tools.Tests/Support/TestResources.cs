@@ -78,3 +78,18 @@ internal sealed class TempResourceFile : IDisposable
 
     public void Dispose() => File.Delete(Path);
 }
+
+/// <summary>
+/// An <see cref="NOpenNLP.Tools.Util.IInputStreamFactory"/> over an embedded test resource.
+/// </summary>
+/// <remarks>
+/// Authored for NOpenNLP; not part of the Apache OpenNLP source. It stands in for
+/// upstream's <c>opennlp.tools.formats.ResourceAsStreamFactory</c>, which resolves a
+/// classpath resource. That class lives in the not-yet-ported <c>formats</c> package,
+/// and its only role in these tests is to reopen a resource on each call so a stream
+/// can be reset, which <see cref="TestResources.OpenResource"/> already provides.
+/// </remarks>
+internal sealed class ResourceAsStreamFactory(string resourcePath) : NOpenNLP.Tools.Util.IInputStreamFactory
+{
+    public Stream CreateInputStream() => TestResources.OpenResource(resourcePath);
+}

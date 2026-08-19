@@ -44,7 +44,10 @@ public sealed class TokenizerModel : BaseModel
     /// <param name="tokenizerModel">the model</param>
     /// <param name="manifestInfoEntries">the manifest</param>
     /// <param name="tokenizerFactory">the factory</param>
-    public TokenizerModel(IMaxentModel tokenizerModel, Dictionary<string, string> manifestInfoEntries, TokenizerFactory tokenizerFactory)
+    // NOpenNLP: widened from Dictionary to IDictionary to match the BaseModel
+    // constructor it forwards to, and SentenceModel's equivalent constructor.
+    public TokenizerModel(IMaxentModel tokenizerModel, IDictionary<string, string>? manifestInfoEntries,
+        TokenizerFactory tokenizerFactory)
         : base(COMPONENT_NAME, tokenizerFactory.LanguageCode, manifestInfoEntries, tokenizerFactory)
     {
         artifactMap.Put(TOKENIZER_MODEL_ENTRY, tokenizerModel);
