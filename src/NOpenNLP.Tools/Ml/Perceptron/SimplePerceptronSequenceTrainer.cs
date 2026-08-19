@@ -245,8 +245,7 @@ public class SimplePerceptronSequenceTrainer<T> : AbstractEventModelSequenceTrai
 
         sequenceStream.Reset();
 
-        Sequence<T>? sequence;
-        while ((sequence = sequenceStream.Read()) != null)
+        while (sequenceStream.Read() is { } sequence)
         {
             Event[] taggerEvents = sequenceStream.UpdateContext(sequence, model);
             Event[] events = sequence.Events;
@@ -376,8 +375,7 @@ public class SimplePerceptronSequenceTrainer<T> : AbstractEventModelSequenceTrai
 
         sequenceStream.Reset();
 
-        Sequence<T>? sequence;
-        while ((sequence = sequenceStream.Read()) != null)
+        while (sequenceStream.Read() is { } sequence)
         {
             Event[] taggerEvents = sequenceStream.UpdateContext(sequence,
                 new PerceptronModel(@params, predLabels, outcomeLabels));

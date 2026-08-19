@@ -37,7 +37,7 @@ public class RealBasicEventStream(IObjectStream<string?> ds) : IObjectStream<Eve
         return eventString != null ? CreateEvent(eventString) : null;
     }
 
-    private Event? CreateEvent(string obs)
+    private static Event? CreateEvent(string obs) // NOpenNLP: made static
     {
         int lastSpace = obs.LastIndexOf(' ');
         if (lastSpace == -1)

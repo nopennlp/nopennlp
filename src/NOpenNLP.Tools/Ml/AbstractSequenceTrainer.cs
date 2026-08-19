@@ -29,10 +29,6 @@ namespace NOpenNLP.Tools.Ml;
 /// <typeparam name="T">The type of the object which is the source of each sequence.</typeparam>
 public abstract class AbstractSequenceTrainer<T> : AbstractTrainer, ISequenceTrainer<T>
 {
-    protected AbstractSequenceTrainer()
-    {
-    }
-
     /// <summary>
     /// Trains a sequence classification model from the given sequence stream.
     /// </summary>
