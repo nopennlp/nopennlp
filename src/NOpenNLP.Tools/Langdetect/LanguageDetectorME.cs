@@ -22,6 +22,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using J2N;
+using NOpenNLP.Tools.Ml;
+using NOpenNLP.Tools.Ml.Model;
 using NOpenNLP.Tools.Util;
 using JCG = J2N.Collections.Generic;
 
@@ -294,7 +296,21 @@ public class LanguageDetectorME : ILanguageDetector
         return new StringCPLengthPair(content.Substring(startIndex, endIndex - startIndex), take);
     }
 
-    // NOpenNLP: the train method is not ported; training is out of scope.
+    public static LanguageDetectorModel Train(IObjectStream<LanguageSample?> samples,
+        TrainingParameters mlParams, LanguageDetectorFactory factory)
+    {
+        IDictionary<string, string> manifestInfoEntries = new JCG.Dictionary<string, string>();
+
+        mlParams.PutIfAbsent(AbstractEventTrainer.DATA_INDEXER_PARAM,
+            AbstractEventTrainer.DATA_INDEXER_ONE_PASS_VALUE);
+
+        IEventTrainer trainer = TrainerFactory.GetEventTrainer(mlParams, manifestInfoEntries);
+
+        IMaxentModel model = trainer.Train(
+            new LanguageDetectorEventStream(samples, factory.GetContextGenerator()));
+
+        return new LanguageDetectorModel(model, manifestInfoEntries, factory);
+    }
 
     private sealed class StringCPLengthPair(string s, int length)
     {
