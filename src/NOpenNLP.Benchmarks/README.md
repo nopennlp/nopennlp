@@ -63,6 +63,10 @@ Markdown and HTML.
 | `ChunkerBenchmarks` | `ChunkerME.Chunk` |
 | `NameFinderBenchmarks` | `NameFinderME.Find`, over all seven entity models |
 | `ModelLoadingBenchmarks` | Constructing each model from its `.bin` — the zip container, the manifest and the model readers |
+| `StemmerBenchmarks` | `PorterStemmer.Stem` and `SnowballStemmer.Stem` (English) |
+
+`StemmerBenchmarks` is the one case that needs no model, so it runs without
+`testdata/models-sf/`.
 
 Every benchmark runs on the same text as its Java counterpart, and on the same
 text the integration tests use, so a benchmark result and a test failure can be
@@ -80,6 +84,24 @@ Allocation is tracked alongside time. The Java code allocates freely and IKVM
 turns that into managed allocation, so a port that is no faster but allocates
 far less is still a real improvement, and one that quietly allocates more is a
 regression worth seeing.
+
+Check a large win against the JMH numbers before believing it. The stemmers are
+a worked example: in-process against IKVM, NOpenNLP looks 2.98x faster on Porter
+and 3.95x on Snowball, but real Java on a JVM is quicker than IKVM's translation
+of it, and against `src/java/opennlp-benchmarks` the honest figures are 1.6x and
+2.1x. Both are wins; only one pair is the number to quote.
+
+| | Real Java (JMH) | NOpenNLP | IKVM-implied |
+| --- | --- | --- | --- |
+| Porter | 0.404 us | 0.256 us | 2.98x |
+| Snowball (English) | 3.974 us | 1.913 us | 3.95x |
+
+The Snowball gap comes with 4.39x less allocation, which is the more solid half
+of the result. A plausible contributor is that OpenNLP's runtime buffers into a
+synchronized `StringBuffer` where the generated C# uses `StringBuilder`; the
+reflective `Among` dispatch in `find_among` is *not* the explanation for English,
+which declares no reflective entries. Treat the cause as unconfirmed until
+someone profiles it.
 
 ## Why this is not in CI
 
