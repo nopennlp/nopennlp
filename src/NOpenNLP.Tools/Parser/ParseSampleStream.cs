@@ -19,17 +19,14 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using System.IO;
+using System.Linq;
 using NOpenNLP.Tools.Util;
 
 namespace NOpenNLP.Tools.Parser;
 
-public class ParseSampleStream : FilterObjectStream<string?, Parse?>
+public class ParseSampleStream(IObjectStream<string?> @in)
+    : FilterObjectStream<string?, Parse?>(@in)
 {
-    public ParseSampleStream(IObjectStream<string?> @in)
-        : base(@in)
-    {
-    }
-
     /// <inheritdoc/>
     /// <exception cref="IOException">if there is an error during reading</exception>
     public override Parse? Read()
@@ -61,16 +58,5 @@ public class ParseSampleStream : FilterObjectStream<string?, Parse?>
     /// NOpenNLP: equivalent of <c>value.trim().isEmpty()</c> in Java, whose
     /// <c>String.trim()</c> treats only characters &lt;= U+0020 as trimmable.
     /// </summary>
-    private static bool IsJavaBlank(string value)
-    {
-        foreach (char c in value)
-        {
-            if (c > ' ')
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
+    private static bool IsJavaBlank(string value) => value.All(c => c <= ' ');
 }

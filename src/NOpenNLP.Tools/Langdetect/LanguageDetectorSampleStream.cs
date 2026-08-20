@@ -32,19 +32,14 @@ namespace NOpenNLP.Tools.Langdetect;
 /// The language is the first string in the line followed by a tab and the document content.<br/>
 /// Sample line: category-string tab-char document line-break-char(s)<br/>
 /// </summary>
-public class LanguageDetectorSampleStream : FilterObjectStream<string?, LanguageSample?>
+public class LanguageDetectorSampleStream(IObjectStream<string?> samples)
+    : FilterObjectStream<string?, LanguageSample?>(samples)
 {
-    public LanguageDetectorSampleStream(IObjectStream<string?> samples)
-        : base(samples)
-    {
-    }
-
     /// <inheritdoc/>
     /// <exception cref="IOException">if there is an error during reading</exception>
     public override LanguageSample? Read()
     {
-        string? sampleString;
-        while ((sampleString = samples.Read()) != null)
+        while (samples.Read() is { } sampleString)
         {
             int tabIndex = sampleString.IndexOf('\t');
             if (tabIndex > 0)

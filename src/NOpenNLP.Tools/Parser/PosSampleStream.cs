@@ -24,29 +24,25 @@ using NOpenNLP.Tools.Util;
 
 namespace NOpenNLP.Tools.Parser;
 
-public class PosSampleStream : FilterObjectStream<Parse?, POSSample?>
+public class PosSampleStream(IObjectStream<Parse?> @in)
+    : FilterObjectStream<Parse?, POSSample?>(@in)
 {
-    public PosSampleStream(IObjectStream<Parse?> @in)
-        : base(@in)
-    {
-    }
-
     /// <inheritdoc/>
     /// <exception cref="IOException">if there is an error during reading</exception>
     public override POSSample? Read()
     {
-        Parse? parse = samples.Read();
+        var parse = samples.Read();
 
         if (parse != null)
         {
-            Parse[] nodes = parse.GetTagNodes();
+            var nodes = parse.GetTagNodes();
 
             string[] toks = new string[nodes.Length];
             string[] preds = new string[nodes.Length];
 
             for (int ti = 0; ti < nodes.Length; ti++)
             {
-                Parse tok = nodes[ti];
+                var tok = nodes[ti];
                 toks[ti] = tok.CoveredText;
                 preds[ti] = tok.Type;
             }

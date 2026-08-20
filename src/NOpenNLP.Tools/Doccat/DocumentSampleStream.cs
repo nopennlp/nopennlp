@@ -35,13 +35,9 @@ namespace NOpenNLP.Tools.Doccat;
 /// separated document tokens.<br/>
 /// Sample line: category-string tab-char whitespace-separated-tokens line-break-char(s)<br/>
 /// </summary>
-public class DocumentSampleStream : FilterObjectStream<string?, DocumentSample?>
+public class DocumentSampleStream(IObjectStream<string?> samples)
+    : FilterObjectStream<string?, DocumentSample?>(samples)
 {
-    public DocumentSampleStream(IObjectStream<string?> samples)
-        : base(samples)
-    {
-    }
-
     /// <inheritdoc/>
     /// <exception cref="IOException">if there is an error during reading</exception>
     public override DocumentSample? Read()
@@ -59,7 +55,7 @@ public class DocumentSampleStream : FilterObjectStream<string?, DocumentSample?>
             {
                 string category = tokens[0];
                 string[] docTokens = new string[tokens.Length - 1];
-                System.Array.Copy(tokens, 1, docTokens, 0, tokens.Length - 1);
+                Array.Copy(tokens, 1, docTokens, 0, tokens.Length - 1);
 
                 sample = new DocumentSample(category, docTokens);
             }

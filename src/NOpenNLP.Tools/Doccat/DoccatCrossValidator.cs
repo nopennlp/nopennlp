@@ -18,7 +18,6 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
-using System;
 using System.IO;
 using NOpenNLP.Tools.Util;
 using NOpenNLP.Tools.Util.Eval;
@@ -65,14 +64,11 @@ public class DoccatCrossValidator
 
         while (partitioner.HasNext)
         {
-            CrossValidationPartitioner<DocumentSample>.TrainingSampleStream trainingSampleStream =
-                partitioner.Next();
+            var trainingSampleStream = partitioner.Next();
 
-            DoccatModel model = DocumentCategorizerME.Train(languageCode,
-                trainingSampleStream, @params, factory);
+            var model = DocumentCategorizerME.Train(languageCode, trainingSampleStream, @params, factory);
 
-            DocumentCategorizerEvaluator evaluator = new(
-                new DocumentCategorizerME(model), listeners);
+            DocumentCategorizerEvaluator evaluator = new(new DocumentCategorizerME(model), listeners);
 
             evaluator.Evaluate(trainingSampleStream.GetTestSampleStream());
 

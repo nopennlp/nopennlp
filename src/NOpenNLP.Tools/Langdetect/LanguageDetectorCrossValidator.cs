@@ -61,14 +61,11 @@ public class LanguageDetectorCrossValidator
 
         while (partitioner.HasNext)
         {
-            CrossValidationPartitioner<LanguageSample>.TrainingSampleStream trainingSampleStream =
-                partitioner.Next();
+            var trainingSampleStream = partitioner.Next();
 
-            LanguageDetectorModel model = LanguageDetectorME.Train(
-                trainingSampleStream, @params, factory);
+            var model = LanguageDetectorME.Train(trainingSampleStream, @params, factory);
 
-            LanguageDetectorEvaluator evaluator = new(
-                new LanguageDetectorME(model), listeners);
+            LanguageDetectorEvaluator evaluator = new(new LanguageDetectorME(model), listeners);
 
             evaluator.Evaluate(trainingSampleStream.GetTestSampleStream());
 

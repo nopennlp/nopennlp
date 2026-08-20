@@ -86,6 +86,6 @@ public class LanguageDetectorEvaluator : Evaluator<LanguageSample>
     /// Represents this objects as human readable <see cref="string"/>.
     /// </summary>
     public override string ToString() =>
-        "Accuracy: " + J2N.Numerics.Double.ToString(accuracy.Value, "J", CultureInfo.InvariantCulture) + "\n" +
-            "Number of documents: " + accuracy.Count.ToString(CultureInfo.InvariantCulture);
+        $"Accuracy: {J2N.Numerics.Double.ToString(accuracy.Value, "J", CultureInfo.InvariantCulture)}\n" +
+        $"Number of documents: {accuracy.Count.ToString(CultureInfo.InvariantCulture)}";
 }

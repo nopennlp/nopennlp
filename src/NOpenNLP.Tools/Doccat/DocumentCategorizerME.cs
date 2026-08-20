@@ -70,7 +70,7 @@ public class DocumentCategorizerME : IDocumentCategorizer
     /// <returns>the score map</returns>
     public virtual IDictionary<string, double> ScoreMap(string[] text)
     {
-        IDictionary<string, double> probDist = new JCG.Dictionary<string, double>();
+        var probDist = new JCG.Dictionary<string, double>();
 
         double[] categorize = Categorize(text);
         int catSize = NumberOfCategories;
@@ -132,10 +132,9 @@ public class DocumentCategorizerME : IDocumentCategorizer
     {
         IDictionary<string, string> manifestInfoEntries = new JCG.Dictionary<string, string>();
 
-        IEventTrainer trainer = TrainerFactory.GetEventTrainer(mlParams, manifestInfoEntries);
+        var trainer = TrainerFactory.GetEventTrainer(mlParams, manifestInfoEntries);
 
-        IMaxentModel model = trainer.Train(
-            new DocumentCategorizerEventStream(samples, factory.FeatureGenerators));
+        var model = trainer.Train(new DocumentCategorizerEventStream(samples, factory.FeatureGenerators));
 
         return new DoccatModel(languageCode, model, manifestInfoEntries, factory);
     }

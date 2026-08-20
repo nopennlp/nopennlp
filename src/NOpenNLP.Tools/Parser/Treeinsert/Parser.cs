@@ -83,16 +83,11 @@ public class Parser : AbstractBottomUpParser
 
     private readonly int[] attachments; // NOpenNLP: made readonly
 
-    public Parser(ParserModel model, int beamSize, double advancePercentage)
+    public Parser(ParserModel model, int beamSize = defaultBeamSize, double advancePercentage = defaultAdvancePercentage)
         : this(model.BuildModel, model.AttachModel, model.CheckModel,
             new POSTaggerME(model.ParserTaggerModel),
             new ChunkerME(model.ParserChunkerModel),
             model.HeadRules, beamSize, advancePercentage)
-    {
-    }
-
-    public Parser(ParserModel model)
-        : this(model, defaultBeamSize, defaultAdvancePercentage)
     {
     }
 
@@ -144,7 +139,7 @@ public class Parser : AbstractBottomUpParser
         while (!top.IsPosTag)
         {
             rf.Insert(0, top);
-            Parse[] kids = top.GetChildren();
+            var kids = top.GetChildren();
             top = kids[^1];
         }
 
@@ -209,11 +204,11 @@ public class Parser : AbstractBottomUpParser
 
     protected override Parse[] AdvanceChunks(Parse p, double minChunkScore)
     {
-        Parse[] parses = base.AdvanceChunks(p, minChunkScore);
-        foreach (Parse parse in parses)
+        var parses = base.AdvanceChunks(p, minChunkScore);
+        foreach (var parse in parses)
         {
-            Parse[] chunks = parse.GetChildren();
-            foreach (Parse chunk in chunks)
+            var chunks = parse.GetChildren();
+            foreach (var chunk in chunks)
             {
                 SetComplete(chunk);
             }
@@ -229,8 +224,8 @@ public class Parser : AbstractBottomUpParser
         int advanceNodeIndex;
         /* The node which will be labeled in this iteration of advancing the parse. */
         Parse? advanceNode = null;
-        Parse[] originalChildren = p.GetChildren();
-        Parse[] children = CollapsePunctuation(originalChildren, punctSet);
+        var originalChildren = p.GetChildren();
+        var children = CollapsePunctuation(originalChildren, punctSet);
         int numNodes = children.Length;
         if (numNodes == 0)
         {
@@ -300,7 +295,7 @@ public class Parser : AbstractBottomUpParser
                 string tag = buildModel.GetOutcome(max);
                 if (!tag.Equals(DONE))
                 {
-                    Parse newParse1 = (Parse)p.Clone();
+                    var newParse1 = (Parse)p.Clone();
                     Parse newNode = new(p.Text, advanceNode!.Span, tag, bprob, advanceNode.Head);
                     newParse1.Insert(newNode);
                     newParse1.AddProb(Math.Log(bprob));
@@ -346,7 +341,7 @@ public class Parser : AbstractBottomUpParser
                             SetComplete(newNode);
                             newParse1.AddProb(Math.Log(cprobs[completeIndex]));
 
-                            Parse newParse2 = (Parse)p.Clone();
+                            var newParse2 = (Parse)p.Clone();
                             Parse newNode2 = new(p.Text, advanceNode.Span, tag, bprob,
                                 advanceNode.Head);
                             newParse2.Insert(newNode2);
@@ -370,7 +365,7 @@ public class Parser : AbstractBottomUpParser
         // advance attaches
         if (doneProb > q)
         {
-            Parse newParse1 = (Parse)p.Clone(); // clone parse
+            var newParse1 = (Parse)p.Clone(); // clone parse
             // mark nodes as built
             if (checkComplete)
             {
@@ -399,10 +394,10 @@ public class Parser : AbstractBottomUpParser
             }
             else
             {
-                IList<Parse> rf = GetRightFrontier(p, punctSet);
+                var rf = GetRightFrontier(p, punctSet);
                 for (int fi = 0, fs = rf.Count; fi < fs; fi++)
                 {
-                    Parse fn = rf[fi];
+                    var fn = rf[fi];
                     attachModel.Eval(
                         attachContextGenerator.GetContext(children, advanceNodeIndex, rf, fi),
                         aprobs);
@@ -426,15 +421,15 @@ public class Parser : AbstractBottomUpParser
                                     (checkComplete && ((attachment == daughterAttachIndex && !IsComplete(fn))
                                         || (attachment == sisterAttachIndex && IsComplete(fn))))))
                         {
-                            Parse newParse2 = newParse1.CloneRoot(fn, originalZeroIndex);
-                            Parse[] newKids = CollapsePunctuation(newParse2.GetChildren(), punctSet);
+                            var newParse2 = newParse1.CloneRoot(fn, originalZeroIndex);
+                            var newKids = CollapsePunctuation(newParse2.GetChildren(), punctSet);
                             // remove node from top level since were going to attach it (including punct)
                             for (int ri = originalZeroIndex + 1; ri <= originalAdvanceIndex; ri++)
                             {
                                 newParse2.Remove(originalZeroIndex + 1);
                             }
 
-                            IList<Parse> crf = GetRightFrontier(newParse2, punctSet);
+                            var crf = GetRightFrontier(newParse2, punctSet);
                             Parse updatedNode;
                             if (attachment == daughterAttachIndex)
                             {
@@ -463,7 +458,7 @@ public class Parser : AbstractBottomUpParser
                             // update spans affected by attachment
                             for (int ni = fi + 1; ni < crf.Count; ni++)
                             {
-                                Parse node = crf[ni];
+                                var node = crf[ni];
                                 node.UpdateSpan();
                             }
 
@@ -495,7 +490,7 @@ public class Parser : AbstractBottomUpParser
                                 else
                                 {
                                     SetComplete(updatedNode);
-                                    Parse newParse3 = newParse2.CloneRoot(updatedNode, originalZeroIndex);
+                                    var newParse3 = newParse2.CloneRoot(updatedNode, originalZeroIndex);
                                     newParse3.AddProb(Math.Log(cprobs[completeIndex]));
                                     newParsesList.Add(newParse3);
                                     SetIncomplete(updatedNode);
@@ -512,9 +507,7 @@ public class Parser : AbstractBottomUpParser
                         {
                             if (debugOn)
                             {
-                                Console.WriteLine("Skipping " + fn.Type + "." + fn.Label + " "
-                                    + fn + " daughter=" + (attachment == daughterAttachIndex)
-                                    + " complete=" + IsComplete(fn) + " prob=" + prob);
+                                Console.WriteLine($"Skipping {fn.Type}.{fn.Label} {fn} daughter={(attachment == daughterAttachIndex)} complete={IsComplete(fn)} prob={prob}");
                             }
                         }
                     }
@@ -523,8 +516,7 @@ public class Parser : AbstractBottomUpParser
                     {
                         if (debugOn)
                         {
-                            Console.WriteLine("Stopping at incomplete node(" + fi + "): "
-                                + fn.Type + "." + fn.Label + " " + fn);
+                            Console.WriteLine($"Stopping at incomplete node({fi}): {fn.Type}.{fn.Label} {fn}");
                         }
 
                         break;
@@ -545,18 +537,18 @@ public class Parser : AbstractBottomUpParser
         Dictionary<string, string> manifestInfoEntries = [];
 
         Console.Error.WriteLine("Building dictionary");
-        OpenNlpDictionary mdict = AbstractBottomUpParser.BuildDictionary(parseSamples, rules, mlParams);
+        var mdict = BuildDictionary(parseSamples, rules, mlParams);
 
         parseSamples.Reset();
 
         // tag
-        POSModel posModel = POSTaggerME.Train(languageCode, new PosSampleStream(
+        var posModel = POSTaggerME.Train(languageCode, new PosSampleStream(
             parseSamples), mlParams.GetParameters("tagger"), new POSTaggerFactory());
 
         parseSamples.Reset();
 
         // chunk
-        ChunkerModel chunkModel = ChunkerME.Train(languageCode, new ChunkSampleStream(
+        var chunkModel = ChunkerME.Train(languageCode, new ChunkSampleStream(
             parseSamples), mlParams.GetParameters("chunker"), new ParserChunkerFactory());
 
         parseSamples.Reset();
@@ -567,9 +559,8 @@ public class Parser : AbstractBottomUpParser
             ParserEventTypeEnum.BUILD, mdict);
         IDictionary<string, string> buildReportMap = new JCG.Dictionary<string, string>();
 
-        IEventTrainer buildTrainer = TrainerFactory.GetEventTrainer(
-            mlParams.GetParameters("build"), buildReportMap);
-        IMaxentModel buildModel = buildTrainer.Train(bes);
+        var buildTrainer = TrainerFactory.GetEventTrainer(mlParams.GetParameters("build"), buildReportMap);
+        var buildModel = buildTrainer.Train(bes);
         Chunking.Parser.MergeReportIntoManifest(manifestInfoEntries, buildReportMap, "build");
 
         parseSamples.Reset();
@@ -580,9 +571,8 @@ public class Parser : AbstractBottomUpParser
             ParserEventTypeEnum.CHECK);
         IDictionary<string, string> checkReportMap = new JCG.Dictionary<string, string>();
 
-        IEventTrainer checkTrainer = TrainerFactory.GetEventTrainer(
-            mlParams.GetParameters("check"), checkReportMap);
-        IMaxentModel checkModel = checkTrainer.Train(kes);
+        var checkTrainer = TrainerFactory.GetEventTrainer(mlParams.GetParameters("check"), checkReportMap);
+        var checkModel = checkTrainer.Train(kes);
         Chunking.Parser.MergeReportIntoManifest(manifestInfoEntries, checkReportMap, "check");
 
         parseSamples.Reset();
@@ -592,9 +582,8 @@ public class Parser : AbstractBottomUpParser
         IObjectStream<Event?> attachEvents = new ParserEventStream(parseSamples, rules,
             ParserEventTypeEnum.ATTACH);
         IDictionary<string, string> attachReportMap = new JCG.Dictionary<string, string>();
-        IEventTrainer attachTrainer = TrainerFactory.GetEventTrainer(
-            mlParams.GetParameters("attach"), attachReportMap);
-        IMaxentModel attachModel = attachTrainer.Train(attachEvents);
+        var attachTrainer = TrainerFactory.GetEventTrainer(mlParams.GetParameters("attach"), attachReportMap);
+        var attachModel = attachTrainer.Train(attachEvents);
         Chunking.Parser.MergeReportIntoManifest(manifestInfoEntries, attachReportMap, "attach");
 
         return new ParserModel(languageCode, buildModel, checkModel,

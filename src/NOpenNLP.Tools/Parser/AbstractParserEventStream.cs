@@ -46,7 +46,7 @@ public abstract class AbstractParserEventStream : AbstractEventStream<Parse>
     protected OpenNlpDictionary? dict;
 
     protected AbstractParserEventStream(IObjectStream<Parse?> d,
-        IHeadRules rules, ParserEventTypeEnum etype, OpenNlpDictionary? dict)
+        IHeadRules rules, ParserEventTypeEnum etype, OpenNlpDictionary? dict = null)
         : base(d)
     {
         this.dict = dict;
@@ -68,11 +68,6 @@ public abstract class AbstractParserEventStream : AbstractEventStream<Parse>
         Init();
     }
 
-    protected AbstractParserEventStream(IObjectStream<Parse?> d, IHeadRules rules, ParserEventTypeEnum etype)
-        : this(d, rules, etype, null)
-    {
-    }
-
     /// <inheritdoc/>
     protected override IEnumerable<Event> CreateEvents(Parse sample)
     {
@@ -85,7 +80,7 @@ public abstract class AbstractParserEventStream : AbstractEventStream<Parse>
         }
 
         sample.UpdateHeads(rules);
-        Parse[] chunks = GetInitialChunks(sample);
+        var chunks = GetInitialChunks(sample);
 #pragma warning disable CS0612 // CHUNK and TAG are obsolete upstream but still handled here
         if (etype == ParserEventTypeEnum.TAG)
         {
@@ -121,9 +116,9 @@ public abstract class AbstractParserEventStream : AbstractEventStream<Parse>
         }
         else
         {
-            Parse[] kids = p.GetChildren();
+            var kids = p.GetChildren();
             bool allKidsAreTags = true;
-            foreach (Parse kid in kids)
+            foreach (var kid in kids)
             {
                 if (!kid.IsPosTag)
                 {
@@ -138,7 +133,7 @@ public abstract class AbstractParserEventStream : AbstractEventStream<Parse>
             }
             else
             {
-                foreach (Parse kid in kids)
+                foreach (var kid in kids)
                 {
                     GetInitialChunks(kid, ichunks);
                 }
@@ -156,10 +151,11 @@ public abstract class AbstractParserEventStream : AbstractEventStream<Parse>
 
     private void AddChunkEvents(IList<Event> chunkEvents, Parse[] chunks)
     {
-        IList<string> toks = new JCG.List<string>();
-        IList<string> tags = new JCG.List<string>();
-        IList<string> preds = new JCG.List<string>();
-        foreach (Parse c in chunks)
+        var toks = new JCG.List<string>();
+        var tags = new JCG.List<string>();
+        var preds = new JCG.List<string>();
+
+        foreach (var c in chunks)
         {
             if (c.IsPosTag)
             {
@@ -171,8 +167,8 @@ public abstract class AbstractParserEventStream : AbstractEventStream<Parse>
             {
                 bool start = true;
                 string ctype = c.Type;
-                Parse[] kids = c.GetChildren();
-                foreach (Parse tok in kids)
+                var kids = c.GetChildren();
+                foreach (var tok in kids)
                 {
                     toks.Add(tok.CoveredText);
                     tags.Add(tok.Type);
@@ -198,9 +194,10 @@ public abstract class AbstractParserEventStream : AbstractEventStream<Parse>
 
     private void AddTagEvents(IList<Event> tagEvents, Parse[] chunks)
     {
-        IList<string> toks = new JCG.List<string>();
-        IList<string> preds = new JCG.List<string>();
-        foreach (Parse c in chunks)
+        var toks = new JCG.List<string>();
+        var preds = new JCG.List<string>();
+
+        foreach (var c in chunks)
         {
             if (c.IsPosTag)
             {
@@ -209,8 +206,8 @@ public abstract class AbstractParserEventStream : AbstractEventStream<Parse>
             }
             else
             {
-                Parse[] kids = c.GetChildren();
-                foreach (Parse tok in kids)
+                var kids = c.GetChildren();
+                foreach (var tok in kids)
                 {
                     toks.Add(tok.CoveredText);
                     preds.Add(tok.Type);
@@ -234,7 +231,7 @@ public abstract class AbstractParserEventStream : AbstractEventStream<Parse>
     /// false otherwise.</returns>
     protected virtual bool LastChild(Parse child, Parse parent)
     {
-        Parse[] kids = AbstractBottomUpParser.CollapsePunctuation(parent.GetChildren(), punctSet);
+        var kids = AbstractBottomUpParser.CollapsePunctuation(parent.GetChildren(), punctSet);
         return kids[^1] == child;
     }
 }

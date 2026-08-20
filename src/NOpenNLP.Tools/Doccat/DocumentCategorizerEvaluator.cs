@@ -18,7 +18,6 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
-using System;
 using System.Globalization;
 using NOpenNLP.Tools.Util.Eval;
 
@@ -89,6 +88,6 @@ public class DocumentCategorizerEvaluator : Evaluator<DocumentSample>
     /// Represents this objects as human readable <see cref="string"/>.
     /// </summary>
     public override string ToString() =>
-        "Accuracy: " + J2N.Numerics.Double.ToString(accuracy.Value, "J", CultureInfo.InvariantCulture) + "\n" +
-            "Number of documents: " + accuracy.Count.ToString(CultureInfo.InvariantCulture);
+        $"Accuracy: {J2N.Numerics.Double.ToString(accuracy.Value, "J", CultureInfo.InvariantCulture)}\n" +
+        $"Number of documents: {accuracy.Count.ToString(CultureInfo.InvariantCulture)}";
 }

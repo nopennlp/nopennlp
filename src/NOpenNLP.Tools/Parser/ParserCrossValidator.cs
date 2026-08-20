@@ -61,8 +61,7 @@ public class ParserCrossValidator
 
         while (partitioner.HasNext)
         {
-            CrossValidationPartitioner<Parse>.TrainingSampleStream trainingSampleStream =
-                partitioner.Next();
+            var trainingSampleStream = partitioner.Next();
 
             ParserModel model;
 

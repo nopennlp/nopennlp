@@ -76,25 +76,25 @@ public class ParserEvaluator : Evaluator<Parse>
 
         if (parse.ChildCount > 0)
         {
-            foreach (Parse child in parse.GetChildren())
+            foreach (var child in parse.GetChildren())
             {
                 stack.Add(child);
             }
         }
 
-        IList<Span> consts = new JCG.List<Span>();
+        var consts = new JCG.List<Span>();
 
         while (stack.Count > 0)
         {
-            Parse constSpan = stack[^1];
+            var constSpan = stack[^1];
             stack.RemoveAt(stack.Count - 1);
 
             if (!constSpan.IsPosTag)
             {
-                Span span = constSpan.Span;
+                var span = constSpan.Span;
                 consts.Add(new Span(span.Start, span.End, constSpan.Type));
 
-                foreach (Parse child in constSpan.GetChildren())
+                foreach (var child in constSpan.GetChildren())
                 {
                     stack.Add(child);
                 }
@@ -107,13 +107,13 @@ public class ParserEvaluator : Evaluator<Parse>
     /// <inheritdoc/>
     protected sealed override Parse ProcessSample(Parse reference)
     {
-        IList<string> tokens = new JCG.List<string>();
-        foreach (Parse token in reference.GetTokenNodes())
+        var tokens = new JCG.List<string>();
+        foreach (var token in reference.GetTokenNodes())
         {
             tokens.Add(token.Span.GetCoveredText(reference.Text.AsCharSequence()).ToString());
         }
 
-        Parse[] predictions = ParseLine(string.Join(" ", tokens), parser, 1);
+        var predictions = ParseLine(string.Join(" ", tokens), parser, 1);
 
         Parse prediction = null!;
         if (predictions.Length > 0)

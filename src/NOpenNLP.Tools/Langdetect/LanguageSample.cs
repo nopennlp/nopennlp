@@ -28,23 +28,17 @@ namespace NOpenNLP.Tools.Langdetect;
 // NOpenNLP: upstream implements java.io.Serializable, which has no .NET
 // counterpart the port needs; model artifacts are written by the serializers in
 // NOpenNLP.Tools.Util.Model instead.
-public class LanguageSample
+// NOpenNLP: upstream stores the context as a CharSequence. .NET has no such
+// abstraction over string, so string is used throughout; ILanguageDetector
+// already takes the document as a string.
+public class LanguageSample(Language language, string context)
 {
-    // NOpenNLP: upstream stores the context as a CharSequence. .NET has no such
-    // abstraction over string, so string is used throughout; ILanguageDetector
-    // already takes the document as a string.
-    public LanguageSample(Language language, string context)
-    {
-        Language = language ?? throw new ArgumentNullException(nameof(language), "language must not be null");
-        Context = context ?? throw new ArgumentNullException(nameof(context), "context must not be null");
-    }
+    public virtual Language Language { get; } = language ?? throw new ArgumentNullException(nameof(language), "language must not be null");
 
-    public virtual Language Language { get; }
-
-    public virtual string Context { get; }
+    public virtual string Context { get; } = context ?? throw new ArgumentNullException(nameof(context), "context must not be null");
 
     /// <inheritdoc/>
-    public override string ToString() => Language.Lang + '	' + Context;
+    public override string ToString() => $"{Language.Lang}\t{Context}";
 
     /// <inheritdoc/>
     public override int GetHashCode() => HashCode.Combine(Context, Language);

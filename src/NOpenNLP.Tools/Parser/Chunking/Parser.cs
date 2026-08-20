@@ -27,7 +27,6 @@ using NOpenNLP.Tools.Ml.Model;
 using NOpenNLP.Tools.Postag;
 using NOpenNLP.Tools.Util;
 using JCG = J2N.Collections.Generic;
-using OpenNlpDictionary = NOpenNLP.Tools.Dictionary.Dictionary;
 
 namespace NOpenNLP.Tools.Parser.Chunking;
 
@@ -92,11 +91,11 @@ public class Parser : AbstractBottomUpParser
             string outcome = buildModel.GetOutcome(boi);
             if (outcome.StartsWith(START, StringComparison.Ordinal))
             {
-                startTypeMap[outcome] = outcome.Substring(START.Length);
+                startTypeMap[outcome] = outcome[START.Length..];
             }
             else if (outcome.StartsWith(CONT, StringComparison.Ordinal))
             {
-                contTypeMap[outcome] = outcome.Substring(CONT.Length);
+                contTypeMap[outcome] = outcome[CONT.Length..];
             }
         }
 
@@ -127,8 +126,8 @@ public class Parser : AbstractBottomUpParser
         int advanceNodeIndex;
         /* The node which will be labeled in this iteration of advancing the parse. */
         Parse? advanceNode = null;
-        Parse[] originalChildren = p.GetChildren();
-        Parse[] children = CollapsePunctuation(originalChildren, punctSet);
+        var originalChildren = p.GetChildren();
+        var children = CollapsePunctuation(originalChildren, punctSet);
         int numNodes = children.Length;
         if (numNodes == 0)
         {
@@ -199,7 +198,7 @@ public class Parser : AbstractBottomUpParser
                 }
             }
 
-            Parse newParse1 = (Parse)p.Clone(); // clone parse
+            var newParse1 = (Parse)p.Clone(); // clone parse
             if (createDerivationString)
             {
                 newParse1.Derivation!.Append(max).Append('-');
@@ -212,18 +211,17 @@ public class Parser : AbstractBottomUpParser
             checkModel.Eval(checkContextGenerator.GetContext(
                 CollapsePunctuation(newParse1.GetChildren(), punctSet), lastStartType!,
                 lastStartIndex, advanceNodeIndex), cprobs);
-            Parse newParse2;
             if (cprobs[completeIndex] > q)
             {
                 // make sure a reduce is likely
-                newParse2 = (Parse)newParse1.Clone();
+                var newParse2 = (Parse)newParse1.Clone();
                 if (createDerivationString)
                 {
                     newParse2.Derivation!.Append(1).Append('.');
                 }
 
                 newParse2.AddProb(Math.Log(cprobs[completeIndex]));
-                Parse[] cons = new Parse[advanceNodeIndex - lastStartIndex + 1];
+                var cons = new Parse[advanceNodeIndex - lastStartIndex + 1];
                 bool flat = true;
                 // first
                 cons[0] = lastStartNode!;
@@ -281,9 +279,9 @@ public class Parser : AbstractBottomUpParser
     public static void MergeReportIntoManifest(IDictionary<string, string> manifest,
         IDictionary<string, string> report, string @namespace)
     {
-        foreach (KeyValuePair<string, string> entry in report)
+        foreach (var entry in report)
         {
-            manifest[@namespace + "." + entry.Key] = entry.Value;
+            manifest[$"{@namespace}.{entry.Key}"] = entry.Value;
         }
     }
 
@@ -293,7 +291,7 @@ public class Parser : AbstractBottomUpParser
     {
         Console.Error.WriteLine("Building dictionary");
 
-        OpenNlpDictionary mdict = AbstractBottomUpParser.BuildDictionary(parseSamples, rules, mlParams);
+        var mdict = BuildDictionary(parseSamples, rules, mlParams);
 
         parseSamples.Reset();
 
@@ -304,28 +302,27 @@ public class Parser : AbstractBottomUpParser
         IObjectStream<Event?> bes = new ParserEventStream(parseSamples, rules,
             ParserEventTypeEnum.BUILD, mdict);
         IDictionary<string, string> buildReportMap = new JCG.Dictionary<string, string>();
-        IEventTrainer buildTrainer =
-            TrainerFactory.GetEventTrainer(mlParams.GetParameters("build"), buildReportMap);
-        IMaxentModel buildModel = buildTrainer.Train(bes);
+        var buildTrainer = TrainerFactory.GetEventTrainer(mlParams.GetParameters("build"), buildReportMap);
+        var buildModel = buildTrainer.Train(bes);
         MergeReportIntoManifest(manifestInfoEntries, buildReportMap, "build");
 
         parseSamples.Reset();
 
         // tag
-        TrainingParameters posTaggerParams = mlParams.GetParameters("tagger");
+        var posTaggerParams = mlParams.GetParameters("tagger");
 
         if (!posTaggerParams.GetObjectSettings().ContainsKey(BeamSearch.BEAM_SIZE_PARAMETER))
         {
             mlParams.Put("tagger", BeamSearch.BEAM_SIZE_PARAMETER, 10);
         }
 
-        POSModel posModel = POSTaggerME.Train(languageCode, new PosSampleStream(parseSamples),
+        var posModel = POSTaggerME.Train(languageCode, new PosSampleStream(parseSamples),
             mlParams.GetParameters("tagger"), new POSTaggerFactory());
 
         parseSamples.Reset();
 
         // chunk
-        ChunkerModel chunkModel = ChunkerME.Train(languageCode,
+        var chunkModel = ChunkerME.Train(languageCode,
             new ChunkSampleStream(parseSamples), mlParams.GetParameters("chunker"),
             new ParserChunkerFactory());
 
@@ -335,9 +332,8 @@ public class Parser : AbstractBottomUpParser
         Console.Error.WriteLine("Training checker");
         IObjectStream<Event?> kes = new ParserEventStream(parseSamples, rules, ParserEventTypeEnum.CHECK);
         IDictionary<string, string> checkReportMap = new JCG.Dictionary<string, string>();
-        IEventTrainer checkTrainer =
-            TrainerFactory.GetEventTrainer(mlParams.GetParameters("check"), checkReportMap);
-        IMaxentModel checkModel = checkTrainer.Train(kes);
+        var checkTrainer = TrainerFactory.GetEventTrainer(mlParams.GetParameters("check"), checkReportMap);
+        var checkModel = checkTrainer.Train(kes);
         MergeReportIntoManifest(manifestInfoEntries, checkReportMap, "check");
 
         return new ParserModel(languageCode, buildModel, checkModel,

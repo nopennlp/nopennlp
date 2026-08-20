@@ -37,7 +37,7 @@ namespace NOpenNLP.Tools.Parser;
 // TODO: Model should validate the artifact map
 public class ParserModel : BaseModel
 {
-    private class HeadRulesSerializer : IArtifactSerializer<Lang.En.HeadRules>
+    private sealed class HeadRulesSerializer : IArtifactSerializer<Lang.En.HeadRules>
     {
         public Lang.En.HeadRules Create(Stream @in) =>
             // NOpenNLP: Java wraps the stream in an InputStreamReader/BufferedReader; the
@@ -45,7 +45,7 @@ public class ParserModel : BaseModel
             // matching the IArtifactSerializer contract.
             new(new StreamReader(@in, new UTF8Encoding(false), false, 1024, leaveOpen: true));
 
-        public virtual void Serialize(Lang.En.HeadRules artifact, Stream @out)
+        public void Serialize(Lang.En.HeadRules artifact, Stream @out)
         {
             // NOpenNLP: mirrors the StreamReader in Create above -- BOM-less UTF-8,
             // left open so the caller keeps ownership of the stream, matching the

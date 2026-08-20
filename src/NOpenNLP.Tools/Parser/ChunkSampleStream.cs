@@ -26,13 +26,9 @@ using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Parser;
 
-public class ChunkSampleStream : FilterObjectStream<Parse?, ChunkSample?>
+public class ChunkSampleStream(IObjectStream<Parse?> @in)
+    : FilterObjectStream<Parse?, ChunkSample?>(@in)
 {
-    public ChunkSampleStream(IObjectStream<Parse?> @in)
-        : base(@in)
-    {
-    }
-
     private static void GetInitialChunks(Parse p, IList<Parse> ichunks)
     {
         if (p.IsPosTag)
@@ -41,9 +37,9 @@ public class ChunkSampleStream : FilterObjectStream<Parse?, ChunkSample?>
         }
         else
         {
-            Parse[] kids = p.GetChildren();
+            var kids = p.GetChildren();
             bool allKidsAreTags = true;
-            foreach (Parse kid in kids)
+            foreach (var kid in kids)
             {
                 if (!kid.IsPosTag)
                 {
@@ -58,7 +54,7 @@ public class ChunkSampleStream : FilterObjectStream<Parse?, ChunkSample?>
             }
             else
             {
-                foreach (Parse kid in kids)
+                foreach (var kid in kids)
                 {
                     GetInitialChunks(kid, ichunks);
                 }
@@ -77,15 +73,16 @@ public class ChunkSampleStream : FilterObjectStream<Parse?, ChunkSample?>
     /// <exception cref="IOException">if there is an error during reading</exception>
     public override ChunkSample? Read()
     {
-        Parse? parse = samples.Read();
+        var parse = samples.Read();
 
         if (parse != null)
         {
-            Parse[] chunks = GetInitialChunks(parse);
-            IList<string> toks = new JCG.List<string>();
-            IList<string> tags = new JCG.List<string>();
-            IList<string> preds = new JCG.List<string>();
-            foreach (Parse c in chunks)
+            var chunks = GetInitialChunks(parse);
+            var toks = new JCG.List<string>();
+            var tags = new JCG.List<string>();
+            var preds = new JCG.List<string>();
+
+            foreach (var c in chunks)
             {
                 if (c.IsPosTag)
                 {
@@ -97,8 +94,8 @@ public class ChunkSampleStream : FilterObjectStream<Parse?, ChunkSample?>
                 {
                     bool start = true;
                     string ctype = c.Type;
-                    Parse[] kids = c.GetChildren();
-                    foreach (Parse tok in kids)
+                    var kids = c.GetChildren();
+                    foreach (var tok in kids)
                     {
                         toks.Add(tok.CoveredText);
                         tags.Add(tok.Type);

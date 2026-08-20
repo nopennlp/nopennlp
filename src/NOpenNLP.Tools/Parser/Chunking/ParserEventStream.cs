@@ -44,13 +44,8 @@ public class ParserEventStream : AbstractParserEventStream
     /// <param name="etype">The type of events desired (tag, chunk, build, or check).</param>
     /// <param name="dict">A tri-gram dictionary to reduce feature generation.</param>
     public ParserEventStream(IObjectStream<Parse?> d, IHeadRules rules,
-        ParserEventTypeEnum etype, OpenNlpDictionary? dict)
+        ParserEventTypeEnum etype, OpenNlpDictionary? dict = null)
         : base(d, rules, etype, dict)
-    {
-    }
-
-    public ParserEventStream(IObjectStream<Parse?> d, IHeadRules rules, ParserEventTypeEnum etype)
-        : this(d, rules, etype, null)
     {
     }
 
@@ -115,7 +110,7 @@ public class ParserEventStream : AbstractParserEventStream
         }
         else
         {
-            reducedChunks = new Parse[0];
+            reducedChunks = [];
         }
 
         return reducedChunks;
@@ -132,8 +127,8 @@ public class ParserEventStream : AbstractParserEventStream
         int ci = 0;
         while (ci < chunks.Length)
         {
-            Parse c = chunks[ci];
-            Parse? parent = c.Parent;
+            var c = chunks[ci];
+            var parent = c.Parent;
             if (parent != null)
             {
                 string type = parent.Type;

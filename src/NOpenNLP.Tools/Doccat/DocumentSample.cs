@@ -37,12 +37,7 @@ public class DocumentSample
 {
     private readonly IList<string> text;
 
-    public DocumentSample(string category, string[] text)
-        : this(category, text, null)
-    {
-    }
-
-    public DocumentSample(string category, string[] text, IDictionary<string, object>? extraInformation)
+    public DocumentSample(string category, string[] text, IDictionary<string, object>? extraInformation = null)
     {
         if (text is null)
         {

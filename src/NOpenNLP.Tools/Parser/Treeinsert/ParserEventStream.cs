@@ -61,10 +61,10 @@ public class ParserEventStream : AbstractParserEventStream
     /// </summary>
     /// <param name="node">The node whose parents are to be returned.</param>
     /// <returns>a set of parent nodes.</returns>
-    private IDictionary<Parse, int> GetNonAdjoinedParent(Parse node)
+    private JCG.Dictionary<Parse, int> GetNonAdjoinedParent(Parse node)
     {
-        IDictionary<Parse, int> parents = new JCG.Dictionary<Parse, int>();
-        Parse parent = node.Parent!;
+        var parents = new JCG.Dictionary<Parse, int>();
+        var parent = node.Parent!;
         int index = IndexOf(node, parent);
         parents[parent] = index;
         while (parent.Type.Equals(node.Type))
@@ -80,7 +80,7 @@ public class ParserEventStream : AbstractParserEventStream
 
     private int IndexOf(Parse child, Parse parent)
     {
-        Parse[] kids = Parser.CollapsePunctuation(parent.GetChildren(), punctSet);
+        var kids = Parser.CollapsePunctuation(parent.GetChildren(), punctSet);
         for (int ki = 0; ki < kids.Length; ki++)
         {
             if (child == kids[ki])
@@ -92,8 +92,8 @@ public class ParserEventStream : AbstractParserEventStream
         return -1;
     }
 
-    private int NonPunctChildCount(Parse node) =>
-        Parser.CollapsePunctuation(node.GetChildren(), punctSet).Length;
+    private int NonPunctChildCount(Parse node)
+        => Parser.CollapsePunctuation(node.GetChildren(), punctSet).Length;
 
     /// <inheritdoc/>
     protected override bool LastChild(Parse child, Parse parent)
@@ -101,7 +101,7 @@ public class ParserEventStream : AbstractParserEventStream
         bool lc = base.LastChild(child, parent);
         while (!lc)
         {
-            Parse cp = child.Parent!;
+            var cp = child.Parent!;
             if (cp != parent && cp.Type.Equals(child.Type))
             {
                 lc = base.LastChild(cp, parent);
@@ -121,12 +121,12 @@ public class ParserEventStream : AbstractParserEventStream
     {
         /* Frontier nodes built from node in a completed parse.  Specifically,
          * they have all their children regardless of the stage of parsing.*/
-        IList<Parse> rightFrontier = new JCG.List<Parse>();
-        IList<Parse> builtNodes = new JCG.List<Parse>();
+        var rightFrontier = new JCG.List<Parse>();
+        var builtNodes = new JCG.List<Parse>();
         /* Nodes which characterize what the parse looks like to the parser as its being built.
          * Specifically, these nodes don't have all their children attached like the parents of
          * the chunk nodes do.*/
-        Parse[] currentChunks = new Parse[chunks.Length];
+        var currentChunks = new Parse[chunks.Length];
         for (int ci = 0; ci < chunks.Length; ci++)
         {
             currentChunks[ci] = (Parse)chunks[ci].Clone();
@@ -138,8 +138,8 @@ public class ParserEventStream : AbstractParserEventStream
 
         for (int ci = 0; ci < chunks.Length; ci++)
         {
-            Parse parent = chunks[ci].Parent!;
-            Parse prevParent = chunks[ci];
+            var parent = chunks[ci].Parent!;
+            var prevParent = chunks[ci];
             int off = 0;
             //build un-built parents
             if (!chunks[ci].IsPosTag)
@@ -221,7 +221,7 @@ public class ParserEventStream : AbstractParserEventStream
             else
             {
                 /* Right frontier consisting of partially-built nodes based on current state of the parse.*/
-                IList<Parse> currentRightFrontier = Parser.GetRightFrontier(currentChunks[0], punctSet);
+                var currentRightFrontier = Parser.GetRightFrontier(currentChunks[0], punctSet);
                 if (currentRightFrontier.Count != rightFrontier.Count)
                 {
                     // NOpenNLP: upstream prints to stderr and calls System.exit(1). A library
@@ -236,8 +236,8 @@ public class ParserEventStream : AbstractParserEventStream
                 //try daughters first.
                 for (int cfi = 0; cfi < currentRightFrontier.Count; cfi++)
                 {
-                    Parse frontierNode = rightFrontier[cfi];
-                    Parse cfn = currentRightFrontier[cfi];
+                    var frontierNode = rightFrontier[cfi];
+                    var cfn = currentRightFrontier[cfi];
                     if (!Parser.checkComplete || !Parser.COMPLETE.Equals(cfn.Label))
                     {
                         bool hasParent = parents.TryGetValue(frontierNode, out int i);
@@ -266,8 +266,8 @@ public class ParserEventStream : AbstractParserEventStream
                 //try sisters, and generate non-attach events.
                 for (int cfi = 0; cfi < currentRightFrontier.Count; cfi++)
                 {
-                    Parse frontierNode = rightFrontier[cfi];
-                    Parse cfn = currentRightFrontier[cfi];
+                    var frontierNode = rightFrontier[cfi];
+                    var cfn = currentRightFrontier[cfi];
                     if (attachNode == null && frontierNode.Parent != null
                         && parents.ContainsKey(frontierNode.Parent)
                         && frontierNode.Type.Equals(frontierNode.Parent.Type))
@@ -308,7 +308,7 @@ public class ParserEventStream : AbstractParserEventStream
                 {
                     if (Parser.ATTACH_DAUGHTER.Equals(attachType))
                     {
-                        Parse daughter = currentChunks[ci];
+                        var daughter = currentChunks[ci];
                         attachNode.Add(daughter, rules);
                         daughter.Parent = attachNode;
                         if (LastChild(chunks[ci], rightFrontier[attachNodeIndex]))
@@ -332,11 +332,11 @@ public class ParserEventStream : AbstractParserEventStream
                     }
                     else if (Parser.ATTACH_SISTER.Equals(attachType))
                     {
-                        Parse frontierNode = rightFrontier[attachNodeIndex];
+                        var frontierNode = rightFrontier[attachNodeIndex];
                         rightFrontier[attachNodeIndex] = frontierNode.Parent!;
-                        Parse sister = currentChunks[ci];
+                        var sister = currentChunks[ci];
 
-                        Parse newParent = attachNode.Parent!.Adjoin(sister, rules);
+                        var newParent = attachNode.Parent!.Adjoin(sister, rules);
 
                         newParent.Parent = attachNode.Parent;
                         attachNode.Parent = newParent;

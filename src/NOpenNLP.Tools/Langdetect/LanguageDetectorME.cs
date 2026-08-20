@@ -132,7 +132,7 @@ public class LanguageDetectorME : ILanguageDetector
             int actualChunkSize = (start + config.ChunkSize > config.MaxLength)
                 ? config.MaxLength - start
                 : config.ChunkSize;
-            StringCPLengthPair chunk = Chunk(content, start, actualChunkSize);
+            var chunk = Chunk(content, start, actualChunkSize);
 
             if (chunk.Length == 0)
             {
@@ -160,7 +160,7 @@ public class LanguageDetectorME : ILanguageDetector
     {
         foreach (string ngram in context)
         {
-            if (!ngrams.TryGetValue(ngram, out MutableInt? i))
+            if (!ngrams.TryGetValue(ngram, out var i))
             {
                 i = new MutableInt(1);
                 ngrams[ngram] = i;
@@ -184,7 +184,7 @@ public class LanguageDetectorME : ILanguageDetector
         string[] allGrams = new string[ngramCounts.Count];
         float[] counts = new float[ngramCounts.Count];
         int i = 0;
-        foreach (KeyValuePair<string, MutableInt> e in ngramCounts)
+        foreach (var e in ngramCounts)
         {
             allGrams[i] = e.Key;
             // TODO -- once OPENNLP-1261 is fixed,
@@ -194,7 +194,7 @@ public class LanguageDetectorME : ILanguageDetector
         }
 
         double[] eval = model.MaxentModel.Eval(allGrams, counts);
-        Language[] arr = new Language[eval.Length];
+        var arr = new Language[eval.Length];
         for (int j = 0; j < eval.Length; j++)
         {
             arr[j] = new Language(model.MaxentModel.GetOutcome(j), eval[j]);
@@ -243,7 +243,7 @@ public class LanguageDetectorME : ILanguageDetector
         // and check that the lang with the highest confidence
         // hasn't changed, and that the confidence in it
         // hasn't decreased
-        foreach (Language[] predictions in predictionsQueue)
+        foreach (var predictions in predictionsQueue)
         {
             if (lastLang == null)
             {
@@ -299,14 +299,14 @@ public class LanguageDetectorME : ILanguageDetector
     public static LanguageDetectorModel Train(IObjectStream<LanguageSample?> samples,
         TrainingParameters mlParams, LanguageDetectorFactory factory)
     {
-        IDictionary<string, string> manifestInfoEntries = new JCG.Dictionary<string, string>();
+        var manifestInfoEntries = new JCG.Dictionary<string, string>();
 
         mlParams.PutIfAbsent(AbstractEventTrainer.DATA_INDEXER_PARAM,
             AbstractEventTrainer.DATA_INDEXER_ONE_PASS_VALUE);
 
-        IEventTrainer trainer = TrainerFactory.GetEventTrainer(mlParams, manifestInfoEntries);
+        var trainer = TrainerFactory.GetEventTrainer(mlParams, manifestInfoEntries);
 
-        IMaxentModel model = trainer.Train(
+        var model = trainer.Train(
             new LanguageDetectorEventStream(samples, factory.GetContextGenerator()));
 
         return new LanguageDetectorModel(model, manifestInfoEntries, factory);
