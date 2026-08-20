@@ -21,6 +21,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using NOpenNLP.Tools.Formats;
 using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Util;
 using NUnit.Framework;

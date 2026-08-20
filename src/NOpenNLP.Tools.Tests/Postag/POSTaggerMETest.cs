@@ -20,6 +20,7 @@
 
 using System;
 using System.Text;
+using NOpenNLP.Tools.Formats;
 using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Util;
 using NOpenNLP.Tools.Util.Model;
@@ -35,10 +36,6 @@ public class POSTaggerMETest
 {
     private static IObjectStream<POSSample?> CreateSampleStream()
     {
-        // NOpenNLP: upstream uses opennlp.tools.formats.ResourceAsStreamFactory,
-        // which lives in the not-yet-ported formats package; the test-side
-        // ResourceAsStreamFactory in Support does the same job over an embedded
-        // resource.
         IInputStreamFactory @in = new ResourceAsStreamFactory(
             "/opennlp/tools/postag/AnnotatedSentences.txt");
 

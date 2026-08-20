@@ -20,6 +20,7 @@
 
 using System.Text;
 using NOpenNLP.Tools.Ml.Model;
+using NOpenNLP.Tools.Formats;
 using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Util;
 using NUnit.Framework;

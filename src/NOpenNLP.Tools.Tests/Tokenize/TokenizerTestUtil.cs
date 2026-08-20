@@ -19,6 +19,7 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using System.Collections.Generic;
 using System.Text;
+using NOpenNLP.Tools.Formats;
 using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Util;
 
@@ -58,10 +59,6 @@ public class TokenizerTestUtil
 
     internal static TokenizerModel CreateMaxentTokenModel()
     {
-        // NOpenNLP: upstream uses opennlp.tools.formats.ResourceAsStreamFactory,
-        // which lives in the not-yet-ported formats package; the test-side
-        // ResourceAsStreamFactory in Support does the same job over an embedded
-        // resource.
         IInputStreamFactory trainDataIn = new ResourceAsStreamFactory(
             "/opennlp/tools/tokenize/token.train");
 

@@ -150,6 +150,37 @@
                       LogicalName="opennlp.tools.util.featuregen.%(Filename)%(Extension)" />
     <EmbeddedResource Include="Formats\brown-cluster.txt"
                       LogicalName="opennlp.tools.formats.brown-cluster.txt" />
+    <!--
+      Corpora for the ported formats tests. The folder names are PascalCased to match
+      the rest of this project, while the LogicalName keeps upstream's lowercase
+      classpath path so the ported tests read resources by the same names the Java
+      originals do.
+    -->
+    <EmbeddedResource Include="Formats\*.sample"
+                      LogicalName="opennlp.tools.formats.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Formats\Brat\*.ann;Formats\Brat\*.txt"
+                      LogicalName="opennlp.tools.formats.brat.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Formats\Conllu\*.conllu"
+                      LogicalName="opennlp.tools.formats.conllu.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Formats\Frenchtreebank\*.xml"
+                      LogicalName="opennlp.tools.formats.frenchtreebank.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Formats\Irishsentencebank\*.xml"
+                      LogicalName="opennlp.tools.formats.irishsentencebank.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Formats\Letsmt\*.xml"
+                      LogicalName="opennlp.tools.formats.letsmt.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Formats\Muc\*.sgml"
+                      LogicalName="opennlp.tools.formats.muc.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Formats\Nkjp\*.xml"
+                      LogicalName="opennlp.tools.formats.nkjp.%(Filename)%(Extension)" />
+    <!--
+      LeipzigLanguageSampleStream walks a directory on disk rather than reading a
+      classpath resource, so these are copied to the output directory instead of being
+      embedded. The dot-prefixed .hidden file and the dontread subfolder are part of the
+      fixture: the test asserts that hidden files and unreadable folders are skipped.
+    -->
+    <None Include="Formats\Leipzig\samples\**\*"
+          CopyToOutputDirectory="PreserveNewest"
+          Link="Formats\Leipzig\samples\%(RecursiveDir)%(Filename)%(Extension)" />
     <EmbeddedResource Include="Chunker\*.bin"
                       LogicalName="opennlp.tools.chunker.%(Filename)%(Extension)" />
     <EmbeddedResource Include="Chunker\test.txt"

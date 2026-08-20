@@ -20,6 +20,7 @@
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using NOpenNLP.Tools.Formats;
 using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Tokenize.Lang;
 using NOpenNLP.Tools.Util;
@@ -35,10 +36,6 @@ public class TokenizerFactoryTest
 {
     private static IObjectStream<TokenSample?> CreateSampleStream()
     {
-        // NOpenNLP: upstream uses opennlp.tools.formats.ResourceAsStreamFactory,
-        // which lives in the not-yet-ported formats package; the test-side
-        // ResourceAsStreamFactory in Support does the same job over an embedded
-        // resource.
         IInputStreamFactory @in = new ResourceAsStreamFactory("/opennlp/tools/tokenize/token.train");
 
         return new TokenSampleStream(new PlainTextByLineStream(@in, Encoding.UTF8));

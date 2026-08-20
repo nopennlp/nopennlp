@@ -20,6 +20,7 @@
 
 using System;
 using System.Text;
+using NOpenNLP.Tools.Formats;
 using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Util;
 using NUnit.Framework;
@@ -71,10 +72,6 @@ public class ChunkerMETest
     {
         // train the chunker
 
-        // NOpenNLP: upstream uses opennlp.tools.formats.ResourceAsStreamFactory,
-        // which lives in the not-yet-ported formats package; the test-side
-        // ResourceAsStreamFactory in Support does the same job over an embedded
-        // resource.
         IInputStreamFactory @in = new ResourceAsStreamFactory("/opennlp/tools/chunker/test.txt");
 
         IObjectStream<ChunkSample?> sampleStream = new ChunkSampleStream(

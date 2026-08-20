@@ -19,6 +19,7 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using System.Text;
+using NOpenNLP.Tools.Formats;
 using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Util;
 using NOpenNLP.Tools.Util.Eval;
@@ -44,10 +45,6 @@ public class ChunkerEvaluatorTest
     [Test]
     public void TestEvaluator()
     {
-        // NOpenNLP: upstream uses opennlp.tools.formats.ResourceAsStreamFactory,
-        // which lives in the not-yet-ported formats package; the test-side
-        // ResourceAsStreamFactory in Support does the same job over an embedded
-        // resource.
         IInputStreamFactory inPredicted = new ResourceAsStreamFactory("/opennlp/tools/chunker/output.txt");
         IInputStreamFactory inExpected = new ResourceAsStreamFactory("/opennlp/tools/chunker/output.txt");
 
