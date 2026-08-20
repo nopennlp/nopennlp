@@ -21,10 +21,13 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.IO;
 using NOpenNLP.Tools.Chunker;
+using NOpenNLP.Tools.Ngram;
 using NOpenNLP.Tools.Postag;
 using NOpenNLP.Tools.Util;
 using JCG = J2N.Collections.Generic;
+using OpenNlpDictionary = NOpenNLP.Tools.Dictionary.Dictionary;
 
 namespace NOpenNLP.Tools.Parser;
 
@@ -579,9 +582,117 @@ public abstract class AbstractBottomUpParser : IParser
         return kids[^1] == child;
     }
 
-    // NOpenNLP: buildDictionary is training-only -- it consumes an ObjectStream<Parse> of
-    // training samples and TrainingParameters, and depends on the parser event streams
-    // which are outside the inference-only port.
-    // public static Dictionary BuildDictionary(IObjectStream<Parse> data, IHeadRules rules,
-    //     TrainingParameters parameters)
+    /// <exception cref="IOException">if there is an error during reading</exception>
+    public static OpenNlpDictionary BuildDictionary(IObjectStream<Parse?> data, IHeadRules rules,
+        TrainingParameters parameters)
+    {
+        int cutoff = parameters.GetIntParameter("dict", TrainingParameters.CUTOFF_PARAM, 5);
+
+        NGramModel mdict = new();
+        Parse? p;
+        while ((p = data.Read()) != null)
+        {
+            p.UpdateHeads(rules);
+            Parse[] pwords = p.GetTagNodes();
+            string[] words = new string[pwords.Length];
+            //add all uni-grams
+            for (int wi = 0; wi < words.Length; wi++)
+            {
+                words[wi] = pwords[wi].CoveredText;
+            }
+
+            mdict.Add(new StringList(words), 1, 1);
+            //add tri-grams and bi-grams for inital sequence
+            Parse[] chunks = CollapsePunctuation(
+                Chunking.ParserEventStream.GetInitialChunks(p), rules.PunctuationTags);
+            string[] cwords = new string[chunks.Length];
+            for (int wi = 0; wi < cwords.Length; wi++)
+            {
+                cwords[wi] = chunks[wi].Head.CoveredText;
+            }
+
+            mdict.Add(new StringList(cwords), 2, 3);
+
+            //emulate reductions to produce additional n-grams
+            int ci = 0;
+            while (ci < chunks.Length)
+            {
+                if (chunks[ci].Parent == null)
+                {
+                    chunks[ci].Show();
+                }
+
+                if (LastChild(chunks[ci], chunks[ci].Parent, rules.PunctuationTags))
+                {
+                    //perform reduce
+                    int reduceStart = ci;
+                    while (reduceStart >= 0 && chunks[reduceStart].Parent == chunks[ci].Parent)
+                    {
+                        reduceStart--;
+                    }
+
+                    reduceStart++;
+                    chunks = Chunking.ParserEventStream.ReduceChunks(chunks, ci, chunks[ci].Parent!);
+                    ci = reduceStart;
+                    if (chunks.Length != 0)
+                    {
+                        string[] window = new string[5];
+                        int wi = 0;
+                        if (ci - 2 >= 0)
+                        {
+                            window[wi++] = chunks[ci - 2].Head.CoveredText;
+                        }
+
+                        if (ci - 1 >= 0)
+                        {
+                            window[wi++] = chunks[ci - 1].Head.CoveredText;
+                        }
+
+                        window[wi++] = chunks[ci].Head.CoveredText;
+                        if (ci + 1 < chunks.Length)
+                        {
+                            window[wi++] = chunks[ci + 1].Head.CoveredText;
+                        }
+
+                        if (ci + 2 < chunks.Length)
+                        {
+                            window[wi++] = chunks[ci + 2].Head.CoveredText;
+                        }
+
+                        if (wi < 5)
+                        {
+                            string[] subWindow = new string[wi];
+                            System.Array.Copy(window, 0, subWindow, 0, wi);
+                            window = subWindow;
+                        }
+
+                        if (window.Length >= 3)
+                        {
+                            mdict.Add(new StringList(window), 2, 3);
+                        }
+                        else if (window.Length == 2)
+                        {
+                            mdict.Add(new StringList(window), 2, 2);
+                        }
+                    }
+
+                    ci = reduceStart - 1; //ci will be incremented at end of loop
+                }
+
+                ci++;
+            }
+        }
+
+        mdict.Cutoff(cutoff, int.MaxValue);
+        return mdict.ToDictionary(true);
+    }
+
+    /// <exception cref="IOException">if there is an error during reading</exception>
+    public static OpenNlpDictionary BuildDictionary(IObjectStream<Parse?> data, IHeadRules rules, int cutoff)
+    {
+        TrainingParameters parameters = new();
+        parameters.Put("dict", TrainingParameters.CUTOFF_PARAM, cutoff);
+
+        return BuildDictionary(data, rules, parameters);
+    }
 }

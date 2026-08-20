@@ -20,10 +20,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using NOpenNLP.Tools.Chunker;
+using NOpenNLP.Tools.Ml;
 using NOpenNLP.Tools.Ml.Model;
 using NOpenNLP.Tools.Postag;
+using NOpenNLP.Tools.Util;
 using JCG = J2N.Collections.Generic;
+using OpenNlpDictionary = NOpenNLP.Tools.Dictionary.Dictionary;
 
 namespace NOpenNLP.Tools.Parser.Treeinsert;
 
@@ -534,9 +538,86 @@ public class Parser : AbstractBottomUpParser
 
     protected override void AdvanceTop(Parse p) => p.Type = TOP_NODE;
 
-    // NOpenNLP: the train overloads are training-only -- they consume ObjectStream<Parse>
-    // training samples and TrainingParameters, and depend on the parser event streams which
-    // are outside the inference-only port.
-    // public static ParserModel Train(string languageCode, IObjectStream<Parse> parseSamples,
-    //     IHeadRules rules, TrainingParameters mlParams)
+    /// <exception cref="IOException">if there is an error during reading</exception>
+    public static ParserModel Train(string languageCode,
+        IObjectStream<Parse?> parseSamples, IHeadRules rules, TrainingParameters mlParams)
+    {
+        Dictionary<string, string> manifestInfoEntries = [];
+
+        Console.Error.WriteLine("Building dictionary");
+        OpenNlpDictionary mdict = AbstractBottomUpParser.BuildDictionary(parseSamples, rules, mlParams);
+
+        parseSamples.Reset();
+
+        // tag
+        POSModel posModel = POSTaggerME.Train(languageCode, new PosSampleStream(
+            parseSamples), mlParams.GetParameters("tagger"), new POSTaggerFactory());
+
+        parseSamples.Reset();
+
+        // chunk
+        ChunkerModel chunkModel = ChunkerME.Train(languageCode, new ChunkSampleStream(
+            parseSamples), mlParams.GetParameters("chunker"), new ParserChunkerFactory());
+
+        parseSamples.Reset();
+
+        // build
+        Console.Error.WriteLine("Training builder");
+        IObjectStream<Event?> bes = new ParserEventStream(parseSamples, rules,
+            ParserEventTypeEnum.BUILD, mdict);
+        IDictionary<string, string> buildReportMap = new JCG.Dictionary<string, string>();
+
+        IEventTrainer buildTrainer = TrainerFactory.GetEventTrainer(
+            mlParams.GetParameters("build"), buildReportMap);
+        IMaxentModel buildModel = buildTrainer.Train(bes);
+        Chunking.Parser.MergeReportIntoManifest(manifestInfoEntries, buildReportMap, "build");
+
+        parseSamples.Reset();
+
+        // check
+        Console.Error.WriteLine("Training checker");
+        IObjectStream<Event?> kes = new ParserEventStream(parseSamples, rules,
+            ParserEventTypeEnum.CHECK);
+        IDictionary<string, string> checkReportMap = new JCG.Dictionary<string, string>();
+
+        IEventTrainer checkTrainer = TrainerFactory.GetEventTrainer(
+            mlParams.GetParameters("check"), checkReportMap);
+        IMaxentModel checkModel = checkTrainer.Train(kes);
+        Chunking.Parser.MergeReportIntoManifest(manifestInfoEntries, checkReportMap, "check");
+
+        parseSamples.Reset();
+
+        // attach
+        Console.Error.WriteLine("Training attacher");
+        IObjectStream<Event?> attachEvents = new ParserEventStream(parseSamples, rules,
+            ParserEventTypeEnum.ATTACH);
+        IDictionary<string, string> attachReportMap = new JCG.Dictionary<string, string>();
+        IEventTrainer attachTrainer = TrainerFactory.GetEventTrainer(
+            mlParams.GetParameters("attach"), attachReportMap);
+        IMaxentModel attachModel = attachTrainer.Train(attachEvents);
+        Chunking.Parser.MergeReportIntoManifest(manifestInfoEntries, attachReportMap, "attach");
+
+        return new ParserModel(languageCode, buildModel, checkModel,
+            attachModel, posModel, chunkModel,
+            rules, ParserType.TREEINSERT, manifestInfoEntries);
+    }
+
+    /// <exception cref="IOException">if there is an error during reading</exception>
+    public static ParserModel Train(string languageCode,
+        IObjectStream<Parse?> parseSamples, IHeadRules rules, int iterations, int cut)
+    {
+        TrainingParameters parameters = new();
+        parameters.Put("dict", TrainingParameters.CUTOFF_PARAM, cut);
+
+        parameters.Put("tagger", TrainingParameters.CUTOFF_PARAM, cut);
+        parameters.Put("tagger", TrainingParameters.ITERATIONS_PARAM, iterations);
+        parameters.Put("chunker", TrainingParameters.CUTOFF_PARAM, cut);
+        parameters.Put("chunker", TrainingParameters.ITERATIONS_PARAM, iterations);
+        parameters.Put("check", TrainingParameters.CUTOFF_PARAM, cut);
+        parameters.Put("check", TrainingParameters.ITERATIONS_PARAM, iterations);
+        parameters.Put("build", TrainingParameters.CUTOFF_PARAM, cut);
+        parameters.Put("build", TrainingParameters.ITERATIONS_PARAM, iterations);
+
+        return Train(languageCode, parseSamples, rules, parameters);
+    }
 }

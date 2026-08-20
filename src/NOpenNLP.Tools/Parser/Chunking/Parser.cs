@@ -20,11 +20,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using NOpenNLP.Tools.Chunker;
+using NOpenNLP.Tools.Ml;
 using NOpenNLP.Tools.Ml.Model;
 using NOpenNLP.Tools.Postag;
 using NOpenNLP.Tools.Util;
 using JCG = J2N.Collections.Generic;
+using OpenNlpDictionary = NOpenNLP.Tools.Dictionary.Dictionary;
 
 namespace NOpenNLP.Tools.Parser.Chunking;
 
@@ -284,9 +287,61 @@ public class Parser : AbstractBottomUpParser
         }
     }
 
-    // NOpenNLP: the train overloads are training-only -- they consume ObjectStream<Parse>
-    // training samples and TrainingParameters, and depend on the parser event streams which
-    // are outside the inference-only port.
-    // public static ParserModel Train(string languageCode, IObjectStream<Parse> parseSamples,
-    //     IHeadRules rules, TrainingParameters mlParams)
+    /// <exception cref="IOException">if there is an error during reading</exception>
+    public static ParserModel Train(string languageCode, IObjectStream<Parse?> parseSamples,
+        IHeadRules rules, TrainingParameters mlParams)
+    {
+        Console.Error.WriteLine("Building dictionary");
+
+        OpenNlpDictionary mdict = AbstractBottomUpParser.BuildDictionary(parseSamples, rules, mlParams);
+
+        parseSamples.Reset();
+
+        Dictionary<string, string> manifestInfoEntries = [];
+
+        // build
+        Console.Error.WriteLine("Training builder");
+        IObjectStream<Event?> bes = new ParserEventStream(parseSamples, rules,
+            ParserEventTypeEnum.BUILD, mdict);
+        IDictionary<string, string> buildReportMap = new JCG.Dictionary<string, string>();
+        IEventTrainer buildTrainer =
+            TrainerFactory.GetEventTrainer(mlParams.GetParameters("build"), buildReportMap);
+        IMaxentModel buildModel = buildTrainer.Train(bes);
+        MergeReportIntoManifest(manifestInfoEntries, buildReportMap, "build");
+
+        parseSamples.Reset();
+
+        // tag
+        TrainingParameters posTaggerParams = mlParams.GetParameters("tagger");
+
+        if (!posTaggerParams.GetObjectSettings().ContainsKey(BeamSearch.BEAM_SIZE_PARAMETER))
+        {
+            mlParams.Put("tagger", BeamSearch.BEAM_SIZE_PARAMETER, 10);
+        }
+
+        POSModel posModel = POSTaggerME.Train(languageCode, new PosSampleStream(parseSamples),
+            mlParams.GetParameters("tagger"), new POSTaggerFactory());
+
+        parseSamples.Reset();
+
+        // chunk
+        ChunkerModel chunkModel = ChunkerME.Train(languageCode,
+            new ChunkSampleStream(parseSamples), mlParams.GetParameters("chunker"),
+            new ParserChunkerFactory());
+
+        parseSamples.Reset();
+
+        // check
+        Console.Error.WriteLine("Training checker");
+        IObjectStream<Event?> kes = new ParserEventStream(parseSamples, rules, ParserEventTypeEnum.CHECK);
+        IDictionary<string, string> checkReportMap = new JCG.Dictionary<string, string>();
+        IEventTrainer checkTrainer =
+            TrainerFactory.GetEventTrainer(mlParams.GetParameters("check"), checkReportMap);
+        IMaxentModel checkModel = checkTrainer.Train(kes);
+        MergeReportIntoManifest(manifestInfoEntries, checkReportMap, "check");
+
+        return new ParserModel(languageCode, buildModel, checkModel,
+            posModel, chunkModel, rules,
+            ParserType.CHUNKING, manifestInfoEntries);
+    }
 }
