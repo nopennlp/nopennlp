@@ -124,6 +124,8 @@
     upstream so future ports are a straight copy.
   -->
   <ItemGroup>
+    <EmbeddedResource Include="Doccat\DoccatSample.txt"
+                      LogicalName="opennlp.tools.doccat.DoccatSample.txt" />
     <EmbeddedResource Include="Postag\TagDictionaryCaseSensitive.xml"
                       LogicalName="opennlp.tools.postag.TagDictionaryCaseSensitive.xml" />
     <EmbeddedResource Include="Postag\TagDictionaryCaseInsensitive.xml"

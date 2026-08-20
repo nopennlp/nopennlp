@@ -19,6 +19,9 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using System.Collections.Generic;
+using NOpenNLP.Tools.Ml;
+using NOpenNLP.Tools.Ml.Model;
+using NOpenNLP.Tools.Util;
 using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Doccat;
@@ -124,5 +127,16 @@ public class DocumentCategorizerME : IDocumentCategorizer
     public virtual string GetAllResults(double[] results) =>
         model.MaxentModel.GetAllOutcomes(results);
 
-    // NOpenNLP: the static train(...) method is not ported; training is out of scope.
+    public static DoccatModel Train(string languageCode, IObjectStream<DocumentSample?> samples,
+        TrainingParameters mlParams, DoccatFactory factory)
+    {
+        IDictionary<string, string> manifestInfoEntries = new JCG.Dictionary<string, string>();
+
+        IEventTrainer trainer = TrainerFactory.GetEventTrainer(mlParams, manifestInfoEntries);
+
+        IMaxentModel model = trainer.Train(
+            new DocumentCategorizerEventStream(samples, factory.FeatureGenerators));
+
+        return new DoccatModel(languageCode, model, manifestInfoEntries, factory);
+    }
 }
