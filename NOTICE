@@ -15,6 +15,49 @@ The ported source has been modified from the original: translated from
 Java to C#, renamed to the NOpenNLP.Tools namespace, and adapted to .NET
 idioms and APIs.
 
+This product contains software from the Snowball project
+(https://snowballstem.org/), licensed under the BSD 3-Clause License
+rather than the Apache License 2.0:
+
+    Copyright (c) 2001, Dr Martin Porter
+    Copyright (c) 2002, Richard Boulton
+    Copyright (c) 2015, Cesar Souza
+    All rights reserved.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions
+    are met:
+
+        * Redistributions of source code must retain the above copyright
+          notice, this list of conditions and the following disclaimer.
+        * Redistributions in binary form must reproduce the above
+          copyright notice, this list of conditions and the following
+          disclaimer in the documentation and/or other materials
+          provided with the distribution.
+        * Neither the name of the copyright holders nor the names of its
+          contributors may be used to endorse or promote products
+          derived from this software without specific prior written
+          permission.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+    COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+    (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+    SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+    STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+    OF THE POSSIBILITY OF SUCH DAMAGE.
+
+This covers src/NOpenNLP.Tools/Stemmer/Snowball: the Among and
+SnowballProgram runtime, vendored from the Snowball compiler's C# runtime,
+and the stemmers under Generated/, produced by running that compiler's C#
+backend over the Snowball algorithm sources. Apache OpenNLP generates the
+same stemmers from the same sources with the compiler's Java backend.
+
 The test suite includes the Prepositional Phrase Attachment Dataset from
 Ratnaparkhi, Reynar, & Roukos, "A Maximum Entropy Model for Prepositional
 Phrase Attachment". ARPA HLT 1994. The data is licensed under the Apache
