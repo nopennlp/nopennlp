@@ -36,24 +36,47 @@
     byte-identical files is a bad trade, so the generated .cs is committed and
     reviewed like any other source.
 
-    Requires PowerShell 7 or later, git, and a C compiler with make. Runs on
-    macOS and Linux; on Windows it needs a Unix-like toolchain (WSL or MSYS2).
+    The Snowball compiler is C built with make, so by default this runs itself
+    inside a Linux container and only PowerShell 7 and Docker are needed. That
+    makes the generation identical on Windows, macOS and Linux, rather than
+    depending on whichever C toolchain the developer happens to have - on
+    Windows it would otherwise need WSL or MSYS2.
+
+    The container is stock `mcr.microsoft.com/dotnet/sdk:10.0` with git and
+    build-essential added at run time. Nothing is built into an image and no
+    Dockerfile is needed; the repository is bind-mounted and the generated files
+    land directly in the working tree.
 
 .PARAMETER WorkingDirectory
     Where to clone and build the Snowball compiler. Defaults to a temporary
-    directory that is reused across runs so repeat invocations are cheap.
+    directory that is reused across runs so repeat invocations are cheap. Under
+    Docker this lives inside the container and the clone is not reused.
 
 .PARAMETER OutputDirectory
     Where to write the generated stemmers. Defaults to
     src/NOpenNLP.Tools/Stemmer/Snowball/Generated beside the repository root.
 
+.PARAMETER NoDocker
+    Run directly on this machine instead of in a container. Requires git and a C
+    compiler with make on PATH. Use this if you already have the toolchain and
+    want to skip the container, or when running inside one.
+
+.PARAMETER Image
+    The container image to generate in. Defaults to the .NET 10 SDK image, which
+    the repository already uses elsewhere.
+
 .EXAMPLE
     build/generate-snowball-stemmers.ps1
+
+.EXAMPLE
+    build/generate-snowball-stemmers.ps1 -NoDocker
 #>
 [CmdletBinding()]
 param(
     [string] $WorkingDirectory,
-    [string] $OutputDirectory
+    [string] $OutputDirectory,
+    [switch] $NoDocker,
+    [string] $Image = 'mcr.microsoft.com/dotnet/sdk:10.0'
 )
 
 Set-StrictMode -Version Latest
@@ -166,9 +189,60 @@ function Invoke-Native {
     return $output
 }
 
+# Re-invoke this same script inside a container. There is deliberately only one
+# implementation: the algorithm list, the pins and the generation logic below are
+# the single source of truth, and the container path just runs them somewhere
+# with a C toolchain.
+if (-not $NoDocker) {
+    if (-not (Get-Command 'docker' -ErrorAction SilentlyContinue)) {
+        throw 'docker is required but was not found on PATH. Install Docker, or pass -NoDocker to generate with a local C toolchain.'
+    }
+
+    # $OutputDirectory has already been defaulted above, so ask what the caller
+    # actually passed rather than whether it has a value.
+    if ($PSBoundParameters.ContainsKey('OutputDirectory')) {
+        throw '-OutputDirectory cannot be combined with the default Docker run, because the container writes through a fixed mount. Pass -NoDocker as well to choose your own output directory.'
+    }
+
+    Write-Host "Generating in $Image ..."
+
+    # The apt install is part of the run rather than a Dockerfile so there is no
+    # image to build, tag or keep current. It costs a few seconds against a
+    # generation that is run rarely.
+    $script = @(
+        'set -e'
+        'export DEBIAN_FRONTEND=noninteractive'
+        'apt-get update -qq'
+        'apt-get install -y -qq git build-essential > /dev/null'
+        'pwsh -NoProfile -File /repo/build/generate-snowball-stemmers.ps1 -NoDocker'
+    ) -join "`n"
+
+    # Generated files must be owned by the invoking user, not root. Docker
+    # Desktop on Windows and macOS maps ownership for us, but a native Linux
+    # daemon does not, so pass the real uid/gid there.
+    $dockerArgs = [System.Collections.Generic.List[string]]::new()
+    $dockerArgs.AddRange([string[]] @('run', '--rm', '-v', "${repositoryRoot}:/repo", '-w', '/repo'))
+
+    if ($IsLinux) {
+        $dockerArgs.AddRange([string[]] @('-u', "$(id -u):$(id -g)"))
+    }
+
+    $dockerArgs.AddRange([string[]] @($Image, 'bash', '-lc', $script))
+
+    # Not Invoke-Native: that captures output, and this is the long-running step
+    # where the apt install and the per-language progress should be visible as
+    # they happen.
+    & docker @dockerArgs
+    if ($LASTEXITCODE -ne 0) {
+        throw "Generation in $Image failed with exit code $LASTEXITCODE."
+    }
+
+    return
+}
+
 foreach ($tool in @('git', 'make')) {
     if (-not (Get-Command $tool -ErrorAction SilentlyContinue)) {
-        throw "$tool is required but was not found on PATH."
+        throw "$tool is required but was not found on PATH. Omit -NoDocker to generate in a container instead."
     }
 }
 

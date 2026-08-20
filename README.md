@@ -25,7 +25,13 @@ Early work in progress. The port currently covers the **inference** APIs of the
 Apache OpenNLP does not hand-write its Snowball stemmers; it generates them with
 the Snowball compiler and commits the output. This port does the same thing with
 that compiler's C# backend, pinned to Snowball 2.0.0, rather than translating the
-generated Java by hand. `build/generate-snowball-stemmers.ps1` regenerates them.
+generated Java by hand.
+
+`build/generate-snowball-stemmers.ps1` regenerates them. It runs the compiler in
+a Linux container by default, so PowerShell 7 and Docker are the only
+prerequisites and the result is identical on Windows, macOS and Linux — verified
+byte-for-byte against a native macOS run. Pass `-NoDocker` to use a local C
+toolchain instead.
 
 Measured over the full Snowball vocabularies (1,113,209 words), 17 of the 21
 languages produce output identical to OpenNLP 1.9.4. Finnish, Hungarian, French
