@@ -293,11 +293,14 @@ public abstract class BaseModel : IArtifactProvider
 
             if (factory != null)
             {
-                // NOpenNLP: upstream reads from a ZipInputStream, which supports
-                // mark/reset, so a nested model artifact (a POSModel or ChunkerModel
-                // inside a ParserModel) can seek back to the start of its own entry.
-                // ZipArchiveEntry.Open returns a forward-only DeflateStream, so the
-                // entry is copied into a seekable MemoryStream first.
+                // NOpenNLP: a nested model artifact (a POSModel or ChunkerModel inside
+                // a ParserModel) is loaded by constructing that model from this entry,
+                // and LoadModel above rewinds its input with a seek. Upstream instead
+                // rewinds with mark/reset, and wraps the stream in a BufferedInputStream
+                // when the stream does not support marking -- which ZipInputStream does
+                // not. ZipArchiveEntry.Open returns a forward-only DeflateStream that
+                // cannot seek, so the entry is copied into a seekable MemoryStream,
+                // which is this port's counterpart to that BufferedInputStream.
                 using var entryStream = entry.Open();
                 using var seekableEntryStream = new MemoryStream();
                 entryStream.CopyTo(seekableEntryStream);

@@ -52,7 +52,11 @@ public class DocumentSample
         Category = category ?? throw new ArgumentNullException(nameof(category), "category must not be null");
         this.text = new ReadOnlyCollection<string>(new JCG.List<string>(text));
 
-        ExtraInformation = extraInformation ?? new JCG.Dictionary<string, object>();
+        // NOpenNLP: upstream uses Collections.emptyMap(), which is immutable; the
+        // .NET counterpart is an empty ReadOnlyDictionary. A supplied map is stored
+        // as-is, matching upstream.
+        ExtraInformation = extraInformation
+            ?? new ReadOnlyDictionary<string, object>(new JCG.Dictionary<string, object>());
     }
 
     public virtual string Category { get; }

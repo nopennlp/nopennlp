@@ -39,8 +39,11 @@ public class ParserCrossValidator
 
     // NOpenNLP: upstream declares this field but never assigns it, so the monitors
     // passed to the constructor are silently dropped and the evaluator below always
-    // receives null. That behaviour is preserved; see the constructor.
+    // receives null. That behaviour is preserved; see the constructor. CS0649 is
+    // suppressed because the field being unassigned is the point, not an oversight.
+#pragma warning disable CS0649
     private readonly IParserEvaluationMonitor?[]? monitors;
+#pragma warning restore CS0649
 
     public ParserCrossValidator(string languageCode, TrainingParameters @params,
         IHeadRules rules, ParserType parserType, params IParserEvaluationMonitor?[]? monitors)

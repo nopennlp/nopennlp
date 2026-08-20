@@ -41,7 +41,11 @@ public class ParseSampleStream : FilterObjectStream<string?, Parse?>
 
             if (parse != null)
             {
-                if (parse.Trim().Length != 0)
+                // NOpenNLP: Java's String.trim() strips only characters <= U+0020,
+                // whereas .NET's Trim() strips all Unicode whitespace. A line made up
+                // of, say, NBSP (U+00A0) is non-blank to upstream and would be parsed,
+                // so the Java definition is used here rather than skipping the line.
+                if (!IsJavaBlank(parse))
                 {
                     return Parse.ParseParse(parse);
                 }
@@ -51,5 +55,22 @@ public class ParseSampleStream : FilterObjectStream<string?, Parse?>
                 return null;
             }
         }
+    }
+
+    /// <summary>
+    /// NOpenNLP: equivalent of <c>value.trim().isEmpty()</c> in Java, whose
+    /// <c>String.trim()</c> treats only characters &lt;= U+0020 as trimmable.
+    /// </summary>
+    private static bool IsJavaBlank(string value)
+    {
+        foreach (char c in value)
+        {
+            if (c > ' ')
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
