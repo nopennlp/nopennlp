@@ -25,6 +25,7 @@ using NOpenNLP.Tools.Ml.Maxent.Io;
 using NOpenNLP.Tools.Ml.Model;
 using NOpenNLP.Tools.Ml.Naivebayes;
 using NOpenNLP.Tools.Namefind;
+using NOpenNLP.Tools.Parser;
 using NOpenNLP.Tools.Postag;
 using NOpenNLP.Tools.Util;
 using NOpenNLP.Tools.Util.Featuregen;
@@ -682,5 +683,49 @@ public class PortRegressionTest
         {
             File.Delete(path);
         }
+    }
+
+    /// <summary>
+    /// A model whose artifact map holds other models -- a ParserModel contains a
+    /// POSModel and a ChunkerModel -- must survive a serialize/load round trip.
+    /// </summary>
+    /// <remarks>
+    /// Three separate port defects broke this path, and none was reachable until
+    /// parser training existed to produce such a model:
+    /// <para/>
+    /// 1. BaseModel.GetArtifactSerializer and FinishLoadingArtifacts indexed
+    /// artifactSerializers directly. Java's Map.get returns null for an absent key
+    /// and both call sites rely on that null -- an ISerializableArtifact supplies
+    /// its own serializer, and a nested model names one in the manifest -- but the
+    /// J2N indexer throws KeyNotFoundException instead.
+    /// <para/>
+    /// 2. FinishLoadingArtifacts passed the raw ZipArchiveEntry stream to the nested
+    /// model's constructor. Java reads from a ZipInputStream, which supports
+    /// mark/reset, whereas ZipArchiveEntry.Open returns a forward-only DeflateStream
+    /// that cannot seek back to the start of the entry.
+    /// </remarks>
+    [Test]
+    public void TestModelWithNestedModelsRoundTrips()
+    {
+        using IObjectStream<Parse?> parseSamples = ParserTestUtil.OpenTestTrainingData();
+        Tools.Parser.Lang.En.HeadRules headRules = ParserTestUtil.CreateTestHeadRules();
+
+        TrainingParameters @params = new();
+        @params.Put(TrainingParameters.ITERATIONS_PARAM, 10);
+        @params.Put(TrainingParameters.CUTOFF_PARAM, 5);
+
+        ParserModel model = Tools.Parser.Chunking.Parser.Train("eng", parseSamples, headRules, @params);
+
+        using MemoryStream serialized = new();
+        model.Serialize(serialized);
+
+        ParserModel roundTripped = new(new MemoryStream(serialized.ToArray()));
+
+        ClassicAssert.NotNull(roundTripped.BuildModel);
+        ClassicAssert.NotNull(roundTripped.CheckModel);
+        ClassicAssert.NotNull(roundTripped.ParserTaggerModel);
+        ClassicAssert.NotNull(roundTripped.ParserChunkerModel);
+        ClassicAssert.NotNull(roundTripped.HeadRules);
+        ClassicAssert.AreEqual(ParserType.CHUNKING, roundTripped.ParserTypeValue);
     }
 }

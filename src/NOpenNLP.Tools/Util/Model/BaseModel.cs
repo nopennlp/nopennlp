@@ -278,7 +278,13 @@ public abstract class BaseModel : IArtifactProvider
             // there should be no need to prevent that.
             string entryName = entry.Name;
             string extension = GetEntryExtension(entryName);
-            IArtifactSerializer factory = artifactSerializers[extension];
+
+            // NOpenNLP: Java's Map.get returns null for an absent key, whereas the
+            // J2N indexer throws KeyNotFoundException. A null here is expected and
+            // handled below: an artifact whose serializer is named in the manifest
+            // (SERIALIZER_CLASS_NAME_PREFIX) need not have one registered by extension.
+            artifactSerializers.TryGetValue(extension, out IArtifactSerializer? factory);
+
             string? artifactSerializerClazzName = GetManifestProperty(SERIALIZER_CLASS_NAME_PREFIX + entryName);
             if (artifactSerializerClazzName != null)
             {
@@ -287,8 +293,16 @@ public abstract class BaseModel : IArtifactProvider
 
             if (factory != null)
             {
+                // NOpenNLP: upstream reads from a ZipInputStream, which supports
+                // mark/reset, so a nested model artifact (a POSModel or ChunkerModel
+                // inside a ParserModel) can seek back to the start of its own entry.
+                // ZipArchiveEntry.Open returns a forward-only DeflateStream, so the
+                // entry is copied into a seekable MemoryStream first.
                 using var entryStream = entry.Open();
-                artifactMap.Put(entryName, factory.Create(entryStream));
+                using var seekableEntryStream = new MemoryStream();
+                entryStream.CopyTo(seekableEntryStream);
+                seekableEntryStream.Position = 0;
+                artifactMap.Put(entryName, factory.Create(seekableEntryStream));
             }
             else
             {
@@ -320,7 +334,12 @@ public abstract class BaseModel : IArtifactProvider
     {
         try
         {
-            return artifactSerializers[GetEntryExtension(resourceName)];
+            // NOpenNLP: Java's Map.get returns null for an absent key, whereas the
+            // J2N indexer throws KeyNotFoundException. Serialize below relies on the
+            // null: an artifact that implements ISerializableArtifact supplies its own
+            // serializer and need not have one registered by extension.
+            artifactSerializers.TryGetValue(GetEntryExtension(resourceName), out var serializer);
+            return serializer;
         }
         catch (InvalidFormatException e)
         {
