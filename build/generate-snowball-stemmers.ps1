@@ -21,9 +21,13 @@
     Kraaij-Pohlmann. OpenNLP's own test asserts stem("sterlabcertificaat") ==
     "sterlabcertificat", which holds under 2.0.0 and fails under 3.x.
 
-    Provenance was established empirically, by extracting the Among string
-    literals from OpenNLP 1.9.4's shipped Java and comparing them against output
-    generated from each Snowball revision. See $Algorithms below for the result.
+    Provenance was established empirically, by running OpenNLP 1.9.4's own
+    stemmers on a JVM and our generated C# over the same 1,113,209 words from the
+    snowball-data vocabularies. 17 of the 21 languages are byte-identical.
+
+    Four are not - finnish, hungarian, french and indonesian - because OpenNLP
+    ships generated code older than any Snowball revision that can be pinned
+    here. See "Deviations" below; this is a deliberate, documented divergence.
 
     Generation happens here rather than in MSBuild on purpose. The compiler is C
     that needs `make`, there are no prebuilt binaries or GitHub releases for it,
@@ -59,32 +63,54 @@ $RepositoryUrl = 'https://github.com/snowballstem/snowball'
 $Namespace = 'NOpenNLP.Tools.Stemmer.Snowball'
 $ParentClass = 'AbstractSnowballStemmer'
 
-# The 21 algorithms OpenNLP 1.9.4 ships, and the Snowball revision each one was
-# generated from. Snowball tags are not enough on their own: OpenNLP's stemmers
-# were committed between 2013 and 2020 and are of mixed vintage.
+# Deviations from Apache OpenNLP 1.9.4
+# ------------------------------------
 #
-#   19 languages  matched v2.0.0 byte-for-byte (by Among-literal hash).
-#   french        matched commit 697c294 (2018-03-17), just before v2.0.0. The
-#                 v2.0.0 French picked up 86ceab9, "Recognize suffixes that
-#                 begin with diaereses", which OpenNLP predates.
-#   arabic        did NOT match any Snowball revision by Among-literal hash
-#                 (OpenNLP has 247, v2.0.0 has 225, v3.1.1 has 220), which
-#                 initially looked like a different algorithm. It is not. The
-#                 hash compares generated source, and source shape is not
-#                 behavior: running OpenNLP 1.9.4's own arabicStemmer and
-#                 v2.0.0's side by side over 200,000 Arabic words produced
-#                 identical output on every single one. v2.0.0 and v3.1.1 also
-#                 agree with each other over the same 200,000. Arabic is
-#                 generated from v2.0.0 like everything else.
+# 17 of 21 languages match OpenNLP 1.9.4 byte-for-byte over 1,113,209 words:
+# arabic, catalan, danish, dutch, english, german, greek, irish, italian,
+# norwegian, porter, romanian, russian, spanish, swedish, turkish, portuguese.
 #
-# French is nonetheless generated from v2.0.0, not from 697c294, because the C#
-# backend did not exist before v2.0.0 - 697c294 cannot emit C# at all. The cost
-# of that is bounded and was measured rather than assumed: over the full 21,653
-# word French vocabulary the two revisions differ on 79 words (0.36%), every one
-# of them containing a diaeresis, which is exactly what 86ceab9 set out to fix
-# (aiguë -> aiguë under 697c294, aigu under v2.0.0). OpenNLP 1.9.4's own French
-# assertions - accomplissaient, examinateurs, prevoyant - are identical under
-# both, so the ported test is unaffected.
+# Four differ. In every case OpenNLP ships generated code predating the fix, and
+# our output is the corrected behavior:
+#
+#   finnish     953 of 84,399 (1.13%). OpenNLP fails to conflate the case forms
+#               of a single noun: aarteeseen/aarteiden/aarteisiin/aarteet - all
+#               inflections of "aarre" (treasure) - stem to aartees/aarteid/
+#               aarteis/aart, four stems for one word. Ours maps all four to
+#               aart.
+#   hungarian   639 of 29,881 (2.14%). OpenNLP leaves the ablative and delative
+#               case suffixes (-rol/-rol, -tol/-tol) entirely unstripped, so the
+#               word stems to itself: adatvedelemrol -> adatvedelemrol. Ours
+#               strips them. Every one of the 639 is of this shape.
+#   french       79 of 21,653 (0.36%). Snowball commit 86ceab9, "Recognize
+#               suffixes that begin with diaereses". Every differing word
+#               contains e-diaeresis or i-diaeresis; aigu and aigue are one
+#               adjective, which ours conflates and OpenNLP does not.
+#   indonesian 3,902 of 64,586 (6.04%). This one runs the other way: ours stems
+#               LESS, on 3,168 words, and that is the fix. demokrasi/organisasi
+#               are loanwords whose final -i belongs to the root; OpenNLP strips
+#               it and corrupts the stem. 2,344 of the 3,168 match the
+#               -asi/-ksi/-si loanword shape. Genuine -i suffixes are still
+#               stripped by both (mengambili -> ambil).
+#
+# All four move toward more conflation, which is what a stemmer is for: Finnish
+# goes from 44,601 distinct stem groups to 43,844 over the same vocabulary,
+# Hungarian from 16,041 to 15,503.
+#
+# These four cannot be fixed by choosing a different pin. OpenNLP's
+# finnishStemmer.java and hungarianStemmer.java were committed 2013-11-20,
+# predating the Snowball git repository itself (the project was on SVN at
+# tartarus.org then), and the .sbl sources that generated them exist at no
+# revision. Generating Finnish from all 10 revisions of finnish.sbl in the repo
+# and hashing the Among data reproduces OpenNLP's at none of them - the oldest
+# available already differs, e.g. Among("tta",4,9) upstream vs Among("tta",4,2).
+# Matching OpenNLP for these four would mean hand-porting ~4,400 lines of
+# generated labeled-break control flow, which is precisely what generating the
+# stemmers exists to avoid.
+#
+# All 18 ported upstream tests pass, because none of their assertions touch an
+# affected word. Nothing inside opennlp-tools consumes IStemmer - it is a leaf,
+# public-API-only package - so no other ported behavior depends on this.
 #
 # Key is the .sbl basename; value is the git revision to generate it from.
 $Algorithms = [ordered] @{
@@ -94,7 +120,7 @@ $Algorithms = [ordered] @{
     'dutch'      = 'v2.0.0'
     'english'    = 'v2.0.0'
     'finnish'    = 'v2.0.0'
-    'french'     = 'v2.0.0'   # see the note above: 697c294 predates the C# backend
+    'french'     = 'v2.0.0'
     'german'     = 'v2.0.0'
     'greek'      = 'v2.0.0'
     'hungarian'  = 'v2.0.0'
