@@ -27,6 +27,11 @@ namespace NOpenNLP.Tools.Ml.Model;
 
 public class BinaryFileDataReader : IDataReader
 {
+    // NOpenNLP-specific: matches BufferedStream's own default. The reads below are
+    // one to eight bytes each, so any buffer amortizes the per-call cost; this size
+    // is a compromise, small enough not to matter against a multi-megabyte model.
+    private const int BufferSize = 4096;
+
     private readonly Stream input; // NOpenNLP: made readonly
 
     public BinaryFileDataReader(FileInfo f)
@@ -39,11 +44,24 @@ public class BinaryFileDataReader : IDataReader
         {
             input = f.OpenRead();
         }
+
+        // NOpenNLP-specific: see the stream constructor. Upstream gets this for
+        // free, because Java's BinaryFileDataReader wraps both of these in a
+        // BufferedInputStream before handing them to a DataInputStream.
+        input = new BufferedStream(input, BufferSize);
     }
 
     public BinaryFileDataReader(Stream @in)
     {
-        input = @in;
+        // NOpenNLP-specific: buffer the caller's stream. ReadDouble/ReadInt32 pull
+        // a byte at a time (see DataInput), and the stream this is handed is
+        // typically the non-buffered DeflateStream from ZipArchiveEntry.Open(),
+        // where every one of those calls crosses into the decompressor. Reading a
+        // 7.7 MB pos.model that way measured 232 ms against 30 ms buffered, and on
+        // the CI net8.0 Windows leg it inflated the model-loading tests from under
+        // a second to 38-52 s each. Upstream is unaffected: Java's
+        // BinaryFileDataReader wraps its input in a BufferedInputStream.
+        input = new BufferedStream(@in, BufferSize);
     }
 
     public virtual double ReadDouble() => input.ReadJavaDouble();
