@@ -12,6 +12,20 @@
 *.ps1 text eol=lf
 *.sh text eol=lf
 
+# Test corpora are data under test, not source: they are copied from
+# opennlp-tools/src/test/resources verbatim, and the readers under test are line
+# oriented. conll2003-en.sample ships with CRLF terminators upstream while its
+# siblings use LF, and that mix is part of what the ported tests read. Normalizing
+# it under text=auto would silently change the bytes a parser sees, and would make
+# the fixture differ from the Apache OpenNLP release this port targets.
+src/NOpenNLP.Tools.Tests/Formats/**/*.sample -text
+src/NOpenNLP.Tools.Tests/Formats/*.sample -text
+src/NOpenNLP.Tools.Tests/Formats/**/*.ann -text
+src/NOpenNLP.Tools.Tests/Formats/**/*.conllu -text
+src/NOpenNLP.Tools.Tests/Formats/**/*.sgml -text
+src/NOpenNLP.Tools.Tests/Formats/Brat/*.txt -text
+src/NOpenNLP.Tools.Tests/Formats/Leipzig/** -text
+
 # Never touch the bytes of binary files.
 *.bin binary
 *.zip binary

@@ -18,6 +18,7 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
+using System;
 using System.IO;
 using NOpenNLP.Tools.Namefind;
 using NOpenNLP.Tools.Util;
@@ -75,7 +76,7 @@ public class Conll03NameSampleStreamTest
     {
         IObjectStream<NameSample?> sampleStream =
             OpenData(Conll03NameSampleStream.Language.DE, ENGLISH_SAMPLE);
-        Assert.Throws<IOException>(() => sampleStream.Read());
+        Assert.Throws<IOException>((Action)(() => sampleStream.Read()));
     }
 
     [Test]
@@ -83,7 +84,7 @@ public class Conll03NameSampleStreamTest
     {
         IObjectStream<NameSample?> sampleStream =
             OpenData(Conll03NameSampleStream.Language.EN, GERMAN_SAMPLE);
-        Assert.Throws<IOException>(() => sampleStream.Read());
+        Assert.Throws<IOException>((Action)(() => sampleStream.Read()));
     }
 
     [Test]

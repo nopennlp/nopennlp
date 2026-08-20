@@ -241,7 +241,8 @@ public class IrishSentenceBankDocument
 
                                             if (!" ".Equals(tmptxt, StringComparison.Ordinal))
                                             {
-                                                spans.Add(new Span(AdvanceLeft(tmptxt, last), AdvanceRight(tmptxt, last)));
+                                                spans.Add(new Span(
+                                                    AdvanceLeft(tmptxt, last), AdvanceRight(tmptxt, last)));
                                             }
 
                                             last += tmptxt.Length;

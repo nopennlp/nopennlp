@@ -14,11 +14,25 @@ Early work in progress. The port currently covers the **inference** APIs of the
 |---|---|
 | Tokenization, sentence detection, POS tagging | Model training |
 | Lemmatization, chunking, name finding (NER) | Command-line tools |
-| Language detection, document categorization | Corpus format readers |
+| Language detection, document categorization | Corpus format stream factories |
 | Maxent / Perceptron / Naive Bayes inference | |
 | Model loading and feature generation | |
 | Parsing, entity linking, word vectors | |
 | Porter and Snowball stemmers | |
+| Corpus format readers | |
+
+### Corpus format readers
+
+`NOpenNLP.Tools.Formats` reads third-party corpora into streams of native
+`*Sample` objects: CoNLL 2002, CoNLL 2003, CoNLL-X, CoNLL-U, brat, MUC, NKJP,
+Leipzig, LETSMT, French Treebank, OntoNotes, Irish Sentence Bank, Moses,
+Évalita, BioNLP/NLPBA 2004, 20 Newsgroups, Census90, and the Portuguese Árvores
+Deitadas (AD) corpus, plus converters between sample types.
+
+The matching `*SampleStreamFactory` classes are not ported. They exist to expose
+these readers to the OpenNLP command-line tools through the `cmdline`
+`ObjectStreamFactory` SPI, and they arrive with that package; constructing a
+reader directly does not need them.
 
 ### Stemmers
 
