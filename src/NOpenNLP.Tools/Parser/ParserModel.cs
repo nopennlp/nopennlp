@@ -18,6 +18,7 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -36,7 +37,7 @@ namespace NOpenNLP.Tools.Parser;
 // TODO: Model should validate the artifact map
 public class ParserModel : BaseModel
 {
-    private class HeadRulesSerializer : IArtifactSerializer<Lang.En.HeadRules>
+    private sealed class HeadRulesSerializer : IArtifactSerializer<Lang.En.HeadRules>
     {
         public Lang.En.HeadRules Create(Stream @in) =>
             // NOpenNLP: Java wraps the stream in an InputStreamReader/BufferedReader; the
@@ -44,7 +45,7 @@ public class ParserModel : BaseModel
             // matching the IArtifactSerializer contract.
             new(new StreamReader(@in, new UTF8Encoding(false), false, 1024, leaveOpen: true));
 
-        public virtual void Serialize(Lang.En.HeadRules artifact, Stream @out)
+        public void Serialize(Lang.En.HeadRules artifact, Stream @out)
         {
             // NOpenNLP: mirrors the StreamReader in Create above -- BOM-less UTF-8,
             // left open so the caller keeps ownership of the stream, matching the
@@ -70,60 +71,62 @@ public class ParserModel : BaseModel
     private const string HEAD_RULES_MODEL_ENTRY_NAME = "head-rules.headrules";
     private const string PARSER_TYPE = "parser-type";
 
-    // NOpenNLP: these constructors exist only to assemble a model from freshly
-    // trained components; training is not supported, only inference on models
-    // loaded from disk.
-    // public ParserModel(string languageCode, IMaxentModel buildModel, IMaxentModel checkModel,
-    //     IMaxentModel attachModel, POSModel parserTagger,
-    //     ChunkerModel chunkerTagger, IHeadRules headRules,
-    //     ParserType modelType, Dictionary<string, string> manifestInfoEntries)
-    //     : base(COMPONENT_NAME, languageCode, manifestInfoEntries)
-    // {
-    //     SetManifestProperty(PARSER_TYPE, modelType.ToString());
-    //
-    //     artifactMap.Put(BUILD_MODEL_ENTRY_NAME, buildModel);
-    //
-    //     artifactMap.Put(CHECK_MODEL_ENTRY_NAME, checkModel);
-    //
-    //     if (ParserType.CHUNKING.Equals(modelType))
-    //     {
-    //         if (attachModel != null)
-    //             throw new ArgumentException("attachModel must be null for chunking parser!");
-    //     }
-    //     else if (ParserType.TREEINSERT.Equals(modelType))
-    //     {
-    //         if (attachModel is null)
-    //             throw new ArgumentNullException(nameof(attachModel), "attachModel must not be null");
-    //         artifactMap.Put(ATTACH_MODEL_ENTRY_NAME, attachModel);
-    //     }
-    //     else
-    //     {
-    //         throw new InvalidOperationException($"Unknown ParserType '{modelType}'!");
-    //     }
-    //
-    //     artifactMap.Put(PARSER_TAGGER_MODEL_ENTRY_NAME, parserTagger);
-    //
-    //     artifactMap.Put(CHUNKER_TAGGER_MODEL_ENTRY_NAME, chunkerTagger);
-    //
-    //     artifactMap.Put(HEAD_RULES_MODEL_ENTRY_NAME, headRules);
-    //     CheckArtifactMap();
-    // }
+    public ParserModel(string languageCode, IMaxentModel buildModel, IMaxentModel checkModel,
+        IMaxentModel? attachModel, POSModel parserTagger,
+        ChunkerModel chunkerTagger, IHeadRules headRules,
+        ParserType modelType, Dictionary<string, string> manifestInfoEntries)
+        : base(COMPONENT_NAME, languageCode, manifestInfoEntries)
+    {
+        SetManifestProperty(PARSER_TYPE, modelType.ToString());
 
-    // public ParserModel(string languageCode, IMaxentModel buildModel, IMaxentModel checkModel,
-    //     IMaxentModel attachModel, POSModel parserTagger,
-    //     ChunkerModel chunkerTagger, IHeadRules headRules, ParserType modelType)
-    //     : this(languageCode, buildModel, checkModel, attachModel, parserTagger,
-    //         chunkerTagger, headRules, modelType, null)
-    // {
-    // }
+        artifactMap.Put(BUILD_MODEL_ENTRY_NAME, buildModel);
 
-    // public ParserModel(string languageCode, IMaxentModel buildModel, IMaxentModel checkModel,
-    //     POSModel parserTagger, ChunkerModel chunkerTagger,
-    //     IHeadRules headRules, ParserType type, Dictionary<string, string> manifestInfoEntries)
-    //     : this(languageCode, buildModel, checkModel, null, parserTagger,
-    //         chunkerTagger, headRules, type, manifestInfoEntries)
-    // {
-    // }
+        artifactMap.Put(CHECK_MODEL_ENTRY_NAME, checkModel);
+
+        if (ParserType.CHUNKING.Equals(modelType))
+        {
+            if (attachModel != null)
+            {
+                throw new ArgumentException("attachModel must be null for chunking parser!");
+            }
+        }
+        else if (ParserType.TREEINSERT.Equals(modelType))
+        {
+            if (attachModel is null)
+            {
+                throw new ArgumentNullException(nameof(attachModel), "attachModel must not be null");
+            }
+
+            artifactMap.Put(ATTACH_MODEL_ENTRY_NAME, attachModel);
+        }
+        else
+        {
+            throw new InvalidOperationException($"Unknown ParserType '{modelType}'!");
+        }
+
+        artifactMap.Put(PARSER_TAGGER_MODEL_ENTRY_NAME, parserTagger);
+
+        artifactMap.Put(CHUNKER_TAGGER_MODEL_ENTRY_NAME, chunkerTagger);
+
+        artifactMap.Put(HEAD_RULES_MODEL_ENTRY_NAME, headRules);
+        CheckArtifactMap();
+    }
+
+    public ParserModel(string languageCode, IMaxentModel buildModel, IMaxentModel checkModel,
+        IMaxentModel? attachModel, POSModel parserTagger,
+        ChunkerModel chunkerTagger, IHeadRules headRules, ParserType modelType)
+        : this(languageCode, buildModel, checkModel, attachModel, parserTagger,
+            chunkerTagger, headRules, modelType, null)
+    {
+    }
+
+    public ParserModel(string languageCode, IMaxentModel buildModel, IMaxentModel checkModel,
+        POSModel parserTagger, ChunkerModel chunkerTagger,
+        IHeadRules headRules, ParserType type, Dictionary<string, string> manifestInfoEntries)
+        : this(languageCode, buildModel, checkModel, null, parserTagger,
+            chunkerTagger, headRules, type, manifestInfoEntries)
+    {
+    }
 
     public ParserModel(Stream @in)
         : base(COMPONENT_NAME, @in)
@@ -193,12 +196,21 @@ public class ParserModel : BaseModel
     public virtual IHeadRules? HeadRules => GetArtifact<IHeadRules>(HEAD_RULES_MODEL_ENTRY_NAME);
 
     // TODO: Update model methods should make sure properties are copied correctly ...
-    // NOpenNLP: the update methods below rebuild the model through the
-    // training-only constructors above, so they are not supported either.
-    // public ParserModel UpdateBuildModel(IMaxentModel buildModel)
-    // public ParserModel UpdateCheckModel(IMaxentModel checkModel)
-    // public ParserModel UpdateTaggerModel(POSModel taggerModel)
-    // public ParserModel UpdateChunkerModel(ChunkerModel chunkModel)
+    public virtual ParserModel UpdateBuildModel(IMaxentModel buildModel) =>
+        new(Language, buildModel, CheckModel!, AttachModel,
+            ParserTaggerModel!, ParserChunkerModel!, HeadRules!, ParserTypeValue!.Value);
+
+    public virtual ParserModel UpdateCheckModel(IMaxentModel checkModel) =>
+        new(Language, BuildModel!, checkModel, AttachModel,
+            ParserTaggerModel!, ParserChunkerModel!, HeadRules!, ParserTypeValue!.Value);
+
+    public virtual ParserModel UpdateTaggerModel(POSModel taggerModel) =>
+        new(Language, BuildModel!, CheckModel!, AttachModel,
+            taggerModel, ParserChunkerModel!, HeadRules!, ParserTypeValue!.Value);
+
+    public virtual ParserModel UpdateChunkerModel(ChunkerModel chunkModel) =>
+        new(Language, BuildModel!, CheckModel!, AttachModel,
+            ParserTaggerModel!, chunkModel, HeadRules!, ParserTypeValue!.Value);
 
     protected override void ValidateArtifactMap()
     {

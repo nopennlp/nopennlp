@@ -278,7 +278,13 @@ public abstract class BaseModel : IArtifactProvider
             // there should be no need to prevent that.
             string entryName = entry.Name;
             string extension = GetEntryExtension(entryName);
-            IArtifactSerializer factory = artifactSerializers[extension];
+
+            // NOpenNLP: Java's Map.get returns null for an absent key, whereas the
+            // J2N indexer throws KeyNotFoundException. A null here is expected and
+            // handled below: an artifact whose serializer is named in the manifest
+            // (SERIALIZER_CLASS_NAME_PREFIX) need not have one registered by extension.
+            artifactSerializers.TryGetValue(extension, out IArtifactSerializer? factory);
+
             string? artifactSerializerClazzName = GetManifestProperty(SERIALIZER_CLASS_NAME_PREFIX + entryName);
             if (artifactSerializerClazzName != null)
             {
@@ -287,8 +293,19 @@ public abstract class BaseModel : IArtifactProvider
 
             if (factory != null)
             {
+                // NOpenNLP: a nested model artifact (a POSModel or ChunkerModel inside
+                // a ParserModel) is loaded by constructing that model from this entry,
+                // and LoadModel above rewinds its input with a seek. Upstream instead
+                // rewinds with mark/reset, and wraps the stream in a BufferedInputStream
+                // when the stream does not support marking -- which ZipInputStream does
+                // not. ZipArchiveEntry.Open returns a forward-only DeflateStream that
+                // cannot seek, so the entry is copied into a seekable MemoryStream,
+                // which is this port's counterpart to that BufferedInputStream.
                 using var entryStream = entry.Open();
-                artifactMap.Put(entryName, factory.Create(entryStream));
+                using var seekableEntryStream = new MemoryStream();
+                entryStream.CopyTo(seekableEntryStream);
+                seekableEntryStream.Position = 0;
+                artifactMap.Put(entryName, factory.Create(seekableEntryStream));
             }
             else
             {
@@ -320,7 +337,12 @@ public abstract class BaseModel : IArtifactProvider
     {
         try
         {
-            return artifactSerializers[GetEntryExtension(resourceName)];
+            // NOpenNLP: Java's Map.get returns null for an absent key, whereas the
+            // J2N indexer throws KeyNotFoundException. Serialize below relies on the
+            // null: an artifact that implements ISerializableArtifact supplies its own
+            // serializer and need not have one registered by extension.
+            artifactSerializers.TryGetValue(GetEntryExtension(resourceName), out var serializer);
+            return serializer;
         }
         catch (InvalidFormatException e)
         {

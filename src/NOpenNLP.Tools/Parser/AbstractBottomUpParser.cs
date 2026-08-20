@@ -21,10 +21,13 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.IO;
 using NOpenNLP.Tools.Chunker;
+using NOpenNLP.Tools.Ngram;
 using NOpenNLP.Tools.Postag;
 using NOpenNLP.Tools.Util;
 using JCG = J2N.Collections.Generic;
+using OpenNlpDictionary = NOpenNLP.Tools.Dictionary.Dictionary;
 
 namespace NOpenNLP.Tools.Parser;
 
@@ -197,8 +200,8 @@ public abstract class AbstractBottomUpParser : IParser
     /// <param name="p">The parse whose parent references need to be assigned.</param>
     public static void SetParents(Parse p)
     {
-        Parse[] children = p.GetChildren();
-        foreach (Parse child in children)
+        var children = p.GetChildren();
+        foreach (var child in children)
         {
             child.Parent = p;
             SetParents(child);
@@ -217,7 +220,6 @@ public abstract class AbstractBottomUpParser : IParser
     {
         JCG.List<Parse> collapsedParses = new(chunks.Length);
         int lastNonPunct = -1;
-        int nextNonPunct;
         for (int ci = 0, cn = chunks.Length; ci < cn; ci++)
         {
             if (punctSet.Contains(chunks[ci].Type))
@@ -227,6 +229,7 @@ public abstract class AbstractBottomUpParser : IParser
                     chunks[lastNonPunct].AddNextPunctuation(chunks[ci]);
                 }
 
+                int nextNonPunct;
                 for (nextNonPunct = ci + 1; nextNonPunct < cn; nextNonPunct++)
                 {
                     if (!punctSet.Contains(chunks[nextNonPunct].Type))
@@ -296,7 +299,7 @@ public abstract class AbstractBottomUpParser : IParser
             // NOpenNLP: upstream iterates the TreeSet directly while bounded by K. J2N's
             // SortedSet enumerates in the same sorted order, so this preserves the
             // upstream traversal.
-            foreach (Parse tp in odh)
+            foreach (var tp in odh)
             {
                 if (derivationRank >= K)
                 {
@@ -339,7 +342,7 @@ public abstract class AbstractBottomUpParser : IParser
 
                 if (nd != null)
                 {
-                    foreach (Parse parse in nd)
+                    foreach (var parse in nd)
                     {
                         if (parse.Complete())
                         {
@@ -388,7 +391,7 @@ public abstract class AbstractBottomUpParser : IParser
             JCG.List<Parse> topParses = new(numParses);
             while (completeParses.Count > 0 && topParses.Count < numParses)
             {
-                Parse tp = completeParses.Min!;
+                var tp = completeParses.Min!;
                 completeParses.Remove(tp);
                 topParses.Add(tp);
             }
@@ -401,7 +404,7 @@ public abstract class AbstractBottomUpParser : IParser
     {
         if (tokens.ChildCount > 0)
         {
-            Parse p = Parse(tokens, 1)[0];
+            var p = Parse(tokens, 1)[0];
             SetParents(p);
             return p;
         }
@@ -420,20 +423,20 @@ public abstract class AbstractBottomUpParser : IParser
     protected virtual Parse[] AdvanceChunks(Parse p, double minChunkScore)
     {
         // chunk
-        Parse[] children = p.GetChildren();
+        var children = p.GetChildren();
         string[] words = new string[children.Length];
         string[] ptags = new string[words.Length];
         double[] probs = new double[words.Length];
 
         for (int i = 0, il = children.Length; i < il; i++)
         {
-            Parse sp = children[i];
+            var sp = children[i];
             words[i] = sp.Head.CoveredText;
             ptags[i] = sp.Type;
         }
 
-        Sequence[] cs = chunker.TopKSequences(words, ptags, minChunkScore - p.Prob);
-        Parse[] newParses = new Parse[cs.Length];
+        var cs = chunker.TopKSequences(words, ptags, minChunkScore - p.Prob);
+        var newParses = new Parse[cs.Length];
         for (int si = 0, sl = cs.Length; si < sl; si++)
         {
             newParses[si] = (Parse)p.Clone(); // copies top level
@@ -464,9 +467,9 @@ public abstract class AbstractBottomUpParser : IParser
                     // make previous constituent if it exists
                     if (type != null)
                     {
-                        Parse p1 = p.GetChildren()[start];
-                        Parse p2 = p.GetChildren()[end];
-                        Parse[] cons = new Parse[end - start + 1];
+                        var p1 = p.GetChildren()[start];
+                        var p2 = p.GetChildren()[end];
+                        var cons = new Parse[end - start + 1];
                         cons[0] = p1;
                         if (end - start != 0)
                         {
@@ -514,7 +517,7 @@ public abstract class AbstractBottomUpParser : IParser
     /// <returns>Parses with different POS-tag sequence assignments.</returns>
     protected Parse[] AdvanceTags(Parse p)
     {
-        Parse[] children = p.GetChildren();
+        var children = p.GetChildren();
         string[] words = new string[children.Length];
         double[] probs = new double[words.Length];
         for (int i = 0, il = children.Length; i < il; i++)
@@ -522,8 +525,8 @@ public abstract class AbstractBottomUpParser : IParser
             words[i] = children[i].CoveredText;
         }
 
-        Sequence[] ts = tagger.TopKSequences(words);
-        Parse[] newParses = new Parse[ts.Length];
+        var ts = tagger.TopKSequences(words);
+        var newParses = new Parse[ts.Length];
         for (int i = 0; i < ts.Length; i++)
         {
             string[] tags = [.. ts[i].Outcomes];
@@ -536,7 +539,7 @@ public abstract class AbstractBottomUpParser : IParser
 
             for (int j = 0; j < words.Length; j++)
             {
-                Parse word = children[j];
+                var word = children[j];
                 double prob = probs[j];
                 newParses[i].Insert(new Parse(word.Text, word.Span, tags[j], prob, j));
                 newParses[i].AddProb(Math.Log(prob));
@@ -575,13 +578,120 @@ public abstract class AbstractBottomUpParser : IParser
             return false;
         }
 
-        Parse[] kids = CollapsePunctuation(parent.GetChildren(), punctSet);
+        var kids = CollapsePunctuation(parent.GetChildren(), punctSet);
         return kids[^1] == child;
     }
 
-    // NOpenNLP: buildDictionary is training-only -- it consumes an ObjectStream<Parse> of
-    // training samples and TrainingParameters, and depends on the parser event streams
-    // which are outside the inference-only port.
-    // public static Dictionary BuildDictionary(IObjectStream<Parse> data, IHeadRules rules,
-    //     TrainingParameters parameters)
+    /// <exception cref="IOException">if there is an error during reading</exception>
+    public static OpenNlpDictionary BuildDictionary(IObjectStream<Parse?> data, IHeadRules rules,
+        TrainingParameters parameters)
+    {
+        int cutoff = parameters.GetIntParameter("dict", TrainingParameters.CUTOFF_PARAM, 5);
+
+        NGramModel mdict = new();
+        while (data.Read() is { } p)
+        {
+            p.UpdateHeads(rules);
+            var pwords = p.GetTagNodes();
+            string[] words = new string[pwords.Length];
+            //add all uni-grams
+            for (int wi = 0; wi < words.Length; wi++)
+            {
+                words[wi] = pwords[wi].CoveredText;
+            }
+
+            mdict.Add(new StringList(words), 1, 1);
+            //add tri-grams and bi-grams for inital sequence
+            var chunks = CollapsePunctuation(
+                Chunking.ParserEventStream.GetInitialChunks(p), rules.PunctuationTags);
+            string[] cwords = new string[chunks.Length];
+            for (int wi = 0; wi < cwords.Length; wi++)
+            {
+                cwords[wi] = chunks[wi].Head.CoveredText;
+            }
+
+            mdict.Add(new StringList(cwords), 2, 3);
+
+            //emulate reductions to produce additional n-grams
+            int ci = 0;
+            while (ci < chunks.Length)
+            {
+                if (chunks[ci].Parent == null)
+                {
+                    chunks[ci].Show();
+                }
+
+                if (LastChild(chunks[ci], chunks[ci].Parent, rules.PunctuationTags))
+                {
+                    //perform reduce
+                    int reduceStart = ci;
+                    while (reduceStart >= 0 && chunks[reduceStart].Parent == chunks[ci].Parent)
+                    {
+                        reduceStart--;
+                    }
+
+                    reduceStart++;
+                    chunks = Chunking.ParserEventStream.ReduceChunks(chunks, ci, chunks[ci].Parent!);
+                    ci = reduceStart;
+                    if (chunks.Length != 0)
+                    {
+                        string[] window = new string[5];
+                        int wi = 0;
+                        if (ci - 2 >= 0)
+                        {
+                            window[wi++] = chunks[ci - 2].Head.CoveredText;
+                        }
+
+                        if (ci - 1 >= 0)
+                        {
+                            window[wi++] = chunks[ci - 1].Head.CoveredText;
+                        }
+
+                        window[wi++] = chunks[ci].Head.CoveredText;
+                        if (ci + 1 < chunks.Length)
+                        {
+                            window[wi++] = chunks[ci + 1].Head.CoveredText;
+                        }
+
+                        if (ci + 2 < chunks.Length)
+                        {
+                            window[wi++] = chunks[ci + 2].Head.CoveredText;
+                        }
+
+                        if (wi < 5)
+                        {
+                            string[] subWindow = new string[wi];
+                            System.Array.Copy(window, 0, subWindow, 0, wi);
+                            window = subWindow;
+                        }
+
+                        if (window.Length >= 3)
+                        {
+                            mdict.Add(new StringList(window), 2, 3);
+                        }
+                        else if (window.Length == 2)
+                        {
+                            mdict.Add(new StringList(window), 2, 2);
+                        }
+                    }
+
+                    ci = reduceStart - 1; //ci will be incremented at end of loop
+                }
+
+                ci++;
+            }
+        }
+
+        mdict.Cutoff(cutoff, int.MaxValue);
+        return mdict.ToDictionary(true);
+    }
+
+    /// <exception cref="IOException">if there is an error during reading</exception>
+    public static OpenNlpDictionary BuildDictionary(IObjectStream<Parse?> data, IHeadRules rules, int cutoff)
+    {
+        TrainingParameters parameters = new();
+        parameters.Put("dict", TrainingParameters.CUTOFF_PARAM, cutoff);
+
+        return BuildDictionary(data, rules, parameters);
+    }
 }
