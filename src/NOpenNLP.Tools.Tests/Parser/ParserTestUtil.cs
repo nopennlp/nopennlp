@@ -31,8 +31,9 @@ public class ParserTestUtil
     public static HeadRules CreateTestHeadRules()
     {
         using Stream headRulesIn = TestResources.OpenResource("/opennlp/tools/parser/en_head_rules");
+        using StreamReader reader = new(headRulesIn, Encoding.UTF8);
 
-        return new HeadRules(new StreamReader(headRulesIn, Encoding.UTF8));
+        return new HeadRules(reader);
     }
 
     /// <summary>
@@ -42,14 +43,14 @@ public class ParserTestUtil
     /// </summary>
     public static IObjectStream<Parse?> OpenTestTrainingData()
     {
-        ResetableSampleStream resetableSampleStream = new();
+        OpenTestTrainingDataObjectStreamBaseAnonymousClass resetableSampleStream = new();
 
         resetableSampleStream.Reset();
 
         return resetableSampleStream;
     }
 
-    private sealed class ResetableSampleStream : ObjectStreamBase<Parse?>
+    private sealed class OpenTestTrainingDataObjectStreamBaseAnonymousClass : ObjectStreamBase<Parse?>
     {
         private IObjectStream<Parse?>? samples;
 
@@ -58,6 +59,11 @@ public class ParserTestUtil
         public override void Reset()
         {
             samples?.Dispose();
+
+            // NOpenNLP: upstream wraps the body in a catch for
+            // UnsupportedEncodingException that calls Assert.fail. .NET has no checked
+            // counterpart and Encoding.UTF8 cannot throw it -- upstream's own comment
+            // says "Should never happen" -- so there is nothing to catch here.
 
             // NOpenNLP: upstream uses opennlp.tools.formats.ResourceAsStreamFactory,
             // which is not ported; the ResourceAsStreamFactory in Support does the
