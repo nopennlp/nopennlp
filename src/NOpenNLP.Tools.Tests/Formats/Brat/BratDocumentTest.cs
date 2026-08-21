@@ -20,7 +20,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using NOpenNLP.Tools.Support;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
@@ -32,17 +31,15 @@ public class BratDocumentTest
     [Test]
     public void TestDocumentWithEntitiesParsing()
     {
-        IDictionary<string, string> typeToClassMap = new Dictionary<string, string>();
+        var typeToClassMap = new Dictionary<string, string>();
         BratAnnotationStreamTest.AddEntityTypes(typeToClassMap);
         AnnotationConfiguration config = new(typeToClassMap);
 
-        Stream txtIn = TestResources.OpenResource(
-            "/opennlp/tools/formats/brat/voa-with-entities.txt");
+        var txtIn = TestResources.OpenResource("/opennlp/tools/formats/brat/voa-with-entities.txt");
 
-        Stream annIn = TestResources.OpenResource(
-            "/opennlp/tools/formats/brat/voa-with-entities.ann");
+        var annIn = TestResources.OpenResource("/opennlp/tools/formats/brat/voa-with-entities.ann");
 
-        BratDocument doc = BratDocument.ParseDocument(config, "voa-with-entities", txtIn, annIn);
+        var doc = BratDocument.ParseDocument(config, "voa-with-entities", txtIn, annIn);
 
         ClassicAssert.AreEqual("voa-with-entities", doc.Id);
         ClassicAssert.IsTrue(doc.Text.StartsWith(" U . S .  President ", StringComparison.Ordinal));
@@ -50,7 +47,7 @@ public class BratDocumentTest
 
         ClassicAssert.AreEqual(18, doc.Annotations.Count);
 
-        BratAnnotation? annotation = doc.GetAnnotation("T2");
+        var annotation = doc.GetAnnotation("T2");
         CheckNote(annotation, "Barack Obama", "President Obama was the 44th U.S. president");
         annotation = doc.GetAnnotation("T3");
         CheckNote(annotation, "South Korea", "The capital of South Korea is Seoul");
@@ -59,7 +56,7 @@ public class BratDocumentTest
     private static void CheckNote(BratAnnotation? annotation, string expectedCoveredText, string expectedNote)
     {
         ClassicAssert.IsTrue(annotation is SpanAnnotation);
-        SpanAnnotation spanAnn = (SpanAnnotation)annotation!;
+        var spanAnn = (SpanAnnotation)annotation!;
         ClassicAssert.AreEqual(expectedCoveredText, spanAnn.CoveredText);
         ClassicAssert.AreEqual(expectedNote, spanAnn.Note);
     }
@@ -72,19 +69,17 @@ public class BratDocumentTest
     [Test]
     public void TestSpanWithMultiFragments()
     {
-        IDictionary<string, string> typeToClassMap = new Dictionary<string, string>();
+        var typeToClassMap = new Dictionary<string, string>();
         BratAnnotationStreamTest.AddEntityTypes(typeToClassMap);
         AnnotationConfiguration config = new(typeToClassMap);
 
-        Stream txtIn = TestResources.OpenResource(
-            "/opennlp/tools/formats/brat/opennlp-1193.txt");
+        var txtIn = TestResources.OpenResource("/opennlp/tools/formats/brat/opennlp-1193.txt");
 
-        Stream annIn = TestResources.OpenResource(
-            "/opennlp/tools/formats/brat/opennlp-1193.ann");
+        var annIn = TestResources.OpenResource("/opennlp/tools/formats/brat/opennlp-1193.ann");
 
-        BratDocument doc = BratDocument.ParseDocument(config, "opennlp-1193", txtIn, annIn);
+        var doc = BratDocument.ParseDocument(config, "opennlp-1193", txtIn, annIn);
 
-        SpanAnnotation t1 = (SpanAnnotation)doc.GetAnnotation("T1")!;
+        var t1 = (SpanAnnotation)doc.GetAnnotation("T1")!;
         ClassicAssert.AreEqual(t1.Spans[0].Start, 0);
         ClassicAssert.AreEqual(t1.Spans[0].End, 7);
         ClassicAssert.AreEqual(t1.Spans[1].Start, 8);
@@ -92,7 +87,7 @@ public class BratDocumentTest
         ClassicAssert.AreEqual(t1.Spans[2].Start, 17);
         ClassicAssert.AreEqual(t1.Spans[2].End, 24);
 
-        SpanAnnotation t2 = (SpanAnnotation)doc.GetAnnotation("T2")!;
+        var t2 = (SpanAnnotation)doc.GetAnnotation("T2")!;
         ClassicAssert.AreEqual(t2.Spans[0].Start, 26);
         ClassicAssert.AreEqual(t2.Spans[0].End, 33);
         ClassicAssert.AreEqual(t2.Spans[1].Start, 40);

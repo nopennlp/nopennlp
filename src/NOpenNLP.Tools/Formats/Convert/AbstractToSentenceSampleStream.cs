@@ -57,25 +57,29 @@ public abstract class AbstractToSentenceSampleStream<T> : FilterObjectStream<T?,
     /// <exception cref="IOException">if there is an error during reading</exception>
     public override SentenceSample? Read()
     {
-        IList<string[]> sentences = new JCG.List<string[]>();
-
-        T? posSample;
-        int chunks = 0;
-        while ((posSample = samples.Read()) != null && chunks < chunkSize)
+        // NOpenNLP: converted recursion to iteration
+        while (true)
         {
-            sentences.Add(ToSentence(posSample));
-            chunks++;
-        }
+            JCG.List<string[]> sentences = [];
 
-        if (sentences.Count > 0)
-        {
-            return new SentenceSample(detokenizer, [.. sentences]);
-        }
-        else if (posSample != null)
-        {
-            return Read(); // filter out empty line
-        }
+            T? posSample;
+            int chunks = 0;
+            while ((posSample = samples.Read()) != null && chunks < chunkSize)
+            {
+                sentences.Add(ToSentence(posSample));
+                chunks++;
+            }
 
-        return null; // last sample was read
+            if (sentences.Count > 0)
+            {
+                return new SentenceSample(detokenizer, [.. sentences]);
+            }
+            else if (posSample != null)
+            {
+                continue;
+            }
+
+            return null; // last sample was read
+        }
     }
 }

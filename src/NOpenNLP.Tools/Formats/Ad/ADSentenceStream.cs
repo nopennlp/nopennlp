@@ -41,7 +41,8 @@ namespace NOpenNLP.Tools.Formats.Ad;
 /// <para/>
 /// <b>Note:</b> Do not use this class, internal use only!
 /// </summary>
-public class ADSentenceStream : FilterObjectStream<string?, ADSentenceStream.Sentence?>
+public class ADSentenceStream(IObjectStream<string?> lineStream)
+    : FilterObjectStream<string?, ADSentenceStream.Sentence?>(lineStream)
 {
     public class Sentence
     {
@@ -64,11 +65,11 @@ public class ADSentenceStream : FilterObjectStream<string?, ADSentenceStream.Sen
         // NOpenNLP: upstream declares these as instance fields, recompiling the pattern for
         // every SentenceParser. They are immutable, so they are static readonly here.
         private static readonly Regex nodePattern =
-            new Regex("([=-]*)([^:=]+:[^\\(\\s]+)(\\(([^\\)]+)\\))?\\s*(?:(\\((<.+>)\\))*)\\s*$");
+            new("([=-]*)([^:=]+:[^\\(\\s]+)(\\(([^\\)]+)\\))?\\s*(?:(\\((<.+>)\\))*)\\s*$");
         private static readonly Regex leafPattern =
-            new Regex("^([=-]*)([^:=]+):([^\\(\\s]+)\\([\"'](.+)[\"']\\s*((?:<.+>)*)\\s*([^\\)]+)?\\)\\s+(.+)");
+            new("^([=-]*)([^:=]+):([^\\(\\s]+)\\([\"'](.+)[\"']\\s*((?:<.+>)*)\\s*([^\\)]+)?\\)\\s+(.+)");
         private static readonly Regex bizarreLeafPattern =
-            new Regex("^([=-]*)([^:=]+=[^\\(\\s]+)\\(([\"'].+[\"'])?\\s*([^\\)]+)?\\)\\s+(.+)");
+            new("^([=-]*)([^:=]+=[^\\(\\s]+)\\(([\"'].+[\"'])?\\s*([^\\)]+)?\\)\\s+(.+)");
 
         // NOpenNLP: RegexOptions.ECMAScript is required here and only here. Java's \w/\W are
         // ASCII-only by default ([a-zA-Z0-9_]), so an accented letter such as 'á' is \W and this
@@ -76,20 +77,19 @@ public class ADSentenceStream : FilterObjectStream<string?, ADSentenceStream.Sen
         // would be \w and the line would NOT be recognized as punctuation. The AD corpus is
         // Portuguese and full of accented characters, so the default would silently change which
         // tokens become punctuation leaves. ECMAScript restores Java's ASCII semantics.
-        private static readonly Regex punctuationPattern = new Regex("^(=*)(\\W+)$", RegexOptions.ECMAScript);
+        private static readonly Regex punctuationPattern = new("^(=*)(\\W+)$", RegexOptions.ECMAScript);
 
         // NOpenNLP: hoisted out of fixPunctuation(), where upstream calls String.replaceAll and so
         // recompiles both patterns on every sentence.
-        private static readonly Regex punctuationPeriodPattern = new Regex("\\»\\s+\\.");
-        private static readonly Regex punctuationCommaPattern = new Regex("\\»\\s+\\,");
+        private static readonly Regex punctuationPeriodPattern = new("\\»\\s+\\.");
+        private static readonly Regex punctuationCommaPattern = new("\\»\\s+\\,");
 
         // NOpenNLP: hoisted out of getElement(), where upstream calls String.matches(). This uses \w
         // and so needs RegexOptions.ECMAScript for the same reason punctuationPattern does: Java's \w
         // is ASCII-only, so a lexeme starting with an accented letter does NOT match upstream and the
         // leaf is kept. Under .NET's default Unicode-aware \w it would match and the leaf would be
         // dropped instead. String.matches() also anchors the whole input, hence the explicit anchors.
-        private static readonly Regex bizarreLexemePattern =
-            new Regex("^(?:\\w.*?[\\.<>].*)$", RegexOptions.ECMAScript);
+        private static readonly Regex bizarreLexemePattern = new("^(?:\\w.*?[\\.<>].*)$", RegexOptions.ECMAScript);
 
         // These stay instance fields: parse() deliberately reuses the previous sentence's text and
         // metadata when it meets the "&&" marker, which signals an alternative parse of the same
@@ -103,8 +103,8 @@ public class ADSentenceStream : FilterObjectStream<string?, ADSentenceStream.Sen
         public Sentence? Parse(string sentenceString, int para, bool isTitle, bool isBox)
         {
             TextReader reader = new StringReader(sentenceString);
-            Sentence sentence = new Sentence();
-            Node root = new Node();
+            var sentence = new Sentence();
+            var root = new Node();
             try
             {
                 // first line is <s ...>
@@ -138,7 +138,7 @@ public class ADSentenceStream : FilterObjectStream<string?, ADSentenceStream.Sen
                 if (!useSameTextAndMeta)
                 {
                     // got source, get the metadata
-                    string metaFromSource = line.Substring(7);
+                    string metaFromSource = line[7..];
                     line = reader.ReadLine();
                     if (line == null)
                     {
@@ -147,7 +147,7 @@ public class ADSentenceStream : FilterObjectStream<string?, ADSentenceStream.Sen
                     // we should have the plain sentence
                     // we remove the first token
                     int start = line.IndexOf(" ", StringComparison.Ordinal);
-                    text = line.Substring(start + 1).Trim();
+                    text = line[(start + 1)..].Trim();
                     text = FixPunctuation(text);
                     string titleTag = "";
                     if (isTitle) titleTag = " title";
@@ -155,7 +155,7 @@ public class ADSentenceStream : FilterObjectStream<string?, ADSentenceStream.Sen
                     if (isBox) boxTag = " box";
                     if (start > 0)
                     {
-                        meta = line.Substring(0, start) + " p=" + para + titleTag + boxTag + metaFromSource;
+                        meta = line[..start] + " p=" + para + titleTag + boxTag + metaFromSource;
                     }
                 }
                 sentence.Text = text;
@@ -174,7 +174,7 @@ public class ADSentenceStream : FilterObjectStream<string?, ADSentenceStream.Sen
                 // offers bottom-indexed get(int) and firstElement(). System.Collections.Generic.Stack<T>
                 // exposes neither, and J2N has no Stack<T>, so a list stands in: Add/peek-last/remove-last
                 // reproduce push/peek/pop, and index 0 is firstElement().
-                JCG.List<Node> nodeStack = new JCG.List<Node>();
+                JCG.List<Node> nodeStack = [];
 
                 root.SyntacticTag = "ROOT";
                 root.Level = 0;
@@ -183,10 +183,10 @@ public class ADSentenceStream : FilterObjectStream<string?, ADSentenceStream.Sen
                 /* now we have to take care of the lastLevel. Every time it raises, we will add the
                 leaf to the node at the top. If it decreases, we remove the top. */
 
-                while (line != null && line.Length != 0 && !line.StartsWith("</s>", StringComparison.Ordinal)
+                while (!string.IsNullOrEmpty(line) && !line.StartsWith("</s>", StringComparison.Ordinal)
                     && !line.Equals("&&", StringComparison.Ordinal))
                 {
-                    TreeElement? element = GetElement(line);
+                    var element = GetElement(line);
 
                     if (element != null)
                     {
@@ -196,7 +196,7 @@ public class ADSentenceStream : FilterObjectStream<string?, ADSentenceStream.Sen
                         // 1) When we get a new element, we check its level and remove from
                         // the top of the stack nodes that are brothers or nephews.
                         while (nodeStack.Count > 0 && element.Level > 0
-                            && element.Level <= nodeStack[nodeStack.Count - 1].Level)
+                            && element.Level <= nodeStack[^1].Level)
                         {
                             // NOpenNLP: upstream assigns the popped node to an unused local `nephew`.
                             nodeStack.RemoveAt(nodeStack.Count - 1);
@@ -214,7 +214,7 @@ public class ADSentenceStream : FilterObjectStream<string?, ADSentenceStream.Sen
                             {
                                 // 2b) There are parent candidates.
                                 // look for the node with the correct level
-                                Node peek = nodeStack[nodeStack.Count - 1];
+                                var peek = nodeStack[^1];
                                 if (element.Level == 0)
                                 { // add to the root
                                     nodeStack[0].AddElement(element);
@@ -250,9 +250,9 @@ public class ADSentenceStream : FilterObjectStream<string?, ADSentenceStream.Sen
                         {
                             // 3) Check if the element that is at the top of the stack is this
                             // node parent, if yes add it as a son
-                            if (nodeStack.Count > 0 && nodeStack[nodeStack.Count - 1].Level < element.Level)
+                            if (nodeStack.Count > 0 && nodeStack[^1].Level < element.Level)
                             {
-                                nodeStack[nodeStack.Count - 1].AddElement(element);
+                                nodeStack[^1].AddElement(element);
                             }
                             else
                             {
@@ -295,18 +295,18 @@ public class ADSentenceStream : FilterObjectStream<string?, ADSentenceStream.Sen
             // try node
             // NOpenNLP: Java's Matcher.matches() requires the whole input to match. .NET's
             // Regex.Match does not, so every matches() call site below is anchored explicitly.
-            Match nodeMatcher = MatchWholeString(nodePattern, line);
+            var nodeMatcher = MatchWholeString(nodePattern, line);
             if (nodeMatcher.Success)
             {
                 int level = nodeMatcher.Groups[1].Value.Length + 1;
                 string syntacticTag = nodeMatcher.Groups[2].Value;
-                Node node = new Node();
+                var node = new Node();
                 node.Level = level;
                 node.SyntacticTag = syntacticTag;
                 return node;
             }
 
-            Match leafMatcher = MatchWholeString(leafPattern, line);
+            var leafMatcher = MatchWholeString(leafPattern, line);
             if (leafMatcher.Success)
             {
                 int level = leafMatcher.Groups[1].Value.Length + 1;
@@ -319,7 +319,7 @@ public class ADSentenceStream : FilterObjectStream<string?, ADSentenceStream.Sen
                 string secondaryTag = leafMatcher.Groups[5].Value;
                 string? morphologicalTag = leafMatcher.Groups[6].Success ? leafMatcher.Groups[6].Value : null;
                 string lexeme = leafMatcher.Groups[7].Value;
-                Leaf leaf = new Leaf();
+                var leaf = new Leaf();
                 leaf.Level = level;
                 leaf.SyntacticTag = syntacticTag;
                 leaf.FunctionalTag = funcTag;
@@ -331,12 +331,12 @@ public class ADSentenceStream : FilterObjectStream<string?, ADSentenceStream.Sen
                 return leaf;
             }
 
-            Match punctuationMatcher = MatchWholeString(punctuationPattern, line);
+            var punctuationMatcher = MatchWholeString(punctuationPattern, line);
             if (punctuationMatcher.Success)
             {
                 int level = punctuationMatcher.Groups[1].Value.Length + 1;
                 string lexeme = punctuationMatcher.Groups[2].Value;
-                Leaf leaf = new Leaf();
+                var leaf = new Leaf();
                 leaf.Level = level;
                 leaf.Lexeme = lexeme;
                 return leaf;
@@ -351,7 +351,7 @@ public class ADSentenceStream : FilterObjectStream<string?, ADSentenceStream.Sen
 
             if (line.StartsWith("=", StringComparison.Ordinal))
             {
-                Match bizarreLeafMatcher = MatchWholeString(bizarreLeafPattern, line);
+                var bizarreLeafMatcher = MatchWholeString(bizarreLeafPattern, line);
                 if (bizarreLeafMatcher.Success)
                 {
                     int level = bizarreLeafMatcher.Groups[1].Value.Length + 1;
@@ -362,7 +362,7 @@ public class ADSentenceStream : FilterObjectStream<string?, ADSentenceStream.Sen
                     string? morphologicalTag =
                         bizarreLeafMatcher.Groups[4].Success ? bizarreLeafMatcher.Groups[4].Value : null;
                     string lexeme = bizarreLeafMatcher.Groups[5].Value;
-                    Leaf leaf = new Leaf();
+                    var leaf = new Leaf();
                     leaf.Level = level;
                     leaf.SyntacticTag = syntacticTag;
                     leaf.MorphologicalTag = morphologicalTag;
@@ -381,14 +381,14 @@ public class ADSentenceStream : FilterObjectStream<string?, ADSentenceStream.Sen
                 else
                 {
                     int level = line.LastIndexOf("=", StringComparison.Ordinal) + 1;
-                    string lexeme = line.Substring(level + 1);
+                    string lexeme = line[(level + 1)..];
 
                     if (bizarreLexemePattern.IsMatch(lexeme))
                     {
                         return null;
                     }
 
-                    Leaf leaf = new Leaf();
+                    var leaf = new Leaf();
                     leaf.Level = level + 1;
                     leaf.SyntacticTag = "";
                     leaf.MorphologicalTag = "";
@@ -399,7 +399,7 @@ public class ADSentenceStream : FilterObjectStream<string?, ADSentenceStream.Sen
             }
 
             Console.Error.WriteLine("Couldn't parse leaf: " + line);
-            Leaf newLeaf = new Leaf();
+            var newLeaf = new Leaf();
             newLeaf.Level = 1;
             newLeaf.SyntacticTag = "";
             newLeaf.MorphologicalTag = "";
@@ -413,8 +413,8 @@ public class ADSentenceStream : FilterObjectStream<string?, ADSentenceStream.Sen
         // reproduces matches() without having to rewrite each pattern.
         private static Match MatchWholeString(Regex regex, string input)
         {
-            Match match = regex.Match(input);
-            if (match.Success && match.Index == 0 && match.Length == input.Length)
+            var match = regex.Match(input);
+            if (match is { Success: true, Index: 0 } && match.Length == input.Length)
             {
                 return match;
             }
@@ -440,7 +440,7 @@ public class ADSentenceStream : FilterObjectStream<string?, ADSentenceStream.Sen
         /// </summary>
         public class Node : TreeElement
         {
-            private readonly JCG.List<TreeElement> elems = new JCG.List<TreeElement>(); // NOpenNLP: made readonly
+            private readonly JCG.List<TreeElement> elems = new(); // NOpenNLP: made readonly
 
             public void AddElement(TreeElement element) => elems.Add(element);
 
@@ -448,7 +448,7 @@ public class ADSentenceStream : FilterObjectStream<string?, ADSentenceStream.Sen
 
             public override string ToString()
             {
-                StringBuilder sb = new StringBuilder();
+                var sb = new StringBuilder();
                 // print itself and its children
                 for (int i = 0; i < Level; i++)
                 {
@@ -460,9 +460,9 @@ public class ADSentenceStream : FilterObjectStream<string?, ADSentenceStream.Sen
                     sb.Append(MorphologicalTag);
                 }
                 sb.Append('\n');
-                foreach (TreeElement element in elems)
+                foreach (var element in elems)
                 {
-                    sb.Append(element.ToString());
+                    sb.Append(element);
                 }
                 return sb.ToString();
             }
@@ -495,7 +495,7 @@ public class ADSentenceStream : FilterObjectStream<string?, ADSentenceStream.Sen
 
             public override string ToString()
             {
-                StringBuilder sb = new StringBuilder();
+                var sb = new StringBuilder();
                 // print itself and its children
                 for (int i = 0; i < Level; i++)
                 {
@@ -518,61 +518,55 @@ public class ADSentenceStream : FilterObjectStream<string?, ADSentenceStream.Sen
     /// <summary>
     /// The start sentence pattern.
     /// </summary>
-    private static readonly Regex sentStart = new Regex("^(?:<s[^>]*>)$");
+    private static readonly Regex sentStart = new("^(?:<s[^>]*>)$");
 
     /// <summary>
     /// The end sentence pattern.
     /// </summary>
-    private static readonly Regex sentEnd = new Regex("^(?:</s>)$");
-    private static readonly Regex extEnd = new Regex("^(?:</ext>)$");
+    private static readonly Regex sentEnd = new("^(?:</s>)$");
+    private static readonly Regex extEnd = new("^(?:</ext>)$");
 
     /// <summary>
     /// The start sentence pattern.
     /// </summary>
-    private static readonly Regex titleStart = new Regex("^(?:<t[^>]*>)$");
+    private static readonly Regex titleStart = new("^(?:<t[^>]*>)$");
 
     /// <summary>
     /// The end sentence pattern.
     /// </summary>
-    private static readonly Regex titleEnd = new Regex("^(?:</t>)$");
+    private static readonly Regex titleEnd = new("^(?:</t>)$");
 
     /// <summary>
     /// The start sentence pattern.
     /// </summary>
-    private static readonly Regex boxStart = new Regex("^(?:<caixa[^>]*>)$");
+    private static readonly Regex boxStart = new("^(?:<caixa[^>]*>)$");
 
     /// <summary>
     /// The end sentence pattern.
     /// </summary>
-    private static readonly Regex boxEnd = new Regex("^(?:</caixa>)$");
+    private static readonly Regex boxEnd = new("^(?:</caixa>)$");
 
     /// <summary>
     /// The start sentence pattern.
     /// </summary>
-    private static readonly Regex paraStart = new Regex("^(?:<p[^>]*>)$");
+    private static readonly Regex paraStart = new("^(?:<p[^>]*>)$");
 
     /// <summary>
     /// The start sentence pattern.
     /// </summary>
-    private static readonly Regex textStart = new Regex("^(?:<ext[^>]*>)$");
+    private static readonly Regex textStart = new("^(?:<ext[^>]*>)$");
 
-    private readonly SentenceParser parser; // NOpenNLP: made readonly
+    private readonly SentenceParser parser = new(); // NOpenNLP: made readonly
 
     private int paraID = 0;
     private bool isTitle = false;
     private bool isBox = false;
 
-    public ADSentenceStream(IObjectStream<string?> lineStream)
-        : base(lineStream)
-    {
-        parser = new SentenceParser();
-    }
-
     /// <inheritdoc/>
     /// <exception cref="IOException">if there is an error during reading</exception>
     public override Sentence? Read()
     {
-        StringBuilder sentence = new StringBuilder();
+        var sentence = new StringBuilder();
         bool sentenceStarted = false;
 
         while (true)

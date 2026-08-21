@@ -85,8 +85,7 @@ public class ADChunkSampleStream : ObjectStreamBase<ChunkSample?>
     /// <exception cref="IOException">if there is an error during reading</exception>
     public override ChunkSample? Read()
     {
-        ADSentenceStream.Sentence? paragraph;
-        while ((paragraph = adSentenceStream.Read()) != null)
+        while (adSentenceStream.Read() is { } paragraph)
         {
             if (end > -1 && index >= end)
             {
@@ -101,10 +100,10 @@ public class ADChunkSampleStream : ObjectStreamBase<ChunkSample?>
             }
             else
             {
-                ADSentenceStream.SentenceParser.Node? root = paragraph.Root;
-                IList<string> sentence = new JCG.List<string>();
-                IList<string> tags = new JCG.List<string>();
-                IList<string> target = new JCG.List<string>();
+                var root = paragraph.Root;
+                JCG.List<string> sentence = [];
+                JCG.List<string> tags = [];
+                JCG.List<string> target = [];
 
                 ProcessRoot(root, sentence, tags, target);
 
@@ -123,8 +122,8 @@ public class ADChunkSampleStream : ObjectStreamBase<ChunkSample?>
     {
         if (root != null)
         {
-            ADSentenceStream.SentenceParser.TreeElement[] elements = root.Elements;
-            foreach (ADSentenceStream.SentenceParser.TreeElement element in elements)
+            var elements = root.Elements;
+            foreach (var element in elements)
             {
                 if (element.IsLeaf)
                 {
@@ -150,14 +149,14 @@ public class ADChunkSampleStream : ObjectStreamBase<ChunkSample?>
             inherited = true;
         }
 
-        ADSentenceStream.SentenceParser.TreeElement[] elements = node.Elements;
+        var elements = node.Elements;
         for (int i = 0; i < elements.Length; i++)
         {
             if (elements[i].IsLeaf)
             {
                 bool isIntermediate = false;
                 string tag = phraseTag;
-                ADSentenceStream.SentenceParser.Leaf leaf = (ADSentenceStream.SentenceParser.Leaf)elements[i];
+                var leaf = (ADSentenceStream.SentenceParser.Leaf)elements[i];
 
                 string? localChunk = GetChunkTag(leaf);
                 if (localChunk != null && !tag.Equals(localChunk, StringComparison.Ordinal))
@@ -282,11 +281,11 @@ public class ADChunkSampleStream : ObjectStreamBase<ChunkSample?>
     {
         string tag = node.SyntacticTag!;
 
-        string phraseTag = tag.Substring(tag.LastIndexOf(":", StringComparison.Ordinal) + 1);
+        string phraseTag = tag[(tag.LastIndexOf(":", StringComparison.Ordinal) + 1)..];
 
         while (phraseTag.EndsWith("-", StringComparison.Ordinal))
         {
-            phraseTag = phraseTag.Substring(0, phraseTag.Length - 1);
+            phraseTag = phraseTag[..^1];
         }
 
         // maybe we should use only np, vp and pp, but will keep ap and advp.
@@ -324,5 +323,5 @@ public class ADChunkSampleStream : ObjectStreamBase<ChunkSample?>
     protected virtual bool IsIncludePunctuations => false;
 
     protected virtual bool IsIntermediate(IList<string> tags, IList<string> target, string phraseTag) =>
-        target.Count > 0 && target[target.Count - 1].EndsWith("-" + phraseTag, StringComparison.Ordinal);
+        target.Count > 0 && target[^1].EndsWith("-" + phraseTag, StringComparison.Ordinal);
 }

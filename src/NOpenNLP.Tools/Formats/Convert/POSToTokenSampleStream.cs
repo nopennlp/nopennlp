@@ -39,7 +39,7 @@ public class POSToTokenSampleStream(IDetokenizer detokenizer, IObjectStream<POSS
     /// <exception cref="IOException">if there is an error during reading</exception>
     public override TokenSample? Read()
     {
-        POSSample? posSample = samples.Read();
+        var posSample = samples.Read();
 
         TokenSample? tokenSample = null;
 

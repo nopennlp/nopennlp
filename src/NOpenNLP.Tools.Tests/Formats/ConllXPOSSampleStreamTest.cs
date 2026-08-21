@@ -19,7 +19,6 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using System.Text;
-using NOpenNLP.Tools.Postag;
 using NOpenNLP.Tools.Util;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
@@ -33,127 +32,126 @@ public class ConllXPOSSampleStreamTest
     {
         IInputStreamFactory @in = new ResourceAsStreamFactory("/opennlp/tools/formats/conllx.sample");
 
-        using (IObjectStream<POSSample?> sampleStream = new ConllXPOSSampleStream(@in, Encoding.UTF8))
-        {
-            POSSample? a = sampleStream.Read();
+        using var sampleStream = new ConllXPOSSampleStream(@in, Encoding.UTF8);
 
-            string[] aSentence = a!.Sentence;
-            string[] aTags = a.Tags;
+        var a = sampleStream.Read();
 
-            ClassicAssert.AreEqual(22, aSentence.Length);
-            ClassicAssert.AreEqual(22, aTags.Length);
+        var aSentence = a!.Sentence;
+        var aTags = a.Tags;
 
-            ClassicAssert.AreEqual("To", aSentence[0]);
-            ClassicAssert.AreEqual("AC", aTags[0]);
+        ClassicAssert.AreEqual(22, aSentence.Length);
+        ClassicAssert.AreEqual(22, aTags.Length);
 
-            ClassicAssert.AreEqual("kendte", aSentence[1]);
-            ClassicAssert.AreEqual("AN", aTags[1]);
+        ClassicAssert.AreEqual("To", aSentence[0]);
+        ClassicAssert.AreEqual("AC", aTags[0]);
 
-            ClassicAssert.AreEqual("russiske", aSentence[2]);
-            ClassicAssert.AreEqual("AN", aTags[2]);
+        ClassicAssert.AreEqual("kendte", aSentence[1]);
+        ClassicAssert.AreEqual("AN", aTags[1]);
 
-            ClassicAssert.AreEqual("historikere", aSentence[3]);
-            ClassicAssert.AreEqual("NC", aTags[3]);
+        ClassicAssert.AreEqual("russiske", aSentence[2]);
+        ClassicAssert.AreEqual("AN", aTags[2]);
 
-            ClassicAssert.AreEqual("Andronik", aSentence[4]);
-            ClassicAssert.AreEqual("NP", aTags[4]);
+        ClassicAssert.AreEqual("historikere", aSentence[3]);
+        ClassicAssert.AreEqual("NC", aTags[3]);
 
-            ClassicAssert.AreEqual("Andronik", aSentence[5]);
-            ClassicAssert.AreEqual("NP", aTags[5]);
+        ClassicAssert.AreEqual("Andronik", aSentence[4]);
+        ClassicAssert.AreEqual("NP", aTags[4]);
 
-            ClassicAssert.AreEqual("og", aSentence[6]);
-            ClassicAssert.AreEqual("CC", aTags[6]);
+        ClassicAssert.AreEqual("Andronik", aSentence[5]);
+        ClassicAssert.AreEqual("NP", aTags[5]);
 
-            ClassicAssert.AreEqual("Igor", aSentence[7]);
-            ClassicAssert.AreEqual("NP", aTags[7]);
+        ClassicAssert.AreEqual("og", aSentence[6]);
+        ClassicAssert.AreEqual("CC", aTags[6]);
 
-            ClassicAssert.AreEqual("Klamkin", aSentence[8]);
-            ClassicAssert.AreEqual("NP", aTags[8]);
+        ClassicAssert.AreEqual("Igor", aSentence[7]);
+        ClassicAssert.AreEqual("NP", aTags[7]);
 
-            ClassicAssert.AreEqual("tror", aSentence[9]);
-            ClassicAssert.AreEqual("VA", aTags[9]);
+        ClassicAssert.AreEqual("Klamkin", aSentence[8]);
+        ClassicAssert.AreEqual("NP", aTags[8]);
 
-            ClassicAssert.AreEqual("ikke", aSentence[10]);
-            ClassicAssert.AreEqual("RG", aTags[10]);
+        ClassicAssert.AreEqual("tror", aSentence[9]);
+        ClassicAssert.AreEqual("VA", aTags[9]);
 
-            ClassicAssert.AreEqual(",", aSentence[11]);
-            ClassicAssert.AreEqual("XP", aTags[11]);
+        ClassicAssert.AreEqual("ikke", aSentence[10]);
+        ClassicAssert.AreEqual("RG", aTags[10]);
 
-            ClassicAssert.AreEqual("at", aSentence[12]);
-            ClassicAssert.AreEqual("CS", aTags[12]);
+        ClassicAssert.AreEqual(",", aSentence[11]);
+        ClassicAssert.AreEqual("XP", aTags[11]);
 
-            ClassicAssert.AreEqual("Rusland", aSentence[13]);
-            ClassicAssert.AreEqual("NP", aTags[13]);
+        ClassicAssert.AreEqual("at", aSentence[12]);
+        ClassicAssert.AreEqual("CS", aTags[12]);
 
-            ClassicAssert.AreEqual("kan", aSentence[14]);
-            ClassicAssert.AreEqual("VA", aTags[14]);
+        ClassicAssert.AreEqual("Rusland", aSentence[13]);
+        ClassicAssert.AreEqual("NP", aTags[13]);
 
-            ClassicAssert.AreEqual("udvikles", aSentence[15]);
-            ClassicAssert.AreEqual("VA", aTags[15]);
+        ClassicAssert.AreEqual("kan", aSentence[14]);
+        ClassicAssert.AreEqual("VA", aTags[14]);
 
-            ClassicAssert.AreEqual("uden", aSentence[16]);
-            ClassicAssert.AreEqual("SP", aTags[16]);
+        ClassicAssert.AreEqual("udvikles", aSentence[15]);
+        ClassicAssert.AreEqual("VA", aTags[15]);
 
-            ClassicAssert.AreEqual("en", aSentence[17]);
-            ClassicAssert.AreEqual("PI", aTags[17]);
+        ClassicAssert.AreEqual("uden", aSentence[16]);
+        ClassicAssert.AreEqual("SP", aTags[16]);
 
-            ClassicAssert.AreEqual("\"", aSentence[18]);
-            ClassicAssert.AreEqual("XP", aTags[18]);
+        ClassicAssert.AreEqual("en", aSentence[17]);
+        ClassicAssert.AreEqual("PI", aTags[17]);
 
-            ClassicAssert.AreEqual("jernnæve", aSentence[19]);
-            ClassicAssert.AreEqual("NC", aTags[19]);
+        ClassicAssert.AreEqual("\"", aSentence[18]);
+        ClassicAssert.AreEqual("XP", aTags[18]);
 
-            ClassicAssert.AreEqual("\"", aSentence[20]);
-            ClassicAssert.AreEqual("XP", aTags[20]);
+        ClassicAssert.AreEqual("jernnæve", aSentence[19]);
+        ClassicAssert.AreEqual("NC", aTags[19]);
 
-            ClassicAssert.AreEqual(".", aSentence[21]);
-            ClassicAssert.AreEqual("XP", aTags[21]);
+        ClassicAssert.AreEqual("\"", aSentence[20]);
+        ClassicAssert.AreEqual("XP", aTags[20]);
 
-            POSSample? b = sampleStream.Read();
+        ClassicAssert.AreEqual(".", aSentence[21]);
+        ClassicAssert.AreEqual("XP", aTags[21]);
 
-            string[] bSentence = b!.Sentence;
-            string[] bTags = b.Tags;
+        var b = sampleStream.Read();
 
-            ClassicAssert.AreEqual(12, bSentence.Length);
-            ClassicAssert.AreEqual(12, bTags.Length);
+        var bSentence = b!.Sentence;
+        var bTags = b.Tags;
 
-            ClassicAssert.AreEqual("De", bSentence[0]);
-            ClassicAssert.AreEqual("PP", bTags[0]);
+        ClassicAssert.AreEqual(12, bSentence.Length);
+        ClassicAssert.AreEqual(12, bTags.Length);
 
-            ClassicAssert.AreEqual("hævder", bSentence[1]);
-            ClassicAssert.AreEqual("VA", bTags[1]);
+        ClassicAssert.AreEqual("De", bSentence[0]);
+        ClassicAssert.AreEqual("PP", bTags[0]);
 
-            ClassicAssert.AreEqual(",", bSentence[2]);
-            ClassicAssert.AreEqual("XP", bTags[2]);
+        ClassicAssert.AreEqual("hævder", bSentence[1]);
+        ClassicAssert.AreEqual("VA", bTags[1]);
 
-            ClassicAssert.AreEqual("at", bSentence[3]);
-            ClassicAssert.AreEqual("CS", bTags[3]);
+        ClassicAssert.AreEqual(",", bSentence[2]);
+        ClassicAssert.AreEqual("XP", bTags[2]);
 
-            ClassicAssert.AreEqual("Ruslands", bSentence[4]);
-            ClassicAssert.AreEqual("NP", bTags[4]);
+        ClassicAssert.AreEqual("at", bSentence[3]);
+        ClassicAssert.AreEqual("CS", bTags[3]);
 
-            ClassicAssert.AreEqual("vej", bSentence[5]);
-            ClassicAssert.AreEqual("NC", bTags[5]);
+        ClassicAssert.AreEqual("Ruslands", bSentence[4]);
+        ClassicAssert.AreEqual("NP", bTags[4]);
 
-            ClassicAssert.AreEqual("til", bSentence[6]);
-            ClassicAssert.AreEqual("SP", bTags[6]);
+        ClassicAssert.AreEqual("vej", bSentence[5]);
+        ClassicAssert.AreEqual("NC", bTags[5]);
 
-            ClassicAssert.AreEqual("demokrati", bSentence[7]);
-            ClassicAssert.AreEqual("NC", bTags[7]);
+        ClassicAssert.AreEqual("til", bSentence[6]);
+        ClassicAssert.AreEqual("SP", bTags[6]);
 
-            ClassicAssert.AreEqual("går", bSentence[8]);
-            ClassicAssert.AreEqual("VA", bTags[8]);
+        ClassicAssert.AreEqual("demokrati", bSentence[7]);
+        ClassicAssert.AreEqual("NC", bTags[7]);
 
-            ClassicAssert.AreEqual("gennem", bSentence[9]);
-            ClassicAssert.AreEqual("SP", bTags[9]);
+        ClassicAssert.AreEqual("går", bSentence[8]);
+        ClassicAssert.AreEqual("VA", bTags[8]);
 
-            ClassicAssert.AreEqual("diktatur", bSentence[10]);
-            ClassicAssert.AreEqual("NC", bTags[10]);
+        ClassicAssert.AreEqual("gennem", bSentence[9]);
+        ClassicAssert.AreEqual("SP", bTags[9]);
 
-            ClassicAssert.AreEqual(".", bSentence[11]);
-            ClassicAssert.AreEqual("XP", bTags[11]);
+        ClassicAssert.AreEqual("diktatur", bSentence[10]);
+        ClassicAssert.AreEqual("NC", bTags[10]);
 
-            ClassicAssert.Null(sampleStream.Read());
-        }
+        ClassicAssert.AreEqual(".", bSentence[11]);
+        ClassicAssert.AreEqual("XP", bTags[11]);
+
+        ClassicAssert.Null(sampleStream.Read());
     }
 }

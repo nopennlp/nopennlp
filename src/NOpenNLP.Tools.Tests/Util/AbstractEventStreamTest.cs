@@ -18,7 +18,6 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using System.Collections.Generic;
-using System.Linq;
 using NOpenNLP.Tools.Ml.Model;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;

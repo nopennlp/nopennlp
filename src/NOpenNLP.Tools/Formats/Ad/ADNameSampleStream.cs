@@ -57,13 +57,12 @@ public class ADNameSampleStream : ObjectStreamBase<NameSample?>
     /// <summary>
     /// Pattern of a NER tag in Arvores Deitadas.
     /// </summary>
-    private static readonly Regex tagPattern = new Regex("<(NER:)?(.*?)>");
+    private static readonly Regex tagPattern = new("<(NER:)?(.*?)>");
 
-    private static readonly Regex whitespacePattern = new Regex("\\s+");
-    private static readonly Regex underlinePattern = new Regex("[_]+");
-    private static readonly Regex hyphenPattern =
-        new Regex("((\\p{L}+)-$)|(^-(\\p{L}+)(.*))|((\\p{L}+)-(\\p{L}+)(.*))");
-    private static readonly Regex alphanumericPattern = new Regex("^[\\p{L}\\p{Nd}]+$");
+    private static readonly Regex whitespacePattern = new("\\s+");
+    private static readonly Regex underlinePattern = new("[_]+");
+    private static readonly Regex hyphenPattern = new("((\\p{L}+)-$)|(^-(\\p{L}+)(.*))|((\\p{L}+)-(\\p{L}+)(.*))");
+    private static readonly Regex alphanumericPattern = new("^[\\p{L}\\p{Nd}]+$");
 
     /// <summary>
     /// Map to the Arvores Deitadas types to our types. It is read-only.
@@ -72,7 +71,7 @@ public class ADNameSampleStream : ObjectStreamBase<NameSample?>
 
     static ADNameSampleStream()
     {
-        JCG.Dictionary<string, string> harem = new JCG.Dictionary<string, string>();
+        JCG.Dictionary<string, string> harem = [];
 
         const string person = "person";
         harem["hum"] = person;
@@ -194,9 +193,8 @@ public class ADNameSampleStream : ObjectStreamBase<NameSample?>
     /// <exception cref="IOException">if there is an error during reading</exception>
     public override NameSample? Read()
     {
-        ADSentenceStream.Sentence? paragraph;
         // we should look for text here.
-        while ((paragraph = adSentenceStream.Read()) != null)
+        while (adSentenceStream.Read() is { } paragraph)
         {
             int currentTextID = GetTextID(paragraph);
             bool clearData = false;
@@ -206,9 +204,9 @@ public class ADNameSampleStream : ObjectStreamBase<NameSample?>
                 textID = currentTextID;
             }
 
-            ADSentenceStream.SentenceParser.Node? root = paragraph.Root;
-            IList<string> sentence = new JCG.List<string>();
-            IList<Span> names = new JCG.List<Span>();
+            var root = paragraph.Root;
+            JCG.List<string> sentence = [];
+            JCG.List<Span> names = [];
             Process(root, sentence, names);
 
             return new NameSample([.. sentence], [.. names], clearData);
@@ -226,7 +224,7 @@ public class ADNameSampleStream : ObjectStreamBase<NameSample?>
     {
         if (node != null)
         {
-            foreach (ADSentenceStream.SentenceParser.TreeElement element in node.Elements)
+            foreach (var element in node.Elements)
             {
                 if (element.IsLeaf)
                 {
@@ -292,7 +290,7 @@ public class ADNameSampleStream : ObjectStreamBase<NameSample?>
                         sentence.Add(lexemes[i]);
                     }
                 }
-                leftContractionPart = lexemes[lexemes.Length - 1];
+                leftContractionPart = lexemes[^1];
                 return;
             }
             if (leafTag.Contains("<NER2>"))
@@ -329,7 +327,7 @@ public class ADNameSampleStream : ObjectStreamBase<NameSample?>
             int lastIndex = names.Count - 1;
             if (names.Count > 0)
             {
-                Span last = names[lastIndex];
+                var last = names[lastIndex];
                 if (last.End == sentence.Count - 1)
                 {
                     names[lastIndex] = new Span(last.Start, sentence.Count, last.Type);
@@ -340,7 +338,7 @@ public class ADNameSampleStream : ObjectStreamBase<NameSample?>
 
     private IList<string> ProcessLexeme(string lexemeStr)
     {
-        IList<string> @out = new JCG.List<string>();
+        var @out = new JCG.List<string>();
         string[] parts = SplitDroppingTrailingEmpty(underlinePattern, lexemeStr);
         foreach (string tok in parts)
         {
@@ -363,20 +361,20 @@ public class ADNameSampleStream : ObjectStreamBase<NameSample?>
     {
         bool tokAdded = false;
         string original = tok;
-        IList<string> @out = new JCG.List<string>();
+        var @out = new JCG.List<string>();
         // NOpenNLP: upstream uses a LinkedList purely as an append-then-append-all buffer.
-        JCG.List<string> suffix = new JCG.List<string>();
+        JCG.List<string> suffix = [];
         char first = tok[0];
         if (first == '«')
         {
             @out.Add(first.ToString());
-            tok = tok.Substring(1);
+            tok = tok[1..];
         }
-        char last = tok[tok.Length - 1];
-        if (last == '»' || last == ':' || last == ',' || last == '!')
+        char last = tok[^1];
+        if (last is '»' or ':' or ',' or '!')
         {
             suffix.Add(last.ToString());
-            tok = tok.Substring(0, tok.Length - 1);
+            tok = tok[..^1];
         }
 
         // lets split all hyphens
@@ -384,10 +382,10 @@ public class ADNameSampleStream : ObjectStreamBase<NameSample?>
         {
             // NOpenNLP: Java's Matcher.matches() anchors the whole input; hyphenPattern has no
             // outer anchors of its own, so the match is checked against the full input length.
-            Match matcher = MatchWholeString(hyphenPattern, tok);
+            var matcher = MatchWholeString(hyphenPattern, tok);
 
             string? firstTok = null;
-            string hyphen = "-";
+            const string hyphen = "-";
             string? secondTok = null;
             string? rest = null;
 
@@ -444,7 +442,7 @@ public class ADNameSampleStream : ObjectStreamBase<NameSample?>
 
     private void AddIfNotEmpty(string? firstTok, IList<string> @out)
     {
-        if (firstTok != null && firstTok.Length > 0)
+        if (firstTok is { Length: > 0 })
         {
             foreach (string processed in ProcessTok(firstTok))
             {
@@ -470,7 +468,7 @@ public class ADNameSampleStream : ObjectStreamBase<NameSample?>
             // NOpenNLP: Java's Matcher.matches() anchors the whole input; tagPattern is unanchored,
             // so an unanchored .NET IsMatch here would accept tags with trailing junk that upstream
             // rejects.
-            Match matcher = MatchWholeString(tagPattern, t);
+            var matcher = MatchWholeString(tagPattern, t);
             if (matcher.Success)
             {
                 string ner = matcher.Groups[2].Value;
@@ -540,7 +538,7 @@ public class ADNameSampleStream : ObjectStreamBase<NameSample?>
 
         if (corpusType == CorpusType.lit)
         {
-            Match m2 = MatchWholeString(metaPattern!, meta);
+            var m2 = MatchWholeString(metaPattern!, meta);
             if (m2.Success)
             {
                 string textId = m2.Groups[1].Value;
@@ -558,7 +556,7 @@ public class ADNameSampleStream : ObjectStreamBase<NameSample?>
         }
         else if (corpusType == CorpusType.cie)
         {
-            Match m2 = MatchWholeString(metaPattern!, meta);
+            var m2 = MatchWholeString(metaPattern!, meta);
             if (m2.Success)
             {
                 string textId = m2.Groups[1].Value;
@@ -576,7 +574,7 @@ public class ADNameSampleStream : ObjectStreamBase<NameSample?>
         }
         else if (corpusType == CorpusType.ama)
         {
-            Match m2 = MatchWholeString(metaPattern!, meta);
+            var m2 = MatchWholeString(metaPattern!, meta);
             if (m2.Success)
             {
                 // NOpenNLP: parsing must be culture-invariant; a bare int.Parse is culture-sensitive.
@@ -597,8 +595,8 @@ public class ADNameSampleStream : ObjectStreamBase<NameSample?>
     // without rewriting each pattern.
     private static Match MatchWholeString(Regex regex, string input)
     {
-        Match match = regex.Match(input);
-        if (match.Success && match.Index == 0 && match.Length == input.Length)
+        var match = regex.Match(input);
+        if (match is { Success: true, Index: 0 } && match.Length == input.Length)
         {
             return match;
         }

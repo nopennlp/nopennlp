@@ -49,12 +49,12 @@ internal class LetsmtSentenceStream : ObjectStreamBase<SentenceSample?>
     /// <exception cref="IOException">if there is an error during reading</exception>
     public override SentenceSample? Read()
     {
-        var sentencesString = new StringBuilder();
-        IList<Span> sentenceSpans = new JCG.List<Span>();
+        StringBuilder sentencesString = new();
+        JCG.List<Span> sentenceSpans = [];
 
         for (int i = 0; i < 25 && sentenceIt.MoveNext(); i++)
         {
-            LetsmtDocument.LetsmtSentence sentence = sentenceIt.Current;
+            var sentence = sentenceIt.Current;
 
             int begin = sentencesString.Length;
 

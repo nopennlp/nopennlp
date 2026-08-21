@@ -21,7 +21,6 @@
 using System.IO;
 using System.Text;
 using NOpenNLP.Tools.Formats;
-using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Util;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
@@ -39,7 +38,7 @@ public class LanguageDetectorMETest
     public void TestPredictLanguages()
     {
         ILanguageDetector ld = new LanguageDetectorME(this.model);
-        Language[] languages = ld.PredictLanguages("estava em uma marcenaria na Rua Bruno");
+        var languages = ld.PredictLanguages("estava em uma marcenaria na Rua Bruno");
 
         ClassicAssert.AreEqual(4, languages.Length);
         ClassicAssert.AreEqual("pob", languages[0].Lang);
@@ -60,9 +59,9 @@ public class LanguageDetectorMETest
                 sb.Append("estava em uma marcenaria na Rua Bruno ");
             }
 
-            ProbingLanguageDetectionResult result = ld.ProbingPredictLanguages(sb.ToString());
+            var result = ld.ProbingPredictLanguages(sb.ToString());
             ClassicAssert.IsTrue(result.Length <= 600);
-            Language[] languages = result.Languages;
+            var languages = result.Languages;
             ClassicAssert.AreEqual(4, languages.Length);
             ClassicAssert.AreEqual("pob", languages[0].Lang);
             ClassicAssert.AreEqual("ita", languages[1].Lang);
@@ -75,7 +74,7 @@ public class LanguageDetectorMETest
     public void TestPredictLanguage()
     {
         ILanguageDetector ld = new LanguageDetectorME(this.model);
-        Language language = ld.PredictLanguage("Dove è meglio che giochi");
+        var language = ld.PredictLanguage("Dove è meglio che giochi");
 
         ClassicAssert.AreEqual("ita", language.Lang);
     }
@@ -84,7 +83,7 @@ public class LanguageDetectorMETest
     public void TestSupportedLanguages()
     {
         ILanguageDetector ld = new LanguageDetectorME(this.model);
-        string[] supportedLanguages = ld.SupportedLanguages;
+        var supportedLanguages = ld.SupportedLanguages;
 
         ClassicAssert.AreEqual(4, supportedLanguages.Length);
     }
@@ -92,7 +91,7 @@ public class LanguageDetectorMETest
     [Test]
     public void TestLoadFromSerialized()
     {
-        byte[] serialized = SerializeModel(model);
+        var serialized = SerializeModel(model);
 
         LanguageDetectorModel myModel = new(new MemoryStream(serialized));
 
@@ -110,7 +109,7 @@ public class LanguageDetectorMETest
 
     public static LanguageDetectorModel TrainModel(LanguageDetectorFactory factory)
     {
-        LanguageDetectorSampleStream sampleStream = CreateSampleStream();
+        var sampleStream = CreateSampleStream();
 
         TrainingParameters @params = new();
         @params.Put(TrainingParameters.ITERATIONS_PARAM, 100);

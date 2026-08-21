@@ -19,7 +19,6 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using System.IO;
-using NOpenNLP.Tools.Parser;
 using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Util;
 using NUnit.Framework;
@@ -88,10 +87,10 @@ public class ConstitParseSampleStreamTest
     {
         var @out = new MemoryStream();
 
-        byte[] buffer = new byte[1024];
-        int length;
-        using (Stream sampleIn = TestResources.OpenResource("/opennlp/tools/formats/frenchtreebank/sample1.xml"))
+        var buffer = new byte[1024];
+        using (var sampleIn = TestResources.OpenResource("/opennlp/tools/formats/frenchtreebank/sample1.xml"))
         {
+            int length;
             while ((length = sampleIn.Read(buffer, 0, buffer.Length)) > 0)
             {
                 @out.Write(buffer, 0, length);
@@ -110,31 +109,29 @@ public class ConstitParseSampleStreamTest
     [Test]
     public void TestThereIsExactlyOneSent()
     {
-        using (IObjectStream<Parse?> samples =
-            new ConstitParseSampleStream(ObjectStreamUtils.CreateObjectStream<byte[]?>(GetSample1())))
-        {
-            ClassicAssert.IsNotNull(samples.Read());
-            ClassicAssert.IsNull(samples.Read());
-            ClassicAssert.IsNull(samples.Read());
-        }
+        using var samples =
+            new ConstitParseSampleStream(ObjectStreamUtils.CreateObjectStream<byte[]?>(GetSample1()));
+
+        ClassicAssert.IsNotNull(samples.Read());
+        ClassicAssert.IsNull(samples.Read());
+        ClassicAssert.IsNull(samples.Read());
     }
 
     [Test]
     public void TestTokensAreCorrect()
     {
-        using (IObjectStream<Parse?> samples =
-            new ConstitParseSampleStream(ObjectStreamUtils.CreateObjectStream<byte[]?>(GetSample1())))
+        using var samples =
+            new ConstitParseSampleStream(ObjectStreamUtils.CreateObjectStream<byte[]?>(GetSample1()));
+
+        var p = samples.Read();
+
+        var tagNodes = p!.GetTagNodes();
+        var tokens = new string[tagNodes.Length];
+        for (int ti = 0; ti < tagNodes.Length; ti++)
         {
-            Parse? p = samples.Read();
-
-            Parse[] tagNodes = p!.GetTagNodes();
-            string[] tokens = new string[tagNodes.Length];
-            for (int ti = 0; ti < tagNodes.Length; ti++)
-            {
-                tokens[ti] = tagNodes[ti].CoveredText;
-            }
-
-            CollectionAssert.AreEqual(sample1Tokens, tokens);
+            tokens[ti] = tagNodes[ti].CoveredText;
         }
+
+        CollectionAssert.AreEqual(sample1Tokens, tokens);
     }
 }

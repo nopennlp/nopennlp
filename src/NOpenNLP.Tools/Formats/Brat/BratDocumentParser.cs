@@ -35,18 +35,12 @@ public class BratDocumentParser
     private readonly ITokenizer tokenizer; // NOpenNLP: made readonly
     private readonly ISet<string>? nameTypes;
 
-    public BratDocumentParser(ISentenceDetector sentenceDetector, ITokenizer tokenizer)
-        : this(sentenceDetector, tokenizer, null)
-    {
-    }
-
     public BratDocumentParser(ISentenceDetector sentenceDetector, ITokenizer tokenizer,
-        ISet<string>? nameTypes)
+        ISet<string>? nameTypes = null)
     {
-        if (nameTypes != null && nameTypes.Count == 0)
+        if (nameTypes is { Count: 0 })
         {
-            throw new ArgumentException("nameTypes should be null or have one or more elements",
-                nameof(nameTypes));
+            throw new ArgumentException("nameTypes should be null or have one or more elements", nameof(nameTypes));
         }
 
         this.sentDetector = sentenceDetector;
@@ -60,16 +54,16 @@ public class BratDocumentParser
         // to be able to print warning a set of entities id must be maintained
         // to check if all entities have been used up after the matching is done
 
-        var entityIdSet = new JCG.HashSet<string>();
-        var coveredIndexes = new JCG.Dictionary<int, Span>();
+        JCG.HashSet<string> entityIdSet = [];
+        JCG.Dictionary<int, Span> coveredIndexes = [];
 
-        foreach (BratAnnotation ann in sample.Annotations)
+        foreach (var ann in sample.Annotations)
         {
             if (IsSpanAnnotation(ann))
             {
                 entityIdSet.Add(ann.Id);
 
-                foreach (Span span in ((SpanAnnotation)ann).Spans)
+                foreach (var span in ((SpanAnnotation)ann).Spans)
                 {
                     for (int i = span.Start; i < span.End; i++)
                     {
@@ -81,26 +75,22 @@ public class BratDocumentParser
 
         // Map spans to tokens, and merge fragments based on token
 
-        //
-
-
         // Detect sentence and correct sentence spans assuming no split can be inside a name annotation
-        var sentences = new JCG.List<Span>();
-        foreach (Span sentence in sentDetector.SentPosDetect(sample.Text))
+        JCG.List<Span> sentences = [];
+        foreach (var sentence in sentDetector.SentPosDetect(sample.Text))
         {
             // NOpenNLP: upstream reads Map.get, which yields null when the sentence start is
             // not covered by a name; TryGetValue preserves that instead of throwing.
-            coveredIndexes.TryGetValue(sentence.Start, out Span? conflictingName);
+            coveredIndexes.TryGetValue(sentence.Start, out var conflictingName);
 
             if (sentences.Count > 0 && conflictingName != null &&
                 conflictingName.Start < sentence.Start)
             {
-                Span lastSentence = sentences[sentences.Count - 1];
+                var lastSentence = sentences[^1];
                 sentences.RemoveAt(sentences.Count - 1);
                 sentences.Add(new Span(lastSentence.Start, sentence.End));
 
-                Console.WriteLine("Correcting sentence segmentation in document " +
-                    sample.Id);
+                Console.WriteLine($"Correcting sentence segmentation in document {sample.Id}");
             }
             else
             {
@@ -116,12 +106,12 @@ public class BratDocumentParser
 
         var samples = new JCG.List<NameSample>(sentences.Count);
 
-        foreach (Span sentence in sentences)
+        foreach (var sentence in sentences)
         {
             string sentenceText = sentence.GetCoveredText(
                 sample.Text.AsCharSequence()).ToString();
 
-            Span[] tokens = tokenizer.TokenizePos(sentenceText);
+            var tokens = tokenizer.TokenizePos(sentenceText);
 
             // Note:
             // A begin and end token index can be identical, but map to different
@@ -130,7 +120,7 @@ public class BratDocumentParser
             // in the tokenIndexMap.
             // The tokenIndexMap maps to the sentence local token index.
 
-            var tokenIndexMap = new JCG.Dictionary<int, int>();
+            JCG.Dictionary<int, int> tokenIndexMap = [];
 
             for (int i = 0; i < tokens.Length; i++)
             {
@@ -138,21 +128,21 @@ public class BratDocumentParser
                 tokenIndexMap[sentence.Start + tokens[i].End] = i + 1;
             }
 
-            var names = new JCG.List<Span>();
+            JCG.List<Span> names = [];
 
-            foreach (BratAnnotation ann in sample.Annotations)
+            foreach (var ann in sample.Annotations)
             {
                 if (IsSpanAnnotation(ann))
                 {
-                    SpanAnnotation entity = (SpanAnnotation)ann;
+                    var entity = (SpanAnnotation)ann;
 
                     // NOpenNLP: upstream nulls out merged fragments in place, so the list must
                     // hold nulls until the surviving spans are collected below.
-                    var mappedFragments = new JCG.List<Span?>();
+                    JCG.List<Span?> mappedFragments = [];
 
-                    foreach (Span span in entity.Spans)
+                    foreach (var span in entity.Spans)
                     {
-                        Span entitySpan = span;
+                        var entitySpan = span;
 
                         if (sentence.Contains(entitySpan))
                         {
@@ -174,9 +164,7 @@ public class BratDocumentParser
                             }
                             else
                             {
-                                Console.Error.WriteLine("Dropped entity " + entity.Id + " ("
-                                    + entitySpan.GetCoveredText(sample.Text.AsCharSequence()) + ") " + " in document "
-                                    + sample.Id + ", it is not matching tokenization!");
+                                Console.Error.WriteLine($"Dropped entity {entity.Id} ({entitySpan.GetCoveredText(sample.Text.AsCharSequence())})  in document {sample.Id}, it is not matching tokenization!");
                             }
                         }
                     }
@@ -198,7 +186,7 @@ public class BratDocumentParser
                         }
                     }
 
-                    foreach (Span? span in mappedFragments)
+                    foreach (var span in mappedFragments)
                     {
                         if (span != null)
                         {
@@ -214,8 +202,7 @@ public class BratDocumentParser
 
         foreach (string id in entityIdSet)
         {
-            Console.Error.WriteLine("Dropped entity " + id + " in document " +
-                sample.Id + ", is not matching sentence segmentation!");
+            Console.Error.WriteLine($"Dropped entity {id} in document {sample.Id}, is not matching sentence segmentation!");
         }
 
         return samples;

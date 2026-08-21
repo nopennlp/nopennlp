@@ -64,10 +64,10 @@ public class LetsmtDocument
     // elements and only reset when a <w> or <s> ends.
     internal static LetsmtDocument Parse(Stream letsmtXmlIn)
     {
-        var sentences = new JCG.List<LetsmtSentence>();
+        JCG.List<LetsmtSentence> sentences = [];
 
-        var chars = new StringBuilder();
-        var tokens = new JCG.List<string>();
+        StringBuilder chars = new();
+        JCG.List<string> tokens = [];
 
         // XmlUtil.CreateSecureReaderSettings sets DtdProcessing.Prohibit, which is the
         // counterpart of upstream's disallow-doctype-decl feature.
@@ -126,8 +126,8 @@ public class LetsmtDocument
 
                     if (tokens.Count > 0)
                     {
-                        sentence.tokens = tokens.ToArray();
-                        tokens = new JCG.List<string>();
+                        sentence.tokens = [.. tokens];
+                        tokens = [];
                     }
                     else
                     {

@@ -42,115 +42,117 @@ public class PortugueseContractionUtility
 
     static PortugueseContractionUtility()
     {
-        JCG.Dictionary<string, string> elems = new JCG.Dictionary<string, string>();
-        // 103 CONTRACTIONS.
-        elems["a+a"] = "à";
-        elems["a+as"] = "às";
-        elems["a+aquele"] = "àquele";
-        elems["a+aqueles"] = "àqueles";
-        elems["a+aquela"] = "àquela";
-        elems["a+aquelas"] = "àquelas";
-        elems["a+aquilo"] = "àquilo";
-        elems["a+o"] = "ao";
-        elems["a+os"] = "aos";
-        elems["com+mim"] = "comigo";
-        elems["com+nòs"] = "conosco";
-        elems["com+si"] = "consigo";
-        elems["com+ti"] = "contigo";
-        elems["com+vòs"] = "convosco";
-        elems["de+aí"] = "daí";
-        elems["de+alguém"] = "dalguém";
-        elems["de+algum"] = "dalgum";
-        elems["de+alguma"] = "dalguma";
-        elems["de+alguns"] = "dalguns";
-        elems["de+algumas"] = "dalgumas";
-        elems["de+ali"] = "dali";
-        elems["de+aquém"] = "daquém";
-        elems["de+aquele"] = "daquele";
-        elems["de+aquela"] = "daquela";
-        elems["de+aqueles"] = "daqueles";
-        elems["de+aquelas"] = "daquelas";
-        elems["de+aqui"] = "daqui";
-        elems["de+aquilo"] = "daquilo";
-        elems["de+ele"] = "dele";
-        elems["de+ela"] = "dela";
-        elems["de+eles"] = "deles";
-        elems["de+elas"] = "delas";
-        elems["de+entre"] = "dentre";
-        elems["de+esse"] = "desse";
-        elems["de+essa"] = "dessa";
-        elems["de+esses"] = "desses";
-        elems["de+essas"] = "dessas";
-        elems["de+este"] = "deste";
-        elems["de+esta"] = "desta";
-        elems["de+estes"] = "destes";
-        elems["de+estas"] = "destas";
-        elems["de+isso"] = "disso";
-        elems["de+isto"] = "disto";
-        elems["de+o"] = "do";
-        elems["de+a"] = "da";
-        elems["de+os"] = "dos";
-        elems["de+as"] = "das";
-        elems["de+outrem"] = "doutrem";
-        elems["de+outro"] = "doutro";
-        elems["de+outra"] = "doutra";
-        elems["de+outros"] = "doutros";
-        elems["de+outras"] = "doutras";
-        elems["de+um"] = "dum";
-        elems["de+uma"] = "duma";
-        elems["de+uns"] = "duns";
-        elems["de+umas"] = "dumas";
-        elems["esse+outro"] = "essoutro";
-        elems["essa+outra"] = "essoutra";
-        elems["este+outro"] = "estoutro";
-        elems["este+outra"] = "estoutra";
-        elems["ele+o"] = "lho";
-        elems["ele+a"] = "lha";
-        elems["ele+os"] = "lhos";
-        elems["ele+as"] = "lhas";
-        elems["em+algum"] = "nalgum";
-        elems["em+alguma"] = "nalguma";
-        elems["em+alguns"] = "nalguns";
-        elems["em+algumas"] = "nalgumas";
-        elems["em+aquele"] = "naquele";
-        elems["em+aquela"] = "naquela";
-        elems["em+aqueles"] = "naqueles";
-        elems["em+aquelas"] = "naquelas";
-        elems["em+aquilo"] = "naquilo";
-        elems["em+ele"] = "nele";
-        elems["em+ela"] = "nela";
-        elems["em+eles"] = "neles";
-        elems["em+elas"] = "nelas";
-        elems["em+esse"] = "nesse";
-        elems["em+essa"] = "nessa";
-        elems["em+esses"] = "nesses";
-        elems["em+essas"] = "nessas";
-        elems["em+este"] = "neste";
-        elems["em+esta"] = "nesta";
-        elems["em+estes"] = "nestes";
-        elems["em+estas"] = "nestas";
-        elems["em+isso"] = "nisso";
-        elems["em+isto"] = "nisto";
-        elems["em+o"] = "no";
-        elems["em+a"] = "na";
-        elems["em+os"] = "nos";
-        elems["em+as"] = "nas";
-        elems["em+outro"] = "noutro";
-        elems["em+outra"] = "noutra";
-        elems["em+outros"] = "noutros";
-        elems["em+outras"] = "noutras";
-        elems["em+um"] = "num";
-        elems["em+uma"] = "numa";
-        elems["em+uns"] = "nuns";
-        elems["em+umas"] = "numas";
-        elems["por+o"] = "pelo";
-        elems["por+a"] = "pela";
-        elems["por+os"] = "pelos";
-        elems["por+as"] = "pelas";
-        elems["para+a"] = "pra";
-        elems["para+o"] = "pro";
-        elems["para+as"] = "pras";
-        elems["para+os"] = "pros";
+        var elems = new JCG.Dictionary<string, string>
+        {
+            // 103 CONTRACTIONS.
+            ["a+a"] = "à",
+            ["a+as"] = "às",
+            ["a+aquele"] = "àquele",
+            ["a+aqueles"] = "àqueles",
+            ["a+aquela"] = "àquela",
+            ["a+aquelas"] = "àquelas",
+            ["a+aquilo"] = "àquilo",
+            ["a+o"] = "ao",
+            ["a+os"] = "aos",
+            ["com+mim"] = "comigo",
+            ["com+nòs"] = "conosco",
+            ["com+si"] = "consigo",
+            ["com+ti"] = "contigo",
+            ["com+vòs"] = "convosco",
+            ["de+aí"] = "daí",
+            ["de+alguém"] = "dalguém",
+            ["de+algum"] = "dalgum",
+            ["de+alguma"] = "dalguma",
+            ["de+alguns"] = "dalguns",
+            ["de+algumas"] = "dalgumas",
+            ["de+ali"] = "dali",
+            ["de+aquém"] = "daquém",
+            ["de+aquele"] = "daquele",
+            ["de+aquela"] = "daquela",
+            ["de+aqueles"] = "daqueles",
+            ["de+aquelas"] = "daquelas",
+            ["de+aqui"] = "daqui",
+            ["de+aquilo"] = "daquilo",
+            ["de+ele"] = "dele",
+            ["de+ela"] = "dela",
+            ["de+eles"] = "deles",
+            ["de+elas"] = "delas",
+            ["de+entre"] = "dentre",
+            ["de+esse"] = "desse",
+            ["de+essa"] = "dessa",
+            ["de+esses"] = "desses",
+            ["de+essas"] = "dessas",
+            ["de+este"] = "deste",
+            ["de+esta"] = "desta",
+            ["de+estes"] = "destes",
+            ["de+estas"] = "destas",
+            ["de+isso"] = "disso",
+            ["de+isto"] = "disto",
+            ["de+o"] = "do",
+            ["de+a"] = "da",
+            ["de+os"] = "dos",
+            ["de+as"] = "das",
+            ["de+outrem"] = "doutrem",
+            ["de+outro"] = "doutro",
+            ["de+outra"] = "doutra",
+            ["de+outros"] = "doutros",
+            ["de+outras"] = "doutras",
+            ["de+um"] = "dum",
+            ["de+uma"] = "duma",
+            ["de+uns"] = "duns",
+            ["de+umas"] = "dumas",
+            ["esse+outro"] = "essoutro",
+            ["essa+outra"] = "essoutra",
+            ["este+outro"] = "estoutro",
+            ["este+outra"] = "estoutra",
+            ["ele+o"] = "lho",
+            ["ele+a"] = "lha",
+            ["ele+os"] = "lhos",
+            ["ele+as"] = "lhas",
+            ["em+algum"] = "nalgum",
+            ["em+alguma"] = "nalguma",
+            ["em+alguns"] = "nalguns",
+            ["em+algumas"] = "nalgumas",
+            ["em+aquele"] = "naquele",
+            ["em+aquela"] = "naquela",
+            ["em+aqueles"] = "naqueles",
+            ["em+aquelas"] = "naquelas",
+            ["em+aquilo"] = "naquilo",
+            ["em+ele"] = "nele",
+            ["em+ela"] = "nela",
+            ["em+eles"] = "neles",
+            ["em+elas"] = "nelas",
+            ["em+esse"] = "nesse",
+            ["em+essa"] = "nessa",
+            ["em+esses"] = "nesses",
+            ["em+essas"] = "nessas",
+            ["em+este"] = "neste",
+            ["em+esta"] = "nesta",
+            ["em+estes"] = "nestes",
+            ["em+estas"] = "nestas",
+            ["em+isso"] = "nisso",
+            ["em+isto"] = "nisto",
+            ["em+o"] = "no",
+            ["em+a"] = "na",
+            ["em+os"] = "nos",
+            ["em+as"] = "nas",
+            ["em+outro"] = "noutro",
+            ["em+outra"] = "noutra",
+            ["em+outros"] = "noutros",
+            ["em+outras"] = "noutras",
+            ["em+um"] = "num",
+            ["em+uma"] = "numa",
+            ["em+uns"] = "nuns",
+            ["em+umas"] = "numas",
+            ["por+o"] = "pelo",
+            ["por+a"] = "pela",
+            ["por+os"] = "pelos",
+            ["por+as"] = "pelas",
+            ["para+a"] = "pra",
+            ["para+o"] = "pro",
+            ["para+as"] = "pras",
+            ["para+os"] = "pros"
+        };
         Contractions = new ReadOnlyDictionary<string, string>(elems);
     }
 
@@ -171,7 +173,7 @@ public class PortugueseContractionUtility
         }
         else
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             // NOpenNLP: Java's String.split(regex) drops trailing empty strings, .NET's
             // string.Split does not. The difference matters because parts[parts.Length - 1] is
             // read below, so a trailing "_" would yield "" here but the last real token in Java.
@@ -180,7 +182,7 @@ public class PortugueseContractionUtility
             {
                 sb.Append(parts[i]).Append(' ');
             }
-            key = parts[parts.Length - 1] + "+" + right;
+            key = parts[^1] + "+" + right;
             if (Contractions.TryGetValue(key, out contraction))
             {
                 sb.Append(contraction);
@@ -205,13 +207,13 @@ public class PortugueseContractionUtility
                 }
             }
 
-            string leftLower = StringUtil.ToLowerCase(parts[parts.Length - 1]);
+            string leftLower = StringUtil.ToLowerCase(parts[^1]);
             key = leftLower + "+" + right;
             if (Contractions.TryGetValue(key, out contraction))
             {
                 string r = contraction;
-                string firstChar = r.Substring(0, 1);
-                r = StringUtil.ToUpperCase(firstChar) + r.Substring(1);
+                string firstChar = r[..1];
+                r = StringUtil.ToUpperCase(firstChar) + r[1..];
                 sb.Append(r);
                 return sb.ToString();
             }

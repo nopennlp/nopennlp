@@ -21,7 +21,6 @@
 using System.Collections.Generic;
 using System.Text;
 using NOpenNLP.Tools.Chunker;
-using NOpenNLP.Tools.Formats;
 using NOpenNLP.Tools.Util;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
@@ -71,14 +70,10 @@ public class ADChunkSampleStreamTest
 
         IInputStreamFactory @in = new ResourceAsStreamFactory("/opennlp/tools/formats/ad.sample");
 
-        using (ADChunkSampleStream stream = new ADChunkSampleStream(
-            new PlainTextByLineStream(@in, Encoding.UTF8)))
+        using var stream = new ADChunkSampleStream(new PlainTextByLineStream(@in, Encoding.UTF8));
+        while (stream.Read() is { } sample)
         {
-            ChunkSample? sample;
-            while ((sample = stream.Read()) != null)
-            {
-                samples.Add(sample);
-            }
+            samples.Add(sample);
         }
     }
 }

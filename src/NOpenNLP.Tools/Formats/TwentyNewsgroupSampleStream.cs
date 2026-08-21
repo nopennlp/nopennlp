@@ -34,13 +34,12 @@ public class TwentyNewsgroupSampleStream : ObjectStreamBase<DocumentSample?>
     private readonly ITokenizer tokenizer; // NOpenNLP: made readonly
 
     // NOpenNLP: upstream uses a HashMap, whose iteration order is unspecified.
-    // LinkedDictionary iterates in insertion order so repeated passes -- and runs --
+    // OrderedDictionary iterates in insertion order so repeated passes -- and runs --
     // yield the samples in the same, directory-listing order.
     // FileInfo hashes by reference where java.nio.file.Path hashes by path, but the
     // enumeration below visits each file exactly once, so no key is ever looked up or
     // overwritten and the two behave identically here.
-    private readonly JCG.LinkedDictionary<FileInfo, string> catFileMap =
-        new JCG.LinkedDictionary<FileInfo, string>(); // NOpenNLP: made readonly
+    private readonly JCG.OrderedDictionary<FileInfo, string> catFileMap = []; // NOpenNLP: made readonly
 
     // NOpenNLP: Read() advances one entry per call and Reset() restarts the traversal,
     // which is the manual hasNext()/next() control an IEnumerator expresses directly.
@@ -51,9 +50,9 @@ public class TwentyNewsgroupSampleStream : ObjectStreamBase<DocumentSample?>
     {
         this.tokenizer = tokenizer;
 
-        foreach (DirectoryInfo dir in dataDir.EnumerateDirectories())
+        foreach (var dir in dataDir.EnumerateDirectories())
         {
-            foreach (FileInfo file in dir.EnumerateFiles())
+            foreach (var file in dir.EnumerateFiles())
             {
                 catFileMap[file] = dir.Name;
             }
@@ -72,7 +71,7 @@ public class TwentyNewsgroupSampleStream : ObjectStreamBase<DocumentSample?>
     {
         if (catFileTupleIterator.MoveNext())
         {
-            KeyValuePair<FileInfo, string> catFileTuple = catFileTupleIterator.Current;
+            var catFileTuple = catFileTupleIterator.Current;
 
             // NOpenNLP: upstream builds the String from the raw bytes with the JVM's
             // default charset. .NET has no equivalent notion of a platform charset --

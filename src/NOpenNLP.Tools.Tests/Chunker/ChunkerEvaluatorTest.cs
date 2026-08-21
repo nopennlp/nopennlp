@@ -20,9 +20,7 @@
 
 using System.Text;
 using NOpenNLP.Tools.Formats;
-using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Util;
-using NOpenNLP.Tools.Util.Eval;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
 
@@ -48,21 +46,21 @@ public class ChunkerEvaluatorTest
         IInputStreamFactory inPredicted = new ResourceAsStreamFactory("/opennlp/tools/chunker/output.txt");
         IInputStreamFactory inExpected = new ResourceAsStreamFactory("/opennlp/tools/chunker/output.txt");
 
-        DummyChunkSampleStream predictedSample = new DummyChunkSampleStream(
+        var predictedSample = new DummyChunkSampleStream(
             new PlainTextByLineStream(inPredicted, Encoding.UTF8), true);
 
-        DummyChunkSampleStream expectedSample = new DummyChunkSampleStream(
+        var expectedSample = new DummyChunkSampleStream(
             new PlainTextByLineStream(inExpected, Encoding.UTF8), false);
 
         IChunker dummyChunker = new DummyChunker(predictedSample);
 
-        StringBuilder stream = new StringBuilder();
+        var stream = new StringBuilder();
         IChunkerEvaluationMonitor listener = new ChunkEvaluationErrorListener(stream);
-        ChunkerEvaluator evaluator = new ChunkerEvaluator(dummyChunker, listener);
+        var evaluator = new ChunkerEvaluator(dummyChunker, listener);
 
         evaluator.Evaluate(expectedSample);
 
-        FMeasure fm = evaluator.FMeasure;
+        var fm = evaluator.FMeasure;
 
         ClassicAssert.AreEqual(0.8d, fm.PrecisionScore, DELTA);
         ClassicAssert.AreEqual(0.875d, fm.RecallScore, DELTA);
@@ -76,21 +74,21 @@ public class ChunkerEvaluatorTest
         IInputStreamFactory inPredicted = new ResourceAsStreamFactory("/opennlp/tools/chunker/output.txt");
         IInputStreamFactory inExpected = new ResourceAsStreamFactory("/opennlp/tools/chunker/output.txt");
 
-        DummyChunkSampleStream predictedSample = new DummyChunkSampleStream(
+        var predictedSample = new DummyChunkSampleStream(
             new PlainTextByLineStream(inPredicted, Encoding.UTF8), true);
 
-        DummyChunkSampleStream expectedSample = new DummyChunkSampleStream(
+        var expectedSample = new DummyChunkSampleStream(
             new PlainTextByLineStream(inExpected, Encoding.UTF8), true);
 
         IChunker dummyChunker = new DummyChunker(predictedSample);
 
-        StringBuilder stream = new StringBuilder();
+        var stream = new StringBuilder();
         IChunkerEvaluationMonitor listener = new ChunkEvaluationErrorListener(stream);
-        ChunkerEvaluator evaluator = new ChunkerEvaluator(dummyChunker, listener);
+        var evaluator = new ChunkerEvaluator(dummyChunker, listener);
 
         evaluator.Evaluate(expectedSample);
 
-        FMeasure fm = evaluator.FMeasure;
+        var fm = evaluator.FMeasure;
 
         ClassicAssert.AreEqual(1d, fm.PrecisionScore, DELTA);
         ClassicAssert.AreEqual(1d, fm.RecallScore, DELTA);

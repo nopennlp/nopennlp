@@ -88,10 +88,10 @@ public class SgmlParser
         // value chars
         // " <- end
 
-        IDictionary<string, string> attributes = new JCG.Dictionary<string, string>();
+        JCG.Dictionary<string, string> attributes = new();
 
-        StringBuilder key = new StringBuilder();
-        StringBuilder value = new StringBuilder();
+        StringBuilder key = new();
+        StringBuilder value = new();
 
         bool extractKey = false;
         bool extractValue = false;
@@ -142,7 +142,7 @@ public class SgmlParser
     /// <exception cref="IOException">if there is an error during reading</exception>
     public void Parse(TextReader @in, ContentHandler handler)
     {
-        StringBuilder buffer = new StringBuilder();
+        StringBuilder buffer = new();
 
         bool isInsideTag = false;
         bool isStartTag = true;

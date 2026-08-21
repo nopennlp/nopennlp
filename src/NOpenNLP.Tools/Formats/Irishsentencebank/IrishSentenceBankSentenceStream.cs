@@ -50,11 +50,11 @@ internal class IrishSentenceBankSentenceStream : ObjectStreamBase<SentenceSample
     public override SentenceSample? Read()
     {
         var sentencesString = new StringBuilder();
-        IList<Span> sentenceSpans = new JCG.List<Span>();
+        JCG.List<Span> sentenceSpans = [];
 
         while (sentenceIt.MoveNext())
         {
-            IrishSentenceBankDocument.IrishSentenceBankSentence sentence = sentenceIt.Current;
+            var sentence = sentenceIt.Current;
 
             int begin = sentencesString.Length;
 

@@ -32,12 +32,6 @@ public class NKJPSegmentationDocument
 {
     public class Pointer(string doc, string id, int offset, int length, bool spaceAfter)
     {
-        internal string doc = doc;
-        internal string id = id;
-        internal int offset = offset;
-        internal int length = length;
-        internal bool space_after = spaceAfter;
-
         public string Doc => doc;
 
         public string Id => id;
@@ -46,30 +40,31 @@ public class NKJPSegmentationDocument
 
         public int Length => length;
 
-        public bool SpaceAfter => space_after;
+        public bool SpaceAfter => spaceAfter;
 
-        public Span ToSpan() => new Span(this.offset, this.offset + this.length);
+        public Span ToSpan() => new Span(offset, offset + length);
 
         public override string ToString() =>
-            doc + "#string-range(" + id + "," + offset.ToString(CultureInfo.InvariantCulture)
-                + "," + length.ToString(CultureInfo.InvariantCulture) + ")";
+            $"{doc}#string-range({id},{offset.ToString(CultureInfo.InvariantCulture)},{length.ToString(CultureInfo.InvariantCulture)})";
     }
 
     // NOpenNLP: upstream exposes getSegments(); the outer map preserves insertion order
     // (LinkedHashMap upstream), which NKJPSentenceSampleStream relies on when it walks the
     // sentences in document order. J2N's Dictionary does not preserve insertion order, so
-    // this uses LinkedDictionary, the J2N counterpart of LinkedHashMap.
+    // this uses OrderedDictionary, J2N's replacement for LinkedHashMap. The inner maps are
+    // ordered for the same reason: NKJPSentenceSampleStream accumulates each sentence's
+    // character offsets by walking the segment keys in order, so reordering them would
+    // shift the resulting spans rather than merely reorder the output.
     public IDictionary<string, IDictionary<string, Pointer>> Segments => segments;
 
-    internal IDictionary<string, IDictionary<string, Pointer>> segments;
+    internal readonly JCG.OrderedDictionary<string, IDictionary<string, Pointer>> segments;
 
     internal NKJPSegmentationDocument()
+        : this([])
     {
-        this.segments = new JCG.LinkedDictionary<string, IDictionary<string, Pointer>>();
     }
 
-    internal NKJPSegmentationDocument(IDictionary<string, IDictionary<string, Pointer>> segments)
-        : this()
+    internal NKJPSegmentationDocument(JCG.OrderedDictionary<string, IDictionary<string, Pointer>> segments)
     {
         this.segments = segments;
     }
@@ -93,18 +88,17 @@ public class NKJPSegmentationDocument
     /// <exception cref="IOException">Thrown if the XML cannot be parsed.</exception>
     public static NKJPSegmentationDocument Parse(Stream isStream)
     {
-        IDictionary<string, IDictionary<string, Pointer>> sentences =
-            new JCG.LinkedDictionary<string, IDictionary<string, Pointer>>();
+        JCG.OrderedDictionary<string, IDictionary<string, Pointer>> sentences = [];
 
         try
         {
-            XmlDocument doc = XmlUtil.CreateDocument(isStream);
+            var doc = XmlUtil.CreateDocument(isStream);
 
-            XmlNodeList nl = doc.SelectNodes(SENT_NODES)!;
+            var nl = doc.SelectNodes(SENT_NODES)!;
 
             for (int i = 0; i < nl.Count; i++)
             {
-                XmlNode sentnode = nl[i]!;
+                var sentnode = nl[i]!;
 
                 string? sentid = null;
                 if (sentnode.Attributes?.GetNamedItem("xml:id") != null)
@@ -112,21 +106,21 @@ public class NKJPSegmentationDocument
                     sentid = sentnode.Attributes.GetNamedItem("xml:id")!.InnerText;
                 }
 
-                IDictionary<string, Pointer> segments = new JCG.LinkedDictionary<string, Pointer>();
-                XmlNodeList segnl = sentnode.SelectNodes(SEG_NODES)!;
+                JCG.OrderedDictionary<string, Pointer> segments = [];
+                var segnl = sentnode.SelectNodes(SEG_NODES)!;
 
                 for (int j = 0; j < segnl.Count; j++)
                 {
-                    XmlNode n = segnl[j]!;
+                    var n = segnl[j]!;
                     if (NodeName(n).Equals("seg", StringComparison.Ordinal))
                     {
                         string segid = XmlID(n);
-                        Pointer pointer = FromSeg(n);
+                        var pointer = FromSeg(n);
                         segments[segid] = pointer;
                     }
                     else if (NodeName(n).Equals("choice", StringComparison.Ordinal))
                     {
-                        XmlNodeList choices = n.ChildNodes;
+                        var choices = n.ChildNodes;
 
                         for (int k = 0; k < choices.Count; k++)
                         {
@@ -134,12 +128,12 @@ public class NKJPSegmentationDocument
                             {
                                 if (!CheckRejectedParen(choices[k]!))
                                 {
-                                    XmlNodeList paren_segs = choices[k]!.SelectNodes(SEG_NODES_ONLY)!;
+                                    var paren_segs = choices[k]!.SelectNodes(SEG_NODES_ONLY)!;
 
                                     for (int l = 0; l < paren_segs.Count; l++)
                                     {
                                         string segid = XmlID(paren_segs[l]!);
-                                        Pointer pointer = FromSeg(paren_segs[l]!);
+                                        var pointer = FromSeg(paren_segs[l]!);
                                         segments[segid] = pointer;
                                     }
                                 }
@@ -149,7 +143,7 @@ public class NKJPSegmentationDocument
                                 if (!CheckRejected(choices[k]!))
                                 {
                                     string segid = XmlID(choices[k]!);
-                                    Pointer pointer = FromSeg(choices[k]!);
+                                    var pointer = FromSeg(choices[k]!);
                                     segments[segid] = pointer;
                                 }
                             }
@@ -217,7 +211,7 @@ public class NKJPSegmentationDocument
         {
             for (int i = 0; i < n.ChildNodes.Count; i++)
             {
-                XmlNode m = n.ChildNodes[i]!;
+                var m = n.ChildNodes[i]!;
                 if (NodeName(m).Equals("seg", StringComparison.Ordinal))
                 {
                     if (!CheckRejected(m))
@@ -284,18 +278,18 @@ public class NKJPSegmentationDocument
         // observable; it is left as-is to keep the port faithful.
         bool space_after = ptr.Equals("yes", StringComparison.Ordinal);
 
-        if (!ptr.Contains("#") || !ptr.Contains("(") || ptr[ptr.Length - 1] != ')')
+        if (!ptr.Contains("#") || !ptr.Contains("(") || ptr[^1] != ')')
         {
             throw new IOException("String " + ptr + " does not appear to be a valid NKJP corresp attribute");
         }
 
         int docend = ptr.IndexOf('#');
-        string document = ptr.Substring(0, docend);
+        string document = ptr[..docend];
 
         int pointer_start = ptr.IndexOf('(') + 1;
         string[] pieces = ptr.Substring(pointer_start, ptr.Length - 1 - pointer_start).Split(',');
 
-        if (pieces.Length < 3 || pieces.Length > 4)
+        if (pieces.Length is < 3 or > 4)
         {
             throw new IOException("String " + ptr + " does not appear to be a valid NKJP corresp attribute");
         }

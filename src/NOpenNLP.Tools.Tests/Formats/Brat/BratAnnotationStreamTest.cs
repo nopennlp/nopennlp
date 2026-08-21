@@ -20,7 +20,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Util;
 using NUnit.Framework;
@@ -32,7 +31,7 @@ public class BratAnnotationStreamTest
     private static IObjectStream<BratAnnotation?> CreatBratAnnotationStream(
         AnnotationConfiguration conf, string file)
     {
-        Stream @in = TestResources.OpenResource(file);
+        var @in = TestResources.OpenResource(file);
         return new BratAnnotationStream(conf, "testing", @in);
     }
 
@@ -47,18 +46,16 @@ public class BratAnnotationStreamTest
     [Test]
     public void TestParsingEntities()
     {
-        IDictionary<string, string> typeToClassMap = new Dictionary<string, string>();
+        var typeToClassMap = new Dictionary<string, string>();
         AddEntityTypes(typeToClassMap);
 
         AnnotationConfiguration annConfig = new(typeToClassMap);
 
-        IObjectStream<BratAnnotation?> annStream = CreatBratAnnotationStream(annConfig,
-            "/opennlp/tools/formats/brat/voa-with-entities.ann");
+        var annStream = CreatBratAnnotationStream(annConfig, "/opennlp/tools/formats/brat/voa-with-entities.ann");
 
         // TODO: Test if we get the entities ... we expect!
 
-        BratAnnotation? ann;
-        while ((ann = annStream.Read()) != null)
+        while (annStream.Read() is { } ann)
         {
             Console.WriteLine(ann);
         }
@@ -67,19 +64,17 @@ public class BratAnnotationStreamTest
     [Test]
     public void TestParsingRelations()
     {
-        IDictionary<string, string> typeToClassMap = new Dictionary<string, string>();
+        var typeToClassMap = new Dictionary<string, string>();
         AddEntityTypes(typeToClassMap);
         typeToClassMap["Related"] = AnnotationConfiguration.RELATION_TYPE;
 
         AnnotationConfiguration annConfig = new(typeToClassMap);
 
-        IObjectStream<BratAnnotation?> annStream = CreatBratAnnotationStream(annConfig,
-            "/opennlp/tools/formats/brat/voa-with-relations.ann");
+        var annStream = CreatBratAnnotationStream(annConfig, "/opennlp/tools/formats/brat/voa-with-relations.ann");
 
         // TODO: Test if we get the entities ... we expect!
 
-        BratAnnotation? ann;
-        while ((ann = annStream.Read()) != null)
+        while (annStream.Read() is { } ann)
         {
             Console.WriteLine(ann);
         }

@@ -46,7 +46,7 @@ public class LeipzigLanguageSampleStreamTest
         int sentencesPerSample = 1;
         try
         {
-            LeipzigLanguageSampleStream stream = new LeipzigLanguageSampleStream(
+            var stream = new LeipzigLanguageSampleStream(
                 new DirectoryInfo(TestDataPath), sentencesPerSample, samplesPerLanguage);
             int count = 0;
             while (stream.Read() != null)
@@ -71,7 +71,7 @@ public class LeipzigLanguageSampleStreamTest
         // overloads of Assert.Throws.
         Assert.Throws<InvalidFormatException>((Action)(() =>
         {
-            LeipzigLanguageSampleStream stream = new LeipzigLanguageSampleStream(
+            var stream = new LeipzigLanguageSampleStream(
                 new DirectoryInfo(TestDataPath), sentencesPerSample, samplesPerLanguage);
             while (stream.Read() != null) ;
         }));

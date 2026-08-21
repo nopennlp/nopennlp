@@ -18,7 +18,6 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using NOpenNLP.Tools.Postag;
@@ -68,11 +67,10 @@ public class ConllXPOSSampleStream : FilterObjectStream<string?, POSSample?>
             // paragraph get lines
             using var reader = new StringReader(paragraph);
 
-            IList<string> tokens = new JCG.List<string>(100);
-            IList<string> tags = new JCG.List<string>(100);
+            var tokens = new JCG.List<string>(100);
+            var tags = new JCG.List<string>(100);
 
-            string? line;
-            while ((line = reader.ReadLine()) != null)
+            while (reader.ReadLine() is { } line)
             {
                 const int minNumberOfFields = 5;
 
@@ -85,8 +83,8 @@ public class ConllXPOSSampleStream : FilterObjectStream<string?, POSSample?>
                 }
                 else
                 {
-                    throw new InvalidFormatException("Every non-empty line must have at least " +
-                        minNumberOfFields + " fields: '" + line + "'!");
+                    throw new InvalidFormatException(
+                        $"Every non-empty line must have at least {minNumberOfFields} fields: '{line}'!");
                 }
             }
 

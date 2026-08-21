@@ -104,8 +104,8 @@ public class ADSentenceSampleStream : ObjectStreamBase<SentenceSample?>
             }
         }
 
-        StringBuilder document = new StringBuilder();
-        IList<Span> sentences = new JCG.List<Span>();
+        var document = new StringBuilder();
+        JCG.List<Span> sentences = [];
         do
         {
             do
@@ -146,7 +146,7 @@ public class ADSentenceSampleStream : ObjectStreamBase<SentenceSample?>
         text = text.Trim();
         if (text.Length > 0)
         {
-            char lastChar = text[text.Length - 1];
+            char lastChar = text[^1];
             return Array.BinarySearch(ptEosCharacters, lastChar) >= 0;
         }
         return false;
@@ -155,7 +155,7 @@ public class ADSentenceSampleStream : ObjectStreamBase<SentenceSample?>
     // there are some different types of metadata depending on the corpus.
     // todo: merge this patterns
     // NOpenNLP: upstream declares this as an instance field, recompiling the pattern per stream.
-    private static readonly Regex meta1 = new Regex("^(?:[a-zA-Z\\-]*(\\d+)).*?p=(\\d+).*");
+    private static readonly Regex meta1 = new("^(?:[a-zA-Z\\-]*(\\d+)).*?p=(\\d+).*");
 
     private void UpdateMeta()
     {
@@ -166,7 +166,7 @@ public class ADSentenceSampleStream : ObjectStreamBase<SentenceSample?>
             // ends with .* rather than $, so an unanchored .NET match would differ on input
             // containing a newline -- .NET's `.` stops at \n while the trailing .* must still reach
             // the end for matches() to succeed. The explicit full-length check keeps them aligned.
-            Match m = MatchWholeString(meta1, meta);
+            var m = MatchWholeString(meta1, meta);
             int currentText;
             int currentPara;
             if (m.Success)
@@ -201,8 +201,8 @@ public class ADSentenceSampleStream : ObjectStreamBase<SentenceSample?>
     // Regex.Match finds a match anywhere. Anchoring to the full input length reproduces matches().
     private static Match MatchWholeString(Regex regex, string input)
     {
-        Match match = regex.Match(input);
-        if (match.Success && match.Index == 0 && match.Length == input.Length)
+        var match = regex.Match(input);
+        if (match is { Success: true, Index: 0 } && match.Length == input.Length)
         {
             return match;
         }

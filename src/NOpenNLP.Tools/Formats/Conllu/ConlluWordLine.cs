@@ -95,19 +95,12 @@ public class ConlluWordLine
     /// </summary>
     /// <param name="tagset">the type of tag to retrieve, either universal (U) or language specific (X)</param>
     public string GetPosTag(ConlluTagset tagset)
-    {
-        switch (tagset)
+        => tagset switch
         {
-            case ConlluTagset.U:
-                return uPosTag;
-            case ConlluTagset.X:
-                return xPosTag;
-            default:
-                // NOpenNLP: upstream throws IllegalStateException; InvalidOperationException
-                // is the .NET counterpart.
-                throw new InvalidOperationException("Unexpected tagset value: " + tagset);
-        }
-    }
+            ConlluTagset.U => uPosTag,
+            ConlluTagset.X => xPosTag,
+            _ => throw new InvalidOperationException($"Unexpected tagset value: {tagset}")
+        };
 
     /// <summary>
     /// Gets the list of morphological features from the universal feature inventory or from a

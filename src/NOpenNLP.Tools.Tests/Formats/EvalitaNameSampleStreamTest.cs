@@ -35,7 +35,7 @@ public class EvalitaNameSampleStreamTest
     /// <exception cref="IOException">if the stream cannot be created</exception>
     private static IObjectStream<NameSample?> OpenData(EvalitaNameSampleStream.Language lang, string name)
     {
-        IInputStreamFactory @in = new ResourceAsStreamFactory("/opennlp/tools/formats/" + name);
+        IInputStreamFactory @in = new ResourceAsStreamFactory($"/opennlp/tools/formats/{name}");
 
         return new EvalitaNameSampleStream(lang, @in, EvalitaNameSampleStream.GeneratePersonEntities);
     }
@@ -43,10 +43,9 @@ public class EvalitaNameSampleStreamTest
     [Test]
     public void TestParsingItalianSample()
     {
-        IObjectStream<NameSample?> sampleStream =
-            OpenData(EvalitaNameSampleStream.Language.IT, "evalita-ner-it.sample");
+        var sampleStream = OpenData(EvalitaNameSampleStream.Language.IT, "evalita-ner-it.sample");
 
-        NameSample? personName = sampleStream.Read();
+        var personName = sampleStream.Read();
 
         ClassicAssert.NotNull(personName);
 
@@ -54,7 +53,7 @@ public class EvalitaNameSampleStreamTest
         ClassicAssert.AreEqual(1, personName.Names.Length);
         ClassicAssert.AreEqual(true, personName.IsClearAdaptiveDataSet);
 
-        Span nameSpan = personName.Names[0];
+        var nameSpan = personName.Names[0];
         ClassicAssert.AreEqual(8, nameSpan.Start);
         ClassicAssert.AreEqual(10, nameSpan.End);
         ClassicAssert.AreEqual(true, personName.IsClearAdaptiveDataSet);
@@ -67,9 +66,8 @@ public class EvalitaNameSampleStreamTest
     [Test]
     public void TestReset()
     {
-        IObjectStream<NameSample?> sampleStream =
-            OpenData(EvalitaNameSampleStream.Language.IT, "evalita-ner-it.sample");
-        NameSample? sample = sampleStream.Read();
+        var sampleStream = OpenData(EvalitaNameSampleStream.Language.IT, "evalita-ner-it.sample");
+        var sample = sampleStream.Read();
         sampleStream.Reset();
         ClassicAssert.AreEqual(sample, sampleStream.Read());
     }

@@ -41,23 +41,21 @@ internal class ConstitDocumentHandler(IList<Parse> parses)
 
     private const string SENT_TYPE_NAME = "S";
 
-    private readonly IList<Parse> parses = parses;
-
     private bool insideSentenceElement;
 
     /// <summary>
     /// A token buffer, a token might be build up by multiple
     /// <see cref="Characters(string)"/> calls.
     /// </summary>
-    private readonly StringBuilder tokenBuffer = new StringBuilder();
+    private readonly StringBuilder tokenBuffer = new();
 
-    private readonly StringBuilder text = new StringBuilder();
+    private readonly StringBuilder text = new();
 
     private int offset;
     // NOpenNLP: J2N has no Stack<T>; the BCL one is used. Only Push/Pop/Clear are
     // called, which behave identically.
-    private readonly Stack<Constituent> stack = new Stack<Constituent>();
-    private readonly IList<Constituent> cons = new JCG.List<Constituent>();
+    private readonly Stack<Constituent> stack = new();
+    private readonly JCG.List<Constituent> cons = [];
 
     private string? cat;
     private string? subcat;
@@ -97,13 +95,13 @@ internal class ConstitDocumentHandler(IList<Parse> parses)
             // This implementation hopefully decodes these cases correctly!
 
             string? newCat = getAttributeValue("cat");
-            if (newCat != null && newCat.Length > 0)
+            if (!string.IsNullOrEmpty(newCat))
             {
                 cat = newCat;
             }
 
             string? newSubcat = getAttributeValue("subcat");
-            if (newSubcat != null && newSubcat.Length > 0)
+            if (!string.IsNullOrEmpty(newSubcat))
             {
                 subcat = newSubcat;
             }
@@ -121,11 +119,11 @@ internal class ConstitDocumentHandler(IList<Parse> parses)
                 string? catint = getAttributeValue("catint");
                 if (catint != null)
                 {
-                    type = "null" + catint;
+                    type = $"null{catint}";
                 }
                 else
                 {
-                    type = "null" + (subcat ?? "null");
+                    type = $"null{subcat ?? "null"}";
                 }
             }
         }
@@ -161,7 +159,7 @@ internal class ConstitDocumentHandler(IList<Parse> parses)
                 }
             }
 
-            Constituent unfinishedCon = stack.Pop();
+            var unfinishedCon = stack.Pop();
 
             if (isCreateConstituent)
             {
@@ -179,8 +177,8 @@ internal class ConstitDocumentHandler(IList<Parse> parses)
 
                 string txt = text.ToString();
                 int tokenIndex = -1;
-                Parse p = new Parse(txt, new Span(0, txt.Length), AbstractBottomUpParser.TOP_NODE, 1, 0);
-                foreach (Constituent con in cons)
+                var p = new Parse(txt, new Span(0, txt.Length), AbstractBottomUpParser.TOP_NODE, 1, 0);
+                foreach (var con in cons)
                 {
                     string type = con.Label;
                     if (!type.Equals(AbstractBottomUpParser.TOP_NODE, StringComparison.Ordinal))
@@ -189,7 +187,7 @@ internal class ConstitDocumentHandler(IList<Parse> parses)
                         {
                             tokenIndex++;
                         }
-                        Parse c = new Parse(txt, con.Span, type, 1, tokenIndex);
+                        var c = new Parse(txt, con.Span, type, 1, tokenIndex);
                         p.Insert(c);
                     }
                 }

@@ -18,7 +18,6 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
-using NOpenNLP.Tools.Formats;
 using NOpenNLP.Tools.Util;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
@@ -33,24 +32,23 @@ public class ConlluStreamTest
         IInputStreamFactory streamFactory =
             new ResourceAsStreamFactory("/opennlp/tools/formats/conllu/de-ud-train-sample.conllu");
 
-        using (IObjectStream<ConlluSentence?> stream = new ConlluStream(streamFactory))
-        {
-            ConlluSentence? sent1 = stream.Read();
+        using var stream = new ConlluStream(streamFactory);
 
-            ClassicAssert.AreEqual("train-s21", sent1!.SentenceIdComment);
-            ClassicAssert.AreEqual("Fachlich kompetent, sehr gute Beratung und ein freundliches Team.",
-                sent1.TextComment);
-            ClassicAssert.AreEqual(11, sent1.WordLines.Count);
+        var sent1 = stream.Read();
 
-            ConlluSentence? sent2 = stream.Read();
+        ClassicAssert.AreEqual("train-s21", sent1!.SentenceIdComment);
+        ClassicAssert.AreEqual("Fachlich kompetent, sehr gute Beratung und ein freundliches Team.",
+            sent1.TextComment);
+        ClassicAssert.AreEqual(11, sent1.WordLines.Count);
 
-            ClassicAssert.AreEqual("train-s22", sent2!.SentenceIdComment);
-            ClassicAssert.AreEqual(
-                "Beiden Zahnärzten verdanke ich einen neuen Biss und dadurch endlich keine Rückenschmerzen mehr.",
-                sent2.TextComment);
-            ClassicAssert.AreEqual(14, sent2.WordLines.Count);
+        var sent2 = stream.Read();
 
-            ClassicAssert.IsNull(stream.Read(), "Stream must be exhausted");
-        }
+        ClassicAssert.AreEqual("train-s22", sent2!.SentenceIdComment);
+        ClassicAssert.AreEqual(
+            "Beiden Zahnärzten verdanke ich einen neuen Biss und dadurch endlich keine Rückenschmerzen mehr.",
+            sent2.TextComment);
+        ClassicAssert.AreEqual(14, sent2.WordLines.Count);
+
+        ClassicAssert.IsNull(stream.Read(), "Stream must be exhausted");
     }
 }

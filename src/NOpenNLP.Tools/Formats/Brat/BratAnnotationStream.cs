@@ -51,8 +51,7 @@ public class BratAnnotationStream : ObjectStreamBase<BratAnnotation?>
             // the ambient culture the way a bare int.Parse would.
             if (!int.TryParse(intString, NumberStyles.Integer, CultureInfo.InvariantCulture, out int value))
             {
-                throw new InvalidFormatException(new FormatException(
-                    "Failed to parse integer: " + intString));
+                throw new InvalidFormatException(new FormatException($"Failed to parse integer: {intString}"));
             }
 
             return value;
@@ -75,7 +74,7 @@ public class BratAnnotationStream : ObjectStreamBase<BratAnnotation?>
 
                 int beginIndex = ParseInt32(values[BEGIN_OFFSET].GetCoveredText(line.AsCharSequence()).ToString());
 
-                IList<Span> fragments = new JCG.List<Span>();
+                JCG.List<Span> fragments = [];
 
                 for (int i = END_OFFSET; i < values.Length; i++)
                 {
@@ -106,7 +105,7 @@ public class BratAnnotationStream : ObjectStreamBase<BratAnnotation?>
                 string id = values[ID_OFFSET].GetCoveredText(line.AsCharSequence()).ToString();
 
                 string coveredText = line.Substring(values[firstTextTokenIndex].Start,
-                    values[values.Length - 1].End - values[firstTextTokenIndex].Start);
+                    values[^1].End - values[firstTextTokenIndex].Start);
 
                 try
                 {
@@ -130,15 +129,15 @@ public class BratAnnotationStream : ObjectStreamBase<BratAnnotation?>
         private const int ARG2_OFFSET = 3;
 
         /// <exception cref="InvalidFormatException">if the argument cannot be parsed</exception>
-        private string ParseArg(string arg)
+        private static string ParseArg(string arg) // NOpenNLP: made static
         {
             if (arg.Length > 4)
             {
-                return arg.Substring(5).Trim();
+                return arg[5..].Trim();
             }
             else
             {
-                throw new InvalidFormatException("Failed to parse argument: " + arg);
+                throw new InvalidFormatException($"Failed to parse argument: {arg}");
             }
         }
 
@@ -166,7 +165,7 @@ public class BratAnnotationStream : ObjectStreamBase<BratAnnotation?>
             string type = typeParts[0];
             string eventTrigger = typeParts[1];
 
-            IDictionary<string, string> arguments = new JCG.Dictionary<string, string>();
+            JCG.Dictionary<string, string> arguments = [];
 
             for (int i = TYPE_OFFSET + 1; i < tokens.Length; i++)
             {
@@ -194,7 +193,7 @@ public class BratAnnotationStream : ObjectStreamBase<BratAnnotation?>
         /// <inheritdoc/>
         internal override BratAnnotation Parse(Span[] values, string line)
         {
-            if (values.Length == 3 || values.Length == 4)
+            if (values.Length is 3 or 4)
             {
                 string? value = null;
 
@@ -222,8 +221,7 @@ public class BratAnnotationStream : ObjectStreamBase<BratAnnotation?>
         /// <inheritdoc/>
         internal override BratAnnotation Parse(Span[] tokens, string line)
         {
-            Span noteSpan = new Span(tokens[START_VALUE_OFFSET].Start,
-                tokens[tokens.Length - 1].End);
+            var noteSpan = new Span(tokens[START_VALUE_OFFSET].Start, tokens[^1].End);
 
             return new AnnotatorNoteAnnotation(tokens[ID_OFFSET].GetCoveredText(line.AsCharSequence()).ToString(),
                 tokens[ATTACH_TO_OFFSET].GetCoveredText(line.AsCharSequence()).ToString(),
@@ -247,69 +245,76 @@ public class BratAnnotationStream : ObjectStreamBase<BratAnnotation?>
     /// <exception cref="IOException">if there is an error during reading</exception>
     public override BratAnnotation? Read()
     {
-        string? line = reader.ReadLine();
-
-        if (line != null)
+        // NOpenNLP: converted recursion to iteration
+        while (true)
         {
-            Span[] tokens = WhitespaceTokenizer.INSTANCE.TokenizePos(line);
+            string? line = reader.ReadLine();
 
-            if (tokens.Length > 2)
+            if (line != null)
             {
-                string annId = tokens[BratAnnotationParser.ID_OFFSET].GetCoveredText(line.AsCharSequence()).ToString();
+                var tokens = WhitespaceTokenizer.INSTANCE.TokenizePos(line);
 
-                if (annId.Length == 0)
+                if (tokens.Length > 2)
                 {
-                    throw new InvalidFormatException("annotation id is empty");
-                }
+                    string annId = tokens[BratAnnotationParser.ID_OFFSET].GetCoveredText(line.AsCharSequence()).ToString();
 
-                // The first leter of the annotation id marks the annotation type
+                    if (annId.Length == 0)
+                    {
+                        throw new InvalidFormatException("annotation id is empty");
+                    }
 
-                BratAnnotationParser parser;
-                switch (annId[0])
-                {
-                    case 'T':
-                        parser = new SpanAnnotationParser();
-                        break;
-                    case 'R':
-                        parser = new RelationAnnotationParser();
-                        break;
-                    case 'A':
-                        parser = new AttributeAnnotationParser();
-                        break;
-                    case 'E':
-                        parser = new EventAnnotationParser();
-                        break;
-                    case '#':
-                        // the # can be a Note or a comment... if a note, handle it,
-                        // otherwise skip the unsupported type..
-                        if (tokens[BratAnnotationParser.TYPE_OFFSET].GetCoveredText(line.AsCharSequence())
-                            .ToString().Equals(BratAnnotationParser.NOTES_TYPE, StringComparison.Ordinal))
-                        {
-                            parser = new AnnotatorNoteParser();
-                        }
-                        else
-                        {
-                            return Read();
-                        }
-                        break;
-                    default:
-                        // Skip it, do that for everything unsupported (e.g. "*" id)
-                        return Read();
-                }
+                    // The first leter of the annotation id marks the annotation type
 
-                try
-                {
-                    return parser.Parse(tokens, line);
-                }
-                catch (IOException e)
-                {
-                    throw new IOException(string.Format(CultureInfo.InvariantCulture,
-                        "Failed to parse ann document with id [{0}.ann]", id), e);
+                    BratAnnotationParser parser;
+                    switch (annId[0])
+                    {
+                        case 'T':
+                            parser = new SpanAnnotationParser();
+                            break;
+                        case 'R':
+                            parser = new RelationAnnotationParser();
+                            break;
+                        case 'A':
+                            parser = new AttributeAnnotationParser();
+                            break;
+                        case 'E':
+                            parser = new EventAnnotationParser();
+                            break;
+                        case '#':
+                            // the # can be a Note or a comment... if a note, handle it,
+                            // otherwise skip the unsupported type..
+                            if (tokens[BratAnnotationParser.TYPE_OFFSET]
+                                .GetCoveredText(line.AsCharSequence())
+                                .ToString()
+                                .Equals(BratAnnotationParser.NOTES_TYPE, StringComparison.Ordinal))
+                            {
+                                parser = new AnnotatorNoteParser();
+                            }
+                            else
+                            {
+                                continue;
+                            }
+
+                            break;
+                        default:
+                            // Skip it, do that for everything unsupported (e.g. "*" id)
+                            continue;
+                    }
+
+                    try
+                    {
+                        return parser.Parse(tokens, line);
+                    }
+                    catch (IOException e)
+                    {
+                        throw new IOException(string.Format(CultureInfo.InvariantCulture, "Failed to parse ann document with id [{0}.ann]", id), e);
+                    }
                 }
             }
-        }
 
-        return null;
+            return null;
+            break;
+        }
     }
 
     /// <inheritdoc/>

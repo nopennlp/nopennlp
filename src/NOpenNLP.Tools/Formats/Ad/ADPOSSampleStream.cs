@@ -35,7 +35,7 @@ public class ADPOSSampleStream : ObjectStreamBase<POSSample?>
 {
     // NOpenNLP: hoisted out of processLeaf(), where upstream calls String.replaceAll and so
     // recompiles the pattern for every leaf.
-    private static readonly Regex whitespacePattern = new Regex("\\s+");
+    private static readonly Regex whitespacePattern = new("\\s+");
 
     private readonly IObjectStream<ADSentenceStream.Sentence?> adSentenceStream;
     private readonly bool expandME; // NOpenNLP: made readonly
@@ -83,12 +83,11 @@ public class ADPOSSampleStream : ObjectStreamBase<POSSample?>
     /// <exception cref="IOException">if there is an error during reading</exception>
     public override POSSample? Read()
     {
-        ADSentenceStream.Sentence? paragraph;
-        while ((paragraph = adSentenceStream.Read()) != null)
+        while (adSentenceStream.Read() is { } paragraph)
         {
-            ADSentenceStream.SentenceParser.Node? root = paragraph.Root;
-            IList<string> sentence = new JCG.List<string>();
-            IList<string> tags = new JCG.List<string>();
+            var root = paragraph.Root;
+            JCG.List<string> sentence = [];
+            JCG.List<string> tags = [];
             Process(root, sentence, tags);
 
             return new POSSample(sentence, tags);
@@ -100,7 +99,7 @@ public class ADPOSSampleStream : ObjectStreamBase<POSSample?>
     {
         if (node != null)
         {
-            foreach (ADSentenceStream.SentenceParser.TreeElement element in node.Elements)
+            foreach (var element in node.Elements)
             {
                 if (element.IsLeaf)
                 {
@@ -147,8 +146,8 @@ public class ADPOSSampleStream : ObjectStreamBase<POSSample?>
 
                 if (tokens.Length > 0)
                 {
-                    IList<string> toks = new JCG.List<string>(tokens.Length);
-                    IList<string> tagsWithCont = new JCG.List<string>(tokens.Length);
+                    var toks = new JCG.List<string>(tokens.Length);
+                    var tagsWithCont = new JCG.List<string>(tokens.Length);
                     toks.Add(tokens[0]);
                     tagsWithCont.Add("B-" + tag);
                     for (int i = 1; i < tokens.Length; i++)

@@ -21,7 +21,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using NOpenNLP.Tools.Formats;
 using NOpenNLP.Tools.Sentdetect;
 using NOpenNLP.Tools.Util;
 using NUnit.Framework;
@@ -57,17 +56,12 @@ public class ADSentenceSampleStreamTest
 
         IInputStreamFactory @in = new ResourceAsStreamFactory("/opennlp/tools/formats/ad.sample");
 
-        using (ADSentenceSampleStream stream = new ADSentenceSampleStream(
-            new PlainTextByLineStream(@in, Encoding.UTF8), true))
+        using var stream = new ADSentenceSampleStream(new PlainTextByLineStream(@in, Encoding.UTF8), true);
+        while (stream.Read() is { } sample)
         {
-            SentenceSample? sample;
-
-            while ((sample = stream.Read()) != null)
-            {
-                Console.WriteLine(sample.Document);
-                Console.WriteLine("<fim>");
-                samples.Add(sample);
-            }
+            Console.WriteLine(sample.Document);
+            Console.WriteLine("<fim>");
+            samples.Add(sample);
         }
     }
 }

@@ -32,7 +32,7 @@ internal class DocumentSplitterStream(IObjectStream<string?> samples)
     private const string DocStartElement = "<DOC>";
     private const string DocEndElement = "</DOC>";
 
-    private readonly IList<string> docs = new JCG.List<string>(); // NOpenNLP: made readonly
+    private readonly JCG.List<string> docs = []; // NOpenNLP: made readonly
 
     /// <inheritdoc/>
     /// <exception cref="IOException">if there is an error during reading</exception>

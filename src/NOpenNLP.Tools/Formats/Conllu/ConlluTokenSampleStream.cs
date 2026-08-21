@@ -34,15 +34,15 @@ public class ConlluTokenSampleStream(IObjectStream<ConlluSentence?> samples)
     /// <exception cref="IOException">if there is an error during reading</exception>
     public override TokenSample? Read()
     {
-        ConlluSentence? sentence = samples.Read();
+        var sentence = samples.Read();
         if (sentence != null)
         {
             if (sentence.TextComment != null)
             {
-                StringBuilder text = new StringBuilder(sentence.TextComment);
+                var text = new StringBuilder(sentence.TextComment);
                 int searchIndex = 0;
 
-                foreach (ConlluWordLine wordLine in sentence.WordLines)
+                foreach (var wordLine in sentence.WordLines)
                 {
                     // skip over inserted words which are not in the source text
                     if (wordLine.Id.Contains("."))

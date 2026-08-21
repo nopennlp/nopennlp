@@ -32,8 +32,6 @@ namespace NOpenNLP.Tools.Formats.Convert;
 public class FileToStringSampleStream(IObjectStream<FileInfo?> samples, Encoding encoding)
     : FilterObjectStream<FileInfo?, string?>(samples)
 {
-    private readonly Encoding encoding = encoding;
-
     /// <summary>
     /// Reads the contents of a file to a string.
     /// </summary>
@@ -61,15 +59,8 @@ public class FileToStringSampleStream(IObjectStream<FileInfo?> samples, Encoding
     /// <exception cref="IOException">if there is an error during reading</exception>
     public override string? Read()
     {
-        FileInfo? sampleFile = samples.Read();
+        var sampleFile = samples.Read();
 
-        if (sampleFile != null)
-        {
-            return ReadFile(sampleFile, encoding);
-        }
-        else
-        {
-            return null;
-        }
+        return sampleFile != null ? ReadFile(sampleFile, encoding) : null;
     }
 }

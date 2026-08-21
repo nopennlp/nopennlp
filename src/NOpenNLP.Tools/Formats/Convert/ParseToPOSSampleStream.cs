@@ -37,14 +37,14 @@ public class ParseToPOSSampleStream(IObjectStream<Parse?> samples)
     /// <exception cref="IOException">if there is an error during reading</exception>
     public override POSSample? Read()
     {
-        Parse? parse = samples.Read();
+        var parse = samples.Read();
 
         if (parse != null)
         {
-            IList<string> sentence = new JCG.List<string>();
-            IList<string> tags = new JCG.List<string>();
+            JCG.List<string> sentence = [];
+            JCG.List<string> tags = [];
 
-            foreach (Parse tagNode in parse.GetTagNodes())
+            foreach (var tagNode in parse.GetTagNodes())
             {
                 sentence.Add(tagNode.CoveredText);
                 tags.Add(tagNode.Type);

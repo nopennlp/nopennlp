@@ -19,7 +19,6 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using NOpenNLP.Tools.Namefind;
@@ -86,25 +85,14 @@ public class Conll02NameSampleStream : ObjectStreamBase<NameSample?>
     /// <exception cref="InvalidFormatException">if the tag carries an unknown type</exception>
     internal static Span Extract(int begin, int end, string beginTag)
     {
-        string type = beginTag.Substring(2);
-
-        switch (type)
+        string type = beginTag[2..] switch
         {
-            case "PER":
-                type = "person";
-                break;
-            case "LOC":
-                type = "location";
-                break;
-            case "MISC":
-                type = "misc";
-                break;
-            case "ORG":
-                type = "organization";
-                break;
-            default:
-                throw new InvalidFormatException("Unknown type: " + type);
-        }
+            "PER" => "person",
+            "LOC" => "location",
+            "MISC" => "misc",
+            "ORG" => "organization",
+            var unknown => throw new InvalidFormatException($"Unknown type: {unknown}")
+        };
 
         return new Span(begin, end, type);
     }
@@ -113,109 +101,113 @@ public class Conll02NameSampleStream : ObjectStreamBase<NameSample?>
     /// <exception cref="IOException">if there is an error during reading</exception>
     public override NameSample? Read()
     {
-        IList<string> sentence = new JCG.List<string>();
-        IList<string> tags = new JCG.List<string>();
-
-        bool isClearAdaptiveData = false;
-
-        // Empty line indicates end of sentence
-
-        string? line;
-        while ((line = lineStream.Read()) != null && !StringUtil.IsEmpty(line))
+        // NOpenNLP: converted recursion to iteration
+        while (true)
         {
-            if (Language.NLD.Equals(lang) && line.StartsWith(DocStart, StringComparison.Ordinal))
+            JCG.List<string> sentence = [];
+            JCG.List<string> tags = [];
+
+            bool isClearAdaptiveData = false;
+
+            // Empty line indicates end of sentence
+
+            string? line;
+            while ((line = lineStream.Read()) != null && !StringUtil.IsEmpty(line))
             {
-                isClearAdaptiveData = true;
-                continue;
-            }
-
-            string[] fields = line.Split(' ');
-
-            if (fields.Length == 3)
-            {
-                sentence.Add(fields[0]);
-                tags.Add(fields[2]);
-            }
-            else
-            {
-                throw new IOException("Expected three fields per line in training data, got " +
-                    fields.Length + " for line '" + line + "'!");
-            }
-        }
-
-        // Always clear adaptive data for spanish
-        if (Language.SPA.Equals(lang))
-            isClearAdaptiveData = true;
-
-        if (sentence.Count > 0)
-        {
-            // convert name tags into spans
-            IList<Span> names = new JCG.List<Span>();
-
-            int beginIndex = -1;
-            int endIndex = -1;
-            for (int i = 0; i < tags.Count; i++)
-            {
-                string tag = tags[i];
-
-                if (tag.EndsWith("PER", StringComparison.Ordinal) && (types & GeneratePersonEntities) == 0)
-                    tag = "O";
-
-                if (tag.EndsWith("ORG", StringComparison.Ordinal) && (types & GenerateOrganizationEntities) == 0)
-                    tag = "O";
-
-                if (tag.EndsWith("LOC", StringComparison.Ordinal) && (types & GenerateLocationEntities) == 0)
-                    tag = "O";
-
-                if (tag.EndsWith("MISC", StringComparison.Ordinal) && (types & GenerateMiscEntities) == 0)
-                    tag = "O";
-
-                if (tag.StartsWith("B-", StringComparison.Ordinal))
+                if (Language.NLD.Equals(lang) && line.StartsWith(DocStart, StringComparison.Ordinal))
                 {
-                    if (beginIndex != -1)
-                    {
-                        names.Add(Extract(beginIndex, endIndex, tags[beginIndex]));
-                        beginIndex = -1;
-                        endIndex = -1;
-                    }
-
-                    beginIndex = i;
-                    endIndex = i + 1;
+                    isClearAdaptiveData = true;
+                    continue;
                 }
-                else if (tag.StartsWith("I-", StringComparison.Ordinal))
+
+                string[] fields = line.Split(' ');
+
+                if (fields.Length == 3)
                 {
-                    endIndex++;
-                }
-                else if (tag.Equals("O", StringComparison.Ordinal))
-                {
-                    if (beginIndex != -1)
-                    {
-                        names.Add(Extract(beginIndex, endIndex, tags[beginIndex]));
-                        beginIndex = -1;
-                        endIndex = -1;
-                    }
+                    sentence.Add(fields[0]);
+                    tags.Add(fields[2]);
                 }
                 else
                 {
-                    throw new IOException("Invalid tag: " + tag);
+                    throw new IOException(
+                        $"Expected three fields per line in training data, got {fields.Length} for line '{line}'!");
                 }
             }
 
-            // if one span remains, create it here
-            if (beginIndex != -1)
-                names.Add(Extract(beginIndex, endIndex, tags[beginIndex]));
+            // Always clear adaptive data for spanish
+            if (Language.SPA.Equals(lang))
+                isClearAdaptiveData = true;
 
-            return new NameSample([.. sentence], [.. names], isClearAdaptiveData);
-        }
-        else if (line != null)
-        {
-            // Just filter out empty events, if two lines in a row are empty
-            return Read();
-        }
-        else
-        {
-            // source stream is not returning anymore lines
-            return null;
+            if (sentence.Count > 0)
+            {
+                // convert name tags into spans
+                JCG.List<Span> names = [];
+
+                int beginIndex = -1;
+                int endIndex = -1;
+                for (int i = 0; i < tags.Count; i++)
+                {
+                    string tag = tags[i];
+
+                    if (tag.EndsWith("PER", StringComparison.Ordinal) && (types & GeneratePersonEntities) == 0)
+                        tag = "O";
+
+                    if (tag.EndsWith("ORG", StringComparison.Ordinal) && (types & GenerateOrganizationEntities) == 0)
+                        tag = "O";
+
+                    if (tag.EndsWith("LOC", StringComparison.Ordinal) && (types & GenerateLocationEntities) == 0)
+                        tag = "O";
+
+                    if (tag.EndsWith("MISC", StringComparison.Ordinal) && (types & GenerateMiscEntities) == 0)
+                        tag = "O";
+
+                    if (tag.StartsWith("B-", StringComparison.Ordinal))
+                    {
+                        if (beginIndex != -1)
+                        {
+                            names.Add(Extract(beginIndex, endIndex, tags[beginIndex]));
+                            beginIndex = -1;
+                            endIndex = -1;
+                        }
+
+                        beginIndex = i;
+                        endIndex = i + 1;
+                    }
+                    else if (tag.StartsWith("I-", StringComparison.Ordinal))
+                    {
+                        endIndex++;
+                    }
+                    else if (tag.Equals("O", StringComparison.Ordinal))
+                    {
+                        if (beginIndex != -1)
+                        {
+                            names.Add(Extract(beginIndex, endIndex, tags[beginIndex]));
+                            beginIndex = -1;
+                            endIndex = -1;
+                        }
+                    }
+                    else
+                    {
+                        throw new IOException($"Invalid tag: {tag}");
+                    }
+                }
+
+                // if one span remains, create it here
+                if (beginIndex != -1)
+                    names.Add(Extract(beginIndex, endIndex, tags[beginIndex]));
+
+                return new NameSample([.. sentence], [.. names], isClearAdaptiveData);
+            }
+            else if (line != null)
+            {
+                // Just filter out empty events, if two lines in a row are empty
+                continue;
+            }
+            else
+            {
+                // source stream is not returning anymore lines
+                return null;
+            }
         }
     }
 

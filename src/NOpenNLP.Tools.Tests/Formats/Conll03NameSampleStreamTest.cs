@@ -38,7 +38,7 @@ public class Conll03NameSampleStreamTest
     /// <exception cref="IOException">if the stream cannot be created</exception>
     private static IObjectStream<NameSample?> OpenData(Conll03NameSampleStream.Language lang, string name)
     {
-        IInputStreamFactory @in = new ResourceAsStreamFactory("/opennlp/tools/formats/" + name);
+        IInputStreamFactory @in = new ResourceAsStreamFactory($"/opennlp/tools/formats/{name}");
 
         return new Conll03NameSampleStream(lang, @in, Conll02NameSampleStream.GeneratePersonEntities);
     }
@@ -46,10 +46,9 @@ public class Conll03NameSampleStreamTest
     [Test]
     public void TestParsingEnglishSample()
     {
-        IObjectStream<NameSample?> sampleStream =
-            OpenData(Conll03NameSampleStream.Language.EN, ENGLISH_SAMPLE);
+        var sampleStream = OpenData(Conll03NameSampleStream.Language.EN, ENGLISH_SAMPLE);
 
-        NameSample? personName = sampleStream.Read();
+        var personName = sampleStream.Read();
         ClassicAssert.NotNull(personName);
 
         ClassicAssert.AreEqual(9, personName!.Sentence.Length);
@@ -64,7 +63,7 @@ public class Conll03NameSampleStreamTest
         ClassicAssert.AreEqual(1, personName.Names.Length);
         ClassicAssert.AreEqual(false, personName.IsClearAdaptiveDataSet);
 
-        Span nameSpan = personName.Names[0];
+        var nameSpan = personName.Names[0];
         ClassicAssert.AreEqual(0, nameSpan.Start);
         ClassicAssert.AreEqual(2, nameSpan.End);
 
@@ -74,26 +73,23 @@ public class Conll03NameSampleStreamTest
     [Test]
     public void TestParsingEnglishSampleWithGermanAsLanguage()
     {
-        IObjectStream<NameSample?> sampleStream =
-            OpenData(Conll03NameSampleStream.Language.DE, ENGLISH_SAMPLE);
+        var sampleStream = OpenData(Conll03NameSampleStream.Language.DE, ENGLISH_SAMPLE);
         Assert.Throws<IOException>((Action)(() => sampleStream.Read()));
     }
 
     [Test]
     public void TestParsingGermanSampleWithEnglishAsLanguage()
     {
-        IObjectStream<NameSample?> sampleStream =
-            OpenData(Conll03NameSampleStream.Language.EN, GERMAN_SAMPLE);
+        var sampleStream = OpenData(Conll03NameSampleStream.Language.EN, GERMAN_SAMPLE);
         Assert.Throws<IOException>((Action)(() => sampleStream.Read()));
     }
 
     [Test]
     public void TestParsingGermanSample()
     {
-        IObjectStream<NameSample?> sampleStream =
-            OpenData(Conll03NameSampleStream.Language.DE, GERMAN_SAMPLE);
+        var sampleStream = OpenData(Conll03NameSampleStream.Language.DE, GERMAN_SAMPLE);
 
-        NameSample? personName = sampleStream.Read();
+        var personName = sampleStream.Read();
         ClassicAssert.NotNull(personName);
 
         ClassicAssert.AreEqual(5, personName!.Sentence.Length);
@@ -104,10 +100,9 @@ public class Conll03NameSampleStreamTest
     [Test]
     public void TestReset()
     {
-        IObjectStream<NameSample?> sampleStream =
-            OpenData(Conll03NameSampleStream.Language.DE, GERMAN_SAMPLE);
+        var sampleStream = OpenData(Conll03NameSampleStream.Language.DE, GERMAN_SAMPLE);
 
-        NameSample? sample = sampleStream.Read();
+        var sample = sampleStream.Read();
 
         sampleStream.Reset();
 

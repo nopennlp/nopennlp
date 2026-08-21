@@ -22,20 +22,8 @@ using System.Collections.Generic;
 
 namespace NOpenNLP.Tools.Formats.Conllu;
 
-public class ConlluSentence
+public class ConlluSentence(IList<ConlluWordLine> wordLines, string? sentenceIdComment, string? textComment)
 {
-    private readonly IList<ConlluWordLine> wordLines; // NOpenNLP: made readonly
-
-    private readonly string? sentenceIdComment; // NOpenNLP: made readonly
-    private readonly string? textComment; // NOpenNLP: made readonly
-
-    internal ConlluSentence(IList<ConlluWordLine> wordLines, string? sentenceIdComment, string? textComment)
-    {
-        this.wordLines = wordLines;
-        this.sentenceIdComment = sentenceIdComment;
-        this.textComment = textComment;
-    }
-
     public IList<ConlluWordLine> WordLines => wordLines;
 
     public string? SentenceIdComment => sentenceIdComment;

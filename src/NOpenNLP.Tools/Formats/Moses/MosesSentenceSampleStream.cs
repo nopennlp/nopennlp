@@ -34,13 +34,12 @@ public class MosesSentenceSampleStream(IObjectStream<string?> sentences)
     /// <exception cref="IOException">if there is an error during reading</exception>
     public override SentenceSample? Read()
     {
-        StringBuilder sentencesString = new StringBuilder();
+        var sentencesString = new StringBuilder();
         // NOpenNLP: upstream uses a LinkedList, which is only ever appended to and
         // copied to an array; a List does both without the per-node allocation.
-        IList<Span> sentenceSpans = new JCG.List<Span>();
+        JCG.List<Span> sentenceSpans = [];
 
-        string? sentence;
-        for (int i = 0; i < 25 && (sentence = samples.Read()) != null; i++)
+        for (int i = 0; i < 25 && samples.Read() is { } sentence; i++)
         {
             int begin = sentencesString.Length;
             sentence = sentence.Trim();
@@ -51,11 +50,8 @@ public class MosesSentenceSampleStream(IObjectStream<string?> sentences)
             sentencesString.Append(' ');
         }
 
-        if (sentenceSpans.Count > 0)
-        {
-            return new SentenceSample(sentencesString.ToString(), [.. sentenceSpans]);
-        }
-
-        return null;
+        return sentenceSpans.Count > 0
+            ? new SentenceSample(sentencesString.ToString(), [.. sentenceSpans])
+            : null;
     }
 }

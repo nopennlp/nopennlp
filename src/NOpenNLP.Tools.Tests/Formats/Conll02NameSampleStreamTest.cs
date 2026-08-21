@@ -35,7 +35,7 @@ public class Conll02NameSampleStreamTest
     /// <exception cref="IOException">if the stream cannot be created</exception>
     private static IObjectStream<NameSample?> OpenData(Conll02NameSampleStream.Language lang, string name)
     {
-        IInputStreamFactory @in = new ResourceAsStreamFactory("/opennlp/tools/formats/" + name);
+        IInputStreamFactory @in = new ResourceAsStreamFactory($"/opennlp/tools/formats/{name}");
 
         return new Conll02NameSampleStream(lang, @in, Conll02NameSampleStream.GeneratePersonEntities);
     }
@@ -43,10 +43,9 @@ public class Conll02NameSampleStreamTest
     [Test]
     public void TestParsingSpanishSample()
     {
-        IObjectStream<NameSample?> sampleStream =
-            OpenData(Conll02NameSampleStream.Language.SPA, "conll2002-es.sample");
+        var sampleStream = OpenData(Conll02NameSampleStream.Language.SPA, "conll2002-es.sample");
 
-        NameSample? personName = sampleStream.Read();
+        var personName = sampleStream.Read();
 
         ClassicAssert.NotNull(personName);
 
@@ -54,7 +53,7 @@ public class Conll02NameSampleStreamTest
         ClassicAssert.AreEqual(1, personName.Names.Length);
         ClassicAssert.AreEqual(true, personName.IsClearAdaptiveDataSet);
 
-        Span nameSpan = personName.Names[0];
+        var nameSpan = personName.Names[0];
         ClassicAssert.AreEqual(0, nameSpan.Start);
         ClassicAssert.AreEqual(4, nameSpan.End);
         ClassicAssert.AreEqual(true, personName.IsClearAdaptiveDataSet);
@@ -67,10 +66,9 @@ public class Conll02NameSampleStreamTest
     [Test]
     public void TestParsingDutchSample()
     {
-        IObjectStream<NameSample?> sampleStream =
-            OpenData(Conll02NameSampleStream.Language.NLD, "conll2002-nl.sample");
+        var sampleStream = OpenData(Conll02NameSampleStream.Language.NLD, "conll2002-nl.sample");
 
-        NameSample? personName = sampleStream.Read();
+        var personName = sampleStream.Read();
 
         ClassicAssert.AreEqual(0, personName!.Names.Length);
         ClassicAssert.IsTrue(personName.IsClearAdaptiveDataSet);
@@ -85,10 +83,9 @@ public class Conll02NameSampleStreamTest
     [Test]
     public void TestReset()
     {
-        IObjectStream<NameSample?> sampleStream =
-            OpenData(Conll02NameSampleStream.Language.NLD, "conll2002-nl.sample");
+        var sampleStream = OpenData(Conll02NameSampleStream.Language.NLD, "conll2002-nl.sample");
 
-        NameSample? sample = sampleStream.Read();
+        var sample = sampleStream.Read();
 
         sampleStream.Reset();
 

@@ -38,19 +38,19 @@ public class DetokenizeSentenceSampleStream(IDetokenizer detokenizer, IObjectStr
     /// <exception cref="IOException">if there is an error during reading</exception>
     public override SentenceSample? Read()
     {
-        SentenceSample? sample = samples.Read();
+        var sample = samples.Read();
 
         if (sample != null)
         {
-            IList<string> sentenceTexts = new JCG.List<string>();
+            JCG.List<string> sentenceTexts = [];
 
-            foreach (Span sentenceSpan in sample.GetSentences())
+            foreach (var sentenceSpan in sample.GetSentences())
             {
                 sentenceTexts.Add(sample.Document.Substring(sentenceSpan.Start, sentenceSpan.End - sentenceSpan.Start));
             }
 
             var documentText = new StringBuilder();
-            IList<Span> newSentenceSpans = new JCG.List<Span>();
+            JCG.List<Span> newSentenceSpans = [];
             foreach (string sentenceText in sentenceTexts)
             {
                 string[] tokens = WhitespaceTokenizer.INSTANCE.Tokenize(sentenceText);

@@ -26,18 +26,15 @@ namespace NOpenNLP.Tools.Formats.Brat;
 
 public class EventAnnotation : BratAnnotation
 {
-    private readonly string eventTrigger;
-    private readonly IDictionary<string, string> arguments;
-
     protected internal EventAnnotation(string id, string type, string eventTrigger,
         IDictionary<string, string> arguments)
         : base(id, type)
     {
-        this.eventTrigger = eventTrigger ?? throw new ArgumentNullException(nameof(eventTrigger));
-        this.arguments = new JCG.Dictionary<string, string>(arguments).AsReadOnly();
+        EventTrigger = eventTrigger ?? throw new ArgumentNullException(nameof(eventTrigger));
+        Arguments = new JCG.Dictionary<string, string>(arguments).AsReadOnly();
     }
 
-    public string EventTrigger => eventTrigger;
+    public string EventTrigger { get; }
 
-    public IDictionary<string, string> Arguments => arguments;
+    public IDictionary<string, string> Arguments { get; }
 }

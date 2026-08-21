@@ -26,7 +26,7 @@ using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Formats.Brat;
 
-public class AnnotationConfiguration
+public class AnnotationConfiguration(IDictionary<string, string> typeToClassMap)
 {
     public const string SPAN_TYPE = "Span";
     public const string ENTITY_TYPE = "Entity";
@@ -34,12 +34,7 @@ public class AnnotationConfiguration
     public const string ATTRIBUTE_TYPE = "Attribute";
     public const string EVENT_TYPE = "Event";
 
-    private readonly IDictionary<string, string> typeToClassMap;
-
-    public AnnotationConfiguration(IDictionary<string, string> typeToClassMap)
-    {
-        this.typeToClassMap = new JCG.Dictionary<string, string>(typeToClassMap).AsReadOnly();
-    }
+    private readonly IDictionary<string, string> typeToClassMap = new JCG.Dictionary<string, string>(typeToClassMap).AsReadOnly();
 
     /// <summary>
     /// Gets the type class registered for <paramref name="type"/>.
@@ -60,7 +55,7 @@ public class AnnotationConfiguration
     /// <exception cref="IOException">if there is an error during reading</exception>
     public static AnnotationConfiguration Parse(Stream @in)
     {
-        var typeToClassMap = new JCG.Dictionary<string, string>();
+        JCG.Dictionary<string, string> typeToClassMap = [];
 
         // NOpenNLP: leaveOpen keeps the reader from closing the caller's stream, matching
         // upstream, which never closes the BufferedReader it wraps around the stream.
@@ -68,10 +63,9 @@ public class AnnotationConfiguration
             bufferSize: 1024, leaveOpen: true);
 
         // Note: This only supports entities and relations section
-        string? line;
         string? sectionType = null;
 
-        while ((line = reader.ReadLine()) != null)
+        while (reader.ReadLine() is { } line)
         {
             line = line.Trim();
 

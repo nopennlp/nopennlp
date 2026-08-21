@@ -18,8 +18,6 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using System.Collections.Generic;
-using System.IO;
-using NOpenNLP.Tools.Formats;
 using NOpenNLP.Tools.Support;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
@@ -35,9 +33,9 @@ public class BrownBigramFeatureGeneratorTest
     {
         // NOpenNLP: upstream wraps the resource in a ResourceAsStreamFactory.
         // BrownCluster takes the stream directly, so the resource is opened here.
-        using Stream stream = TestResources.OpenResource("/opennlp/tools/formats/brown-cluster.txt");
+        using var stream = TestResources.OpenResource("/opennlp/tools/formats/brown-cluster.txt");
 
-        BrownCluster brownCluster = new BrownCluster(stream);
+        var brownCluster = new BrownCluster(stream);
 
         generator = new BrownBigramFeatureGenerator(brownCluster);
     }

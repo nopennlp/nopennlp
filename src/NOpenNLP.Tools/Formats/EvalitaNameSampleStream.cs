@@ -19,7 +19,6 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using NOpenNLP.Tools.Namefind;
@@ -96,25 +95,14 @@ public class EvalitaNameSampleStream : ObjectStreamBase<NameSample?>
     /// <exception cref="InvalidFormatException">if the tag carries an unknown type</exception>
     private static Span Extract(int begin, int end, string beginTag)
     {
-        string type = beginTag.Substring(2);
-
-        switch (type)
+        string type = beginTag[2..] switch
         {
-            case "PER":
-                type = "person";
-                break;
-            case "LOC":
-                type = "location";
-                break;
-            case "GPE":
-                type = "gpe";
-                break;
-            case "ORG":
-                type = "organization";
-                break;
-            default:
-                throw new InvalidFormatException("Unknown type: " + type);
-        }
+            "PER" => "person",
+            "LOC" => "location",
+            "GPE" => "gpe",
+            "ORG" => "organization",
+            var unknown => throw new InvalidFormatException($"Unknown type: {unknown}")
+        };
 
         return new Span(begin, end, type);
     }
@@ -123,119 +111,123 @@ public class EvalitaNameSampleStream : ObjectStreamBase<NameSample?>
     /// <exception cref="IOException">if there is an error during reading</exception>
     public override NameSample? Read()
     {
-        IList<string> sentence = new JCG.List<string>();
-        IList<string> tags = new JCG.List<string>();
-
-        bool isClearAdaptiveData = false;
-
-        // Empty line indicates end of sentence
-
-        string? line;
-        while ((line = lineStream.Read()) != null && !StringUtil.IsEmpty(line))
+        // NOpenNLP: converted recursion to iteration
+        while (true)
         {
-            if (line.StartsWith(DocStart, StringComparison.Ordinal))
+            JCG.List<string> sentence = [];
+            JCG.List<string> tags = [];
+
+            bool isClearAdaptiveData = false;
+
+            // Empty line indicates end of sentence
+
+            string? line;
+            while ((line = lineStream.Read()) != null && !StringUtil.IsEmpty(line))
             {
-                isClearAdaptiveData = true;
-                string? emptyLine = lineStream.Read();
-
-                // NOpenNLP: upstream passes the line straight to StringUtil.isEmpty, which
-                // throws a NullPointerException when -DOCSTART- is the last line of the
-                // stream. Treating end of stream as "not the expected empty line" reports
-                // the same malformed input through the IOException this branch already
-                // throws, rather than through an unrelated exception type.
-                if (emptyLine is null || !StringUtil.IsEmpty(emptyLine))
-                    throw new IOException("Empty line after -DOCSTART- not empty: '" + emptyLine + "'!");
-
-                continue;
-            }
-
-            string[] fields = line.Split(' ');
-
-            // For Italian: WORD  POS-TAG SC-TAG NE-TAG
-            if (Language.IT.Equals(lang) && fields.Length == 4)
-            {
-                sentence.Add(fields[0]);
-                tags.Add(fields[3]); // 3 is NE-TAG
-            }
-            else
-            {
-                throw new IOException("Incorrect number of fields per line for language: '" + line + "'!");
-            }
-        }
-
-        // Always clear adaptive data for Italian
-        if (Language.IT.Equals(lang))
-            isClearAdaptiveData = true;
-
-        if (sentence.Count > 0)
-        {
-            // convert name tags into spans
-            IList<Span> names = new JCG.List<Span>();
-
-            int beginIndex = -1;
-            int endIndex = -1;
-            for (int i = 0; i < tags.Count; i++)
-            {
-                string tag = tags[i];
-
-                if (tag.EndsWith("PER", StringComparison.Ordinal) && (types & GeneratePersonEntities) == 0)
-                    tag = "O";
-
-                if (tag.EndsWith("ORG", StringComparison.Ordinal) && (types & GenerateOrganizationEntities) == 0)
-                    tag = "O";
-
-                if (tag.EndsWith("LOC", StringComparison.Ordinal) && (types & GenerateLocationEntities) == 0)
-                    tag = "O";
-
-                if (tag.EndsWith("GPE", StringComparison.Ordinal) && (types & GenerateGpeEntities) == 0)
-                    tag = "O";
-
-                if (tag.StartsWith("B-", StringComparison.Ordinal))
+                if (line.StartsWith(DocStart, StringComparison.Ordinal))
                 {
-                    if (beginIndex != -1)
-                    {
-                        names.Add(Extract(beginIndex, endIndex, tags[beginIndex]));
-                        beginIndex = -1;
-                        endIndex = -1;
-                    }
+                    isClearAdaptiveData = true;
+                    string? emptyLine = lineStream.Read();
 
-                    beginIndex = i;
-                    endIndex = i + 1;
+                    // NOpenNLP: upstream passes the line straight to StringUtil.isEmpty, which
+                    // throws a NullPointerException when -DOCSTART- is the last line of the
+                    // stream. Treating end of stream as "not the expected empty line" reports
+                    // the same malformed input through the IOException this branch already
+                    // throws, rather than through an unrelated exception type.
+                    if (emptyLine is null || !StringUtil.IsEmpty(emptyLine))
+                        throw new IOException($"Empty line after -DOCSTART- not empty: '{emptyLine}'!");
+
+                    continue;
                 }
-                else if (tag.StartsWith("I-", StringComparison.Ordinal))
+
+                string[] fields = line.Split(' ');
+
+                // For Italian: WORD  POS-TAG SC-TAG NE-TAG
+                if (Language.IT.Equals(lang) && fields.Length == 4)
                 {
-                    endIndex++;
-                }
-                else if (tag.Equals("O", StringComparison.Ordinal))
-                {
-                    if (beginIndex != -1)
-                    {
-                        names.Add(Extract(beginIndex, endIndex, tags[beginIndex]));
-                        beginIndex = -1;
-                        endIndex = -1;
-                    }
+                    sentence.Add(fields[0]);
+                    tags.Add(fields[3]); // 3 is NE-TAG
                 }
                 else
                 {
-                    throw new IOException("Invalid tag: " + tag);
+                    throw new IOException($"Incorrect number of fields per line for language: '{line}'!");
                 }
             }
 
-            // if one span remains, create it here
-            if (beginIndex != -1)
-                names.Add(Extract(beginIndex, endIndex, tags[beginIndex]));
+            // Always clear adaptive data for Italian
+            if (Language.IT.Equals(lang))
+                isClearAdaptiveData = true;
 
-            return new NameSample([.. sentence], [.. names], isClearAdaptiveData);
-        }
-        else if (line != null)
-        {
-            // Just filter out empty events, if two lines in a row are empty
-            return Read();
-        }
-        else
-        {
-            // source stream is not returning anymore lines
-            return null;
+            if (sentence.Count > 0)
+            {
+                // convert name tags into spans
+                JCG.List<Span> names = [];
+
+                int beginIndex = -1;
+                int endIndex = -1;
+                for (int i = 0; i < tags.Count; i++)
+                {
+                    string tag = tags[i];
+
+                    if (tag.EndsWith("PER", StringComparison.Ordinal) && (types & GeneratePersonEntities) == 0)
+                        tag = "O";
+
+                    if (tag.EndsWith("ORG", StringComparison.Ordinal) && (types & GenerateOrganizationEntities) == 0)
+                        tag = "O";
+
+                    if (tag.EndsWith("LOC", StringComparison.Ordinal) && (types & GenerateLocationEntities) == 0)
+                        tag = "O";
+
+                    if (tag.EndsWith("GPE", StringComparison.Ordinal) && (types & GenerateGpeEntities) == 0)
+                        tag = "O";
+
+                    if (tag.StartsWith("B-", StringComparison.Ordinal))
+                    {
+                        if (beginIndex != -1)
+                        {
+                            names.Add(Extract(beginIndex, endIndex, tags[beginIndex]));
+                            beginIndex = -1;
+                            endIndex = -1;
+                        }
+
+                        beginIndex = i;
+                        endIndex = i + 1;
+                    }
+                    else if (tag.StartsWith("I-", StringComparison.Ordinal))
+                    {
+                        endIndex++;
+                    }
+                    else if (tag.Equals("O", StringComparison.Ordinal))
+                    {
+                        if (beginIndex != -1)
+                        {
+                            names.Add(Extract(beginIndex, endIndex, tags[beginIndex]));
+                            beginIndex = -1;
+                            endIndex = -1;
+                        }
+                    }
+                    else
+                    {
+                        throw new IOException($"Invalid tag: {tag}");
+                    }
+                }
+
+                // if one span remains, create it here
+                if (beginIndex != -1)
+                    names.Add(Extract(beginIndex, endIndex, tags[beginIndex]));
+
+                return new NameSample([.. sentence], [.. names], isClearAdaptiveData);
+            }
+            else if (line != null)
+            {
+                // Just filter out empty events, if two lines in a row are empty
+                continue;
+            }
+            else
+            {
+                // source stream is not returning anymore lines
+                return null;
+            }
         }
     }
 

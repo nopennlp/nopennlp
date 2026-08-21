@@ -44,7 +44,7 @@ public class BratNameSampleStream : SegmenterObjectStream<BratDocument, NameSamp
         ITokenizer tokenizer, IObjectStream<BratDocument?> samples)
         : base(samples)
     {
-        this.parser = new BratDocumentParser(sentDetector, tokenizer, null);
+        parser = new BratDocumentParser(sentDetector, tokenizer);
     }
 
     /// <summary>
@@ -58,8 +58,7 @@ public class BratNameSampleStream : SegmenterObjectStream<BratDocument, NameSamp
         : base(samples)
     {
         // TODO: We can pass in custom validators here ...
-        this.parser = new BratDocumentParser(new SentenceDetectorME(sentModel),
-            new TokenizerME(tokenModel), null);
+        parser = new BratDocumentParser(new SentenceDetectorME(sentModel), new TokenizerME(tokenModel));
     }
 
     /// <summary>
@@ -73,7 +72,7 @@ public class BratNameSampleStream : SegmenterObjectStream<BratDocument, NameSamp
         ITokenizer tokenizer, IObjectStream<BratDocument?> samples, ISet<string>? nameTypes)
         : base(samples)
     {
-        this.parser = new BratDocumentParser(sentDetector, tokenizer, nameTypes);
+        parser = new BratDocumentParser(sentDetector, tokenizer, nameTypes);
     }
 
     /// <summary>
@@ -88,8 +87,7 @@ public class BratNameSampleStream : SegmenterObjectStream<BratDocument, NameSamp
         : base(samples)
     {
         // TODO: We can pass in custom validators here ...
-        this.parser = new BratDocumentParser(new SentenceDetectorME(sentModel),
-            new TokenizerME(tokenModel), nameTypes);
+        parser = new BratDocumentParser(new SentenceDetectorME(sentModel), new TokenizerME(tokenModel), nameTypes);
     }
 
     /// <inheritdoc/>

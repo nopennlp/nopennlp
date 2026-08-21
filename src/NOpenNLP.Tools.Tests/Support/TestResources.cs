@@ -49,7 +49,7 @@ internal static class TestResources
         // Translate the upstream classpath path to the manifest name declared by
         // LogicalName. J2N's FindAndGetManifestResourceStream does not do this
         // translation itself, so the lookup is done against the dotted name.
-        string manifestName = path.TrimStart('/').Replace('/', '.');
+        var manifestName = path.TrimStart('/').Replace('/', '.');
 
         var stream = typeof(TestResources).Assembly.GetManifestResourceStream(manifestName);
 
@@ -71,8 +71,8 @@ internal sealed class TempResourceFile : IDisposable
     public TempResourceFile(string resourcePath)
     {
         Path = System.IO.Path.GetTempFileName();
-        using Stream source = TestResources.OpenResource(resourcePath);
-        using FileStream target = File.Create(Path);
+        using var source = TestResources.OpenResource(resourcePath);
+        using var target = File.Create(Path);
         source.CopyTo(target);
     }
 
@@ -99,21 +99,21 @@ internal sealed class TempDirectory : IDisposable
     {
         Path = System.IO.Path.Combine(
             System.IO.Path.GetTempPath(),
-            prefix + "-" + System.IO.Path.GetFileNameWithoutExtension(System.IO.Path.GetRandomFileName()));
+            $"{prefix}-{System.IO.Path.GetFileNameWithoutExtension(System.IO.Path.GetRandomFileName())}");
 
         Directory.CreateDirectory(Path);
     }
 
     public string Path { get; }
 
-    public DirectoryInfo DirectoryInfo => new DirectoryInfo(Path);
+    public DirectoryInfo DirectoryInfo => new(Path);
 
     /// <summary>
     /// Writes <paramref name="content"/> to a new file in this directory and returns it.
     /// </summary>
     public FileInfo CreateFile(string name, string content)
     {
-        string path = System.IO.Path.Combine(Path, name);
+        var path = System.IO.Path.Combine(Path, name);
         File.WriteAllText(path, content);
         return new FileInfo(path);
     }
@@ -123,9 +123,9 @@ internal sealed class TempDirectory : IDisposable
     /// </summary>
     public FileInfo CopyResource(string resourcePath, string name)
     {
-        string path = System.IO.Path.Combine(Path, name);
-        using Stream source = TestResources.OpenResource(resourcePath);
-        using FileStream target = File.Create(path);
+        var path = System.IO.Path.Combine(Path, name);
+        using var source = TestResources.OpenResource(resourcePath);
+        using var target = File.Create(path);
         source.CopyTo(target);
         return new FileInfo(path);
     }

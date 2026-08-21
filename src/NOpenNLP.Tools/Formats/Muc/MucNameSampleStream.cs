@@ -18,7 +18,6 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
-using System.Collections.Generic;
 using System.IO;
 using NOpenNLP.Tools.Namefind;
 using NOpenNLP.Tools.Tokenize;
@@ -31,7 +30,7 @@ public class MucNameSampleStream : FilterObjectStream<string?, NameSample?>
 {
     private readonly ITokenizer tokenizer;
 
-    private readonly IList<NameSample> storedSamples = new JCG.List<NameSample>(); // NOpenNLP: made readonly
+    private readonly JCG.List<NameSample> storedSamples = []; // NOpenNLP: made readonly
 
     protected internal MucNameSampleStream(ITokenizer tokenizer, IObjectStream<string?> samples)
         : base(samples)
@@ -60,7 +59,7 @@ public class MucNameSampleStream : FilterObjectStream<string?, NameSample?>
 
         if (storedSamples.Count > 0)
         {
-            NameSample sample = storedSamples[0];
+            var sample = storedSamples[0];
             storedSamples.RemoveAt(0);
             return sample;
         }

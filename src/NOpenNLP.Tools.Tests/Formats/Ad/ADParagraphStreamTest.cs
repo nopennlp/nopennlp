@@ -19,7 +19,6 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using System.Text;
-using NOpenNLP.Tools.Formats;
 using NOpenNLP.Tools.Util;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
@@ -35,9 +34,9 @@ public class ADParagraphStreamTest
     {
         int count = 0;
 
-        ADSentenceStream stream = OpenData();
+        var stream = OpenData();
 
-        ADSentenceStream.Sentence? paragraph = stream.Read();
+        var paragraph = stream.Read();
         _ = paragraph!.Root;
         while (paragraph != null)
         {
@@ -54,9 +53,9 @@ public class ADParagraphStreamTest
     {
         int count = 0;
 
-        ADSentenceStream stream = OpenData();
+        var stream = OpenData();
 
-        ADSentenceStream.Sentence? paragraph = stream.Read();
+        var paragraph = stream.Read();
         while (paragraph != null)
         {
             count++;

@@ -38,8 +38,7 @@ public class LeipzigLanguageSampleStream : ObjectStreamBase<LanguageSample?>
     // NOpenNLP: upstream matches the first three characters of a file name against
     // "[a-z]+" with String.matches, which requires the whole input to match. .NET's
     // IsMatch searches, so the pattern is anchored to keep the same meaning.
-    private static readonly Regex LanguagePrefixPattern =
-        new Regex("^[a-z]+$", RegexOptions.CultureInvariant);
+    private static readonly Regex LanguagePrefixPattern = new("^[a-z]+$", RegexOptions.CultureInvariant);
 
     private class LeipzigSentencesStream : ObjectStreamBase<LanguageSample?>
     {
@@ -73,7 +72,7 @@ public class LeipzigLanguageSampleStream : ObjectStreamBase<LanguageSample?>
                     sentencesFile.FullName, totalLineCount, requiredLines));
             }
 
-            IList<int> indexes = new JCG.List<int>(Enumerable.Range(0, totalLineCount));
+            var indexes = new JCG.List<int>(Enumerable.Range(0, totalLineCount));
 
             // NOpenNLP: upstream shuffles with a fixed-seed java.util.Random so the chosen
             // lines are deterministic. J2N's Randomizer reproduces java.util.Random and its
@@ -81,16 +80,15 @@ public class LeipzigLanguageSampleStream : ObjectStreamBase<LanguageSample?>
             // exactly. System.Random uses a different algorithm and would silently diverge.
             indexes.Shuffle(outerInstance.random);
 
-            ISet<int> selectedLines = new JCG.HashSet<int>(indexes.Take(requiredLines));
+            var selectedLines = new JCG.HashSet<int>(indexes.Take(requiredLines));
 
-            IList<string> sentences = new JCG.List<string>();
+            JCG.List<string> sentences = [];
 
             using (IObjectStream<string?> lineStream = new PlainTextByLineStream(
                 new MarkableFileInputStreamFactory(sentencesFile), Encoding.UTF8))
             {
                 int lineIndex = 0;
-                string? line;
-                while ((line = lineStream.Read()) != null)
+                while (lineStream.Read() is { } line)
                 {
                     int tabIndex = line.IndexOf('\t');
                     if (tabIndex != -1)
@@ -116,7 +114,7 @@ public class LeipzigLanguageSampleStream : ObjectStreamBase<LanguageSample?>
         /// <exception cref="IOException">if there is an error during reading</exception>
         public override LanguageSample? Read()
         {
-            StringBuilder sampleString = new StringBuilder();
+            var sampleString = new StringBuilder();
 
             int count = 0;
             while (count < outerInstance.sentencesPerSample && lineIterator.MoveNext())
@@ -124,7 +122,7 @@ public class LeipzigLanguageSampleStream : ObjectStreamBase<LanguageSample?>
                 string line = lineIterator.Current;
                 int textStart = line.IndexOf('\t') + 1;
 
-                sampleString.Append(line.Substring(textStart)).Append(' ');
+                sampleString.Append(line[textStart..]).Append(' ');
 
                 count++;
             }
@@ -169,16 +167,16 @@ public class LeipzigLanguageSampleStream : ObjectStreamBase<LanguageSample?>
         // filter keeps only non-hidden regular files, so enumerating files alone covers it.
         // A leading dot is what marks a file hidden on the Unix-like systems the corpus is
         // read on, and FileAttributes.Hidden covers Windows.
-        var files = new JCG.List<FileInfo>();
+        JCG.List<FileInfo> files = [];
 
-        foreach (FileInfo file in leipzigFolder.EnumerateFiles())
+        foreach (var file in leipzigFolder.EnumerateFiles())
         {
             if (IsHidden(file))
             {
                 continue;
             }
 
-            if (file.Name.Length >= 3 && LanguagePrefixPattern.IsMatch(file.Name.Substring(0, 3)))
+            if (file.Name.Length >= 3 && LanguagePrefixPattern.IsMatch(file.Name[..3]))
             {
                 files.Add(file);
             }
@@ -193,16 +191,16 @@ public class LeipzigLanguageSampleStream : ObjectStreamBase<LanguageSample?>
 
         // NOpenNLP: upstream groups the files by their three-character language prefix,
         // counts each group, then divides samplesPerLanguage by that count.
-        var langCounts = new JCG.Dictionary<string, int>();
+        JCG.Dictionary<string, int> langCounts = [];
 
-        foreach (FileInfo file in sentencesFiles)
+        foreach (var file in sentencesFiles)
         {
-            string prefix = file.Name.Substring(0, 3);
+            string prefix = file.Name[..3];
             langCounts.TryGetValue(prefix, out int count);
             langCounts[prefix] = count + 1;
         }
 
-        var sampleCounts = new JCG.Dictionary<string, int>();
+        JCG.Dictionary<string, int> sampleCounts = [];
 
         foreach (var entry in langCounts)
         {
@@ -232,28 +230,31 @@ public class LeipzigLanguageSampleStream : ObjectStreamBase<LanguageSample?>
     /// <exception cref="IOException">if there is an error during reading</exception>
     public override LanguageSample? Read()
     {
-        LanguageSample? sample;
-        if (sampleStream != null && (sample = sampleStream.Read()) != null)
+        // NOpenNLP: converted recursion to iteration
+        while (true)
         {
-            return sample;
-        }
-        else
-        {
-            if (sentencesFileIndex < sentencesFiles.Length)
+            LanguageSample? sample;
+            if (sampleStream != null && (sample = sampleStream.Read()) != null)
             {
-                FileInfo sentencesFile = sentencesFiles[sentencesFileIndex];
-                sentencesFileIndex++;
-
-                string lang = sentencesFile.Name.Substring(0, 3);
-
-                sampleStream = new LeipzigSentencesStream(this, lang, sentencesFile,
-                    sentencesPerSample, langSampleCounts[lang]);
-
-                return Read();
+                return sample;
             }
-        }
+            else
+            {
+                if (sentencesFileIndex < sentencesFiles.Length)
+                {
+                    var sentencesFile = sentencesFiles[sentencesFileIndex];
+                    sentencesFileIndex++;
 
-        return null;
+                    string lang = sentencesFile.Name[..3];
+
+                    sampleStream = new LeipzigSentencesStream(this, lang, sentencesFile, sentencesPerSample, langSampleCounts[lang]);
+
+                    continue;
+                }
+            }
+
+            return null;
+        }
     }
 
     /// <inheritdoc/>

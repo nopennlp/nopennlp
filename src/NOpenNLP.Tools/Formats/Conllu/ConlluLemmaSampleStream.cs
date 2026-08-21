@@ -18,7 +18,6 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
-using System.Collections.Generic;
 using System.IO;
 using NOpenNLP.Tools.Lemmatizer;
 using NOpenNLP.Tools.Util;
@@ -29,21 +28,19 @@ namespace NOpenNLP.Tools.Formats.Conllu;
 public class ConlluLemmaSampleStream(IObjectStream<ConlluSentence?> samples, ConlluTagset tagset)
     : FilterObjectStream<ConlluSentence?, LemmaSample?>(samples)
 {
-    private readonly ConlluTagset tagset = tagset;
-
     /// <inheritdoc/>
     /// <exception cref="IOException">if there is an error during reading</exception>
     public override LemmaSample? Read()
     {
-        ConlluSentence? sentence = samples.Read();
+        var sentence = samples.Read();
 
         if (sentence != null)
         {
-            IList<string> tokens = new JCG.List<string>();
-            IList<string> tags = new JCG.List<string>();
-            IList<string> lemmas = new JCG.List<string>();
+            JCG.List<string> tokens = [];
+            JCG.List<string> tags = [];
+            JCG.List<string> lemmas = [];
 
-            foreach (ConlluWordLine line in sentence.WordLines)
+            foreach (var line in sentence.WordLines)
             {
                 tokens.Add(line.Form);
                 tags.Add(line.GetPosTag(tagset));

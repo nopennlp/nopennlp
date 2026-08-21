@@ -20,7 +20,6 @@
 using System;
 using System.Text;
 using NOpenNLP.Tools.Formats;
-using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Util;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
@@ -69,11 +68,11 @@ public class LemmatizerMETest
             new PlainTextByLineStream(
                 new ResourceAsStreamFactory("/opennlp/tools/lemmatizer/trial.old.tsv"), Encoding.UTF8));
 
-        TrainingParameters parameters = new TrainingParameters();
+        var parameters = new TrainingParameters();
         parameters.Put(TrainingParameters.ITERATIONS_PARAM, 100);
         parameters.Put(TrainingParameters.CUTOFF_PARAM, 5);
 
-        LemmatizerModel lemmatizerModel = LemmatizerME.Train("eng", sampleStream,
+        var lemmatizerModel = LemmatizerME.Train("eng", sampleStream,
             parameters, new LemmatizerFactory());
 
         lemmatizer = new LemmatizerME(lemmatizerModel);
@@ -82,7 +81,7 @@ public class LemmatizerMETest
     [Test]
     public void TestLemmasAsArray()
     {
-        string[] lemmas = lemmatizer.Lemmatize(tokens, postags);
+        var lemmas = lemmatizer.Lemmatize(tokens, postags);
 
         CollectionAssert.AreEqual(expect, lemmas);
     }
@@ -95,7 +94,7 @@ public class LemmatizerMETest
                 new ResourceAsStreamFactory("/opennlp/tools/lemmatizer/trial.old-insufficient.tsv"),
                 Encoding.UTF8));
 
-        TrainingParameters parameters = new TrainingParameters();
+        var parameters = new TrainingParameters();
         parameters.Put(TrainingParameters.ITERATIONS_PARAM, 100);
         parameters.Put(TrainingParameters.CUTOFF_PARAM, 5);
 

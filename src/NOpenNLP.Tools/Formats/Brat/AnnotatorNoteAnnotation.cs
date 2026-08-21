@@ -22,14 +22,12 @@ namespace NOpenNLP.Tools.Formats.Brat;
 
 public class AnnotatorNoteAnnotation : BratAnnotation
 {
-    private readonly string attachedId;
-
     protected internal AnnotatorNoteAnnotation(string id, string attachedId, string note)
         : base(id, "#AnnotationNote")
     {
-        this.attachedId = attachedId;
+        AttachedId = attachedId;
         Note = note;
     }
 
-    public string AttachedId => attachedId;
+    public string AttachedId { get; }
 }

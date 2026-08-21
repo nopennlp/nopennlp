@@ -22,23 +22,16 @@ using System;
 
 namespace NOpenNLP.Tools.Formats.Brat;
 
-public abstract class BratAnnotation
+public abstract class BratAnnotation(string id, string type)
 {
-    private readonly string id;
-    private readonly string type;
-
-    protected BratAnnotation(string id, string type)
-    {
-        this.id = id ?? throw new ArgumentNullException(nameof(id));
-        this.type = type ?? throw new ArgumentNullException(nameof(type));
-        Note = "";
-    }
+    private readonly string id = id ?? throw new ArgumentNullException(nameof(id));
+    private readonly string type = type ?? throw new ArgumentNullException(nameof(type));
 
     public string Id => id;
 
     public string Type => type;
 
-    public string Note { get; set; }
+    public string Note { get; set; } = "";
 
     public override string ToString() => (id + " " + type + " " + Note).Trim();
 }

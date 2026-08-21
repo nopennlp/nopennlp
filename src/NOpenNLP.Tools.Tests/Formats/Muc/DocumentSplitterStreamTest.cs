@@ -30,7 +30,7 @@ public class DocumentSplitterStreamTest
     [Test]
     public void TestSplitTwoDocuments()
     {
-        StringBuilder docsString = new StringBuilder();
+        var docsString = new StringBuilder();
 
         for (int i = 0; i < 2; i++)
         {
@@ -39,19 +39,18 @@ public class DocumentSplitterStreamTest
             docsString.Append("</DOC>\n");
         }
 
-        using (IObjectStream<string?> docs = new DocumentSplitterStream(
-            ObjectStreamUtils.CreateObjectStream(docsString.ToString())))
-        {
-            string? doc1 = docs.Read();
-            ClassicAssert.AreEqual(docsString.Length / 2, doc1!.Length + 1);
-            ClassicAssert.IsTrue(doc1.Contains("#0"));
+        using IObjectStream<string?> docs = new DocumentSplitterStream(
+            ObjectStreamUtils.CreateObjectStream(docsString.ToString()));
 
-            string? doc2 = docs.Read();
-            ClassicAssert.AreEqual(docsString.Length / 2, doc2!.Length + 1);
-            ClassicAssert.IsTrue(doc2.Contains("#1"));
+        string? doc1 = docs.Read();
+        ClassicAssert.AreEqual(docsString.Length / 2, doc1!.Length + 1);
+        ClassicAssert.IsTrue(doc1.Contains("#0"));
 
-            ClassicAssert.IsNull(docs.Read());
-            ClassicAssert.IsNull(docs.Read());
-        }
+        string? doc2 = docs.Read();
+        ClassicAssert.AreEqual(docsString.Length / 2, doc2!.Length + 1);
+        ClassicAssert.IsTrue(doc2.Contains("#1"));
+
+        ClassicAssert.IsNull(docs.Read());
+        ClassicAssert.IsNull(docs.Read());
     }
 }

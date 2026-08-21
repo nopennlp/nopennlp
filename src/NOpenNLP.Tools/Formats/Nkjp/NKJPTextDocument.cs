@@ -30,8 +30,9 @@ namespace NOpenNLP.Tools.Formats.Nkjp;
 
 public class NKJPTextDocument
 {
-    internal IDictionary<string, string> divtypes;
-    internal IDictionary<string, IDictionary<string, IDictionary<string, string>>> texts;
+    // NOpenNLP: made readonly
+    internal readonly IDictionary<string, string> divtypes;
+    internal readonly IDictionary<string, IDictionary<string, IDictionary<string, string>>> texts;
 
     internal NKJPTextDocument()
     {
@@ -65,23 +66,22 @@ public class NKJPTextDocument
     /// <exception cref="IOException">Thrown if the XML cannot be parsed.</exception>
     public static NKJPTextDocument Parse(Stream isStream)
     {
-        IDictionary<string, string> divtypes = new JCG.Dictionary<string, string>();
-        IDictionary<string, IDictionary<string, IDictionary<string, string>>> texts =
-            new JCG.Dictionary<string, IDictionary<string, IDictionary<string, string>>>();
+        JCG.Dictionary<string, string> divtypes = new();
+        JCG.Dictionary<string, IDictionary<string, IDictionary<string, string>>> texts = new();
 
         try
         {
-            XmlDocument doc = XmlUtil.CreateDocument(isStream);
+            var doc = XmlUtil.CreateDocument(isStream);
 
             doc.DocumentElement!.Normalize();
             string root = doc.DocumentElement.Name;
 
             if (!root.Equals("teiCorpus", StringComparison.OrdinalIgnoreCase))
             {
-                throw new IOException("Expected root node " + root);
+                throw new IOException($"Expected root node {root}");
             }
 
-            XmlNodeList textnl = doc.SelectNodes(TEXT_NODES_EXAMPLE)!;
+            var textnl = doc.SelectNodes(TEXT_NODES_EXAMPLE)!;
             if (textnl.Count == 0)
             {
                 textnl = doc.SelectNodes(TEXT_NODES_SAMPLE)!;
@@ -89,15 +89,14 @@ public class NKJPTextDocument
 
             for (int i = 0; i < textnl.Count; i++)
             {
-                XmlNode textnode = textnl[i]!;
+                var textnode = textnl[i]!;
                 string current_text = Attrib(textnode, "xml:id", true)!;
 
-                IDictionary<string, IDictionary<string, string>> current_divs =
-                    new JCG.Dictionary<string, IDictionary<string, string>>();
-                XmlNodeList divnl = textnode.SelectNodes(DIV_NODES)!;
+                JCG.Dictionary<string, IDictionary<string, string>> current_divs = new();
+                var divnl = textnode.SelectNodes(DIV_NODES)!;
                 for (int j = 0; j < divnl.Count; j++)
                 {
-                    XmlNode divnode = divnl[j]!;
+                    var divnode = divnl[j]!;
                     string? divtype = Attrib(divnode, "type", false);
                     string divid = Attrib(divnode, "xml:id", true)!;
                     // NOpenNLP: upstream puts a possibly-null divtype into a HashMap, which
@@ -106,12 +105,12 @@ public class NKJPTextDocument
                     // here exactly as it does upstream.
                     divtypes[divid] = divtype!;
 
-                    IDictionary<string, string> current_paras = new JCG.Dictionary<string, string>();
-                    XmlNodeList paranl = divnode.SelectNodes(PARA_NODES)!;
+                    JCG.Dictionary<string, string> current_paras = new();
+                    var paranl = divnode.SelectNodes(PARA_NODES)!;
 
                     for (int k = 0; k < paranl.Count; k++)
                     {
-                        XmlNode pnode = paranl[k]!;
+                        var pnode = paranl[k]!;
                         string pid = Attrib(pnode, "xml:id", true)!;
 
                         // NOpenNLP: the && is upstream's, not a typo for || -- this throws
@@ -120,7 +119,7 @@ public class NKJPTextDocument
                         if (pnode.ChildNodes.Count != 1
                             && !NodeName(pnode.FirstChild!).Equals("#text", StringComparison.Ordinal))
                         {
-                            throw new IOException("Unexpected content in p element " + pid);
+                            throw new IOException($"Unexpected content in p element {pid}");
                         }
 
                         string ptext = pnode.InnerText;
@@ -181,7 +180,7 @@ public class NKJPTextDocument
     /// <returns>a map of paragaph IDs and their text</returns>
     internal IDictionary<string, string> GetParagraphs()
     {
-        IDictionary<string, string> paragraphs = new JCG.Dictionary<string, string>();
+        JCG.Dictionary<string, string> paragraphs = new();
         foreach (string dockey in texts.Keys)
         {
             foreach (string divkey in texts[dockey].Keys)
@@ -207,7 +206,7 @@ public class NKJPTextDocument
     {
         if (required && (n.Attributes == null || n.Attributes.Count == 0))
         {
-            throw new IOException("Missing required attributes in node " + n.Name);
+            throw new IOException($"Missing required attributes in node {n.Name}");
         }
         if (n.Attributes!.GetNamedItem(attrib) != null)
         {
@@ -217,7 +216,7 @@ public class NKJPTextDocument
         {
             if (required)
             {
-                throw new IOException("Required attribute \"" + attrib + "\" missing in node " + n.Name);
+                throw new IOException($"Required attribute \"{attrib}\" missing in node {n.Name}");
             }
             else
             {

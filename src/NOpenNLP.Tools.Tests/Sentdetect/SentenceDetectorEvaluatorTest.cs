@@ -21,7 +21,6 @@
 using NOpenNLP.Tools.Util;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
-using System.IO;
 using System.Text;
 
 namespace NOpenNLP.Tools.Sentdetect;

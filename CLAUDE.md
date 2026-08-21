@@ -42,6 +42,8 @@ When converting the original Java code to C#, take care to:
 - Only use features available in our greatest-common-denominator TFM, `netstandard2.0`, or polyfill as necessary.
 - Use J2N equivalents where retaining Java behavior might be important
 - Use J2N collection types internally (i.e. List, Dictionary, etc) but do not expose them in the public API; expose the .NET BCL equivalent interfaces they implement (i.e. `IList<T>`). When using J2N collection types, alias the namespace with `JCG` via `using JCG = J2N.Collections.Generic;`
+- Port `LinkedHashMap` to `JCG.OrderedDictionary`, not the deprecated `JCG.LinkedDictionary`. Always qualify it with `JCG`, since .NET 9's `System.Collections.Generic.OrderedDictionary` makes the bare name ambiguous. `JCG.LinkedHashSet` is unaffected.
+- `JCG.Dictionary` is a `HashMap` and does not preserve insertion order, though it can appear to until entries are removed. Where iteration order is observable, use an ordered type and declare the field/local as that concrete type so the compiler enforces it.
 - When private fields are not mutated, and not already marked `final` in Java, make them `readonly` with a comment: `// NOpenNLP: made readonly`
 - Java `Map` and C# dictionaries differ in ways that silently change behavior. Watch for:
   - `map.get(key)` returns `null` for an absent key; the C# indexer throws
@@ -61,6 +63,12 @@ When converting the original Java code to C#, take care to:
 - Rename `size()` methods to be `Count` if it can be converted to a property and represents the length/size of something.
 - Place `: this(...)` and `: base(...)` constructor calls on a new line
 - Chop very long lines (> 120 chars wide)
+- Prefer `var` over explicit typing except where needed or preferred for clarity, and especially prefer `var` in a `foreach` statement
+- Use `string.IsNullOrEmpty` instead of null/length checks on strings
+- Use range syntax (i.e. `str[1..]`) instead of `Substring` where possible, and index-from-end (i.e. `str[^1]`) instead of `Length - 1` indexing
+- For private fields and variables, prefer using the concrete collection type over the interface where possible for performance. So combined with the collection expressions rule, `IList<X> foo = new JCG.List<X>()` becomes `JCG.List<X> foo = [];`. Do not do this for anything in the public API surface.
+- Use pattern matching for inline variable declarations where possible. i.e. instead of `ADSentenceStream.Sentence? paragraph;\nwhile ((paragraph = adSentenceStream.Read()) != null)`, use `while (adSentenceStream.Read() is { } paragraph)`
+- Use string interpolation instead of concatenation except where it doesn't make sense.
 
 ## Unit Test Porting
 

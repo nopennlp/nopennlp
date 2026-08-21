@@ -19,7 +19,6 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using System.Text;
 using NOpenNLP.Tools.Formats;
-using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Util;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
@@ -47,19 +46,19 @@ public class LemmatizerEvaluatorTest
         const string inPredicted = "/opennlp/tools/lemmatizer/output.txt";
         const string inExpected = "/opennlp/tools/lemmatizer/output.txt";
 
-        Encoding encoding = Encoding.UTF8;
+        var encoding = Encoding.UTF8;
 
-        DummyLemmaSampleStream predictedSample = new DummyLemmaSampleStream(
+        var predictedSample = new DummyLemmaSampleStream(
             new PlainTextByLineStream(new ResourceAsStreamFactory(inPredicted), encoding), true);
 
-        DummyLemmaSampleStream expectedSample = new DummyLemmaSampleStream(
+        var expectedSample = new DummyLemmaSampleStream(
             new PlainTextByLineStream(new ResourceAsStreamFactory(inExpected), encoding), false);
 
         ILemmatizer dummyLemmatizer = new DummyLemmatizer(predictedSample);
 
-        StringBuilder stream = new StringBuilder();
+        var stream = new StringBuilder();
         ILemmatizerEvaluationMonitor listener = new LemmaEvaluationErrorListener(stream);
-        LemmatizerEvaluator evaluator = new LemmatizerEvaluator(dummyLemmatizer, listener);
+        var evaluator = new LemmatizerEvaluator(dummyLemmatizer, listener);
 
         evaluator.Evaluate(expectedSample);
 

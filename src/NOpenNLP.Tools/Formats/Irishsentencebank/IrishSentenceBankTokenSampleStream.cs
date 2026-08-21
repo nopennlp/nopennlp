@@ -49,8 +49,8 @@ internal class IrishSentenceBankTokenSampleStream : ObjectStreamBase<TokenSample
     {
         if (sentenceIt.MoveNext())
         {
-            IrishSentenceBankDocument.IrishSentenceBankSentence sentence = sentenceIt.Current;
-            return sentence.GetTokenSample();
+            var sentence = sentenceIt.Current;
+            return sentence.TokenSample;
         }
         else
         {

@@ -19,7 +19,6 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using NOpenNLP.Tools.Namefind;
@@ -71,142 +70,146 @@ public class Conll03NameSampleStream : ObjectStreamBase<NameSample?>
     /// <exception cref="IOException">if there is an error during reading</exception>
     public override NameSample? Read()
     {
-        IList<string> sentence = new JCG.List<string>();
-        IList<string> tags = new JCG.List<string>();
-
-        bool isClearAdaptiveData = false;
-
-        // Empty line indicates end of sentence
-
-        string? line;
-        while ((line = lineStream.Read()) != null && !StringUtil.IsEmpty(line))
+        // NOpenNLP: converted recursion to iteration
+        while (true)
         {
-            if (line.StartsWith(Conll02NameSampleStream.DocStart, StringComparison.Ordinal))
+            JCG.List<string> sentence = [];
+            JCG.List<string> tags = [];
+
+            bool isClearAdaptiveData = false;
+
+            // Empty line indicates end of sentence
+
+            string? line;
+            while ((line = lineStream.Read()) != null && !StringUtil.IsEmpty(line))
             {
-                isClearAdaptiveData = true;
-                string? emptyLine = lineStream.Read();
-
-                // NOpenNLP: the line after -DOCSTART- is null when the stream ends there.
-                // Upstream passes it straight to StringUtil.isEmpty, which dereferences it
-                // and throws NullPointerException; IsEmpty would likewise throw here. A
-                // truncated file is a malformed corpus rather than a programming error, so
-                // it reports the IOException this branch already raises for a non-empty
-                // line, which names the offending file position.
-                if (emptyLine is null || !StringUtil.IsEmpty(emptyLine))
-                    throw new IOException("Empty line after -DOCSTART- not empty: '" + emptyLine + "'!");
-
-                continue;
-            }
-
-            string[] fields = line.Split(' ');
-
-            // For English: WORD  POS-TAG SC-TAG NE-TAG
-            if (Language.EN.Equals(lang) && fields.Length == 4)
-            {
-                sentence.Add(fields[0]);
-                tags.Add(fields[3]); // 3 is NE-TAG
-            }
-            // For German: WORD  LEMA-TAG POS-TAG SC-TAG NE-TAG
-            else if (Language.DE.Equals(lang) && fields.Length == 5)
-            {
-                sentence.Add(fields[0]);
-                tags.Add(fields[4]); // 4 is NE-TAG
-            }
-            else
-            {
-                throw new IOException("Incorrect number of fields per line for language: '" + line + "'!");
-            }
-        }
-
-        if (sentence.Count > 0)
-        {
-            // convert name tags into spans
-            IList<Span> names = new JCG.List<Span>();
-
-            int beginIndex = -1;
-            int endIndex = -1;
-            for (int i = 0; i < tags.Count; i++)
-            {
-                string tag = tags[i];
-
-                if (tag.EndsWith("PER", StringComparison.Ordinal) &&
-                    (types & Conll02NameSampleStream.GeneratePersonEntities) == 0)
-                    tag = "O";
-
-                if (tag.EndsWith("ORG", StringComparison.Ordinal) &&
-                    (types & Conll02NameSampleStream.GenerateOrganizationEntities) == 0)
-                    tag = "O";
-
-                if (tag.EndsWith("LOC", StringComparison.Ordinal) &&
-                    (types & Conll02NameSampleStream.GenerateLocationEntities) == 0)
-                    tag = "O";
-
-                if (tag.EndsWith("MISC", StringComparison.Ordinal) &&
-                    (types & Conll02NameSampleStream.GenerateMiscEntities) == 0)
-                    tag = "O";
-
-                if (tag.Equals("O", StringComparison.Ordinal))
+                if (line.StartsWith(Conll02NameSampleStream.DocStart, StringComparison.Ordinal))
                 {
-                    // O means we don't have anything this round.
-                    if (beginIndex != -1)
-                    {
-                        names.Add(Conll02NameSampleStream.Extract(beginIndex, endIndex, tags[beginIndex]));
-                        beginIndex = -1;
-                        endIndex = -1;
-                    }
+                    isClearAdaptiveData = true;
+                    string? emptyLine = lineStream.Read();
+
+                    // NOpenNLP: the line after -DOCSTART- is null when the stream ends there.
+                    // Upstream passes it straight to StringUtil.isEmpty, which dereferences it
+                    // and throws NullPointerException; IsEmpty would likewise throw here. A
+                    // truncated file is a malformed corpus rather than a programming error, so
+                    // it reports the IOException this branch already raises for a non-empty
+                    // line, which names the offending file position.
+                    if (emptyLine is null || !StringUtil.IsEmpty(emptyLine))
+                        throw new IOException($"Empty line after -DOCSTART- not empty: '{emptyLine}'!");
+
+                    continue;
                 }
-                else if (tag.StartsWith("B-", StringComparison.Ordinal))
+
+                string[] fields = line.Split(' ');
+
+                // For English: WORD  POS-TAG SC-TAG NE-TAG
+                if (Language.EN.Equals(lang) && fields.Length == 4)
                 {
-                    // B- prefix means we have two same entities next to each other
-                    if (beginIndex != -1)
-                    {
-                        names.Add(Conll02NameSampleStream.Extract(beginIndex, endIndex, tags[beginIndex]));
-                    }
-                    beginIndex = i;
-                    endIndex = i + 1;
+                    sentence.Add(fields[0]);
+                    tags.Add(fields[3]); // 3 is NE-TAG
                 }
-                else if (tag.StartsWith("I-", StringComparison.Ordinal))
+                // For German: WORD  LEMA-TAG POS-TAG SC-TAG NE-TAG
+                else if (Language.DE.Equals(lang) && fields.Length == 5)
                 {
-                    // I- starts or continues a current name entity
-                    if (beginIndex == -1)
-                    {
-                        beginIndex = i;
-                        endIndex = i + 1;
-                    }
-                    else if (!tag.EndsWith(tags[beginIndex].Substring(1), StringComparison.Ordinal))
-                    {
-                        // we have a new tag type following a tagged word series
-                        // also may not have the same I- starting the previous!
-                        names.Add(Conll02NameSampleStream.Extract(beginIndex, endIndex, tags[beginIndex]));
-                        beginIndex = i;
-                        endIndex = i + 1;
-                    }
-                    else
-                    {
-                        endIndex++;
-                    }
+                    sentence.Add(fields[0]);
+                    tags.Add(fields[4]); // 4 is NE-TAG
                 }
                 else
                 {
-                    throw new IOException("Invalid tag: " + tag);
+                    throw new IOException($"Incorrect number of fields per line for language: '{line}'!");
                 }
             }
 
-            // if one span remains, create it here
-            if (beginIndex != -1)
-                names.Add(Conll02NameSampleStream.Extract(beginIndex, endIndex, tags[beginIndex]));
+            if (sentence.Count > 0)
+            {
+                // convert name tags into spans
+                JCG.List<Span> names = [];
 
-            return new NameSample([.. sentence], [.. names], isClearAdaptiveData);
-        }
-        else if (line != null)
-        {
-            // Just filter out empty events, if two lines in a row are empty
-            return Read();
-        }
-        else
-        {
-            // source stream is not returning anymore lines
-            return null;
+                int beginIndex = -1;
+                int endIndex = -1;
+                for (int i = 0; i < tags.Count; i++)
+                {
+                    string tag = tags[i];
+
+                    if (tag.EndsWith("PER", StringComparison.Ordinal) &&
+                        (types & Conll02NameSampleStream.GeneratePersonEntities) == 0)
+                        tag = "O";
+
+                    if (tag.EndsWith("ORG", StringComparison.Ordinal) &&
+                        (types & Conll02NameSampleStream.GenerateOrganizationEntities) == 0)
+                        tag = "O";
+
+                    if (tag.EndsWith("LOC", StringComparison.Ordinal) &&
+                        (types & Conll02NameSampleStream.GenerateLocationEntities) == 0)
+                        tag = "O";
+
+                    if (tag.EndsWith("MISC", StringComparison.Ordinal) &&
+                        (types & Conll02NameSampleStream.GenerateMiscEntities) == 0)
+                        tag = "O";
+
+                    if (tag.Equals("O", StringComparison.Ordinal))
+                    {
+                        // O means we don't have anything this round.
+                        if (beginIndex != -1)
+                        {
+                            names.Add(Conll02NameSampleStream.Extract(beginIndex, endIndex, tags[beginIndex]));
+                            beginIndex = -1;
+                            endIndex = -1;
+                        }
+                    }
+                    else if (tag.StartsWith("B-", StringComparison.Ordinal))
+                    {
+                        // B- prefix means we have two same entities next to each other
+                        if (beginIndex != -1)
+                        {
+                            names.Add(Conll02NameSampleStream.Extract(beginIndex, endIndex, tags[beginIndex]));
+                        }
+                        beginIndex = i;
+                        endIndex = i + 1;
+                    }
+                    else if (tag.StartsWith("I-", StringComparison.Ordinal))
+                    {
+                        // I- starts or continues a current name entity
+                        if (beginIndex == -1)
+                        {
+                            beginIndex = i;
+                            endIndex = i + 1;
+                        }
+                        else if (!tag.EndsWith(tags[beginIndex][1..], StringComparison.Ordinal))
+                        {
+                            // we have a new tag type following a tagged word series
+                            // also may not have the same I- starting the previous!
+                            names.Add(Conll02NameSampleStream.Extract(beginIndex, endIndex, tags[beginIndex]));
+                            beginIndex = i;
+                            endIndex = i + 1;
+                        }
+                        else
+                        {
+                            endIndex++;
+                        }
+                    }
+                    else
+                    {
+                        throw new IOException($"Invalid tag: {tag}");
+                    }
+                }
+
+                // if one span remains, create it here
+                if (beginIndex != -1)
+                    names.Add(Conll02NameSampleStream.Extract(beginIndex, endIndex, tags[beginIndex]));
+
+                return new NameSample([.. sentence], [.. names], isClearAdaptiveData);
+            }
+            else if (line != null)
+            {
+                // Just filter out empty events, if two lines in a row are empty
+                continue;
+            }
+            else
+            {
+                // source stream is not returning anymore lines
+                return null;
+            }
         }
     }
 

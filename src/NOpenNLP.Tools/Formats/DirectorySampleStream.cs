@@ -45,9 +45,9 @@ public class DirectorySampleStream : ObjectStreamBase<FileInfo?>
 
     // NOpenNLP: J2N has no Stack<T>; the BCL one matches java.util.Stack for the
     // push/pop/clear/isEmpty operations used here.
-    private readonly Stack<DirectoryInfo> directories = new Stack<DirectoryInfo>(); // NOpenNLP: made readonly
+    private readonly Stack<DirectoryInfo> directories = new(); // NOpenNLP: made readonly
 
-    private readonly Stack<FileInfo> textFiles = new Stack<FileInfo>(); // NOpenNLP: made readonly
+    private readonly Stack<FileInfo> textFiles = new(); // NOpenNLP: made readonly
 
     /// <summary>
     /// Creates a new directory sample stream.
@@ -62,7 +62,7 @@ public class DirectorySampleStream : ObjectStreamBase<FileInfo?>
 
         var inputDirectoryList = new JCG.List<DirectoryInfo>(dirs.Length);
 
-        foreach (DirectoryInfo dir in dirs)
+        foreach (var dir in dirs)
         {
             // NOpenNLP: upstream checks File.isDirectory(), which is false both for a
             // path that does not exist and for one that is a regular file.
@@ -70,8 +70,7 @@ public class DirectorySampleStream : ObjectStreamBase<FileInfo?>
             if (!dir.Exists)
             {
                 throw new ArgumentException(
-                    "All passed in directories must be directories, but \""
-                    + dir + "\" is not!", nameof(dirs));
+                    $"All passed in directories must be directories, but \"{dir}\" is not!", nameof(dirs));
             }
 
             inputDirectoryList.Add(dir);
@@ -79,7 +78,7 @@ public class DirectorySampleStream : ObjectStreamBase<FileInfo?>
 
         inputDirectories = inputDirectoryList.AsReadOnly();
 
-        foreach (DirectoryInfo dir in inputDirectories)
+        foreach (var dir in inputDirectories)
         {
             directories.Push(dir);
         }
@@ -102,7 +101,7 @@ public class DirectorySampleStream : ObjectStreamBase<FileInfo?>
     {
         while (textFiles.Count == 0 && directories.Count > 0)
         {
-            DirectoryInfo dir = directories.Pop();
+            var dir = directories.Pop();
 
             // NOpenNLP: Java's File.listFiles(FileFilter) returns files and directories
             // in one array, applying the filter to both -- upstream's own test filter is
@@ -115,7 +114,7 @@ public class DirectorySampleStream : ObjectStreamBase<FileInfo?>
 
             entries.Sort((x, y) => string.CompareOrdinal(x.FullName, y.FullName));
 
-            foreach (FileSystemInfo entry in entries)
+            foreach (var entry in entries)
             {
                 if (fileFilter is not null && !fileFilter(entry))
                 {
@@ -133,14 +132,7 @@ public class DirectorySampleStream : ObjectStreamBase<FileInfo?>
             }
         }
 
-        if (textFiles.Count > 0)
-        {
-            return textFiles.Pop();
-        }
-        else
-        {
-            return null;
-        }
+        return textFiles.Count > 0 ? textFiles.Pop() : null;
     }
 
     /// <inheritdoc/>
@@ -149,7 +141,7 @@ public class DirectorySampleStream : ObjectStreamBase<FileInfo?>
         directories.Clear();
         textFiles.Clear();
 
-        foreach (DirectoryInfo dir in inputDirectories)
+        foreach (var dir in inputDirectories)
         {
             directories.Push(dir);
         }

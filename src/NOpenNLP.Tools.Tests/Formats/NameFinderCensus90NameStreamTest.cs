@@ -31,7 +31,7 @@ public class NameFinderCensus90NameStreamTest
     /// <exception cref="IOException">if the stream cannot be created</exception>
     private static IObjectStream<StringList?> OpenData(string name)
     {
-        IInputStreamFactory @in = new ResourceAsStreamFactory("/opennlp/tools/formats/" + name);
+        IInputStreamFactory @in = new ResourceAsStreamFactory($"/opennlp/tools/formats/{name}");
 
         return new NameFinderCensus90NameStream(@in, Encoding.UTF8);
     }
@@ -39,9 +39,9 @@ public class NameFinderCensus90NameStreamTest
     [Test]
     public void TestParsingEnglishSample()
     {
-        IObjectStream<StringList?> sampleStream = OpenData("census90.sample");
+        var sampleStream = OpenData("census90.sample");
 
-        StringList? personName = sampleStream.Read();
+        var personName = sampleStream.Read();
 
         // verify the first 5 taken from the Surname data
         ClassicAssert.NotNull(personName);

@@ -18,7 +18,6 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
-using NOpenNLP.Tools.Formats;
 using NOpenNLP.Tools.Tokenize;
 using NOpenNLP.Tools.Util;
 using NUnit.Framework;
@@ -34,21 +33,20 @@ public class ConlluTokenSampleStreamTest
         IInputStreamFactory streamFactory =
             new ResourceAsStreamFactory("/opennlp/tools/formats/conllu/de-ud-train-sample.conllu");
 
-        using (IObjectStream<TokenSample?> stream = new ConlluTokenSampleStream(new ConlluStream(streamFactory)))
-        {
-            TokenSample expected1 = TokenSample.Parse(
-                "Fachlich kompetent" + TokenSample.DEFAULT_SEPARATOR_CHARS
-                    + ", sehr gute Beratung und ein freundliches Team" + TokenSample.DEFAULT_SEPARATOR_CHARS
-                    + ".", TokenSample.DEFAULT_SEPARATOR_CHARS);
-            ClassicAssert.AreEqual(expected1, stream.Read());
+        using var stream = new ConlluTokenSampleStream(new ConlluStream(streamFactory));
 
-            TokenSample expected2 = TokenSample.Parse("Beiden Zahnärzten verdanke ich einen " +
-                "neuen Biss und dadurch endlich keine Rückenschmerzen mehr"
-                + TokenSample.DEFAULT_SEPARATOR_CHARS + ".", TokenSample.DEFAULT_SEPARATOR_CHARS);
-            ClassicAssert.AreEqual(expected2, stream.Read());
+        var expected1 = TokenSample.Parse(
+            "Fachlich kompetent" + TokenSample.DEFAULT_SEPARATOR_CHARS
+                + ", sehr gute Beratung und ein freundliches Team" + TokenSample.DEFAULT_SEPARATOR_CHARS
+                + ".", TokenSample.DEFAULT_SEPARATOR_CHARS);
+        ClassicAssert.AreEqual(expected1, stream.Read());
 
-            ClassicAssert.IsNull(stream.Read(), "Stream must be exhausted");
-        }
+        var expected2 = TokenSample.Parse("Beiden Zahnärzten verdanke ich einen " +
+            "neuen Biss und dadurch endlich keine Rückenschmerzen mehr"
+            + TokenSample.DEFAULT_SEPARATOR_CHARS + ".", TokenSample.DEFAULT_SEPARATOR_CHARS);
+        ClassicAssert.AreEqual(expected2, stream.Read());
+
+        ClassicAssert.IsNull(stream.Read(), "Stream must be exhausted");
     }
 
     [Test]
@@ -57,21 +55,20 @@ public class ConlluTokenSampleStreamTest
         IInputStreamFactory streamFactory =
             new ResourceAsStreamFactory("/opennlp/tools/formats/conllu/pt_br-ud-sample.conllu");
 
-        using (IObjectStream<TokenSample?> stream = new ConlluTokenSampleStream(new ConlluStream(streamFactory)))
-        {
-            TokenSample expected1 = TokenSample.Parse(
-                "Numa reunião entre representantes da Secretaria da Criança do DF " +
-                    "ea juíza da Vara de Execuções de Medidas Socioeducativas" +
-                    TokenSample.DEFAULT_SEPARATOR_CHARS + ", Lavínia Tupi Vieira Fonseca" +
-                    TokenSample.DEFAULT_SEPARATOR_CHARS + ", ficou acordado que dos 25 internos" +
-                    TokenSample.DEFAULT_SEPARATOR_CHARS + ", 12 serão internados na Unidade de " +
-                    "Planaltina e os outros 13 devem retornar para a Unidade do Recanto das Emas" +
-                    TokenSample.DEFAULT_SEPARATOR_CHARS + ", antigo Ciago" +
-                    TokenSample.DEFAULT_SEPARATOR_CHARS + "."
-                , TokenSample.DEFAULT_SEPARATOR_CHARS);
-            TokenSample? predicted = stream.Read();
-            ClassicAssert.AreEqual(expected1, predicted);
-        }
+        using var stream = new ConlluTokenSampleStream(new ConlluStream(streamFactory));
+
+        var expected1 = TokenSample.Parse(
+            "Numa reunião entre representantes da Secretaria da Criança do DF " +
+                "ea juíza da Vara de Execuções de Medidas Socioeducativas" +
+                TokenSample.DEFAULT_SEPARATOR_CHARS + ", Lavínia Tupi Vieira Fonseca" +
+                TokenSample.DEFAULT_SEPARATOR_CHARS + ", ficou acordado que dos 25 internos" +
+                TokenSample.DEFAULT_SEPARATOR_CHARS + ", 12 serão internados na Unidade de " +
+                "Planaltina e os outros 13 devem retornar para a Unidade do Recanto das Emas" +
+                TokenSample.DEFAULT_SEPARATOR_CHARS + ", antigo Ciago" +
+                TokenSample.DEFAULT_SEPARATOR_CHARS + "."
+            , TokenSample.DEFAULT_SEPARATOR_CHARS);
+        var predicted = stream.Read();
+        ClassicAssert.AreEqual(expected1, predicted);
     }
 
     [Test]
@@ -80,23 +77,22 @@ public class ConlluTokenSampleStreamTest
         IInputStreamFactory streamFactory =
             new ResourceAsStreamFactory("/opennlp/tools/formats/conllu/es-ud-sample.conllu");
 
-        using (IObjectStream<TokenSample?> stream = new ConlluTokenSampleStream(new ConlluStream(streamFactory)))
-        {
-            TokenSample expected1 = TokenSample.Parse(
-                "Digámoslo claramente" + TokenSample.DEFAULT_SEPARATOR_CHARS +
-                    ", la insurgencia se ha pronunciado mucho más claramente respecto al " +
-                    "tema de la paz que el Estado" + TokenSample.DEFAULT_SEPARATOR_CHARS +
-                    ", como lo demuestra el fragmento que Bermúdez cita de la respuesta de \"" +
-                    TokenSample.DEFAULT_SEPARATOR_CHARS + "Gabino" +
-                    TokenSample.DEFAULT_SEPARATOR_CHARS + "\" a Piedad Córdoba" +
-                    TokenSample.DEFAULT_SEPARATOR_CHARS + ", en la cual no se plantea ni siquiera \"" +
-                    TokenSample.DEFAULT_SEPARATOR_CHARS + "esperar un mejor gobierno" +
-                    TokenSample.DEFAULT_SEPARATOR_CHARS + "\"" +
-                    TokenSample.DEFAULT_SEPARATOR_CHARS + "."
+        using var stream = new ConlluTokenSampleStream(new ConlluStream(streamFactory));
 
-                , TokenSample.DEFAULT_SEPARATOR_CHARS);
-            TokenSample? predicted = stream.Read();
-            ClassicAssert.AreEqual(expected1, predicted);
-        }
+        var expected1 = TokenSample.Parse(
+            "Digámoslo claramente" + TokenSample.DEFAULT_SEPARATOR_CHARS +
+                ", la insurgencia se ha pronunciado mucho más claramente respecto al " +
+                "tema de la paz que el Estado" + TokenSample.DEFAULT_SEPARATOR_CHARS +
+                ", como lo demuestra el fragmento que Bermúdez cita de la respuesta de \"" +
+                TokenSample.DEFAULT_SEPARATOR_CHARS + "Gabino" +
+                TokenSample.DEFAULT_SEPARATOR_CHARS + "\" a Piedad Córdoba" +
+                TokenSample.DEFAULT_SEPARATOR_CHARS + ", en la cual no se plantea ni siquiera \"" +
+                TokenSample.DEFAULT_SEPARATOR_CHARS + "esperar un mejor gobierno" +
+                TokenSample.DEFAULT_SEPARATOR_CHARS + "\"" +
+                TokenSample.DEFAULT_SEPARATOR_CHARS + "."
+
+            , TokenSample.DEFAULT_SEPARATOR_CHARS);
+        var predicted = stream.Read();
+        ClassicAssert.AreEqual(expected1, predicted);
     }
 }

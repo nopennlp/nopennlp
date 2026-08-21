@@ -19,8 +19,6 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using System.Text;
-using NOpenNLP.Tools.Formats;
-using NOpenNLP.Tools.Postag;
 using NOpenNLP.Tools.Util;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
@@ -33,83 +31,80 @@ public class ADPOSSampleStreamTest
     public void TestSimple()
     {
         // add one sentence with expandME = includeFeats = false
-        using (ADPOSSampleStream stream = new ADPOSSampleStream(
+        using var stream = new ADPOSSampleStream(
             new PlainTextByLineStream(
                 new ResourceAsStreamFactory("/opennlp/tools/formats/ad.sample"),
-                Encoding.UTF8), false, false))
-        {
-            POSSample? sample = stream.Read();
+                Encoding.UTF8), false, false);
 
-            ClassicAssert.AreEqual(23, sample!.Sentence.Length);
+        var sample = stream.Read();
 
-            ClassicAssert.AreEqual("Inicia", sample.Sentence[0]);
-            ClassicAssert.AreEqual("v-fin", sample.Tags[0]);
+        ClassicAssert.AreEqual(23, sample!.Sentence.Length);
 
-            ClassicAssert.AreEqual("em", sample.Sentence[1]);
-            ClassicAssert.AreEqual("prp", sample.Tags[1]);
+        ClassicAssert.AreEqual("Inicia", sample.Sentence[0]);
+        ClassicAssert.AreEqual("v-fin", sample.Tags[0]);
 
-            ClassicAssert.AreEqual("o", sample.Sentence[2]);
-            ClassicAssert.AreEqual("art", sample.Tags[2]);
+        ClassicAssert.AreEqual("em", sample.Sentence[1]);
+        ClassicAssert.AreEqual("prp", sample.Tags[1]);
 
-            ClassicAssert.AreEqual("Porto_Poesia", sample.Sentence[9]);
-            ClassicAssert.AreEqual("prop", sample.Tags[9]);
-        }
+        ClassicAssert.AreEqual("o", sample.Sentence[2]);
+        ClassicAssert.AreEqual("art", sample.Tags[2]);
+
+        ClassicAssert.AreEqual("Porto_Poesia", sample.Sentence[9]);
+        ClassicAssert.AreEqual("prop", sample.Tags[9]);
     }
 
     [Test]
     public void TestExpandME()
     {
         // add one sentence with expandME = true
-        using (ADPOSSampleStream stream = new ADPOSSampleStream(
+        using var stream = new ADPOSSampleStream(
             new PlainTextByLineStream(
                 new ResourceAsStreamFactory("/opennlp/tools/formats/ad.sample"),
-                Encoding.UTF8), true, false))
-        {
-            POSSample? sample = stream.Read();
+                Encoding.UTF8), true, false);
 
-            ClassicAssert.AreEqual(27, sample!.Sentence.Length);
+        var sample = stream.Read();
 
-            ClassicAssert.AreEqual("Inicia", sample.Sentence[0]);
-            ClassicAssert.AreEqual("v-fin", sample.Tags[0]);
+        ClassicAssert.AreEqual(27, sample!.Sentence.Length);
 
-            ClassicAssert.AreEqual("em", sample.Sentence[1]);
-            ClassicAssert.AreEqual("prp", sample.Tags[1]);
+        ClassicAssert.AreEqual("Inicia", sample.Sentence[0]);
+        ClassicAssert.AreEqual("v-fin", sample.Tags[0]);
 
-            ClassicAssert.AreEqual("o", sample.Sentence[2]);
-            ClassicAssert.AreEqual("art", sample.Tags[2]);
+        ClassicAssert.AreEqual("em", sample.Sentence[1]);
+        ClassicAssert.AreEqual("prp", sample.Tags[1]);
 
-            ClassicAssert.AreEqual("Porto", sample.Sentence[9]);
-            ClassicAssert.AreEqual("B-prop", sample.Tags[9]);
+        ClassicAssert.AreEqual("o", sample.Sentence[2]);
+        ClassicAssert.AreEqual("art", sample.Tags[2]);
 
-            ClassicAssert.AreEqual("Poesia", sample.Sentence[10]);
-            ClassicAssert.AreEqual("I-prop", sample.Tags[10]);
-        }
+        ClassicAssert.AreEqual("Porto", sample.Sentence[9]);
+        ClassicAssert.AreEqual("B-prop", sample.Tags[9]);
+
+        ClassicAssert.AreEqual("Poesia", sample.Sentence[10]);
+        ClassicAssert.AreEqual("I-prop", sample.Tags[10]);
     }
 
     [Test]
     public void TestIncludeFeats()
     {
         // add one sentence with includeFeats = true
-        using (ADPOSSampleStream stream = new ADPOSSampleStream(
+        using var stream = new ADPOSSampleStream(
             new PlainTextByLineStream(
                 new ResourceAsStreamFactory("/opennlp/tools/formats/ad.sample"),
-                Encoding.UTF8), false, true))
-        {
-            POSSample? sample = stream.Read();
+                Encoding.UTF8), false, true);
 
-            ClassicAssert.AreEqual(23, sample!.Sentence.Length);
+        var sample = stream.Read();
 
-            ClassicAssert.AreEqual("Inicia", sample.Sentence[0]);
-            ClassicAssert.AreEqual("v-fin=PR=3S=IND=VFIN", sample.Tags[0]);
+        ClassicAssert.AreEqual(23, sample!.Sentence.Length);
 
-            ClassicAssert.AreEqual("em", sample.Sentence[1]);
-            ClassicAssert.AreEqual("prp", sample.Tags[1]);
+        ClassicAssert.AreEqual("Inicia", sample.Sentence[0]);
+        ClassicAssert.AreEqual("v-fin=PR=3S=IND=VFIN", sample.Tags[0]);
 
-            ClassicAssert.AreEqual("o", sample.Sentence[2]);
-            ClassicAssert.AreEqual("art=DET=M=S", sample.Tags[2]);
+        ClassicAssert.AreEqual("em", sample.Sentence[1]);
+        ClassicAssert.AreEqual("prp", sample.Tags[1]);
 
-            ClassicAssert.AreEqual("Porto_Poesia", sample.Sentence[9]);
-            ClassicAssert.AreEqual("prop=M=S", sample.Tags[9]);
-        }
+        ClassicAssert.AreEqual("o", sample.Sentence[2]);
+        ClassicAssert.AreEqual("art=DET=M=S", sample.Tags[2]);
+
+        ClassicAssert.AreEqual("Porto_Poesia", sample.Sentence[9]);
+        ClassicAssert.AreEqual("prop=M=S", sample.Tags[9]);
     }
 }

@@ -19,6 +19,7 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using System.Collections.Generic;
+using J2N.Collections.ObjectModel;
 using NOpenNLP.Tools.Namefind;
 using NOpenNLP.Tools.Tokenize;
 using NOpenNLP.Tools.Util;
@@ -26,7 +27,7 @@ using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Formats.Muc;
 
-public class MucNameContentHandler : SgmlParser.ContentHandler
+public class MucNameContentHandler(ITokenizer tokenizer, IList<NameSample> storedSamples) : SgmlParser.ContentHandler
 {
     private const string EntityElementName = "ENAMEX";
     private const string TimeElementName = "TIMEX";
@@ -34,7 +35,7 @@ public class MucNameContentHandler : SgmlParser.ContentHandler
 
     // NOpenNLP: upstream builds both sets in a static initializer and wraps them in
     // Collections.unmodifiableSet; a read-only collection initializer says the same thing.
-    private static readonly ISet<string> ExpectedTypes = new JCG.HashSet<string>
+    private static readonly ReadOnlySet<string> ExpectedTypes = new JCG.HashSet<string>
     {
         "PERSON",
         "ORGANIZATION",
@@ -45,33 +46,24 @@ public class MucNameContentHandler : SgmlParser.ContentHandler
         "PERCENT"
     }.AsReadOnly();
 
-    private static readonly ISet<string> NameElementNames = new JCG.HashSet<string>
+    private static readonly ReadOnlySet<string> NameElementNames = new JCG.HashSet<string>
     {
         EntityElementName,
         TimeElementName,
         NumElementName
     }.AsReadOnly();
 
-    private readonly ITokenizer tokenizer;
-    private readonly IList<NameSample> storedSamples;
-
     private bool isInsideContentElement = false;
-    private readonly IList<string> text = new JCG.List<string>();
+    private readonly JCG.List<string> text = [];
     private bool isClearAdaptiveData = false;
 
     // NOpenNLP: J2N has no Stack<T>; the BCL one matches java.util.Stack for the
     // push/pop operations used here. Upstream calls Stack.add(..), which java.util.Stack
     // inherits from Vector and which appends to the end -- the same position pop() reads
     // from -- so Push is the equivalent.
-    private readonly Stack<Span> incompleteNames = new Stack<Span>();
+    private readonly Stack<Span> incompleteNames = new();
 
-    private readonly IList<Span> names = new JCG.List<Span>(); // NOpenNLP: made readonly
-
-    public MucNameContentHandler(ITokenizer tokenizer, IList<NameSample> storedSamples)
-    {
-        this.tokenizer = tokenizer;
-        this.storedSamples = storedSamples;
-    }
+    private readonly JCG.List<Span> names = []; // NOpenNLP: made readonly
 
     /// <inheritdoc/>
     /// <exception cref="InvalidFormatException">if an unknown name type is encountered</exception>
@@ -99,8 +91,7 @@ public class MucNameContentHandler : SgmlParser.ContentHandler
 
             if (nameType is null || !ExpectedTypes.Contains(nameType))
             {
-                throw new InvalidFormatException("Unknown timex, numex or namex type: "
-                    + (nameType ?? "null") + ", expected one of " + FormatExpectedTypes());
+                throw new InvalidFormatException($"Unknown timex, numex or namex type: {nameType ?? "null"}, expected one of {FormatExpectedTypes()}");
             }
 
             incompleteNames.Push(new Span(text.Count, text.Count, StringUtil.ToLowerCase(nameType)));
@@ -109,7 +100,7 @@ public class MucNameContentHandler : SgmlParser.ContentHandler
 
     // NOpenNLP: Java renders a Set in a string concatenation as "[a, b, c]" via
     // AbstractCollection.toString(); .NET would print the type name instead.
-    private static string FormatExpectedTypes() => "[" + string.Join(", ", ExpectedTypes) + "]";
+    private static string FormatExpectedTypes() => $"[{string.Join(", ", ExpectedTypes)}]";
 
     /// <inheritdoc/>
     public override void Characters(string chars)
@@ -129,7 +120,7 @@ public class MucNameContentHandler : SgmlParser.ContentHandler
     {
         if (NameElementNames.Contains(name))
         {
-            Span nameSpan = incompleteNames.Pop();
+            var nameSpan = incompleteNames.Pop();
             nameSpan = new Span(nameSpan.Start, text.Count, nameSpan.Type);
             names.Add(nameSpan);
         }

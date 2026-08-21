@@ -30,12 +30,11 @@ public class SgmlParserTest
     [Test]
     public void TestParse1()
     {
-        using (Stream resource = TestResources.OpenResource("/opennlp/tools/formats/muc/parsertest1.sgml"))
-        using (TextReader @in = new StreamReader(resource, Encoding.UTF8))
-        {
-            SgmlParser parser = new SgmlParser();
-            parser.Parse(@in, new TestParse1ContentHandlerAnonymousClass());
-        }
+        using var resource = TestResources.OpenResource("/opennlp/tools/formats/muc/parsertest1.sgml");
+        using TextReader @in = new StreamReader(resource, Encoding.UTF8);
+
+        var parser = new SgmlParser();
+        parser.Parse(@in, new TestParse1ContentHandlerAnonymousClass());
     }
 
     // NOpenNLP: upstream passes an anonymous subclass of the abstract SgmlParser.ContentHandler

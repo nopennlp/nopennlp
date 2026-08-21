@@ -33,27 +33,17 @@ public class OntoNotesParseSampleStream(IObjectStream<string?> samples)
     /// <exception cref="IOException">if there is an error during reading</exception>
     public override Parse? Read()
     {
-        StringBuilder parseString = new StringBuilder();
+        var parseString = new StringBuilder();
 
         while (true)
         {
             string? parse = samples.Read();
 
-            if (parse != null)
-            {
-                parse = parse.Trim();
-            }
+            parse = parse?.Trim();
 
-            if (parse == null || parse.Length == 0)
+            if (string.IsNullOrEmpty(parse))
             {
-                if (parseString.Length > 0)
-                {
-                    return Parse.ParseParse(parseString.ToString());
-                }
-                else
-                {
-                    return null;
-                }
+                return parseString.Length > 0 ? Parse.ParseParse(parseString.ToString()) : null;
             }
 
             parseString.Append(parse).Append(' ');

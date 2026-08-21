@@ -32,20 +32,18 @@ namespace NOpenNLP.Tools.Formats.Conllu;
 public class ConlluPOSSampleStream(IObjectStream<ConlluSentence?> samples, ConlluTagset tagset)
     : FilterObjectStream<ConlluSentence?, POSSample?>(samples)
 {
-    private readonly ConlluTagset tagset = tagset;
-
     /// <inheritdoc/>
     /// <exception cref="IOException">if there is an error during reading</exception>
     public override POSSample? Read()
     {
-        ConlluSentence? sentence = samples.Read();
+        var sentence = samples.Read();
 
         if (sentence != null)
         {
-            IList<string> tokens = new JCG.List<string>();
-            IList<string> tags = new JCG.List<string>();
+            JCG.List<string> tokens = [];
+            JCG.List<string> tags = [];
 
-            foreach (ConlluWordLine line in sentence.WordLines)
+            foreach (var line in sentence.WordLines)
             {
                 tokens.Add(line.Form);
                 tags.Add(line.GetPosTag(tagset));

@@ -18,8 +18,6 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
-using System.Collections.Generic;
-using System.IO;
 using NOpenNLP.Tools.Support;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
@@ -31,30 +29,28 @@ public class NKJPTextDocumentTest
     [Test]
     public void TestParsingSimpleDoc()
     {
-        using (Stream nkjpTextXmlIn = TestResources.OpenResource("/opennlp/tools/formats/nkjp/text_structure.xml"))
-        {
-            NKJPTextDocument doc = NKJPTextDocument.Parse(nkjpTextXmlIn);
+        using var nkjpTextXmlIn = TestResources.OpenResource("/opennlp/tools/formats/nkjp/text_structure.xml");
 
-            ClassicAssert.AreEqual(1, doc.Divtypes.Count);
-            ClassicAssert.AreEqual("article", doc.Divtypes["div-1"]);
+        var doc = NKJPTextDocument.Parse(nkjpTextXmlIn);
 
-            ClassicAssert.AreEqual(1, doc.Texts.Count);
-            ClassicAssert.AreEqual(1, doc.Texts["text-1"].Count);
-            ClassicAssert.AreEqual(2, doc.Texts["text-1"]["div-1"].Count);
+        ClassicAssert.AreEqual(1, doc.Divtypes.Count);
+        ClassicAssert.AreEqual("article", doc.Divtypes["div-1"]);
 
-            string exp = "To krótki tekst w formacie NKJP. Zawiera dwa zdania.";
-            ClassicAssert.AreEqual(exp, doc.Texts["text-1"]["div-1"]["p-1"]);
-        }
+        ClassicAssert.AreEqual(1, doc.Texts.Count);
+        ClassicAssert.AreEqual(1, doc.Texts["text-1"].Count);
+        ClassicAssert.AreEqual(2, doc.Texts["text-1"]["div-1"].Count);
+
+        string exp = "To krótki tekst w formacie NKJP. Zawiera dwa zdania.";
+        ClassicAssert.AreEqual(exp, doc.Texts["text-1"]["div-1"]["p-1"]);
     }
 
     [Test]
     public void TestGetParagraphs()
     {
-        using (Stream nkjpTextXmlIn = TestResources.OpenResource("/opennlp/tools/formats/nkjp/text_structure.xml"))
-        {
-            NKJPTextDocument doc = NKJPTextDocument.Parse(nkjpTextXmlIn);
-            IDictionary<string, string> paras = doc.GetParagraphs();
-            ClassicAssert.AreEqual("To krótkie zdanie w drugim akapicie.", paras["ab-1"]);
-        }
+        using var nkjpTextXmlIn = TestResources.OpenResource("/opennlp/tools/formats/nkjp/text_structure.xml");
+
+        var doc = NKJPTextDocument.Parse(nkjpTextXmlIn);
+        var paras = doc.GetParagraphs();
+        ClassicAssert.AreEqual("To krótkie zdanie w drugim akapicie.", paras["ab-1"]);
     }
 }

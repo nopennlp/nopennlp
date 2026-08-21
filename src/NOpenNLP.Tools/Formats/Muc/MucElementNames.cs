@@ -18,7 +18,7 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
-using System.Collections.Generic;
+using J2N.Collections.ObjectModel;
 using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Formats.Muc;
@@ -32,9 +32,8 @@ internal static class MucElementNames
     internal const string SentenceElement = "s";
 
     // NOpenNLP: upstream builds the set in a static initializer and wraps it in
-    // Collections.unmodifiableSet. A read-only collection initializer expresses the
-    // same thing, and the BCL ISet<string> is exposed rather than the J2N type.
-    internal static readonly ISet<string> ContentElements = new JCG.HashSet<string>
+    // Collections.unmodifiableSet. A read-only collection initializer expresses the same thing.
+    internal static readonly ReadOnlySet<string> ContentElements = new JCG.HashSet<string>
     {
         HeadlineElement,
         DatelineElement,

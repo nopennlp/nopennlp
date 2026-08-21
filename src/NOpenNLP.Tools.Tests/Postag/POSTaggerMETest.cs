@@ -21,7 +21,6 @@
 using System;
 using System.Text;
 using NOpenNLP.Tools.Formats;
-using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Util;
 using NOpenNLP.Tools.Util.Model;
 using NUnit.Framework;
@@ -48,7 +47,7 @@ public class POSTaggerMETest
     /// <returns><see cref="POSModel"/></returns>
     public static POSModel TrainPOSModel(ModelType type)
     {
-        TrainingParameters @params = new TrainingParameters();
+        var @params = new TrainingParameters();
         @params.Put(TrainingParameters.ALGORITHM_PARAM, type.ToString());
         @params.Put(TrainingParameters.ITERATIONS_PARAM, 100);
         @params.Put(TrainingParameters.CUTOFF_PARAM, 5);
@@ -59,11 +58,11 @@ public class POSTaggerMETest
     [Test]
     public void TestPOSTagger()
     {
-        POSModel posModel = TrainPOSModel(ModelType.MAXENT);
+        var posModel = TrainPOSModel(ModelType.MAXENT);
 
         IPOSTagger tagger = new POSTaggerME(posModel);
 
-        string[] tags = tagger.Tag([
+        var tags = tagger.Tag([
             "The",
             "driver",
             "got",
@@ -83,7 +82,7 @@ public class POSTaggerMETest
     [Test]
     public void TestBuildNGramDictionary()
     {
-        IObjectStream<POSSample?> samples = CreateSampleStream();
+        var samples = CreateSampleStream();
         POSTaggerME.BuildNGramDictionary(samples, 0);
     }
 
@@ -96,7 +95,7 @@ public class POSTaggerMETest
         IObjectStream<POSSample?> stream = new WordTagSampleStream(
             new PlainTextByLineStream(@in, Encoding.UTF8));
 
-        TrainingParameters @params = new TrainingParameters();
+        var @params = new TrainingParameters();
         @params.Put(TrainingParameters.ALGORITHM_PARAM, ModelType.MAXENT.ToString());
         @params.Put(TrainingParameters.ITERATIONS_PARAM, 100);
         @params.Put(TrainingParameters.CUTOFF_PARAM, 5);

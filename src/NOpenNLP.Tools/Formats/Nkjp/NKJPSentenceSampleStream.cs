@@ -35,8 +35,7 @@ public class NKJPSentenceSampleStream : ObjectStreamBase<SentenceSample?>
     // NOpenNLP: upstream holds a java.util.Iterator here. This is one of the cases
     // CLAUDE.md reserves for IEnumerator<T>: Read() needs manual control over advancing,
     // and Reset() has to be able to restart the walk from the beginning.
-    private IEnumerator<KeyValuePair<string, IDictionary<string, NKJPSegmentationDocument.Pointer>>>
-        segmentIt;
+    private IEnumerator<KeyValuePair<string, IDictionary<string, NKJPSegmentationDocument.Pointer>>> segmentIt;
 
     internal NKJPSentenceSampleStream(NKJPSegmentationDocument segments, NKJPTextDocument text)
     {
@@ -51,13 +50,12 @@ public class NKJPSentenceSampleStream : ObjectStreamBase<SentenceSample?>
     public override SentenceSample? Read()
     {
         var sentencesString = new StringBuilder();
-        IList<Span> sentenceSpans = new JCG.List<Span>();
-        IDictionary<string, string> paragraphs = text.GetParagraphs();
+        JCG.List<Span> sentenceSpans = [];
+        var paragraphs = text.GetParagraphs();
 
         while (segmentIt.MoveNext())
         {
-            KeyValuePair<string, IDictionary<string, NKJPSegmentationDocument.Pointer>> segment =
-                segmentIt.Current;
+            var segment = segmentIt.Current;
             int start = 0;
             int end = 0;
             bool started = false;
@@ -66,18 +64,18 @@ public class NKJPSentenceSampleStream : ObjectStreamBase<SentenceSample?>
 
             foreach (string s in segment.Value.Keys)
             {
-                NKJPSegmentationDocument.Pointer currentPointer = segment.Value[s];
-                Span currentSpan = currentPointer.ToSpan();
+                var currentPointer = segment.Value[s];
+                var currentSpan = currentPointer.ToSpan();
 
                 if (!started)
                 {
                     start = currentSpan.Start;
                     started = true;
-                    lastParagraphId = currentPointer.id;
-                    currentParagraph = Paragraph(paragraphs, currentPointer.id);
+                    lastParagraphId = currentPointer.Id;
+                    currentParagraph = Paragraph(paragraphs, currentPointer.Id);
                 }
 
-                if (!lastParagraphId.Equals(currentPointer.id, System.StringComparison.Ordinal))
+                if (!lastParagraphId.Equals(currentPointer.Id, System.StringComparison.Ordinal))
                 {
                     int new_start = sentencesString.Length;
                     sentencesString.Append(currentParagraph.Substring(start, end - start));
@@ -87,8 +85,8 @@ public class NKJPSentenceSampleStream : ObjectStreamBase<SentenceSample?>
 
                     start = currentSpan.Start;
                     end = currentSpan.End;
-                    lastParagraphId = currentPointer.id;
-                    currentParagraph = Paragraph(paragraphs, currentPointer.id);
+                    lastParagraphId = currentPointer.Id;
+                    currentParagraph = Paragraph(paragraphs, currentPointer.Id);
                 }
                 else
                 {
@@ -109,7 +107,7 @@ public class NKJPSentenceSampleStream : ObjectStreamBase<SentenceSample?>
             return null;
         }
 
-        Span[] spans = new Span[sentenceSpans.Count];
+        var spans = new Span[sentenceSpans.Count];
         sentenceSpans.CopyTo(spans, 0);
         return new SentenceSample(sentencesString.ToString(), spans);
     }
@@ -124,7 +122,7 @@ public class NKJPSentenceSampleStream : ObjectStreamBase<SentenceSample?>
         paragraphs.TryGetValue(id, out string? paragraph) ? paragraph : null!;
 
     /// <inheritdoc/>
-    public override void Reset() => segmentIt = segments.Segments.GetEnumerator();
+    public override void Reset() => segmentIt.Reset();
 
     /// <inheritdoc/>
     protected override void Dispose(bool disposing)

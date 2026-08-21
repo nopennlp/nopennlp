@@ -48,15 +48,8 @@ public class FileToByteArraySampleStream(IObjectStream<FileInfo?> samples)
     /// <exception cref="IOException">if there is an error during reading</exception>
     public override byte[]? Read()
     {
-        FileInfo? sampleFile = samples.Read();
+        var sampleFile = samples.Read();
 
-        if (sampleFile != null)
-        {
-            return ReadFile(sampleFile);
-        }
-        else
-        {
-            return null;
-        }
+        return sampleFile != null ? ReadFile(sampleFile) : null;
     }
 }

@@ -18,8 +18,6 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
-using NOpenNLP.Tools.Formats;
-using NOpenNLP.Tools.Sentdetect;
 using NOpenNLP.Tools.Util;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
@@ -34,17 +32,16 @@ public class ConlluSentenceSampleStreamTest
         IInputStreamFactory streamFactory =
             new ResourceAsStreamFactory("/opennlp/tools/formats/conllu/de-ud-train-sample.conllu");
 
-        using (IObjectStream<SentenceSample?> stream =
-            new ConlluSentenceSampleStream(new ConlluStream(streamFactory), 1))
+        using (var stream = new ConlluSentenceSampleStream(new ConlluStream(streamFactory), 1))
         {
-            SentenceSample? sample1 = stream.Read();
+            var sample1 = stream.Read();
 
             ClassicAssert.AreEqual("Fachlich kompetent, sehr gute Beratung und ein freundliches Team.",
                 sample1!.Document);
 
             ClassicAssert.AreEqual(new Span(0, 65), sample1.GetSentences()[0]);
 
-            SentenceSample? sample2 = stream.Read();
+            var sample2 = stream.Read();
 
             ClassicAssert.AreEqual("Beiden Zahnärzten verdanke ich einen neuen Biss und dadurch " +
                 "endlich keine Rückenschmerzen mehr.", sample2!.Document);
@@ -53,10 +50,9 @@ public class ConlluSentenceSampleStreamTest
             ClassicAssert.IsNull(stream.Read(), "Stream must be exhausted");
         }
 
-        using (IObjectStream<SentenceSample?> stream =
-            new ConlluSentenceSampleStream(new ConlluStream(streamFactory), 3))
+        using (var stream = new ConlluSentenceSampleStream(new ConlluStream(streamFactory), 3))
         {
-            SentenceSample? sample = stream.Read();
+            var sample = stream.Read();
 
             ClassicAssert.AreEqual("Fachlich kompetent, sehr gute Beratung und ein freundliches Team."
                 + " Beiden Zahnärzten verdanke ich einen neuen Biss und dadurch endlich keine "

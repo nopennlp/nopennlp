@@ -21,7 +21,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using NOpenNLP.Tools.Namefind;
 using NOpenNLP.Tools.Sentdetect;
 using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Tokenize;
@@ -58,9 +57,9 @@ public class BratNameSampleStreamTest
     {
         bratDirectory = new TempDirectory("nopennlp-brat");
 
-        foreach (string name in BratResources)
+        foreach (var name in BratResources)
         {
-            bratDirectory.CopyResource("/opennlp/tools/formats/brat/" + name, name);
+            bratDirectory.CopyResource($"/opennlp/tools/formats/brat/{name}", name);
         }
     }
 
@@ -70,32 +69,28 @@ public class BratNameSampleStreamTest
     private BratNameSampleStream CreateNameSampleWith(string nameContainsFilter,
         ISet<string>? nameTypes)
     {
-        IDictionary<string, string> typeToClassMap = new Dictionary<string, string>();
+        var typeToClassMap = new Dictionary<string, string>();
         BratAnnotationStreamTest.AddEntityTypes(typeToClassMap);
         AnnotationConfiguration config = new(typeToClassMap);
 
-        DirectoryInfo dir = bratDirectory.DirectoryInfo;
-        Func<FileSystemInfo, bool> fileFilter =
-            pathname => pathname.Name.Contains(nameContainsFilter);
+        var dir = bratDirectory.DirectoryInfo;
 
-        IObjectStream<BratDocument?> bratDocumentStream = new BratDocumentStream(config, dir,
-            false, fileFilter);
+        IObjectStream<BratDocument?> bratDocumentStream = new BratDocumentStream(config, dir, false, FileFilter);
 
         return new BratNameSampleStream(new NewlineSentenceDetector(),
             WhitespaceTokenizer.INSTANCE, bratDocumentStream, nameTypes);
+
+        bool FileFilter(FileSystemInfo pathname) => pathname.Name.Contains(nameContainsFilter);
     }
 
     [Test]
     public void ReadNoOverlap()
     {
-        BratNameSampleStream stream = CreateNameSampleWith("-entities.",
-            null);
+        var stream = CreateNameSampleWith("-entities.", null);
         int count = 0;
-        NameSample? sample = stream.Read();
-        while (sample != null)
+        while (stream.Read() is not null)
         {
             count++;
-            sample = stream.Read();
         }
 
         ClassicAssert.AreEqual(8, count);
@@ -104,18 +99,15 @@ public class BratNameSampleStreamTest
     [Test]
     public void ReadOverlapFail()
     {
-        BratNameSampleStream stream = CreateNameSampleWith("overlapping",
-            null);
+        var stream = CreateNameSampleWith("overlapping", null);
 
         // NOpenNLP: upstream expects RuntimeException, which NameSample throws for
         // overlapping name spans. The port throws InvalidOperationException there, the
         // closest .NET counterpart for an unchecked programming-error throw.
         Assert.Throws<InvalidOperationException>((Action)(() =>
         {
-            NameSample? sample = stream.Read();
-            while (sample != null)
+            while (stream.Read() is not null)
             {
-                sample = stream.Read();
             }
         }));
     }
@@ -132,14 +124,11 @@ public class BratNameSampleStreamTest
     [Test]
     public void ReadOverlapFilter()
     {
-        BratNameSampleStream stream = CreateNameSampleWith("overlapping",
-            new HashSet<string> { "Person" });
+        var stream = CreateNameSampleWith("overlapping", new HashSet<string> { "Person" });
         int count = 0;
-        NameSample? sample = stream.Read();
-        while (sample != null)
+        while (stream.Read() is not null)
         {
             count++;
-            sample = stream.Read();
         }
 
         ClassicAssert.AreEqual(8, count);

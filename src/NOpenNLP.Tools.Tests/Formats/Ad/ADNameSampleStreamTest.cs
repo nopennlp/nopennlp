@@ -20,7 +20,6 @@
 
 using System.Collections.Generic;
 using System.Text;
-using NOpenNLP.Tools.Formats;
 using NOpenNLP.Tools.Namefind;
 using NOpenNLP.Tools.Util;
 using NUnit.Framework;
@@ -118,14 +117,10 @@ public class ADNameSampleStreamTest
 
         IInputStreamFactory @in = new ResourceAsStreamFactory("/opennlp/tools/formats/ad.sample");
 
-        using (ADNameSampleStream stream = new ADNameSampleStream(
-            new PlainTextByLineStream(@in, Encoding.UTF8), true))
+        using var stream = new ADNameSampleStream(new PlainTextByLineStream(@in, Encoding.UTF8), true);
+        while (stream.Read() is { } sample)
         {
-            NameSample? sample;
-            while ((sample = stream.Read()) != null)
-            {
-                samples.Add(sample);
-            }
+            samples.Add(sample);
         }
     }
 }

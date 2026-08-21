@@ -31,13 +31,11 @@ namespace NOpenNLP.Tools.Formats.Convert;
 public class NameToTokenSampleStream(IDetokenizer detokenizer, IObjectStream<NameSample?> samples)
     : FilterObjectStream<NameSample?, TokenSample?>(samples)
 {
-    private readonly IDetokenizer detokenizer = detokenizer;
-
     /// <inheritdoc/>
     /// <exception cref="IOException">if there is an error during reading</exception>
     public override TokenSample? Read()
     {
-        NameSample? nameSample = samples.Read();
+        var nameSample = samples.Read();
 
         TokenSample? tokenSample = null;
 

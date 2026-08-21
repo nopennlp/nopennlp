@@ -48,7 +48,7 @@ public class TokenizerFactoryTest
     {
         // NOpenNLP: upstream calls getResourceAsStream; the .NET counterpart is
         // an embedded resource, opened through the shared TestResources helper.
-        using Stream @in = TestResources.OpenResource("/opennlp/tools/sentdetect/abb.xml");
+        using var @in = TestResources.OpenResource("/opennlp/tools/sentdetect/abb.xml");
 
         return new NOpenNLP.Tools.Dictionary.Dictionary(@in);
     }
@@ -56,12 +56,12 @@ public class TokenizerFactoryTest
     [Test]
     public void TestDefault()
     {
-        NOpenNLP.Tools.Dictionary.Dictionary dic = LoadAbbDictionary();
+        var dic = LoadAbbDictionary();
         const string lang = "spa";
 
-        TokenizerModel model = Train(new TokenizerFactory(lang, dic, false, null!));
+        var model = Train(new TokenizerFactory(lang, dic, false, null!));
 
-        TokenizerFactory factory = model.Factory;
+        var factory = model.Factory;
         ClassicAssert.IsTrue(factory.AbbreviationDictionary != null);
         ClassicAssert.IsTrue(factory.ContextGenerator is DefaultTokenContextGenerator);
 
@@ -70,11 +70,11 @@ public class TokenizerFactoryTest
         ClassicAssert.AreEqual(lang, model.Language);
         ClassicAssert.IsFalse(factory.UseAlphaNumericOptmization);
 
-        MemoryStream @out = new MemoryStream();
+        var @out = new MemoryStream();
         model.Serialize(@out);
-        MemoryStream @in = new MemoryStream(@out.ToArray());
+        var @in = new MemoryStream(@out.ToArray());
 
-        TokenizerModel fromSerialized = new TokenizerModel(@in);
+        var fromSerialized = new TokenizerModel(@in);
 
         factory = fromSerialized.Factory;
         ClassicAssert.IsTrue(factory.AbbreviationDictionary != null);
@@ -92,9 +92,9 @@ public class TokenizerFactoryTest
         NOpenNLP.Tools.Dictionary.Dictionary? dic = null;
         const string lang = "spa";
 
-        TokenizerModel model = Train(new TokenizerFactory(lang, dic, false, null!));
+        var model = Train(new TokenizerFactory(lang, dic, false, null!));
 
-        TokenizerFactory factory = model.Factory;
+        var factory = model.Factory;
         ClassicAssert.IsNull(factory.AbbreviationDictionary);
         ClassicAssert.IsTrue(factory.ContextGenerator is DefaultTokenContextGenerator);
 
@@ -103,11 +103,11 @@ public class TokenizerFactoryTest
         ClassicAssert.AreEqual(lang, model.Language);
         ClassicAssert.IsFalse(factory.UseAlphaNumericOptmization);
 
-        MemoryStream @out = new MemoryStream();
+        var @out = new MemoryStream();
         model.Serialize(@out);
-        MemoryStream @in = new MemoryStream(@out.ToArray());
+        var @in = new MemoryStream(@out.ToArray());
 
-        TokenizerModel fromSerialized = new TokenizerModel(@in);
+        var fromSerialized = new TokenizerModel(@in);
 
         factory = fromSerialized.Factory;
         ClassicAssert.IsNull(factory.AbbreviationDictionary);
@@ -124,11 +124,11 @@ public class TokenizerFactoryTest
     {
         NOpenNLP.Tools.Dictionary.Dictionary? dic = null;
         const string lang = "spa";
-        string pattern = "^[0-9A-Za-z]+$";
+        const string pattern = "^[0-9A-Za-z]+$";
 
-        TokenizerModel model = Train(new TokenizerFactory(lang, dic, true, new Regex(pattern)));
+        var model = Train(new TokenizerFactory(lang, dic, true, new Regex(pattern)));
 
-        TokenizerFactory factory = model.Factory;
+        var factory = model.Factory;
         ClassicAssert.IsNull(factory.AbbreviationDictionary);
         ClassicAssert.IsTrue(factory.ContextGenerator is DefaultTokenContextGenerator);
 
@@ -137,11 +137,11 @@ public class TokenizerFactoryTest
         ClassicAssert.AreEqual(lang, model.Language);
         ClassicAssert.IsTrue(factory.UseAlphaNumericOptmization);
 
-        MemoryStream @out = new MemoryStream();
+        var @out = new MemoryStream();
         model.Serialize(@out);
-        MemoryStream @in = new MemoryStream(@out.ToArray());
+        var @in = new MemoryStream(@out.ToArray());
 
-        TokenizerModel fromSerialized = new TokenizerModel(@in);
+        var fromSerialized = new TokenizerModel(@in);
 
         factory = fromSerialized.Factory;
         ClassicAssert.IsNull(factory.AbbreviationDictionary);
@@ -155,13 +155,13 @@ public class TokenizerFactoryTest
     [Test]
     public void TestDummyFactory()
     {
-        NOpenNLP.Tools.Dictionary.Dictionary dic = LoadAbbDictionary();
+        var dic = LoadAbbDictionary();
         const string lang = "spa";
-        string pattern = "^[0-9A-Za-z]+$";
+        const string pattern = "^[0-9A-Za-z]+$";
 
-        TokenizerModel model = Train(new DummyTokenizerFactory(lang, dic, true, new Regex(pattern)));
+        var model = Train(new DummyTokenizerFactory(lang, dic, true, new Regex(pattern)));
 
-        TokenizerFactory factory = model.Factory;
+        var factory = model.Factory;
         ClassicAssert.IsTrue(factory.AbbreviationDictionary is DummyTokenizerFactory.DummyDictionary);
         ClassicAssert.IsTrue(factory.ContextGenerator is DummyTokenizerFactory.DummyContextGenerator);
         ClassicAssert.AreEqual(pattern, factory.AlphaNumericPattern!.ToString());
@@ -169,11 +169,11 @@ public class TokenizerFactoryTest
         ClassicAssert.AreEqual(lang, model.Language);
         ClassicAssert.IsTrue(factory.UseAlphaNumericOptmization);
 
-        MemoryStream @out = new MemoryStream();
+        var @out = new MemoryStream();
         model.Serialize(@out);
-        MemoryStream @in = new MemoryStream(@out.ToArray());
+        var @in = new MemoryStream(@out.ToArray());
 
-        TokenizerModel fromSerialized = new TokenizerModel(@in);
+        var fromSerialized = new TokenizerModel(@in);
 
         factory = fromSerialized.Factory;
         ClassicAssert.IsTrue(factory.AbbreviationDictionary is DummyTokenizerFactory.DummyDictionary);
@@ -187,13 +187,13 @@ public class TokenizerFactoryTest
     [Test]
     public void TestCreateDummyFactory()
     {
-        NOpenNLP.Tools.Dictionary.Dictionary dic = LoadAbbDictionary();
+        var dic = LoadAbbDictionary();
         const string lang = "spa";
-        string pattern = "^[0-9A-Za-z]+$";
+        const string pattern = "^[0-9A-Za-z]+$";
 
         // NOpenNLP: upstream passes Class.getCanonicalName(); the .NET counterpart
         // that ExtensionLoader resolves is the type's full name.
-        TokenizerFactory factory = TokenizerFactory.Create(
+        var factory = TokenizerFactory.Create(
             typeof(DummyTokenizerFactory).FullName, lang, dic, true, new Regex(pattern))!;
 
         ClassicAssert.IsTrue(factory.AbbreviationDictionary is DummyTokenizerFactory.DummyDictionary);

@@ -61,11 +61,11 @@ public abstract class SegmenterObjectStream<S, T>(IObjectStream<S?> @in)
         }
         else
         {
-            S? inSample = samples.Read();
+            var inSample = samples.Read();
 
             if (inSample != null)
             {
-                IList<T>? outSamples = Read(inSample);
+                var outSamples = Read(inSample);
 
                 if (outSamples != null)
                 {

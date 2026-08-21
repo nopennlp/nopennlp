@@ -22,19 +22,16 @@ namespace NOpenNLP.Tools.Formats.Brat;
 
 public class RelationAnnotation : BratAnnotation
 {
-    private readonly string arg1;
-    private readonly string arg2;
-
     protected internal RelationAnnotation(string id, string type, string arg1, string arg2)
         : base(id, type)
     {
-        this.arg1 = arg1;
-        this.arg2 = arg2;
+        Arg1 = arg1;
+        Arg2 = arg2;
     }
 
-    public string Arg1 => arg1;
+    public string Arg1 { get; }
 
-    public string Arg2 => arg2;
+    public string Arg2 { get; }
 
-    public override string ToString() => base.ToString() + " arg1:" + Arg1 + " arg2:" + Arg2;
+    public override string ToString() => $"{base.ToString()} arg1:{Arg1} arg2:{Arg2}";
 }

@@ -86,26 +86,20 @@ public class NameFinderCensus90NameStream : ObjectStreamBase<StringList?>
 
         if (line != null && !StringUtil.IsEmpty(line))
         {
-            string name2;
             // find the location of the name separator in the line of data.
             int pos = line.IndexOf(' ');
             if (pos != -1)
             {
-                string parsed = line.Substring(0, pos);
+                string parsed = line[..pos];
                 // the data is in ALL CAPS ... so the easiest way is to convert
                 // back to standard mixed case.
-                if (parsed.Length > 2 && parsed.StartsWith("MC", StringComparison.Ordinal))
-                {
-                    name2 = StringUtil.ToUpperCase(parsed.Substring(0, 1)) +
-                            StringUtil.ToLowerCase(parsed.Substring(1, 1)) +
-                            StringUtil.ToUpperCase(parsed.Substring(2, 1)) +
-                            StringUtil.ToLowerCase(parsed.Substring(3));
-                }
-                else
-                {
-                    name2 = StringUtil.ToUpperCase(parsed.Substring(0, 1)) +
-                            StringUtil.ToLowerCase(parsed.Substring(1));
-                }
+                string name2 = parsed.Length > 2 && parsed.StartsWith("MC", StringComparison.Ordinal)
+                    ? StringUtil.ToUpperCase(parsed[..1]) +
+                      StringUtil.ToLowerCase(parsed[1..2]) +
+                      StringUtil.ToUpperCase(parsed[2..3]) +
+                      StringUtil.ToLowerCase(parsed[3..])
+                    : StringUtil.ToUpperCase(parsed[..1]) +
+                      StringUtil.ToLowerCase(parsed[1..]);
 
                 name = new StringList(name2);
             }

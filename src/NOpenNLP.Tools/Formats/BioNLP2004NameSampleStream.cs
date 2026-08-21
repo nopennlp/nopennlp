@@ -19,7 +19,6 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using NOpenNLP.Tools.Namefind;
@@ -65,115 +64,119 @@ public class BioNLP2004NameSampleStream : ObjectStreamBase<NameSample?>
     /// <exception cref="IOException">if there is an error during reading</exception>
     public override NameSample? Read()
     {
-        IList<string> sentence = new JCG.List<string>();
-        IList<string> tags = new JCG.List<string>();
-
-        bool isClearAdaptiveData = false;
-
-        // Empty line indicates end of sentence
-
-        string? line;
-        while ((line = lineStream.Read()) != null && !StringUtil.IsEmpty(line.Trim()))
+        // NOpenNLP: converted recursion to iteration
+        while (true)
         {
-            if (line.StartsWith("###MEDLINE:", StringComparison.Ordinal))
+            JCG.List<string> sentence = [];
+            JCG.List<string> tags = [];
+
+            bool isClearAdaptiveData = false;
+
+            // Empty line indicates end of sentence
+
+            string? line;
+            while ((line = lineStream.Read()) != null && !StringUtil.IsEmpty(line.Trim()))
             {
-                isClearAdaptiveData = true;
-                lineStream.Read();
-                continue;
-            }
-
-            if (line.Contains("ABSTRACT TRUNCATED"))
-                continue;
-
-            string[] fields = line.Split('\t');
-
-            if (fields.Length == 2)
-            {
-                sentence.Add(fields[0]);
-                tags.Add(fields[1]);
-            }
-            else
-            {
-                throw new IOException("Expected two fields per line in training data, got " +
-                    fields.Length + " for line '" + line + "'!");
-            }
-        }
-
-        if (sentence.Count > 0)
-        {
-            // convert name tags into spans
-            IList<Span> names = new JCG.List<Span>();
-
-            int beginIndex = -1;
-            int endIndex = -1;
-            for (int i = 0; i < tags.Count; i++)
-            {
-                string tag = tags[i];
-
-                if (tag.EndsWith("DNA", StringComparison.Ordinal) && (types & GenerateDnaEntities) == 0)
-                    tag = "O";
-
-                if (tag.EndsWith("protein", StringComparison.Ordinal) && (types & GenerateProteinEntities) == 0)
-                    tag = "O";
-
-                if (tag.EndsWith("cell_type", StringComparison.Ordinal) && (types & GenerateCelltypeEntities) == 0)
-                    tag = "O";
-
-                // NOpenNLP: upstream tests GENERATE_CELLTYPE_ENTITIES on this line rather
-                // than GENERATE_CELLLINE_ENTITIES, so cell_line entities are governed by
-                // the cell_type flag. Kept as-is to match upstream output; changing it
-                // would make this reader disagree with Apache OpenNLP on the same corpus.
-                if (tag.EndsWith("cell_line", StringComparison.Ordinal) && (types & GenerateCelltypeEntities) == 0)
-                    tag = "O";
-                if (tag.EndsWith("RNA", StringComparison.Ordinal) && (types & GenerateRnaEntities) == 0)
-                    tag = "O";
-
-                if (tag.StartsWith("B-", StringComparison.Ordinal))
+                if (line.StartsWith("###MEDLINE:", StringComparison.Ordinal))
                 {
-                    if (beginIndex != -1)
-                    {
-                        names.Add(new Span(beginIndex, endIndex, tags[beginIndex].Substring(2)));
-                        beginIndex = -1;
-                        endIndex = -1;
-                    }
-
-                    beginIndex = i;
-                    endIndex = i + 1;
+                    isClearAdaptiveData = true;
+                    lineStream.Read();
+                    continue;
                 }
-                else if (tag.StartsWith("I-", StringComparison.Ordinal))
+
+                if (line.Contains("ABSTRACT TRUNCATED"))
+                    continue;
+
+                string[] fields = line.Split('\t');
+
+                if (fields.Length == 2)
                 {
-                    endIndex++;
-                }
-                else if (tag.Equals("O", StringComparison.Ordinal))
-                {
-                    if (beginIndex != -1)
-                    {
-                        names.Add(new Span(beginIndex, endIndex, tags[beginIndex].Substring(2)));
-                        beginIndex = -1;
-                        endIndex = -1;
-                    }
+                    sentence.Add(fields[0]);
+                    tags.Add(fields[1]);
                 }
                 else
                 {
-                    throw new IOException("Invalid tag: " + tag);
+                    throw new IOException(
+                        $"Expected two fields per line in training data, got {fields.Length} for line '{line}'!");
                 }
             }
 
-            // if one span remains, create it here
-            if (beginIndex != -1)
-                names.Add(new Span(beginIndex, endIndex, tags[beginIndex].Substring(2)));
+            if (sentence.Count > 0)
+            {
+                // convert name tags into spans
+                JCG.List<Span> names = [];
 
-            return new NameSample([.. sentence], [.. names], isClearAdaptiveData);
-        }
-        else if (line != null)
-        {
-            // Just filter out empty events, if two lines in a row are empty
-            return Read();
-        }
-        else
-        {
-            // source stream is not returning anymore lines
-            return null;
+                int beginIndex = -1;
+                int endIndex = -1;
+                for (int i = 0; i < tags.Count; i++)
+                {
+                    string tag = tags[i];
+
+                    if (tag.EndsWith("DNA", StringComparison.Ordinal) && (types & GenerateDnaEntities) == 0)
+                        tag = "O";
+
+                    if (tag.EndsWith("protein", StringComparison.Ordinal) && (types & GenerateProteinEntities) == 0)
+                        tag = "O";
+
+                    if (tag.EndsWith("cell_type", StringComparison.Ordinal) && (types & GenerateCelltypeEntities) == 0)
+                        tag = "O";
+
+                    // NOpenNLP: upstream tests GENERATE_CELLTYPE_ENTITIES on this line rather
+                    // than GENERATE_CELLLINE_ENTITIES, so cell_line entities are governed by
+                    // the cell_type flag. Kept as-is to match upstream output; changing it
+                    // would make this reader disagree with Apache OpenNLP on the same corpus.
+                    if (tag.EndsWith("cell_line", StringComparison.Ordinal) && (types & GenerateCelltypeEntities) == 0)
+                        tag = "O";
+                    if (tag.EndsWith("RNA", StringComparison.Ordinal) && (types & GenerateRnaEntities) == 0)
+                        tag = "O";
+
+                    if (tag.StartsWith("B-", StringComparison.Ordinal))
+                    {
+                        if (beginIndex != -1)
+                        {
+                            names.Add(new Span(beginIndex, endIndex, tags[beginIndex][2..]));
+                            beginIndex = -1;
+                            endIndex = -1;
+                        }
+
+                        beginIndex = i;
+                        endIndex = i + 1;
+                    }
+                    else if (tag.StartsWith("I-", StringComparison.Ordinal))
+                    {
+                        endIndex++;
+                    }
+                    else if (tag.Equals("O", StringComparison.Ordinal))
+                    {
+                        if (beginIndex != -1)
+                        {
+                            names.Add(new Span(beginIndex, endIndex, tags[beginIndex][2..]));
+                            beginIndex = -1;
+                            endIndex = -1;
+                        }
+                    }
+                    else
+                    {
+                        throw new IOException($"Invalid tag: {tag}");
+                    }
+                }
+
+                // if one span remains, create it here
+                if (beginIndex != -1)
+                    names.Add(new Span(beginIndex, endIndex, tags[beginIndex][2..]));
+
+                return new NameSample([.. sentence], [.. names], isClearAdaptiveData);
+            }
+            else if (line != null)
+            {
+                // Just filter out empty events, if two lines in a row are empty
+                continue;
+            }
+            else
+            {
+                // source stream is not returning anymore lines
+                return null;
+            }
         }
     }
 

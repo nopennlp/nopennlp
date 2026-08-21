@@ -39,10 +39,9 @@ public class DocumentToLineStream(IObjectStream<string?> samples)
         IList<string> lines = sample.Split('\n');
 
         // documents must be empty line terminated
-        if (lines[lines.Count - 1].Trim().Length != 0)
+        if (lines[^1].Trim().Length != 0)
         {
-            lines = new JCG.List<string>(lines);
-            lines.Add("");
+            lines = new JCG.List<string>(lines) { "" };
         }
 
         return lines;

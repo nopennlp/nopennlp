@@ -72,7 +72,7 @@ public class BratDocumentStream : ObjectStreamBase<BratDocument?>
 
         while (directoryStack.Count > 0)
         {
-            foreach (FileSystemInfo entry in directoryStack.Pop().EnumerateFileSystemInfos())
+            foreach (var entry in directoryStack.Pop().EnumerateFileSystemInfos())
             {
                 if (fileFilter is not null && !fileFilter(entry))
                 {
@@ -85,7 +85,7 @@ public class BratDocumentStream : ObjectStreamBase<BratDocument?>
                     if (annFilePath.EndsWith(".ann", StringComparison.Ordinal))
                     {
                         // cutoff last 4 chars ...
-                        string documentId = annFilePath.Substring(0, annFilePath.Length - 4);
+                        string documentId = annFilePath[..^4];
 
                         var txtFile = new FileInfo(documentId + ".txt");
 

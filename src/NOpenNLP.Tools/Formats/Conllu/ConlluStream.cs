@@ -50,6 +50,7 @@ public class ConlluStream : ObjectStreamBase<ConlluSentence?>
 
         if (sentence != null)
         {
+            // NOpenNLP: interface-typed because PostProcessContractions returns IList<T>
             IList<ConlluWordLine> wordLines = new JCG.List<ConlluWordLine>();
 
             var reader = new StringReader(sentence);
@@ -57,20 +58,19 @@ public class ConlluStream : ObjectStreamBase<ConlluSentence?>
             string? sentenceId = null;
             string? text = null;
 
-            string? line;
-            while ((line = reader.ReadLine()) != null)
+            while (reader.ReadLine() is { } line)
             {
                 // # indicates a comment line and contains additional data
                 if (line.Trim().StartsWith("#", StringComparison.Ordinal))
                 {
-                    string commentLine = line.Trim().Substring(1);
+                    string commentLine = line.Trim()[1..];
 
                     int separator = commentLine.IndexOf('=');
 
                     if (separator != -1)
                     {
-                        string firstPart = commentLine.Substring(0, separator).Trim();
-                        string secondPart = commentLine.Substring(separator + 1).Trim();
+                        string firstPart = commentLine[..separator].Trim();
+                        string secondPart = commentLine[(separator + 1)..].Trim();
 
                         if (secondPart.Length != 0)
                         {
@@ -103,17 +103,17 @@ public class ConlluStream : ObjectStreamBase<ConlluSentence?>
     private static IList<ConlluWordLine> PostProcessContractions(IList<ConlluWordLine> lines)
     {
         // 1. Find contractions
-        IDictionary<string, int> index = new JCG.Dictionary<string, int>();
-        IDictionary<string, IList<string>> contractions = new JCG.Dictionary<string, IList<string>>();
-        IList<string> linesToDelete = new JCG.List<string>();
+        JCG.Dictionary<string, int> index = [];
+        JCG.Dictionary<string, IList<string>> contractions = [];
+        JCG.List<string> linesToDelete = [];
 
         for (int i = 0; i < lines.Count; i++)
         {
-            ConlluWordLine line = lines[i];
+            var line = lines[i];
             index[line.Id] = i;
             if (line.Id.Contains("-"))
             {
-                IList<string> expandedContractions = new JCG.List<string>();
+                JCG.List<string> expandedContractions = [];
                 string[] ids = line.Id.Split('-');
                 int start = int.Parse(ids[0], CultureInfo.InvariantCulture);
                 int end = int.Parse(ids[1], CultureInfo.InvariantCulture);
@@ -129,19 +129,19 @@ public class ConlluStream : ObjectStreamBase<ConlluSentence?>
         }
 
         // 2. Merge annotation
-        foreach (KeyValuePair<string, IList<string>> entry in contractions)
+        foreach (var entry in contractions)
         {
             string contractionId = entry.Key;
-            IList<string> expandedContractions = entry.Value;
+            var expandedContractions = entry.Value;
             int contractionIndex = index[contractionId];
-            ConlluWordLine contraction = lines[contractionIndex];
-            IList<ConlluWordLine> expandedParts = new JCG.List<ConlluWordLine>();
+            var contraction = lines[contractionIndex];
+            JCG.List<ConlluWordLine> expandedParts = [];
             foreach (string id in expandedContractions)
             {
                 expandedParts.Add(lines[index[id]]);
             }
 
-            ConlluWordLine merged = MergeAnnotation(contraction, expandedParts);
+            var merged = MergeAnnotation(contraction, expandedParts);
             lines[contractionIndex] = merged;
         }
 
@@ -192,7 +192,7 @@ public class ConlluStream : ObjectStreamBase<ConlluSentence?>
     {
         var result = new StringBuilder();
 
-        foreach (ConlluWordLine part in expandedParts)
+        foreach (var part in expandedParts)
         {
             string value = selector(part);
 

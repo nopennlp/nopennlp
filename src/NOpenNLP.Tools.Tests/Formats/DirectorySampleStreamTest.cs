@@ -56,7 +56,7 @@ public class DirectorySampleStreamTest
             return false;
         }
 
-        foreach (FileInfo f in files)
+        foreach (var f in files)
         {
             if (string.Equals(f.FullName, file.FullName, StringComparison.Ordinal))
             {
@@ -76,13 +76,13 @@ public class DirectorySampleStreamTest
 
         // NOpenNLP: upstream's tempDirectory.newFile() creates a file with a ".tmp"
         // suffix, which is what TempFileNameFilter matches on.
-        FileInfo temp1 = tempDirectory.CreateFile("temp1.tmp", string.Empty);
+        var temp1 = tempDirectory.CreateFile("temp1.tmp", string.Empty);
         files.Add(temp1);
 
-        FileInfo temp2 = tempDirectory.CreateFile("temp2.tmp", string.Empty);
+        var temp2 = tempDirectory.CreateFile("temp2.tmp", string.Empty);
         files.Add(temp2);
 
-        DirectorySampleStream stream = new(tempDirectory.DirectoryInfo, filter, false);
+        var stream = new DirectorySampleStream(tempDirectory.DirectoryInfo, filter, false);
 
         FileInfo? file = stream.Read();
         ClassicAssert.IsTrue(Contains(files, file));
@@ -101,13 +101,13 @@ public class DirectorySampleStreamTest
     {
         List<FileInfo> files = [];
 
-        FileInfo temp1 = tempDirectory.CreateFile("temp1.tmp", string.Empty);
+        var temp1 = tempDirectory.CreateFile("temp1.tmp", string.Empty);
         files.Add(temp1);
 
-        FileInfo temp2 = tempDirectory.CreateFile("temp2.tmp", string.Empty);
+        var temp2 = tempDirectory.CreateFile("temp2.tmp", string.Empty);
         files.Add(temp2);
 
-        DirectorySampleStream stream = new(tempDirectory.DirectoryInfo, null, false);
+        var stream = new DirectorySampleStream(tempDirectory.DirectoryInfo, null, false);
 
         FileInfo? file = stream.Read();
         ClassicAssert.IsTrue(Contains(files, file));
@@ -128,16 +128,15 @@ public class DirectorySampleStreamTest
 
         List<FileInfo> files = [];
 
-        FileInfo temp1 = tempDirectory.CreateFile("temp1.tmp", string.Empty);
+        var temp1 = tempDirectory.CreateFile("temp1.tmp", string.Empty);
         files.Add(temp1);
 
-        DirectoryInfo tempSubDirectory = Directory.CreateDirectory(
-            Path.Combine(tempDirectory.Path, "sub1"));
-        FileInfo temp2 = new(Path.Combine(tempSubDirectory.FullName, "sub1.tmp"));
+        var tempSubDirectory = Directory.CreateDirectory(Path.Combine(tempDirectory.Path, "sub1"));
+        var temp2 = new FileInfo(Path.Combine(tempSubDirectory.FullName, "sub1.tmp"));
         File.WriteAllText(temp2.FullName, string.Empty);
         files.Add(temp2);
 
-        DirectorySampleStream stream = new(tempDirectory.DirectoryInfo, filter, true);
+        var stream = new DirectorySampleStream(tempDirectory.DirectoryInfo, filter, true);
 
         FileInfo? file = stream.Read();
         ClassicAssert.IsTrue(Contains(files, file));
@@ -158,13 +157,13 @@ public class DirectorySampleStreamTest
 
         List<FileInfo> files = [];
 
-        FileInfo temp1 = tempDirectory.CreateFile("temp1.tmp", string.Empty);
+        var temp1 = tempDirectory.CreateFile("temp1.tmp", string.Empty);
         files.Add(temp1);
 
-        FileInfo temp2 = tempDirectory.CreateFile("temp2.tmp", string.Empty);
+        var temp2 = tempDirectory.CreateFile("temp2.tmp", string.Empty);
         files.Add(temp2);
 
-        DirectorySampleStream stream = new(tempDirectory.DirectoryInfo, filter, false);
+        var stream = new DirectorySampleStream(tempDirectory.DirectoryInfo, filter, false);
 
         FileInfo? file = stream.Read();
         ClassicAssert.IsTrue(Contains(files, file));
@@ -188,7 +187,7 @@ public class DirectorySampleStreamTest
     {
         Func<FileSystemInfo, bool> filter = TempFileNameFilter;
 
-        DirectorySampleStream stream = new(tempDirectory.DirectoryInfo, filter, false);
+        var stream = new DirectorySampleStream(tempDirectory.DirectoryInfo, filter, false);
 
         ClassicAssert.Null(stream.Read());
 
@@ -200,15 +199,14 @@ public class DirectorySampleStreamTest
     {
         Func<FileSystemInfo, bool> filter = TempFileNameFilter;
 
-        FileInfo notADirectory = tempDirectory.CreateFile("temp1.tmp", string.Empty);
+        var notADirectory = tempDirectory.CreateFile("temp1.tmp", string.Empty);
 
         // NOpenNLP: upstream declares @Test(expected = IllegalArgumentException.class),
         // which the DirectorySampleStream constructor throws; ArgumentException is the
         // .NET counterpart.
         Assert.Throws<ArgumentException>((Action)(() =>
         {
-            DirectorySampleStream stream = new(
-                new DirectoryInfo(notADirectory.FullName), filter, false);
+            var stream = new DirectorySampleStream(new DirectoryInfo(notADirectory.FullName), filter, false);
 
             ClassicAssert.Null(stream.Read());
 

@@ -30,18 +30,15 @@ namespace NOpenNLP.Tools.Formats.Conllu;
 public class ConlluSentenceSampleStream(IObjectStream<ConlluSentence?> samples, int sentencesPerSample)
     : FilterObjectStream<ConlluSentence?, SentenceSample?>(samples)
 {
-    private readonly int sentencesPerSample = sentencesPerSample;
-
     /// <inheritdoc/>
     /// <exception cref="IOException">if there is an error during reading</exception>
     public override SentenceSample? Read()
     {
-        StringBuilder documentText = new StringBuilder();
+        var documentText = new StringBuilder();
 
-        IList<Span> sentenceSpans = new JCG.List<Span>();
+        JCG.List<Span> sentenceSpans = [];
 
-        ConlluSentence? sentence;
-        for (int i = 0; i < sentencesPerSample && (sentence = samples.Read()) != null; i++)
+        for (int i = 0; i < sentencesPerSample && samples.Read() is { } sentence; i++)
         {
             int startIndex = documentText.Length;
 
@@ -54,7 +51,7 @@ public class ConlluSentenceSampleStream(IObjectStream<ConlluSentence?> samples, 
 
         if (documentText.Length > 0)
         {
-            documentText.Length = documentText.Length - 1;
+            documentText.Length -= 1;
             return new SentenceSample(documentText.ToString(), [.. sentenceSpans]);
         }
 

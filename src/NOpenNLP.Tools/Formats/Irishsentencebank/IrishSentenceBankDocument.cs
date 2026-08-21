@@ -41,42 +41,28 @@ public class IrishSentenceBankDocument
 {
     public class IrishSentenceBankFlex(string sf, string[] fl)
     {
-        internal string surface = sf;
-        internal string[] flex = fl;
+        public string Surface => sf;
 
-        public string Surface => surface;
-
-        public string[] Flex => flex;
+        public string[] Flex => fl;
     }
 
     public class IrishSentenceBankSentence(string src, string trans, string orig,
         Span[] toks, IrishSentenceBankFlex[]? flx)
     {
-        private readonly string source = src;
-        private readonly string translation = trans;
-        private readonly string original = orig;
-        private readonly Span[] tokens = toks;
-        private readonly IrishSentenceBankFlex[]? flex = flx;
+        public string Source => src;
 
-        public string Source => source;
+        public string Translation => trans;
 
-        public string Translation => translation;
+        public string Original => orig;
 
-        public string Original => original;
+        public Span[] Tokens => toks;
 
-        public Span[] Tokens => tokens;
+        public IrishSentenceBankFlex[]? Flex => flx;
 
-        public IrishSentenceBankFlex[]? Flex => flex;
-
-        public TokenSample GetTokenSample() => new TokenSample(original, tokens);
+        public TokenSample TokenSample => new(orig, toks);
     }
 
-    private readonly JCG.List<IrishSentenceBankSentence> sentences; // NOpenNLP: made readonly
-
-    public IrishSentenceBankDocument()
-    {
-        sentences = new JCG.List<IrishSentenceBankSentence>();
-    }
+    private readonly JCG.List<IrishSentenceBankSentence> sentences = []; // NOpenNLP: made readonly
 
     public void Add(IrishSentenceBankSentence sent) => sentences.Add(sent);
 
@@ -156,26 +142,26 @@ public class IrishSentenceBankDocument
 
         try
         {
-            XmlDocument doc = XmlUtil.CreateDocument(isStream);
+            var doc = XmlUtil.CreateDocument(isStream);
 
             string root = doc.DocumentElement!.Name;
             if (!root.Equals("sentences", StringComparison.OrdinalIgnoreCase))
             {
-                throw new IOException("Expected root node " + root);
+                throw new IOException($"Expected root node {root}");
             }
 
-            XmlNodeList nl = doc.DocumentElement.ChildNodes;
+            var nl = doc.DocumentElement.ChildNodes;
             for (int i = 0; i < nl.Count; i++)
             {
-                XmlNode sentnode = nl[i]!;
+                var sentnode = nl[i]!;
                 if (sentnode.Name.Equals("sentence", StringComparison.Ordinal))
                 {
                     string src = sentnode.Attributes!.GetNamedItem("source")!.Value!;
                     string trans = "";
-                    IDictionary<int, string> toks = new JCG.Dictionary<int, string>();
-                    IDictionary<int, IList<string>> flx = new JCG.Dictionary<int, IList<string>>();
-                    IList<Span> spans = new JCG.List<Span>();
-                    XmlNodeList sentnl = sentnode.ChildNodes;
+                    JCG.Dictionary<int, string> toks = [];
+                    JCG.Dictionary<int, IList<string>> flx = [];
+                    JCG.List<Span> spans = [];
+                    var sentnl = sentnode.ChildNodes;
                     int flexes = 1;
                     var orig = new StringBuilder();
 
@@ -206,7 +192,7 @@ public class IrishSentenceBankDocument
 
                             case "original":
                                 int last = 0;
-                                XmlNodeList orignl = sentnl[j]!.ChildNodes;
+                                var orignl = sentnl[j]!.ChildNodes;
                                 for (int k = 0; k < orignl.Count; k++)
                                 {
                                     // NOpenNLP: Java's DOM reports every run of character data
@@ -249,7 +235,7 @@ public class IrishSentenceBankDocument
                                             break;
 
                                         default:
-                                            throw new IOException("Unexpected node: " + NodeName(orignl[k]!));
+                                            throw new IOException($"Unexpected node: {NodeName(orignl[k]!)}");
                                     }
                                 }
                                 break;
@@ -259,19 +245,19 @@ public class IrishSentenceBankDocument
                                 break;
 
                             default:
-                                throw new IOException("Unexpected node: " + name);
+                                throw new IOException($"Unexpected node: {name}");
                         }
                     }
 
-                    IrishSentenceBankFlex[]? flexa = new IrishSentenceBankFlex[flexes];
-                    foreach (KeyValuePair<int, string> entry in toks)
+                    var flexa = new IrishSentenceBankFlex[flexes];
+                    foreach (var entry in toks)
                     {
                         int flexidx = entry.Key;
                         string left = entry.Value;
                         // NOpenNLP: upstream calls flx.get(flexidx), which yields null for an
                         // absent key; the C# indexer would throw instead, so this uses
                         // TryGetValue to keep the "no flex for this token" path.
-                        if (!flx.TryGetValue(flexidx, out IList<string>? right0))
+                        if (!flx.TryGetValue(flexidx, out var right0))
                         {
                             flexa = null;
                             break;
@@ -281,14 +267,14 @@ public class IrishSentenceBankDocument
                         flexa![flexidx - 1] = new IrishSentenceBankFlex(left, right);
                     }
 
-                    Span[] spanout = new Span[spans.Count];
+                    var spanout = new Span[spans.Count];
                     spans.CopyTo(spanout, 0);
                     document.Add(new IrishSentenceBankSentence(src, trans, orig.ToString(), spanout, flexa));
                 }
                 else if (!NodeName(sentnode).Equals("#text", StringComparison.Ordinal)
                     && !NodeName(sentnode).Equals("#comment", StringComparison.Ordinal))
                 {
-                    throw new IOException("Unexpected node: " + NodeName(sentnode));
+                    throw new IOException($"Unexpected node: {NodeName(sentnode)}");
                 }
             }
             return document;

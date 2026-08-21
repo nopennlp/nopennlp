@@ -29,7 +29,7 @@ namespace NOpenNLP.Tools.Formats.Frenchtreebank;
 
 public class ConstitParseSampleStream : FilterObjectStream<byte[]?, Parse?>
 {
-    private readonly IList<Parse> parses = new JCG.List<Parse>(); // NOpenNLP: made readonly
+    private readonly JCG.List<Parse> parses = []; // NOpenNLP: made readonly
 
     // NOpenNLP: upstream creates the SAXParser once in the constructor and reuses it. There
     // is no .NET counterpart to hold onto -- an XmlReader is created per document inside
@@ -49,7 +49,7 @@ public class ConstitParseSampleStream : FilterObjectStream<byte[]?, Parse?>
 
             if (xmlbytes != null)
             {
-                IList<Parse> producedParses = new JCG.List<Parse>();
+                JCG.List<Parse> producedParses = [];
                 try
                 {
                     ParseXml(xmlbytes, new ConstitDocumentHandler(producedParses));
@@ -59,7 +59,7 @@ public class ConstitParseSampleStream : FilterObjectStream<byte[]?, Parse?>
                     throw new IOException(e.Message, e);
                 }
 
-                foreach (Parse parse in producedParses)
+                foreach (var parse in producedParses)
                 {
                     parses.Add(parse);
                 }
@@ -68,7 +68,7 @@ public class ConstitParseSampleStream : FilterObjectStream<byte[]?, Parse?>
 
         if (parses.Count > 0)
         {
-            Parse first = parses[0];
+            var first = parses[0];
             parses.RemoveAt(0);
             return first;
         }
@@ -82,8 +82,6 @@ public class ConstitParseSampleStream : FilterObjectStream<byte[]?, Parse?>
     {
         using var input = new MemoryStream(xmlbytes);
         using var reader = XmlReader.Create(input, XmlUtil.CreateSecureReaderSettings());
-
-        string? GetAttributeValue(string name) => reader.GetAttribute(name);
 
         while (reader.Read())
         {
@@ -118,5 +116,9 @@ public class ConstitParseSampleStream : FilterObjectStream<byte[]?, Parse?>
                     break;
             }
         }
+
+        return;
+
+        string? GetAttributeValue(string name) => reader.GetAttribute(name);
     }
 }

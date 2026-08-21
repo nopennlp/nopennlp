@@ -31,7 +31,7 @@ namespace NOpenNLP.Tools.Formats.Leipzig;
 internal class SampleShuffleStream<T> : ObjectStreamBase<T?>
     where T : class
 {
-    private readonly IList<T> bufferedSamples = new JCG.List<T>(); // NOpenNLP: made readonly
+    private readonly JCG.List<T> bufferedSamples = []; // NOpenNLP: made readonly
 
     // NOpenNLP: upstream holds a java.util.Iterator that reset() replaces with a fresh
     // one. That is the manual hasNext()/next() advance an IEnumerator<T> expresses;
@@ -41,8 +41,7 @@ internal class SampleShuffleStream<T> : ObjectStreamBase<T?>
     /// <exception cref="IOException">if there is an error during reading</exception>
     internal SampleShuffleStream(IObjectStream<T?> samples)
     {
-        T? sample;
-        while ((sample = samples.Read()) != null)
+        while (samples.Read() is { } sample)
         {
             bufferedSamples.Add(sample);
         }

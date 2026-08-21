@@ -18,7 +18,6 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
-using System.IO;
 using NOpenNLP.Tools.Support;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
@@ -30,27 +29,26 @@ public class NKJPSegmentationDocumentTest
     [Test]
     public void TestParsingSimpleDoc()
     {
-        using (Stream nkjpSegXmlIn = TestResources.OpenResource("/opennlp/tools/formats/nkjp/ann_segmentation.xml"))
-        {
-            NKJPSegmentationDocument doc = NKJPSegmentationDocument.Parse(nkjpSegXmlIn);
+        using var nkjpSegXmlIn = TestResources.OpenResource("/opennlp/tools/formats/nkjp/ann_segmentation.xml");
 
-            ClassicAssert.AreEqual(1, doc.Segments.Count);
+        var doc = NKJPSegmentationDocument.Parse(nkjpSegXmlIn);
 
-            ClassicAssert.AreEqual(7, doc.Segments["segm_1.1-s"].Count);
+        ClassicAssert.AreEqual(1, doc.Segments.Count);
 
-            string src = "To krótkie zdanie w drugim akapicie.";
+        ClassicAssert.AreEqual(7, doc.Segments["segm_1.1-s"].Count);
 
-            // NOpenNLP: upstream reads the package-private fields `offset` and `length`
-            // directly; the port exposes them as the Offset and Length properties.
-            int offset = doc.Segments["segm_1.1-s"]["segm_1.1-seg"].Offset;
-            ClassicAssert.AreEqual(0, offset);
-            int length = doc.Segments["segm_1.1-s"]["segm_1.1-seg"].Length;
-            ClassicAssert.AreEqual(2, length);
-            // NOpenNLP: Java's String.substring(begin, end) takes an end index, while .NET's
-            // Substring(start, length) takes a length. Upstream passes (offset, length) here,
-            // which for offset 0 makes the two spellings coincide; the port keeps the same
-            // characters by passing (offset, length - offset).
-            ClassicAssert.AreEqual("To", src.Substring(offset, length - offset));
-        }
+        string src = "To krótkie zdanie w drugim akapicie.";
+
+        // NOpenNLP: upstream reads the package-private fields `offset` and `length`
+        // directly; the port exposes them as the Offset and Length properties.
+        int offset = doc.Segments["segm_1.1-s"]["segm_1.1-seg"].Offset;
+        ClassicAssert.AreEqual(0, offset);
+        int length = doc.Segments["segm_1.1-s"]["segm_1.1-seg"].Length;
+        ClassicAssert.AreEqual(2, length);
+        // NOpenNLP: Java's String.substring(begin, end) takes an end index, while .NET's
+        // Substring(start, length) takes a length. Upstream passes (offset, length) here,
+        // which for offset 0 makes the two spellings coincide; the port keeps the same
+        // characters by passing (offset, length - offset).
+        ClassicAssert.AreEqual("To", src[offset..length]);
     }
 }

@@ -19,8 +19,6 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using System.Collections.Generic;
-using System.IO;
-using NOpenNLP.Tools.Namefind;
 using NOpenNLP.Tools.Sentdetect;
 using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Tokenize;
@@ -34,37 +32,34 @@ public class BratDocumentParserTest
     [Test]
     public void TestParse()
     {
-        IDictionary<string, string> typeToClassMap = new Dictionary<string, string>();
+        var typeToClassMap = new Dictionary<string, string>();
         BratAnnotationStreamTest.AddEntityTypes(typeToClassMap);
         AnnotationConfiguration config = new(typeToClassMap);
 
-        Stream txtIn = TestResources.OpenResource(
-            "/opennlp/tools/formats/brat/opennlp-1193.txt");
+        var txtIn = TestResources.OpenResource("/opennlp/tools/formats/brat/opennlp-1193.txt");
 
-        Stream annIn = TestResources.OpenResource(
-            "/opennlp/tools/formats/brat/opennlp-1193.ann");
+        var annIn = TestResources.OpenResource("/opennlp/tools/formats/brat/opennlp-1193.ann");
 
-        BratDocument doc = BratDocument.ParseDocument(config, "opennlp-1193", txtIn, annIn);
+        var doc = BratDocument.ParseDocument(config, "opennlp-1193", txtIn, annIn);
 
-        BratDocumentParser parser = new(new NewlineSentenceDetector(),
-            WhitespaceTokenizer.INSTANCE);
+        BratDocumentParser parser = new(new NewlineSentenceDetector(), WhitespaceTokenizer.INSTANCE);
 
-        IList<NameSample> names = parser.Parse(doc);
+        var names = parser.Parse(doc);
 
         ClassicAssert.AreEqual(3, names.Count);
 
-        NameSample sample1 = names[0];
+        var sample1 = names[0];
 
         ClassicAssert.AreEqual(1, sample1.Names.Length);
         ClassicAssert.AreEqual(0, sample1.Names[0].Start);
         ClassicAssert.AreEqual(2, sample1.Names[0].End);
 
-        NameSample sample2 = names[1];
+        var sample2 = names[1];
         ClassicAssert.AreEqual(1, sample2.Names.Length);
         ClassicAssert.AreEqual(0, sample2.Names[0].Start);
         ClassicAssert.AreEqual(1, sample2.Names[0].End);
 
-        NameSample sample3 = names[2];
+        var sample3 = names[2];
         ClassicAssert.AreEqual(3, sample3.Names.Length);
         ClassicAssert.AreEqual(0, sample3.Names[0].Start);
         ClassicAssert.AreEqual(1, sample3.Names[0].End);

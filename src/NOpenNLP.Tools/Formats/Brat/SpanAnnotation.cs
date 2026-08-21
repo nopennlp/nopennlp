@@ -60,6 +60,6 @@ public class SpanAnnotation : BratAnnotation
 
         spanText.Append(']');
 
-        return base.ToString() + " " + spanText + " " + CoveredText;
+        return $"{base.ToString()} {spanText} {CoveredText}";
     }
 }

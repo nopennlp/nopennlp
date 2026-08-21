@@ -40,9 +40,9 @@ public class BratDocument
         this.id = id;
         this.text = text;
 
-        var annMap = new JCG.Dictionary<string, BratAnnotation>();
-        var noteList = new JCG.List<AnnotatorNoteAnnotation>();
-        foreach (BratAnnotation annotation in annotations)
+        JCG.Dictionary<string, BratAnnotation> annMap = [];
+        JCG.List<AnnotatorNoteAnnotation> noteList = [];
+        foreach (var annotation in annotations)
         {
             if (annotation is AnnotatorNoteAnnotation noteAnnotation)
             {
@@ -59,12 +59,12 @@ public class BratDocument
         // attach AnnotatorNote to the appropriate Annotation.
         // the note should ALWAYS have an appropriate id in the map,
         // but just to be safe, check for null.
-        foreach (AnnotatorNoteAnnotation note in noteList)
+        foreach (var note in noteList)
         {
             // NOpenNLP: upstream reads Map.get, which yields null for an unknown attached
             // id; TryGetValue preserves that rather than throwing the way the C# indexer
             // would, keeping the "just to be safe" check above meaningful.
-            if (annMap.TryGetValue(note.AttachedId, out BratAnnotation? annotation))
+            if (annMap.TryGetValue(note.AttachedId, out var annotation))
             {
                 annotation.Note = note.Note;
             }
@@ -87,7 +87,7 @@ public class BratDocument
     // NOpenNLP: upstream returns Map.get, which yields null for an unknown id; the C#
     // indexer would throw, so this uses TryGetValue and keeps the null.
     public BratAnnotation? GetAnnotation(string id) =>
-        annotationMap.TryGetValue(id, out BratAnnotation? annotation) ? annotation : null;
+        annotationMap.TryGetValue(id, out var annotation) ? annotation : null;
 
     public ICollection<BratAnnotation> Annotations => annotationMap.Values;
 
@@ -118,10 +118,9 @@ public class BratDocument
             text.Append(cbuf, 0, len);
         }
 
-        ICollection<BratAnnotation> annotations = new JCG.List<BratAnnotation>();
+        JCG.List<BratAnnotation> annotations = [];
         IObjectStream<BratAnnotation?> annStream = new BratAnnotationStream(config, id, annIn);
-        BratAnnotation? ann;
-        while ((ann = annStream.Read()) != null)
+        while (annStream.Read() is { } ann)
         {
             annotations.Add(ann);
         }

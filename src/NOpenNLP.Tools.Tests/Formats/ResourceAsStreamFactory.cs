@@ -30,14 +30,9 @@ namespace NOpenNLP.Tools.Formats;
 // addressed by their manifest name rather than relative to a type, so this takes the
 // upstream classpath path directly and resolves it through TestResources, which does
 // that translation for every ported test.
-public class ResourceAsStreamFactory : IInputStreamFactory
+public class ResourceAsStreamFactory(string name) : IInputStreamFactory
 {
-    private readonly string name;
-
-    public ResourceAsStreamFactory(string name)
-    {
-        this.name = name ?? throw new ArgumentNullException(nameof(name), "name must not be null");
-    }
+    private readonly string name = name ?? throw new ArgumentNullException(nameof(name), "name must not be null");
 
     /// <exception cref="IOException">if the stream cannot be created</exception>
     public Stream CreateInputStream() => TestResources.OpenResource(name);

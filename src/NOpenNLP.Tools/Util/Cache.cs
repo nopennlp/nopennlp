@@ -19,7 +19,7 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using System;
 using System.Collections.Generic;
-using J2N.Collections.Generic;
+using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Util;
 
@@ -28,14 +28,14 @@ namespace NOpenNLP.Tools.Util;
 /// <para/>
 /// NOpenNLP: upstream extends java.util.LinkedHashMap and overrides its
 /// <c>removeEldestEntry</c> hook to bound the size. J2N's
-/// <see cref="LinkedDictionary{TKey, TValue}"/> preserves insertion order but
+/// <see cref="JCG.OrderedDictionary{TKey, TValue}"/> preserves insertion order but
 /// has no such hook, so the eviction is performed explicitly on insert.
 /// <para/>
 /// Note that upstream constructs the map in insertion-order mode (not
 /// access-order), so the eviction policy is really first-in-first-out; that
 /// behavior is preserved here.
 /// </summary>
-public class Cache<K, V>(int capacity) : LinkedDictionary<K, V?>
+public class Cache<K, V>(int capacity) : JCG.OrderedDictionary<K, V?>
 {
     private void EvictIfNecessary()
     {

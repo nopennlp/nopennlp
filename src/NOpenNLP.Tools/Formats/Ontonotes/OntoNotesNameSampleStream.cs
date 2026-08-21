@@ -19,7 +19,6 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using NOpenNLP.Tools.Namefind;
@@ -32,32 +31,26 @@ namespace NOpenNLP.Tools.Formats.Ontonotes;
 /// <summary>
 /// Name Sample Stream parser for the OntoNotes 4.0 corpus.
 /// </summary>
-public class OntoNotesNameSampleStream : FilterObjectStream<string?, NameSample?>
+public class OntoNotesNameSampleStream(IObjectStream<string?> samples) : FilterObjectStream<string?, NameSample?>(samples)
 {
-    private readonly IDictionary<string, string> tokenConversionMap;
-
-    private readonly IList<NameSample> nameSamples = new JCG.List<NameSample>(); // NOpenNLP: made readonly
-
-    public OntoNotesNameSampleStream(IObjectStream<string?> samples)
-        : base(samples)
+    // NOpenNLP: upstream wraps the map with Collections.unmodifiableMap; the field is
+    // private and never mutated after construction, so the wrapper is dropped.
+    private readonly JCG.Dictionary<string, string> tokenConversionMap = new()
     {
-        // NOpenNLP: upstream wraps the map with Collections.unmodifiableMap; the field is
-        // private and never mutated after construction, so the wrapper is dropped.
-        tokenConversionMap = new JCG.Dictionary<string, string>
-        {
-            ["-LRB-"] = "(",
-            ["-RRB-"] = ")",
-            ["-LSB-"] = "[",
-            ["-RSB-"] = "]",
-            ["-LCB-"] = "{",
-            ["-RCB-"] = "}",
-            ["-AMP-"] = "&",
-        };
-    }
+        ["-LRB-"] = "(",
+        ["-RRB-"] = ")",
+        ["-LSB-"] = "[",
+        ["-RSB-"] = "]",
+        ["-LCB-"] = "{",
+        ["-RCB-"] = "}",
+        ["-AMP-"] = "&",
+    };
+
+    private readonly JCG.List<NameSample> nameSamples = []; // NOpenNLP: made readonly
 
     private string ConvertToken(string token)
     {
-        StringBuilder convertedToken = new StringBuilder(token);
+        var convertedToken = new StringBuilder(token);
 
         // NOpenNLP: upstream calls StringBuilder.indexOf, which System.Text.StringBuilder
         // does not offer; the builder still holds exactly `token` here, so searching it
@@ -104,8 +97,7 @@ public class OntoNotesNameSampleStream : FilterObjectStream<string?, NameSample?
 
                 bool clearAdaptiveData = true;
 
-                string? line;
-                while ((line = docIn.ReadLine()) != null)
+                while (docIn.ReadLine() is { } line)
                 {
                     if (line.StartsWith("<DOC", StringComparison.Ordinal))
                     {
@@ -119,8 +111,8 @@ public class OntoNotesNameSampleStream : FilterObjectStream<string?, NameSample?
 
                     string[] tokens = WhitespaceTokenizer.INSTANCE.Tokenize(line);
 
-                    IList<Span> entities = new JCG.List<Span>();
-                    IList<string> cleanedTokens = new JCG.List<string>(tokens.Length);
+                    JCG.List<Span> entities = [];
+                    var cleanedTokens = new JCG.List<string>(tokens.Length);
 
                     int tokenIndex = 0;
                     int entityBeginIndex = -1;
@@ -143,8 +135,7 @@ public class OntoNotesNameSampleStream : FilterObjectStream<string?, NameSample?
                             {
                                 int typeEnd = token.IndexOf("\"", typeBegin.Length, StringComparison.Ordinal);
 
-                                entityType = StringUtil.ToLowerCase(
-                                    token.Substring(typeBegin.Length, typeEnd - typeBegin.Length));
+                                entityType = StringUtil.ToLowerCase(token[typeBegin.Length..typeEnd]);
                             }
 
                             if (token.Contains(">"))
@@ -177,7 +168,7 @@ public class OntoNotesNameSampleStream : FilterObjectStream<string?, NameSample?
 
         if (nameSamples.Count != 0)
         {
-            NameSample first = nameSamples[0];
+            var first = nameSamples[0];
             nameSamples.RemoveAt(0);
             return first;
         }
