@@ -7,19 +7,22 @@ learning toolkit for natural language processing.
 
 ## Status
 
-Early work in progress. The port currently covers the **inference** APIs of the
-`opennlp-tools` module: loading pre-trained `.bin` models and running them.
+Work in progress. The port covers the `opennlp-tools` module — inference,
+training, evaluation and the corpus format readers — and the command line tools,
+which install as the `nopennlp` dotnet tool.
 
 | Included | Not yet ported |
 |---|---|
-| Tokenization, sentence detection, POS tagging | Model training |
-| Lemmatization, chunking, name finding (NER) | Command-line tools |
-| Language detection, document categorization | Corpus format stream factories |
+| Tokenization, sentence detection, POS tagging | UIMA integration |
+| Lemmatization, chunking, name finding (NER) | Morfologik addon |
+| Language detection, document categorization | brat annotator service |
 | Maxent / Perceptron / Naive Bayes inference | |
 | Model loading and feature generation | |
 | Parsing, entity linking, word vectors | |
 | Porter and Snowball stemmers | |
-| Corpus format readers | |
+| Corpus format readers and converters | |
+| Model training, evaluation, cross validation | |
+| The `nopennlp` command line tools | |
 
 ### Corpus format readers
 
@@ -73,6 +76,36 @@ Types and members keep their upstream OpenNLP names so that the Java
 documentation and examples carry over directly, with .NET casing conventions
 applied (`TokenizerME.tokenize` becomes `TokenizerME.Tokenize`).
 
+### Command line
+
+The `NOpenNLP.Cli` package installs OpenNLP's command line tools as a
+[dotnet tool](https://learn.microsoft.com/dotnet/core/tools/global-tools) named
+`nopennlp`:
+
+```
+dotnet tool install --global NOpenNLP.Cli
+```
+
+It takes the same arguments as the `opennlp` command, so existing OpenNLP
+command lines, scripts and documentation carry over by changing the command
+name:
+
+```
+nopennlp                                    # lists the tools
+nopennlp SimpleTokenizer < sentences.txt
+nopennlp TokenizerTrainer -model en-token.bin -lang eng -data token.train
+nopennlp POSTaggerTrainer.conllu -model pos.bin -lang deu -data corpus.conllu -tagset u
+nopennlp TokenizerME en-token.bin < sentences.txt
+```
+
+As upstream, a `.format` suffix on a tool name selects the corpus format to read
+(`POSTaggerTrainer.conllu`), any tool prints its help when invoked with `help`,
+and converters take their format as the first argument
+(`nopennlp POSTaggerConverter conllu -data corpus.conllu`).
+
+The name follows Apache OpenNLP's own post-1.9.4 layout, which moved these tools
+into an `opennlp-cli` module.
+
 ## Building and testing
 
 ```
@@ -91,8 +124,11 @@ and macOS:
 | `net8.0` | `net8.0` |
 
 `netstandard2.0` has no runtime of its own, so `net9.0` is designated as its test
-client. To reproduce the full matrix locally (this needs the .NET 8, 9 and 10
-runtimes installed):
+client. The matrix covers the library; `NOpenNLP.Cli` ships as a `net10.0` dotnet
+tool and so has a single target, and its tests run once rather than on every leg.
+
+To reproduce the full matrix locally (this needs the .NET 8, 9 and 10 runtimes
+installed):
 
 ```
 dotnet test NOpenNLP.slnx -p:TestFrameworks=true

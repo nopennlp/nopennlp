@@ -20,6 +20,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Threading.Tasks;
 using NOpenNLP.Tools.Ml.Model;
 using NOpenNLP.Tools.Util;
@@ -688,7 +689,16 @@ public class GISTrainer : AbstractEventTrainer
             }
         }
 
-        Display(". loglikelihood=" + loglikelihood + "\t" + ((double)numCorrect / numEvents) + "\n");
+        // NOpenNLP: upstream concatenates the two doubles, and Java's Double.toString
+        // always renders a decimal point -- a perfect iteration prints "1.0" where .NET's
+        // default formatting prints "1". J2N's "J" format reproduces Java's rendering, as
+        // it does elsewhere in the port, so a training log can be compared against
+        // upstream's line for line.
+        Display(". loglikelihood="
+            + J2N.Numerics.Double.ToString(loglikelihood, "J", CultureInfo.InvariantCulture)
+            + "\t"
+            + J2N.Numerics.Double.ToString((double)numCorrect / numEvents, "J", CultureInfo.InvariantCulture)
+            + "\n");
 
         return loglikelihood;
     }

@@ -19,6 +19,7 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using System;
+using System.Globalization;
 using NOpenNLP.Tools.Ml.Model;
 using NOpenNLP.Tools.Util;
 
@@ -338,7 +339,13 @@ public class PerceptronTrainer : AbstractEventTrainer
             double trainingAccuracy = (double)numCorrect / numEvents;
             if (i < 10 || (i % 10) == 0)
             {
-                Display(". (" + numCorrect + "/" + numEvents + ") " + trainingAccuracy + "\n");
+                // NOpenNLP: Java's Double.toString always renders a decimal point -- a perfect
+                // training accuracy prints "1.0" where .NET's default formatting prints "1".
+                // J2N's "J" format reproduces Java's rendering so the training log matches
+                // upstream line for line.
+                Display(". (" + numCorrect + "/" + numEvents + ") "
+                    + J2N.Numerics.Double.ToString(trainingAccuracy, "J", CultureInfo.InvariantCulture)
+                    + "\n");
             }
 
             bool doAveraging = useAverage && useSkippedlAveraging && (i < 20 || IsPerfectSquare(i))
@@ -363,7 +370,12 @@ public class PerceptronTrainer : AbstractEventTrainer
                 && Math.Abs(prevAccuracy2 - trainingAccuracy) < tolerance
                 && Math.Abs(prevAccuracy3 - trainingAccuracy) < tolerance)
             {
-                Display("Stopping: change in training set accuracy less than " + tolerance + "\n");
+                // NOpenNLP: Java's Double.toString always renders a decimal point and uses
+                // scientific notation differently from .NET -- a tolerance of 1e-5 prints as
+                // "1.0E-5" upstream where .NET's default formatting gives "1E-05". J2N's "J"
+                // format reproduces Java's rendering so the training log matches upstream.
+                Display("Stopping: change in training set accuracy less than "
+                    + J2N.Numerics.Double.ToString(tolerance, "J", CultureInfo.InvariantCulture) + "\n");
                 break;
             }
 
@@ -421,7 +433,12 @@ public class PerceptronTrainer : AbstractEventTrainer
         }
 
         double trainingAccuracy = (double)numCorrect / numEvents;
-        Display("Stats: (" + numCorrect + "/" + numEvents + ") " + trainingAccuracy + "\n");
+        // NOpenNLP: Java's Double.toString always renders a decimal point -- a perfect
+        // training accuracy prints "1.0" where .NET's default formatting prints "1".
+        // J2N's "J" format reproduces Java's rendering so the training log matches
+        // upstream line for line.
+        Display("Stats: (" + numCorrect + "/" + numEvents + ") "
+            + J2N.Numerics.Double.ToString(trainingAccuracy, "J", CultureInfo.InvariantCulture) + "\n");
         return trainingAccuracy;
     }
 

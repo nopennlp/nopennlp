@@ -1,0 +1,81 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!--
+      A dotnet tool ships as a framework-dependent executable, so unlike the library
+      this project targets one concrete runtime rather than netstandard2.0. net10.0
+      matches the library's newest target and the default test client.
+    -->
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>12.0</LangVersion>
+    <RootNamespace>NOpenNLP.Tools.Cmdline</RootNamespace>
+    <!--
+      The assembly name is the command users type. PackAsTool writes a
+      DotnetToolSettings.xml naming ToolCommandName, so `dotnet tool install
+      NOpenNLP.Cli` yields a `nopennlp` command.
+    -->
+    <AssemblyName>nopennlp</AssemblyName>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <IsPackable>true</IsPackable>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>nopennlp</ToolCommandName>
+    <!--
+      The ported tools reproduce upstream's help and usage text, which the CLI prints
+      rather than documenting on members, so the missing-doc warnings the library
+      suppresses are suppressed here too.
+    -->
+    <NoWarn>$(NoWarn);1591;1573</NoWarn>
+    <NeutralLanguage>en</NeutralLanguage>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Packaging">
+    <!--
+      As in NOpenNLP.Tools, no version properties are set here: Nerdbank.GitVersioning
+      derives them from version.json plus the git height and overwrites anything set
+      here. Set the version in version.json instead.
+
+      The package id follows Apache OpenNLP's own post-1.9.4 layout, which extracted
+      the command line tools into an `opennlp-cli` module while keeping them in the
+      `opennlp.tools.cmdline` package.
+    -->
+    <PackageId>NOpenNLP.Cli</PackageId>
+    <Authors>NOpenNLP Contributors</Authors>
+    <Description>The command line interface of NOpenNLP, a C# port of Apache OpenNLP 1.9.4. Installs as the `nopennlp` dotnet tool. This product includes software developed at The Apache Software Foundation. Not affiliated with or endorsed by the Apache Software Foundation.</Description>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageTags>nlp;opennlp;cli;dotnet-tool;tokenizer;pos;lemmatizer;chunker;ner;maxent</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!--
+      2.0.11 is the newest stable release; 3.0 is still prerelease and its breaking
+      changes would land on everyone who installs this tool. 2.0 already parses the
+      single-dash `-model value` options OpenNLP's command lines use.
+    -->
+    <PackageReference Include="System.CommandLine" Version="2.0.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Nerdbank.GitVersioning" Version="3.10.91">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NOpenNLP.Tools\NOpenNLP.Tools.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="NOpenNLP.Cli.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\NOTICE" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

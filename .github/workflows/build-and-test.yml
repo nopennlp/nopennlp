@@ -101,7 +101,7 @@ jobs:
           # Only the projects this job restores. Hashing every csproj would let
           # an edit to NOpenNLP.Benchmarks, which CI never builds, throw away a
           # perfectly good cache.
-          key: nuget-${{ runner.os }}-${{ hashFiles('src/NOpenNLP.Tools/*.csproj', 'src/NOpenNLP.Tools.Tests/*.csproj') }}
+          key: nuget-${{ runner.os }}-${{ hashFiles('src/NOpenNLP.Tools/*.csproj', 'src/NOpenNLP.Tools.Tests/*.csproj', 'src/NOpenNLP.Cli/*.csproj', 'src/NOpenNLP.Cli.Tests/*.csproj') }}
           restore-keys: nuget-${{ runner.os }}-
 
       # Restores what the models job for this OS already downloaded. The key is
@@ -159,6 +159,34 @@ jobs:
           --logger "trx;LogFileName=TestResults.trx"
           --results-directory "${{ github.workspace }}/testresults"
 
+      # The CLI ships as a net10.0 dotnet tool, so it has a single target rather
+      # than the library's four. These steps run only on the net10.0 leg; on the
+      # others the library it references is still built above, so nothing goes
+      # unchecked.
+      - name: Restore CLI (net10.0 only)
+        if: matrix.framework == 'net10.0'
+        run: |
+          dotnet restore src/NOpenNLP.Cli/NOpenNLP.Cli.csproj
+          dotnet restore src/NOpenNLP.Cli.Tests/NOpenNLP.Cli.Tests.csproj
+
+      - name: Build CLI (net10.0 only)
+        if: matrix.framework == 'net10.0'
+        run: >
+          dotnet build src/NOpenNLP.Cli.Tests/NOpenNLP.Cli.Tests.csproj
+          --configuration Release
+          --no-restore
+
+      - name: Test CLI (net10.0 only)
+        if: matrix.framework == 'net10.0'
+        run: >
+          dotnet test src/NOpenNLP.Cli.Tests/NOpenNLP.Cli.Tests.csproj
+          --configuration Release
+          --no-build
+          --no-restore
+          --logger "console;verbosity=normal"
+          --logger "trx;LogFileName=CliTestResults.trx"
+          --results-directory "${{ github.workspace }}/testresults"
+
       - name: Upload test results
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
@@ -186,12 +214,16 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Restore
-        run: dotnet restore src/NOpenNLP.Tools/NOpenNLP.Tools.csproj
+        run: |
+          dotnet restore src/NOpenNLP.Tools/NOpenNLP.Tools.csproj
+          dotnet restore src/NOpenNLP.Cli/NOpenNLP.Cli.csproj
 
       # Confirms the package still builds and carries LICENSE/NOTICE, which the
       # Apache 2.0 terms on the ported OpenNLP source require us to ship.
       - name: Pack
-        run: dotnet pack src/NOpenNLP.Tools/NOpenNLP.Tools.csproj --configuration Release --no-restore
+        run: |
+          dotnet pack src/NOpenNLP.Tools/NOpenNLP.Tools.csproj --configuration Release --no-restore
+          dotnet pack src/NOpenNLP.Cli/NOpenNLP.Cli.csproj --configuration Release --no-restore
 
       - name: Verify NOTICE and README are packaged
         shell: bash
@@ -208,6 +240,34 @@ jobs:
             fi
           done
           echo "All required package contents are present."
+
+      # The CLI package is only useful if it actually installs and runs as a
+      # dotnet tool, which packing alone does not prove: a wrong
+      # ToolCommandName or a missing DotnetToolSettings.xml produces a package
+      # that restores fine and then has no command to invoke.
+      - name: Verify the CLI installs and runs as a dotnet tool
+        shell: bash
+        run: |
+          set -euo pipefail
+          package="$(find src/NOpenNLP.Cli/bin/Release -name '*.nupkg' ! -name '*.symbols.nupkg' | head -1)"
+          echo "Inspecting $package"
+          contents="$(unzip -Z1 "$package")"
+          for required in NOTICE README.md tools/net10.0/any/DotnetToolSettings.xml tools/net10.0/any/nopennlp.dll; do
+            if ! grep -qx "$required" <<<"$contents"; then
+              echo "::error::$required is missing from the CLI package"
+              exit 1
+            fi
+          done
+
+          version="$(basename "$package" .nupkg)"
+          version="${version#NOpenNLP.Cli.}"
+          dotnet tool install --tool-path ./clitool --add-source src/NOpenNLP.Cli/bin/Release NOpenNLP.Cli --version "$version"
+
+          # A bare invocation prints the usage listing and exits 0.
+          ./clitool/nopennlp > usage.txt
+          grep -q "Usage: nopennlp TOOL" usage.txt
+          grep -q "SimpleTokenizer" usage.txt
+          echo "The nopennlp tool installed and ran."
 
       - name: Upload package
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
