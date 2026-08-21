@@ -17,10 +17,10 @@
 
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using System.Collections.Generic;
 using System.Text;
-using NOpenNLP.Tools.Support;
+using NOpenNLP.Tools.Formats;
 using NOpenNLP.Tools.Util;
+using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Tokenize;
 
@@ -31,7 +31,7 @@ public class TokenizerTestUtil
 {
     internal static TokenizerModel CreateSimpleMaxentTokenModel()
     {
-        List<TokenSample> samples = [];
+        JCG.List<TokenSample> samples = [];
 
         samples.Add(new TokenSample("year", [new Span(0, 4)]));
         samples.Add(new TokenSample("year,", [
@@ -48,7 +48,7 @@ public class TokenizerTestUtil
             new Span(0, 3),
             new Span(3, 4)]));
 
-        TrainingParameters mlParams = new TrainingParameters();
+        var mlParams = new TrainingParameters();
         mlParams.Put(TrainingParameters.ITERATIONS_PARAM, 100);
         mlParams.Put(TrainingParameters.CUTOFF_PARAM, 0);
 
@@ -58,17 +58,13 @@ public class TokenizerTestUtil
 
     internal static TokenizerModel CreateMaxentTokenModel()
     {
-        // NOpenNLP: upstream uses opennlp.tools.formats.ResourceAsStreamFactory,
-        // which lives in the not-yet-ported formats package; the test-side
-        // ResourceAsStreamFactory in Support does the same job over an embedded
-        // resource.
         IInputStreamFactory trainDataIn = new ResourceAsStreamFactory(
             "/opennlp/tools/tokenize/token.train");
 
         IObjectStream<TokenSample?> samples = new TokenSampleStream(
             new PlainTextByLineStream(trainDataIn, Encoding.UTF8));
 
-        TrainingParameters mlParams = new TrainingParameters();
+        var mlParams = new TrainingParameters();
         mlParams.Put(TrainingParameters.ITERATIONS_PARAM, 100);
         mlParams.Put(TrainingParameters.CUTOFF_PARAM, 0);
 

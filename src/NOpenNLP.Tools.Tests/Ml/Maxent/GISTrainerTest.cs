@@ -22,7 +22,6 @@ using System.Collections.Generic;
 using NOpenNLP.Tools.Ml.Model;
 using NOpenNLP.Tools.Util;
 using NUnit.Framework;
-using NUnit.Framework.Legacy;
 
 namespace NOpenNLP.Tools.Ml.Maxent;
 

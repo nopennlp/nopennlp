@@ -19,7 +19,6 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using System.Collections.Generic;
-using NOpenNLP.Tools.Ml;
 using NOpenNLP.Tools.Ml.Model;
 using NOpenNLP.Tools.Util;
 

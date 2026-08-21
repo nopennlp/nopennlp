@@ -19,7 +19,7 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using System.Text;
-using NOpenNLP.Tools.Support;
+using NOpenNLP.Tools.Formats;
 using NOpenNLP.Tools.Util;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
@@ -41,7 +41,7 @@ public class ParseSampleStreamTest
     [Test]
     public void TestReadTestStream()
     {
-        IObjectStream<Parse?> parseStream = CreateParseSampleStream();
+        var parseStream = CreateParseSampleStream();
         ClassicAssert.NotNull(parseStream.Read());
         ClassicAssert.NotNull(parseStream.Read());
         ClassicAssert.NotNull(parseStream.Read());

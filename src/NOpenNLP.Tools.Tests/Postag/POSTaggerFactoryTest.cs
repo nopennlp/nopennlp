@@ -21,6 +21,7 @@
 using System;
 using System.IO;
 using System.Text;
+using NOpenNLP.Tools.Formats;
 using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Util;
 using NUnit.Framework;
@@ -36,10 +37,6 @@ public class POSTaggerFactoryTest
 {
     private static IObjectStream<POSSample?> CreateSampleStream()
     {
-        // NOpenNLP: upstream uses opennlp.tools.formats.ResourceAsStreamFactory,
-        // which lives in the not-yet-ported formats package; the test-side
-        // ResourceAsStreamFactory in Support does the same job over an embedded
-        // resource.
         IInputStreamFactory @in = new ResourceAsStreamFactory(
             "/opennlp/tools/postag/AnnotatedSentences.txt");
 
@@ -52,22 +49,22 @@ public class POSTaggerFactoryTest
     [Test]
     public void TestPOSTaggerWithCustomFactory()
     {
-        using Stream dictIn = TestResources.OpenResource(
+        using var dictIn = TestResources.OpenResource(
             "/opennlp/tools/postag/TagDictionaryCaseSensitive.xml");
-        DummyPOSDictionary posDict = new DummyPOSDictionary(POSDictionary.Create(dictIn));
+        var posDict = new DummyPOSDictionary(POSDictionary.Create(dictIn));
 
-        POSModel posModel = TrainPOSModel(new DummyPOSTaggerFactory(posDict));
+        var posModel = TrainPOSModel(new DummyPOSTaggerFactory(posDict));
 
-        POSTaggerFactory factory = posModel.Factory;
+        var factory = posModel.Factory;
         ClassicAssert.IsTrue(factory.TagDictionary is DummyPOSDictionary);
         ClassicAssert.IsTrue(factory.POSContextGenerator is DummyPOSContextGenerator);
         ClassicAssert.IsTrue(factory.SequenceValidator is DummyPOSSequenceValidator);
 
-        MemoryStream @out = new MemoryStream();
+        var @out = new MemoryStream();
         posModel.Serialize(@out);
-        MemoryStream @in = new MemoryStream(@out.ToArray());
+        var @in = new MemoryStream(@out.ToArray());
 
-        POSModel fromSerialized = new POSModel(@in);
+        var fromSerialized = new POSModel(@in);
 
         factory = fromSerialized.Factory;
         ClassicAssert.IsTrue(factory.TagDictionary is DummyPOSDictionary);
@@ -78,21 +75,21 @@ public class POSTaggerFactoryTest
     [Test]
     public void TestPOSTaggerWithDefaultFactory()
     {
-        using Stream dictIn = TestResources.OpenResource(
+        using var dictIn = TestResources.OpenResource(
             "/opennlp/tools/postag/TagDictionaryCaseSensitive.xml");
-        POSDictionary posDict = POSDictionary.Create(dictIn);
-        POSModel posModel = TrainPOSModel(new POSTaggerFactory(null, null, posDict));
+        var posDict = POSDictionary.Create(dictIn);
+        var posModel = TrainPOSModel(new POSTaggerFactory(null, null, posDict));
 
-        POSTaggerFactory factory = posModel.Factory;
+        var factory = posModel.Factory;
         ClassicAssert.IsTrue(factory.TagDictionary is POSDictionary);
         ClassicAssert.IsTrue(factory.POSContextGenerator != null);
         ClassicAssert.IsTrue(factory.SequenceValidator is DefaultPOSSequenceValidator);
 
-        MemoryStream @out = new MemoryStream();
+        var @out = new MemoryStream();
         posModel.Serialize(@out);
-        MemoryStream @in = new MemoryStream(@out.ToArray());
+        var @in = new MemoryStream(@out.ToArray());
 
-        POSModel fromSerialized = new POSModel(@in);
+        var fromSerialized = new POSModel(@in);
 
         factory = fromSerialized.Factory;
         ClassicAssert.IsTrue(factory.TagDictionary is POSDictionary);

@@ -20,7 +20,7 @@
 
 using System;
 using System.Text;
-using NOpenNLP.Tools.Support;
+using NOpenNLP.Tools.Formats;
 using NOpenNLP.Tools.Util;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
@@ -71,20 +71,16 @@ public class ChunkerMETest
     {
         // train the chunker
 
-        // NOpenNLP: upstream uses opennlp.tools.formats.ResourceAsStreamFactory,
-        // which lives in the not-yet-ported formats package; the test-side
-        // ResourceAsStreamFactory in Support does the same job over an embedded
-        // resource.
         IInputStreamFactory @in = new ResourceAsStreamFactory("/opennlp/tools/chunker/test.txt");
 
         IObjectStream<ChunkSample?> sampleStream = new ChunkSampleStream(
             new PlainTextByLineStream(@in, Encoding.UTF8));
 
-        TrainingParameters @params = new TrainingParameters();
+        var @params = new TrainingParameters();
         @params.Put(TrainingParameters.ITERATIONS_PARAM, 70);
         @params.Put(TrainingParameters.CUTOFF_PARAM, 1);
 
-        ChunkerModel chunkerModel = ChunkerME.Train("eng", sampleStream, @params, new ChunkerFactory());
+        var chunkerModel = ChunkerME.Train("eng", sampleStream, @params, new ChunkerFactory());
 
         this.chunker = new ChunkerME(chunkerModel);
     }
@@ -92,7 +88,7 @@ public class ChunkerMETest
     [Test]
     public void TestChunkAsArray()
     {
-        string[] preds = chunker.Chunk(toks1, tags1);
+        var preds = chunker.Chunk(toks1, tags1);
 
         CollectionAssert.AreEqual(expect1, preds);
     }
@@ -100,8 +96,8 @@ public class ChunkerMETest
     [Test]
     public void TestChunkAsSpan()
     {
-        Span[] preds = chunker.ChunkAsSpans(toks1, tags1);
-        Console.Out.WriteLine("[" + string.Join(", ", (object[])preds) + "]");
+        var preds = chunker.ChunkAsSpans(toks1, tags1);
+        Console.Out.WriteLine($"[{string.Join(", ", (object[])preds)}]");
 
         ClassicAssert.AreEqual(10, preds.Length);
         ClassicAssert.AreEqual(new Span(0, 1, "NP"), preds[0]);
@@ -119,7 +115,7 @@ public class ChunkerMETest
     [Test]
     public void TestTokenProbArray()
     {
-        Sequence[] preds = chunker.TopKSequences(toks1, tags1);
+        var preds = chunker.TopKSequences(toks1, tags1);
 
         ClassicAssert.IsTrue(preds.Length > 0);
         ClassicAssert.AreEqual(expect1.Length, preds[0].Probs.Length);
@@ -130,7 +126,7 @@ public class ChunkerMETest
     [Test]
     public void TestTokenProbMinScore()
     {
-        Sequence[] preds = chunker.TopKSequences(toks1, tags1, -5.55);
+        var preds = chunker.TopKSequences(toks1, tags1, -5.55);
 
         ClassicAssert.AreEqual(4, preds.Length);
         ClassicAssert.AreEqual(expect1.Length, preds[0].Probs.Length);
@@ -147,7 +143,7 @@ public class ChunkerMETest
         IObjectStream<ChunkSample?> sampleStream = new ChunkSampleStream(
             new PlainTextByLineStream(@in, Encoding.UTF8));
 
-        TrainingParameters @params = new TrainingParameters();
+        var @params = new TrainingParameters();
         @params.Put(TrainingParameters.ITERATIONS_PARAM, 70);
         @params.Put(TrainingParameters.CUTOFF_PARAM, 1);
 

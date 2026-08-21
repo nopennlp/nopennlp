@@ -19,6 +19,7 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using NOpenNLP.Tools.Sentdetect.Lang;
+using NOpenNLP.Tools.Formats;
 using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Util;
 using NUnit.Framework;
@@ -49,7 +50,7 @@ public class SentenceDetectorFactoryTest
 
     private static NOpenNLP.Tools.Dictionary.Dictionary LoadAbbDictionary()
     {
-        using Stream @in = TestResources.OpenResource("/opennlp/tools/sentdetect/abb.xml");
+        using var @in = TestResources.OpenResource("/opennlp/tools/sentdetect/abb.xml");
 
         return new NOpenNLP.Tools.Dictionary.Dictionary(@in);
     }
@@ -57,22 +58,21 @@ public class SentenceDetectorFactoryTest
     [Test]
     public void TestDefault()
     {
-        NOpenNLP.Tools.Dictionary.Dictionary dic = LoadAbbDictionary();
+        var dic = LoadAbbDictionary();
 
         char[] eos = ['.', '?'];
-        SentenceModel sdModel = Train(new SentenceDetectorFactory("eng", true, dic,
-            eos));
+        var sdModel = Train(new SentenceDetectorFactory("eng", true, dic, eos));
 
         SentenceDetectorFactory? factory = sdModel.Factory;
         ClassicAssert.IsTrue(factory!.GetSDContextGenerator() is DefaultSDContextGenerator);
         ClassicAssert.IsTrue(factory.EndOfSentenceScanner is DefaultEndOfSentenceScanner);
         CollectionAssert.AreEqual(eos, factory.EOSCharacters);
 
-        MemoryStream @out = new MemoryStream();
+        var @out = new MemoryStream();
         sdModel.Serialize(@out);
-        MemoryStream @in = new MemoryStream(@out.ToArray());
+        var @in = new MemoryStream(@out.ToArray());
 
-        SentenceModel fromSerialized = new SentenceModel(@in);
+        var fromSerialized = new SentenceModel(@in);
 
         factory = fromSerialized.Factory;
         ClassicAssert.IsTrue(factory!.GetSDContextGenerator() is DefaultSDContextGenerator);
@@ -86,8 +86,7 @@ public class SentenceDetectorFactoryTest
         NOpenNLP.Tools.Dictionary.Dictionary? dic = null;
 
         char[] eos = ['.', '?'];
-        SentenceModel sdModel = Train(new SentenceDetectorFactory("eng", true,
-            dic, eos));
+        var sdModel = Train(new SentenceDetectorFactory("eng", true, dic, eos));
 
         SentenceDetectorFactory? factory = sdModel.Factory;
         ClassicAssert.IsNull(factory!.AbbreviationDictionary);
@@ -95,11 +94,11 @@ public class SentenceDetectorFactoryTest
         ClassicAssert.IsTrue(factory.EndOfSentenceScanner is DefaultEndOfSentenceScanner);
         CollectionAssert.AreEqual(eos, factory.EOSCharacters);
 
-        MemoryStream @out = new MemoryStream();
+        var @out = new MemoryStream();
         sdModel.Serialize(@out);
-        MemoryStream @in = new MemoryStream(@out.ToArray());
+        var @in = new MemoryStream(@out.ToArray());
 
-        SentenceModel fromSerialized = new SentenceModel(@in);
+        var fromSerialized = new SentenceModel(@in);
 
         factory = fromSerialized.Factory;
         ClassicAssert.IsNull(factory!.AbbreviationDictionary);
@@ -114,8 +113,7 @@ public class SentenceDetectorFactoryTest
         NOpenNLP.Tools.Dictionary.Dictionary? dic = null;
 
         char[]? eos = null;
-        SentenceModel sdModel = Train(new SentenceDetectorFactory("eng", true,
-            dic, eos));
+        var sdModel = Train(new SentenceDetectorFactory("eng", true, dic, eos));
 
         SentenceDetectorFactory? factory = sdModel.Factory;
         ClassicAssert.IsNull(factory!.AbbreviationDictionary);
@@ -123,11 +121,11 @@ public class SentenceDetectorFactoryTest
         ClassicAssert.IsTrue(factory.EndOfSentenceScanner is DefaultEndOfSentenceScanner);
         CollectionAssert.AreEqual(Factory.defaultEosCharacters, factory.EOSCharacters);
 
-        MemoryStream @out = new MemoryStream();
+        var @out = new MemoryStream();
         sdModel.Serialize(@out);
-        MemoryStream @in = new MemoryStream(@out.ToArray());
+        var @in = new MemoryStream(@out.ToArray());
 
-        SentenceModel fromSerialized = new SentenceModel(@in);
+        var fromSerialized = new SentenceModel(@in);
 
         factory = fromSerialized.Factory;
         ClassicAssert.IsNull(factory!.AbbreviationDictionary);
@@ -139,11 +137,10 @@ public class SentenceDetectorFactoryTest
     [Test]
     public void TestDummyFactory()
     {
-        NOpenNLP.Tools.Dictionary.Dictionary dic = LoadAbbDictionary();
+        var dic = LoadAbbDictionary();
 
         char[] eos = ['.', '?'];
-        SentenceModel sdModel = Train(new DummySentenceDetectorFactory("eng", true,
-            dic, eos));
+        var sdModel = Train(new DummySentenceDetectorFactory("eng", true, dic, eos));
 
         SentenceDetectorFactory? factory = sdModel.Factory;
         ClassicAssert.IsTrue(factory!.AbbreviationDictionary is DummyDictionary);
@@ -151,11 +148,11 @@ public class SentenceDetectorFactoryTest
         ClassicAssert.IsTrue(factory.EndOfSentenceScanner is DummyEOSScanner);
         CollectionAssert.AreEqual(eos, factory.EOSCharacters);
 
-        MemoryStream @out = new MemoryStream();
+        var @out = new MemoryStream();
         sdModel.Serialize(@out);
-        MemoryStream @in = new MemoryStream(@out.ToArray());
+        var @in = new MemoryStream(@out.ToArray());
 
-        SentenceModel fromSerialized = new SentenceModel(@in);
+        var fromSerialized = new SentenceModel(@in);
 
         factory = fromSerialized.Factory;
         ClassicAssert.IsTrue(factory!.AbbreviationDictionary is DummyDictionary);
@@ -170,10 +167,10 @@ public class SentenceDetectorFactoryTest
     [Test]
     public void TestCreateDummyFactory()
     {
-        NOpenNLP.Tools.Dictionary.Dictionary dic = LoadAbbDictionary();
+        var dic = LoadAbbDictionary();
         char[] eos = ['.', '?'];
 
-        SentenceDetectorFactory factory = SentenceDetectorFactory.Create(
+        var factory = SentenceDetectorFactory.Create(
             typeof(DummySentenceDetectorFactory).FullName, "spa", false,
             dic, eos);
 

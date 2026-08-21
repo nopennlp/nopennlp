@@ -19,9 +19,8 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using System;
-using System.Collections.Generic;
 using System.Text;
-using NOpenNLP.Tools.Support;
+using NOpenNLP.Tools.Formats;
 using NOpenNLP.Tools.Util;
 using NOpenNLP.Tools.Util.Model;
 using NUnit.Framework;
@@ -40,17 +39,13 @@ public class TokenNameFinderCrossValidatorTest
     [Test]
     public void TestWithNullResources()
     {
-        // NOpenNLP: upstream uses opennlp.tools.formats.ResourceAsStreamFactory,
-        // which lives in the not-yet-ported formats package; the test-side
-        // ResourceAsStreamFactory in Support does the same job over an embedded
-        // resource.
         IInputStreamFactory @in = new ResourceAsStreamFactory(
             "/opennlp/tools/namefind/AnnotatedSentences.txt");
 
         IObjectStream<NameSample?> sampleStream = new NameSampleDataStream(
             new PlainTextByLineStream(@in, Latin1));
 
-        TrainingParameters mlParams = new();
+        var mlParams = new TrainingParameters();
         mlParams.Put(TrainingParameters.ITERATIONS_PARAM, 70);
         mlParams.Put(TrainingParameters.CUTOFF_PARAM, 1);
 
@@ -59,7 +54,7 @@ public class TokenNameFinderCrossValidatorTest
         // NOpenNLP: upstream's bare `null` binds to the TokenNameFinderFactory
         // overload, since its byte[] overload also requires a resources map. The
         // cast pins the same overload here, where both would otherwise apply.
-        TokenNameFinderCrossValidator cv = new("eng",
+        var cv = new TokenNameFinderCrossValidator("eng",
             TYPE, mlParams, (TokenNameFinderFactory)null!, (ITokenNameFinderEvaluationMonitor?)null);
 
         cv.Evaluate(sampleStream, 2);
@@ -79,21 +74,21 @@ public class TokenNameFinderCrossValidatorTest
         IObjectStream<NameSample?> sampleStream = new NameSampleDataStream(
             new PlainTextByLineStream(@in, Latin1));
 
-        TrainingParameters mlParams = new();
+        var mlParams = new TrainingParameters();
         mlParams.Put(TrainingParameters.ITERATIONS_PARAM, 70);
         mlParams.Put(TrainingParameters.CUTOFF_PARAM, 1);
 
         mlParams.Put(TrainingParameters.ALGORITHM_PARAM, ModelType.MAXENT.ToString());
 
-        StringBuilder @out = new();
+        var @out = new StringBuilder();
         // NOpenNLP: upstream uses opennlp.tools.cmdline.namefind.NameEvaluationErrorListener;
         // the cmdline package is not ported, so the test-local stand-in in
         // TokenNameFinderEvaluatorTest is reused here. The assertion below only
         // observes that the listener wrote something for a misclassification.
         var listener = new CrossValidatorErrorListener(@out);
 
-        IDictionary<string, object> resources = new JCG.Dictionary<string, object>();
-        TokenNameFinderCrossValidator cv = new("eng",
+        JCG.Dictionary<string, object> resources = [];
+        var cv = new TokenNameFinderCrossValidator("eng",
             TYPE, mlParams, null, resources, listener);
 
         cv.Evaluate(sampleStream, 2);
@@ -111,7 +106,7 @@ public class TokenNameFinderCrossValidatorTest
         IObjectStream<NameSample?> sampleStream = new NameSampleDataStream(
             new PlainTextByLineStream(@in, Latin1));
 
-        TrainingParameters mlParams = new();
+        var mlParams = new TrainingParameters();
         mlParams.Put(TrainingParameters.ITERATIONS_PARAM, 70);
         mlParams.Put(TrainingParameters.CUTOFF_PARAM, 1);
 
@@ -120,7 +115,7 @@ public class TokenNameFinderCrossValidatorTest
         // NOpenNLP: upstream's bare `null` binds to the TokenNameFinderFactory
         // overload, since its byte[] overload also requires a resources map. The
         // cast pins the same overload here, where both would otherwise apply.
-        TokenNameFinderCrossValidator cv = new("eng",
+        var cv = new TokenNameFinderCrossValidator("eng",
             TYPE, mlParams, (TokenNameFinderFactory)null!, (ITokenNameFinderEvaluationMonitor?)null);
 
         Assert.Throws<InsufficientTrainingDataException>((Action)(() => cv.Evaluate(sampleStream, 2)));

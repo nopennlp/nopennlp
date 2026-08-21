@@ -18,10 +18,9 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using NOpenNLP.Tools.Support;
+using NOpenNLP.Tools.Formats;
 using NOpenNLP.Tools.Util;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
@@ -56,7 +55,7 @@ public class LanguageDetectorFactoryTest
     [Test]
     public void TestCorrectFactory()
     {
-        byte[] serialized = LanguageDetectorMETest.SerializeModel(model);
+        var serialized = LanguageDetectorMETest.SerializeModel(model);
 
         LanguageDetectorModel myModel = new(new MemoryStream(serialized));
 
@@ -66,7 +65,7 @@ public class LanguageDetectorFactoryTest
     [Test]
     public void TestDummyFactory()
     {
-        byte[] serialized = LanguageDetectorMETest.SerializeModel(model);
+        var serialized = LanguageDetectorMETest.SerializeModel(model);
 
         LanguageDetectorModel myModel = new(new MemoryStream(serialized));
 
@@ -76,11 +75,11 @@ public class LanguageDetectorFactoryTest
     [Test]
     public void TestDummyFactoryContextGenerator()
     {
-        ILanguageDetectorContextGenerator cg = model.Factory.GetContextGenerator();
-        string[] context = cg.GetContext(
+        var cg = model.Factory.GetContextGenerator();
+        var context = cg.GetContext(
             "a dummy text phrase to test if the context generator works!!!!!!!!!!!!");
 
-        ISet<string> set = new JCG.HashSet<string>(context);
+        var set = new JCG.HashSet<string>(context);
 
         ClassicAssert.IsTrue(set.Contains("!!!!!")); // default normalizer would remove the repeated !
         ClassicAssert.IsTrue(set.Contains("a dum"));

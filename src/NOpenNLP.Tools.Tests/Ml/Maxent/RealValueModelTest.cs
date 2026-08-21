@@ -20,7 +20,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using NOpenNLP.Tools.Ml.Model;
 using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Util;

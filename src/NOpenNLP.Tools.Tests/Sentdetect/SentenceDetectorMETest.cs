@@ -18,7 +18,7 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
-using NOpenNLP.Tools.Support;
+using NOpenNLP.Tools.Formats;
 using NOpenNLP.Tools.Util;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
@@ -38,27 +38,27 @@ public class SentenceDetectorMETest
         IInputStreamFactory @in = new ResourceAsStreamFactory(
             "/opennlp/tools/sentdetect/Sentences.txt");
 
-        TrainingParameters mlParams = new TrainingParameters();
+        var mlParams = new TrainingParameters();
         mlParams.Put(TrainingParameters.ITERATIONS_PARAM, 100);
         mlParams.Put(TrainingParameters.CUTOFF_PARAM, 0);
 
-        SentenceDetectorFactory factory = new SentenceDetectorFactory("eng", true, null, null);
+        var factory = new SentenceDetectorFactory("eng", true, null, null);
 
-        SentenceModel sentdetectModel = SentenceDetectorME.Train(
+        var sentdetectModel = SentenceDetectorME.Train(
             "eng", new SentenceSampleStream(new PlainTextByLineStream(@in,
                 Encoding.UTF8)), factory, mlParams);
 
         ClassicAssert.AreEqual("eng", sentdetectModel.Language);
 
-        SentenceDetectorME sentDetect = new SentenceDetectorME(sentdetectModel);
+        var sentDetect = new SentenceDetectorME(sentdetectModel);
 
         // Tests sentence detector with sentDetect method
         string sampleSentences1 = "This is a test. There are many tests, this is the second.";
-        string[] sents = sentDetect.SentDetect(sampleSentences1);
+        var sents = sentDetect.SentDetect(sampleSentences1);
         ClassicAssert.AreEqual(sents.Length, 2);
         ClassicAssert.AreEqual(sents[0], "This is a test.");
         ClassicAssert.AreEqual(sents[1], "There are many tests, this is the second.");
-        double[] probs = sentDetect.SentenceProbabilities;
+        var probs = sentDetect.SentenceProbabilities;
         ClassicAssert.AreEqual(probs.Length, 2);
 
         string sampleSentences2 = "This is a test. There are many tests, this is the second";
@@ -123,7 +123,7 @@ public class SentenceDetectorMETest
         ClassicAssert.AreEqual(sents[0], "This is a test");
 
         // Test that sentPosDetect also works
-        Span[] pos = sentDetect.SentPosDetect(sampleSentences2);
+        var pos = sentDetect.SentPosDetect(sampleSentences2);
         ClassicAssert.AreEqual(pos.Length, 2);
         probs = sentDetect.SentenceProbabilities;
         ClassicAssert.AreEqual(probs.Length, 2);
@@ -137,11 +137,11 @@ public class SentenceDetectorMETest
         IInputStreamFactory @in = new ResourceAsStreamFactory(
             "/opennlp/tools/sentdetect/SentencesInsufficient.txt");
 
-        TrainingParameters mlParams = new TrainingParameters();
+        var mlParams = new TrainingParameters();
         mlParams.Put(TrainingParameters.ITERATIONS_PARAM, 100);
         mlParams.Put(TrainingParameters.CUTOFF_PARAM, 0);
 
-        SentenceDetectorFactory factory = new SentenceDetectorFactory("eng", true, null, null);
+        var factory = new SentenceDetectorFactory("eng", true, null, null);
 
         Assert.Throws<InsufficientTrainingDataException>((Action)(() => SentenceDetectorME.Train("eng",
             new SentenceSampleStream(

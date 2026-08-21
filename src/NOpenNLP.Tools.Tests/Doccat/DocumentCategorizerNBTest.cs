@@ -18,7 +18,6 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
-using System;
 using System.Collections.Generic;
 using NOpenNLP.Tools.Ml;
 using NOpenNLP.Tools.Ml.Naivebayes;

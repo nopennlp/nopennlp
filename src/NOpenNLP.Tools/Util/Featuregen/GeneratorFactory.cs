@@ -101,7 +101,7 @@ public static class GeneratorFactory // NOpenNLP: made static
         protected XmlElement? generatorElement;
         protected FeatureGeneratorResourceProvider? resourceManager;
         // to respect the order <generator/> in AggregatedFeatureGenerator, let's use LinkedHashMap
-        protected readonly LinkedDictionary<string, object> args = new(); // NOpenNLP: made readonly
+        protected readonly JCG.OrderedDictionary<string, object> args = []; // NOpenNLP: made readonly
 
         public virtual IDictionary<string, IArtifactSerializer>? ArtifactSerializerMapping => null;
 
@@ -109,7 +109,7 @@ public static class GeneratorFactory // NOpenNLP: made static
         {
             this.generatorElement = element;
             this.resourceManager = resourceManager;
-            IList<IAdaptiveFeatureGenerator?> generators = new JCG.List<IAdaptiveFeatureGenerator?>();
+            JCG.List<IAdaptiveFeatureGenerator?> generators = [];
             XmlNodeList childNodes = generatorElement.ChildNodes;
             for (int i = 0; i < childNodes.Count; i++)
             {
@@ -464,7 +464,7 @@ public static class GeneratorFactory // NOpenNLP: made static
         // check it is new format?
         if (elementName.Equals("featureGenerators"))
         {
-            IList<IAdaptiveFeatureGenerator?> generators = new JCG.List<IAdaptiveFeatureGenerator?>();
+            JCG.List<IAdaptiveFeatureGenerator?> generators = [];
             XmlNodeList childNodes = generatorElement.ChildNodes;
             for (int i = 0; i < childNodes.Count; i++)
             {
@@ -845,7 +845,7 @@ public static class GeneratorFactory // NOpenNLP: made static
     /// <exception cref="InvalidFormatException">if xml is not well-formed</exception>
     public static IList<XmlElement> GetDescriptorElements(Stream xmlDescriptorIn)
     {
-        IList<XmlElement> elements = new JCG.List<XmlElement>();
+        JCG.List<XmlElement> elements = [];
         XmlDocument xmlDescriptorDOM = CreateDOM(xmlDescriptorIn);
         //XPath xPath = XPathFactory.NewInstance().NewXPath();
         XmlNodeList allElements;

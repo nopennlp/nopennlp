@@ -18,9 +18,9 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
+using System;
 using System.Text;
-using NOpenNLP.Tools.Ml.Model;
-using NOpenNLP.Tools.Support;
+using NOpenNLP.Tools.Formats;
 using NOpenNLP.Tools.Util;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
@@ -64,11 +64,11 @@ public class NameFinderMETest
                 new PlainTextByLineStream(new ResourceAsStreamFactory(
                     "/opennlp/tools/namefind/AnnotatedSentences.txt"), encoding));
 
-        TrainingParameters params_ = new();
+        var params_ = new TrainingParameters();
         params_.Put(TrainingParameters.ITERATIONS_PARAM, 70);
         params_.Put(TrainingParameters.CUTOFF_PARAM, 1);
 
-        TokenNameFinderModel nameFinderModel = NameFinderME.Train("eng", null, sampleStream,
+        var nameFinderModel = NameFinderME.Train("eng", null, sampleStream,
             params_, TokenNameFinderFactory.Create(null, null, new JCG.Dictionary<string, object>(), new BioCodec()));
 
         ITokenNameFinder nameFinder = new NameFinderME(nameFinderModel);
@@ -86,7 +86,7 @@ public class NameFinderMETest
             "traditional",
             "meal."];
 
-        Span[] names = nameFinder.Find(sentence);
+        var names = nameFinder.Find(sentence);
 
         ClassicAssert.AreEqual(1, names.Length);
         ClassicAssert.AreEqual(new Span(0, 1, DEFAULT), names[0]);
@@ -123,21 +123,21 @@ public class NameFinderMETest
             new PlainTextByLineStream(new ResourceAsStreamFactory(
                 "/opennlp/tools/namefind/AnnotatedSentencesWithTypes.txt"), encoding));
 
-        TrainingParameters params_ = new();
+        var params_ = new TrainingParameters();
         params_.Put(TrainingParameters.ITERATIONS_PARAM, 70);
         params_.Put(TrainingParameters.CUTOFF_PARAM, 1);
 
-        TokenNameFinderModel nameFinderModel = NameFinderME.Train("eng", null, sampleStream,
+        var nameFinderModel = NameFinderME.Train("eng", null, sampleStream,
             params_, TokenNameFinderFactory.Create(null, null, new JCG.Dictionary<string, object>(), new BioCodec()));
 
-        NameFinderME nameFinder = new(nameFinderModel);
+        var nameFinder = new NameFinderME(nameFinderModel);
 
         // now test if it can detect the sample sentences
 
         string[] sentence2 = ["Hi", "Mike", ",", "it's", "Stefanie",
             "Schmidt", "."];
 
-        Span[] names2 = nameFinder.Find(sentence2);
+        var names2 = nameFinder.Find(sentence2);
 
         ClassicAssert.AreEqual(2, names2.Length);
         ClassicAssert.AreEqual(new Span(1, 2, "person"), names2[0]);
@@ -148,7 +148,7 @@ public class NameFinderMETest
         string[] sentence = ["Alisa", "appreciated", "the", "hint", "and",
             "enjoyed", "a", "delicious", "traditional", "meal."];
 
-        Span[] names = nameFinder.Find(sentence);
+        var names = nameFinder.Find(sentence);
 
         ClassicAssert.AreEqual(1, names.Length);
         ClassicAssert.AreEqual(new Span(0, 1, "person"), names[0]);
@@ -167,21 +167,21 @@ public class NameFinderMETest
             new PlainTextByLineStream(new ResourceAsStreamFactory(
                 "/opennlp/tools/namefind/OnlyWithNames.train"), Encoding.UTF8));
 
-        TrainingParameters params_ = new();
+        var params_ = new TrainingParameters();
         params_.Put(TrainingParameters.ITERATIONS_PARAM, 70);
         params_.Put(TrainingParameters.CUTOFF_PARAM, 1);
 
-        TokenNameFinderModel nameFinderModel = NameFinderME.Train("eng", null, sampleStream,
+        var nameFinderModel = NameFinderME.Train("eng", null, sampleStream,
             params_, TokenNameFinderFactory.Create(null, null, new JCG.Dictionary<string, object>(), new BioCodec()));
 
-        NameFinderME nameFinder = new(nameFinderModel);
+        var nameFinder = new NameFinderME(nameFinderModel);
 
         // now test if it can detect the sample sentences
 
-        string[] sentence = SplitOnWhitespace("Neil Abercrombie Anibal Acevedo-Vila Gary Ackerman " +
+        var sentence = SplitOnWhitespace("Neil Abercrombie Anibal Acevedo-Vila Gary Ackerman " +
             "Robert Aderholt Daniel Akaka Todd Akin Lamar Alexander Rodney Alexander");
 
-        Span[] names1 = nameFinder.Find(sentence);
+        var names1 = nameFinder.Find(sentence);
 
         ClassicAssert.AreEqual(new Span(0, 2, DEFAULT), names1[0]);
         ClassicAssert.AreEqual(new Span(2, 4, DEFAULT), names1[1]);
@@ -197,21 +197,21 @@ public class NameFinderMETest
             new PlainTextByLineStream(new ResourceAsStreamFactory(
                 "/opennlp/tools/namefind/OnlyWithNames.train"), Encoding.UTF8));
 
-        TrainingParameters params_ = new();
+        var params_ = new TrainingParameters();
         params_.Put(TrainingParameters.ITERATIONS_PARAM, 70);
         params_.Put(TrainingParameters.CUTOFF_PARAM, 1);
 
-        TokenNameFinderModel nameFinderModel = NameFinderME.Train("eng", TYPE_OVERRIDE, sampleStream,
+        var nameFinderModel = NameFinderME.Train("eng", TYPE_OVERRIDE, sampleStream,
             params_, TokenNameFinderFactory.Create(null, null, new JCG.Dictionary<string, object>(), new BioCodec()));
 
-        NameFinderME nameFinder = new(nameFinderModel);
+        var nameFinder = new NameFinderME(nameFinderModel);
 
         // now test if it can detect the sample sentences
 
-        string[] sentence = SplitOnWhitespace("Neil Abercrombie Anibal Acevedo-Vila Gary Ackerman " +
+        var sentence = SplitOnWhitespace("Neil Abercrombie Anibal Acevedo-Vila Gary Ackerman " +
             "Robert Aderholt Daniel Akaka Todd Akin Lamar Alexander Rodney Alexander");
 
-        Span[] names1 = nameFinder.Find(sentence);
+        var names1 = nameFinder.Find(sentence);
 
         ClassicAssert.AreEqual(new Span(0, 2, TYPE_OVERRIDE), names1[0]);
         ClassicAssert.AreEqual(new Span(2, 4, TYPE_OVERRIDE), names1[1]);
@@ -232,21 +232,21 @@ public class NameFinderMETest
             new PlainTextByLineStream(new ResourceAsStreamFactory(
                 "/opennlp/tools/namefind/OnlyWithNamesWithTypes.train"), Encoding.UTF8));
 
-        TrainingParameters params_ = new();
+        var params_ = new TrainingParameters();
         params_.Put(TrainingParameters.ITERATIONS_PARAM, 70);
         params_.Put(TrainingParameters.CUTOFF_PARAM, 1);
 
-        TokenNameFinderModel nameFinderModel = NameFinderME.Train("eng", null, sampleStream,
+        var nameFinderModel = NameFinderME.Train("eng", null, sampleStream,
             params_, TokenNameFinderFactory.Create(null, null, new JCG.Dictionary<string, object>(), new BioCodec()));
 
-        NameFinderME nameFinder = new(nameFinderModel);
+        var nameFinder = new NameFinderME(nameFinderModel);
 
         // now test if it can detect the sample sentences
 
-        string[] sentence = SplitOnWhitespace("Neil Abercrombie Anibal Acevedo-Vila Gary Ackerman " +
+        var sentence = SplitOnWhitespace("Neil Abercrombie Anibal Acevedo-Vila Gary Ackerman " +
             "Robert Aderholt Daniel Akaka Todd Akin Lamar Alexander Rodney Alexander");
 
-        Span[] names1 = nameFinder.Find(sentence);
+        var names1 = nameFinder.Find(sentence);
 
         ClassicAssert.AreEqual(new Span(0, 2, "person"), names1[0]);
         ClassicAssert.AreEqual(new Span(2, 4, "person"), names1[1]);
@@ -267,21 +267,21 @@ public class NameFinderMETest
             new PlainTextByLineStream(new ResourceAsStreamFactory(
                 "/opennlp/tools/namefind/OnlyWithEntitiesWithTypes.train"), Encoding.UTF8));
 
-        TrainingParameters params_ = new();
+        var params_ = new TrainingParameters();
         params_.Put(TrainingParameters.ALGORITHM_PARAM, "MAXENT");
         params_.Put(TrainingParameters.ITERATIONS_PARAM, 70);
         params_.Put(TrainingParameters.CUTOFF_PARAM, 1);
 
-        TokenNameFinderModel nameFinderModel = NameFinderME.Train("eng", null, sampleStream,
+        var nameFinderModel = NameFinderME.Train("eng", null, sampleStream,
             params_, TokenNameFinderFactory.Create(null, null, new JCG.Dictionary<string, object>(), new BioCodec()));
 
-        NameFinderME nameFinder = new(nameFinderModel);
+        var nameFinder = new NameFinderME(nameFinderModel);
 
         // now test if it can detect the sample sentences
 
-        string[] sentence = SplitOnWhitespace("NATO United States Barack Obama");
+        var sentence = SplitOnWhitespace("NATO United States Barack Obama");
 
-        Span[] names1 = nameFinder.Find(sentence);
+        var names1 = nameFinder.Find(sentence);
 
         ClassicAssert.AreEqual(new Span(0, 1, "organization"), names1[0]); // NATO
         ClassicAssert.AreEqual(new Span(1, 3, "location"), names1[1]); // United States
@@ -293,8 +293,8 @@ public class NameFinderMETest
     {
         // NOpenNLP: NameFinderSequenceModel is nullable on the ported model, but a
         // model that has just been trained always has one.
-        ISequenceClassificationModel<string> model = nameFinderModel.NameFinderSequenceModel!;
-        string[] outcomes = model.Outcomes;
+        var model = nameFinderModel.NameFinderSequenceModel!;
+        var outcomes = model.Outcomes;
         foreach (var outcome in outcomes)
         {
             if (outcome.Equals(NameFinderME.OTHER))
@@ -310,7 +310,7 @@ public class NameFinderMETest
     public void TestDropOverlappingSpans()
     {
         Span[] spans = [new Span(1, 10), new Span(1, 11), new Span(1, 11), new Span(5, 15)];
-        Span[] remainingSpan = NameFinderME.DropOverlappingSpans(spans);
+        var remainingSpan = NameFinderME.DropOverlappingSpans(spans);
         ClassicAssert.AreEqual(new Span(1, 11), remainingSpan[0]);
     }
 
@@ -326,14 +326,14 @@ public class NameFinderMETest
             new PlainTextByLineStream(new ResourceAsStreamFactory(
                 "/opennlp/tools/namefind/voa1.train"), Encoding.UTF8));
 
-        TrainingParameters params_ = new();
+        var params_ = new TrainingParameters();
         params_.Put(TrainingParameters.ITERATIONS_PARAM, 70);
         params_.Put(TrainingParameters.CUTOFF_PARAM, 1);
 
-        TokenNameFinderModel nameFinderModel = NameFinderME.Train("eng", null, sampleStream,
+        var nameFinderModel = NameFinderME.Train("eng", null, sampleStream,
             params_, TokenNameFinderFactory.Create(null, null, new JCG.Dictionary<string, object>(), new BioCodec()));
 
-        NameFinderME nameFinder = new(nameFinderModel);
+        var nameFinder = new NameFinderME(nameFinderModel);
 
         // now test if it can detect the sample sentences
 
@@ -344,7 +344,7 @@ public class NameFinderMETest
             "Korea", "move", "toward", "ending", "its", "nuclear", "weapons",
             "programs", "."];
 
-        Span[] names1 = nameFinder.Find(sentence);
+        var names1 = nameFinder.Find(sentence);
 
         ClassicAssert.AreEqual(new Span(0, 4, "location"), names1[0]);
         ClassicAssert.AreEqual(new Span(5, 7, "person"), names1[1]);
@@ -358,7 +358,7 @@ public class NameFinderMETest
         sentence = ["Scott", "Snyder", "is", "the", "director", "of",
             "the", "Center", "for", "U", ".", "S", ".", "Korea", "Policy", "."];
 
-        Span[] names2 = nameFinder.Find(sentence);
+        var names2 = nameFinder.Find(sentence);
 
         ClassicAssert.AreEqual(2, names2.Length);
         ClassicAssert.AreEqual(new Span(0, 2, "person"), names2[0]);
@@ -371,7 +371,7 @@ public class NameFinderMETest
     // would agree on these inputs but not on a tab or newline, so the character
     // set matches what Java's \\s does.
     private static string[] SplitOnWhitespace(string s) =>
-        s.Split([' ', '\t', '\n', '\r', '\f', '\v'], System.StringSplitOptions.RemoveEmptyEntries);
+        s.Split([' ', '\t', '\n', '\r', '\f', '\v'], StringSplitOptions.RemoveEmptyEntries);
 
     // NOpenNLP: StandardCharsets.ISO_8859_1 has no named BCL counterpart that is
     // registered on every target, so the code page is used directly.

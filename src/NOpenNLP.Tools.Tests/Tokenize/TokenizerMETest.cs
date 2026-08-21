@@ -19,7 +19,7 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using System;
 using System.Text;
-using NOpenNLP.Tools.Support;
+using NOpenNLP.Tools.Formats;
 using NOpenNLP.Tools.Util;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
@@ -39,11 +39,11 @@ public class TokenizerMETest
     [Test]
     public void TestTokenizerSimpleModel()
     {
-        TokenizerModel model = TokenizerTestUtil.CreateSimpleMaxentTokenModel();
+        var model = TokenizerTestUtil.CreateSimpleMaxentTokenModel();
 
-        TokenizerME tokenizer = new TokenizerME(model);
+        var tokenizer = new TokenizerME(model);
 
-        string[] tokens = tokenizer.Tokenize("test,");
+        var tokens = tokenizer.Tokenize("test,");
 
         ClassicAssert.AreEqual(2, tokens.Length);
         ClassicAssert.AreEqual("test", tokens[0]);
@@ -53,10 +53,10 @@ public class TokenizerMETest
     [Test]
     public void TestTokenizer()
     {
-        TokenizerModel model = TokenizerTestUtil.CreateMaxentTokenModel();
+        var model = TokenizerTestUtil.CreateMaxentTokenModel();
 
-        TokenizerME tokenizer = new TokenizerME(model);
-        string[] tokens = tokenizer.Tokenize("Sounds like it's not properly thought through!");
+        var tokenizer = new TokenizerME(model);
+        var tokens = tokenizer.Tokenize("Sounds like it's not properly thought through!");
 
         ClassicAssert.AreEqual(9, tokens.Length);
         ClassicAssert.AreEqual("Sounds", tokens[0]);
@@ -73,17 +73,13 @@ public class TokenizerMETest
     [Test]
     public void TestInsufficientData()
     {
-        // NOpenNLP: upstream uses opennlp.tools.formats.ResourceAsStreamFactory,
-        // which lives in the not-yet-ported formats package; the test-side
-        // ResourceAsStreamFactory in Support does the same job over an embedded
-        // resource.
         IInputStreamFactory trainDataIn = new ResourceAsStreamFactory(
             "/opennlp/tools/tokenize/token-insufficient.train");
 
         IObjectStream<TokenSample?> samples = new TokenSampleStream(
             new PlainTextByLineStream(trainDataIn, Encoding.UTF8));
 
-        TrainingParameters mlParams = new TrainingParameters();
+        var mlParams = new TrainingParameters();
         mlParams.Put(TrainingParameters.ITERATIONS_PARAM, 100);
         mlParams.Put(TrainingParameters.CUTOFF_PARAM, 5);
 

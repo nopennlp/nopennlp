@@ -16,7 +16,6 @@
 using System.IO;
 using System.Linq;
 using System.Text;
-using NOpenNLP.Tools.Dictionary.Serializer;
 using NOpenNLP.Tools.Ngram;
 using NOpenNLP.Tools.Postag;
 using NOpenNLP.Tools.Tokenize;

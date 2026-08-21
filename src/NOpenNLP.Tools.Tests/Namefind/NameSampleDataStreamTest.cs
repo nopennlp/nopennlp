@@ -22,7 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using NOpenNLP.Tools.Support;
+using NOpenNLP.Tools.Formats;
 using NOpenNLP.Tools.Util;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
@@ -63,17 +63,10 @@ public class NameSampleDataStreamTest
     [Test]
     public void TestWithoutNameTypes()
     {
-        // NOpenNLP: upstream uses opennlp.tools.formats.ResourceAsStreamFactory,
-        // which lives in the not-yet-ported formats package; the test-side
-        // ResourceAsStreamFactory in Support does the same job over an embedded
-        // resource.
         IInputStreamFactory @in = new ResourceAsStreamFactory(
             "/opennlp/tools/namefind/AnnotatedSentences.txt");
 
-        NameSampleDataStream ds = new(
-            new PlainTextByLineStream(@in, Latin1));
-
-        NameSample? ns = ds.Read();
+        var ds = new NameSampleDataStream(new PlainTextByLineStream(@in, Latin1));
 
         string[] expectedNames = ["Alan McKennedy", "Julie", "Marie Clara",
             "Stefanie Schmidt", "Mike", "Stefanie Schmidt", "George", "Luise",
@@ -85,15 +78,13 @@ public class NameSampleDataStreamTest
         List<string> names = [];
         List<Span> spans = [];
 
-        while (ns != null)
+        while (ds.Read() is { } ns)
         {
             foreach (var nameSpan in ns.Names)
             {
                 names.Add(SublistToString(ns.Sentence, nameSpan));
                 spans.Add(nameSpan);
             }
-
-            ns = ds.Read();
         }
 
         ds.Dispose();
@@ -132,24 +123,17 @@ public class NameSampleDataStreamTest
     [Test]
     public void TestWithoutNameTypeAndInvalidData()
     {
-        using (NameSampleDataStream sampleStream = new(
-            ObjectStreamUtils.CreateObjectStream("<START> <START> Name <END>")))
-        {
-            Assert.Throws<IOException>((Action)(() => sampleStream.Read()));
-        }
+        using var sampleStream1 = new NameSampleDataStream(
+            ObjectStreamUtils.CreateObjectStream("<START> <START> Name <END>"));
+        Assert.Throws<IOException>((Action)(() => sampleStream1.Read()));
 
-        using (NameSampleDataStream sampleStream = new(
-            ObjectStreamUtils.CreateObjectStream("<START> Name <END> <END>")))
-        {
-            Assert.Throws<IOException>((Action)(() => sampleStream.Read()));
-        }
+        using var sampleStream2 = new NameSampleDataStream(
+            ObjectStreamUtils.CreateObjectStream("<START> Name <END> <END>"));
+        Assert.Throws<IOException>((Action)(() => sampleStream2.Read()));
 
-        using (NameSampleDataStream sampleStream = new(
-            ObjectStreamUtils.CreateObjectStream(
-                "<START> <START> Person <END> Street <END>")))
-        {
-            Assert.Throws<IOException>((Action)(() => sampleStream.Read()));
-        }
+        using var sampleStream3 = new NameSampleDataStream(
+            ObjectStreamUtils.CreateObjectStream("<START> <START> Person <END> Street <END>"));
+        Assert.Throws<IOException>((Action)(() => sampleStream3.Read()));
     }
 
     /// <summary>
@@ -162,20 +146,18 @@ public class NameSampleDataStreamTest
         IInputStreamFactory @in = new ResourceAsStreamFactory(
             "/opennlp/tools/namefind/voa1.train");
 
-        NameSampleDataStream ds = new(
-            new PlainTextByLineStream(@in, Encoding.UTF8));
+        var ds = new NameSampleDataStream(new PlainTextByLineStream(@in, Encoding.UTF8));
 
         Dictionary<string, List<string>> names = [];
         Dictionary<string, List<Span>> spans = [];
 
-        NameSample? ns;
-        while ((ns = ds.Read()) != null)
+        while (ds.Read() is { } ns)
         {
-            Span[] nameSpans = ns.Names;
+            var nameSpans = ns.Names;
 
             foreach (var nameSpan in nameSpans)
             {
-                string type = nameSpan.Type!;
+                var type = nameSpan.Type!;
                 if (!names.ContainsKey(type))
                 {
                     names[type] = [];
@@ -285,28 +267,19 @@ public class NameSampleDataStreamTest
     [Test]
     public void TestWithNameTypeAndInvalidData()
     {
-        using (NameSampleDataStream sampleStream = new(
-            ObjectStreamUtils.CreateObjectStream("<START:> Name <END>")))
-        {
-            Assert.Throws<IOException>((Action)(() => sampleStream.Read()));
-        }
+        using var sampleStream1 = new NameSampleDataStream(
+            ObjectStreamUtils.CreateObjectStream("<START:> Name <END>"));
+        Assert.Throws<IOException>((Action)(() => sampleStream1.Read()));
 
-        using (NameSampleDataStream sampleStream = new(
-            ObjectStreamUtils.CreateObjectStream(
-                "<START:street> <START:person> Name <END> <END>")))
-        {
-            Assert.Throws<IOException>((Action)(() => sampleStream.Read()));
-        }
+        using var sampleStream2 = new NameSampleDataStream(
+            ObjectStreamUtils.CreateObjectStream("<START:street> <START:person> Name <END> <END>"));
+        Assert.Throws<IOException>((Action)(() => sampleStream2.Read()));
     }
 
     [Test]
     public void TestClearAdaptiveData()
     {
-        string trainingData = "a\n" +
-            "b\n" +
-            "c\n" +
-            "\n" +
-            "d\n";
+        const string trainingData = "a\nb\nc\n\nd\n";
 
         IObjectStream<string?> untokenizedLineStream = new PlainTextByLineStream(
             new MockInputStreamFactory(trainingData), Encoding.UTF8);
@@ -328,10 +301,9 @@ public class NameSampleDataStreamTest
         IInputStreamFactory @in = new ResourceAsStreamFactory(
             "/opennlp/tools/namefind/html1.train");
 
-        NameSampleDataStream ds = new(
-            new PlainTextByLineStream(@in, Encoding.UTF8));
+        var ds = new NameSampleDataStream(new PlainTextByLineStream(@in, Encoding.UTF8));
 
-        NameSample? ns = ds.Read();
+        var ns = ds.Read();
 
         ClassicAssert.AreEqual(1, ns!.Sentence.Length);
         ClassicAssert.AreEqual("<html>", ns.Sentence[0]);

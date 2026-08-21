@@ -20,6 +20,7 @@
 
 using System.IO;
 using System.Text;
+using NOpenNLP.Tools.Formats;
 using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Util;
 using HeadRules = NOpenNLP.Tools.Parser.Lang.En.HeadRules;
@@ -30,8 +31,8 @@ public class ParserTestUtil
 {
     public static HeadRules CreateTestHeadRules()
     {
-        using Stream headRulesIn = TestResources.OpenResource("/opennlp/tools/parser/en_head_rules");
-        using StreamReader reader = new(headRulesIn, Encoding.UTF8);
+        using var headRulesIn = TestResources.OpenResource("/opennlp/tools/parser/en_head_rules");
+        using var reader = new StreamReader(headRulesIn, Encoding.UTF8);
 
         return new HeadRules(reader);
     }
@@ -43,7 +44,7 @@ public class ParserTestUtil
     /// </summary>
     public static IObjectStream<Parse?> OpenTestTrainingData()
     {
-        OpenTestTrainingDataObjectStreamBaseAnonymousClass resetableSampleStream = new();
+        var resetableSampleStream = new OpenTestTrainingDataObjectStreamBaseAnonymousClass();
 
         resetableSampleStream.Reset();
 

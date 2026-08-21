@@ -17,6 +17,8 @@
 
 using System;
 using System.IO;
+using NUnit.Framework;
+using NUnit.Framework.Interfaces;
 
 namespace NOpenNLP.Tools.Support;
 
@@ -47,7 +49,7 @@ internal static class TestResources
         // Translate the upstream classpath path to the manifest name declared by
         // LogicalName. J2N's FindAndGetManifestResourceStream does not do this
         // translation itself, so the lookup is done against the dotted name.
-        string manifestName = path.TrimStart('/').Replace('/', '.');
+        var manifestName = path.TrimStart('/').Replace('/', '.');
 
         var stream = typeof(TestResources).Assembly.GetManifestResourceStream(manifestName);
 
@@ -69,8 +71,8 @@ internal sealed class TempResourceFile : IDisposable
     public TempResourceFile(string resourcePath)
     {
         Path = System.IO.Path.GetTempFileName();
-        using Stream source = TestResources.OpenResource(resourcePath);
-        using FileStream target = File.Create(Path);
+        using var source = TestResources.OpenResource(resourcePath);
+        using var target = File.Create(Path);
         source.CopyTo(target);
     }
 
@@ -80,16 +82,74 @@ internal sealed class TempResourceFile : IDisposable
 }
 
 /// <summary>
-/// An <see cref="NOpenNLP.Tools.Util.IInputStreamFactory"/> over an embedded test resource.
+/// Creates an empty temporary directory for the duration of a test, and removes it
+/// afterwards.
 /// </summary>
 /// <remarks>
-/// Authored for NOpenNLP; not part of the Apache OpenNLP source. It stands in for
-/// upstream's <c>opennlp.tools.formats.ResourceAsStreamFactory</c>, which resolves a
-/// classpath resource. That class lives in the not-yet-ported <c>formats</c> package,
-/// and its only role in these tests is to reopen a resource on each call so a stream
-/// can be reset, which <see cref="TestResources.OpenResource"/> already provides.
+/// Authored for NOpenNLP; not part of the Apache OpenNLP source. It stands in for JUnit's
+/// <c>TemporaryFolder</c> rule, which upstream's <c>DirectorySampleStreamTest</c> uses and
+/// NUnit has no direct equivalent for. The two behaviours worth copying from Lucene.NET's
+/// <c>LuceneTestCase.CreateTempDir</c> are here: the directory name carries a random
+/// component rather than a counter, so concurrent test runs cannot collide, and a failing
+/// test keeps its directory instead of deleting the evidence.
 /// </remarks>
-internal sealed class ResourceAsStreamFactory(string resourcePath) : NOpenNLP.Tools.Util.IInputStreamFactory
+internal sealed class TempDirectory : IDisposable
 {
-    public Stream CreateInputStream() => TestResources.OpenResource(resourcePath);
+    public TempDirectory(string prefix = "nopennlp")
+    {
+        Path = System.IO.Path.Combine(
+            System.IO.Path.GetTempPath(),
+            $"{prefix}-{System.IO.Path.GetFileNameWithoutExtension(System.IO.Path.GetRandomFileName())}");
+
+        Directory.CreateDirectory(Path);
+    }
+
+    public string Path { get; }
+
+    public DirectoryInfo DirectoryInfo => new(Path);
+
+    /// <summary>
+    /// Writes <paramref name="content"/> to a new file in this directory and returns it.
+    /// </summary>
+    public FileInfo CreateFile(string name, string content)
+    {
+        var path = System.IO.Path.Combine(Path, name);
+        File.WriteAllText(path, content);
+        return new FileInfo(path);
+    }
+
+    /// <summary>
+    /// Copies an embedded test resource into this directory under <paramref name="name"/>.
+    /// </summary>
+    public FileInfo CopyResource(string resourcePath, string name)
+    {
+        var path = System.IO.Path.Combine(Path, name);
+        using var source = TestResources.OpenResource(resourcePath);
+        using var target = File.Create(path);
+        source.CopyTo(target);
+        return new FileInfo(path);
+    }
+
+    public void Dispose()
+    {
+        // Leave the directory behind when the test failed, so it can be inspected, and
+        // say where it is. Deleting it would discard exactly the evidence needed to
+        // diagnose the failure.
+        if (TestContext.CurrentContext.Result.Outcome.Status == TestStatus.Failed)
+        {
+            TestContext.Error.WriteLine($"NOTE: leaving temporary files on disk at: {Path}");
+            return;
+        }
+
+        try
+        {
+            Directory.Delete(Path, recursive: true);
+        }
+        catch (IOException)
+        {
+            // A file still held open by the test is not itself a test failure, and
+            // throwing here would replace the real result with a cleanup error.
+            TestContext.Error.WriteLine($"NOTE: could not remove temporary directory: {Path}");
+        }
+    }
 }

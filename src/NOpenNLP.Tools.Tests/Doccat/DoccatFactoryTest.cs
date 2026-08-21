@@ -18,10 +18,9 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
-using System;
 using System.IO;
 using System.Text;
-using NOpenNLP.Tools.Support;
+using NOpenNLP.Tools.Formats;
 using NOpenNLP.Tools.Util;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
@@ -54,17 +53,17 @@ public class DoccatFactoryTest
     [Test]
     public void TestDefault()
     {
-        DoccatModel model = Train();
+        var model = Train();
 
         ClassicAssert.NotNull(model);
 
-        MemoryStream @out = new();
+        var @out = new MemoryStream();
         model.Serialize(@out);
-        MemoryStream @in = new(@out.ToArray());
+        var @in = new MemoryStream(@out.ToArray());
 
         DoccatModel fromSerialized = new(@in);
 
-        DoccatFactory factory = fromSerialized.Factory;
+        var factory = fromSerialized.Factory;
 
         ClassicAssert.NotNull(factory);
 
@@ -85,13 +84,13 @@ public class DoccatFactoryTest
 
         DoccatFactory factory = new(featureGenerators);
 
-        DoccatModel model = Train(factory);
+        var model = Train(factory);
 
         ClassicAssert.NotNull(model);
 
-        MemoryStream @out = new();
+        var @out = new MemoryStream();
         model.Serialize(@out);
-        MemoryStream @in = new(@out.ToArray());
+        var @in = new MemoryStream(@out.ToArray());
 
         DoccatModel fromSerialized = new(@in);
 
