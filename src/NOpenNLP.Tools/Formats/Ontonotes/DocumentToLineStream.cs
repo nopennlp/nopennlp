@@ -44,7 +44,13 @@ public class DocumentToLineStream(IObjectStream<string?> samples)
         IList<string> lines = StringUtil.SplitDroppingTrailingEmpty(sample, '\n');
 
         // documents must be empty line terminated
-        if (lines[^1].Trim().Length != 0)
+        // NOpenNLP: the count check is not upstream's. Java's split returns one element
+        // for an empty document but none for one that is only newlines, and upstream
+        // indexes the last element unguarded, so such a document throws
+        // ArrayIndexOutOfBoundsException there. Treating it as already terminated returns
+        // the empty line list the rest of the pipeline expects, rather than trading
+        // upstream's crash for a different one.
+        if (lines.Count > 0 && lines[^1].Trim().Length != 0)
         {
             lines = new JCG.List<string>(lines) { "" };
         }

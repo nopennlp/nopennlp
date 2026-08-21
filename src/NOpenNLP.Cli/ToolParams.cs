@@ -118,11 +118,12 @@ public static class ToolParams
     // rejects anything that is not true/false. Taking the raw string and interpreting it
     // through JavaBooleanValue is what makes those command lines work here too. The
     // HelpName still reads "true|false", as upstream's valueName does.
-    internal static Option<string?> JavaBoolean(string name, string description, bool defaultValue) =>
+    internal static Option<string?> JavaBoolean(string name, string description,
+        bool defaultValue, string helpName = "true|false") =>
         new Option<string?>(name)
         {
             Description = description,
-            HelpName = "true|false",
+            HelpName = helpName,
             DefaultValueFactory = _ => defaultValue ? "true" : "false",
         };
 

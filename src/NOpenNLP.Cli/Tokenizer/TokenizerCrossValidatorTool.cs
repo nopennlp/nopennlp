@@ -33,7 +33,7 @@ public sealed class TokenizerCrossValidatorTool : AbstractCrossValidatorTool<Tok
 {
     private readonly Option<int> folds = ToolParams.Folds();
     private readonly Option<string?> misclassified = ToolParams.Misclassified();
-    private readonly Option<bool> alphaNumOpt = TrainingParams.AlphaNumOpt();
+    private readonly Option<string?> alphaNumOpt = TrainingParams.AlphaNumOpt();
     private readonly Option<FileInfo?> abbDict = TrainingParams.AbbDict();
     private readonly Option<string?> factoryName = TrainingParams.Factory();
     private readonly Option<string> lang = ToolParams.Lang();
@@ -74,7 +74,7 @@ public sealed class TokenizerCrossValidatorTool : AbstractCrossValidatorTool<Tok
 
             TokenizerFactory? tokFactory = TokenizerFactory.Create(
                 parseResult.GetValue(factoryName), parseResult.GetRequiredValue(lang), dict,
-                parseResult.GetRequiredValue(alphaNumOpt), null!);
+                ToolParams.JavaBooleanValue(parseResult.GetValue(alphaNumOpt)), null!);
             validator = new TokenizerCrossValidator(mlParams, tokFactory!, listener);
 
             validator.Evaluate(sampleStream!, parseResult.GetRequiredValue(folds));

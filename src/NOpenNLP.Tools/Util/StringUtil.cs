@@ -395,6 +395,12 @@ public class StringUtil
     /// difference is silent and changes results: an extra empty token reaches a model, or
     /// an empty class name reaches an extension loader. Interior empty strings are kept by
     /// both, and both yield a single-element array when the separator is absent.
+    /// <para/>
+    /// The empty input is the one case where Java does <b>not</b> drop the trailing empty:
+    /// <c>"".split(",")</c> is one element, the empty string, while <c>",".split(",")</c>
+    /// is none. Both were checked against a real JDK. That single element matters -- a
+    /// caller that reads the last element of the result, as the OntoNotes line splitter
+    /// does, would otherwise fail on an empty document where upstream succeeds.
     /// </remarks>
     public static string[] SplitDroppingTrailingEmpty(string value, char separator)
     {
@@ -409,6 +415,13 @@ public class StringUtil
         if (length == parts.Length)
         {
             return parts;
+        }
+
+        // Java's split never returns an empty array for an empty input; it returns the
+        // input itself as the single element.
+        if (length == 0 && value.Length == 0)
+        {
+            return parts.Length > 0 ? [parts[0]] : [value];
         }
 
         string[] trimmed = new string[length];

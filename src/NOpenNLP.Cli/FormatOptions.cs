@@ -87,7 +87,22 @@ internal static class FormatOptions
 
         if (parameter.ValueType == typeof(bool))
         {
-            return Build<bool>(parameter);
+            // NOpenNLP: declared as Option<string> so it accepts what
+            // Boolean.parseBoolean does. System.CommandLine validates a bool token
+            // itself, before any parser of ours runs, so an Option<bool> rejects
+            // `-includeTitles 0` -- which upstream reads as false -- with exit 1.
+            // GetValue<bool> below interprets the string the way Java does.
+            var option = new Option<string?>(parameter.Name)
+            {
+                Description = parameter.Description,
+                HelpName = parameter.ValueName,
+                Required = !parameter.IsOptional,
+            };
+
+            bool defaultValue = parameter.DefaultValue is bool value && value;
+            option.DefaultValueFactory = _ => defaultValue ? "true" : "false";
+
+            return option;
         }
 
         if (parameter.ValueType == typeof(FileInfo))
@@ -114,26 +129,6 @@ internal static class FormatOptions
             option.DefaultValueFactory = _ => defaultValue;
         }
 
-        // NOpenNLP: upstream parses a boolean argument with Boolean.parseBoolean, which
-        // maps any string other than a case-insensitive "true" to false and never fails.
-        // Option<bool> accepts only true/false and reports a parse error otherwise, so a
-        // command line using `-includeTitles 0` -- meaningful (false) under Apache
-        // OpenNLP -- would abort here. See ToolParams.JavaBoolean for the same fix on the
-        // tools' own options.
-        if (option is Option<bool> booleanOption)
-        {
-            bool defaultValue = parameter.DefaultValue is bool value && value;
-
-            // Pinned to one token for the same reason as ToolParams.JavaBoolean: without
-            // it System.CommandLine treats the option as a flag and reads an
-            // unrecognized value as a separate argument.
-            booleanOption.Arity = ArgumentArity.ExactlyOne;
-            booleanOption.CustomParser = result =>
-                result.Tokens.Count == 0
-                    ? defaultValue
-                    : bool.TryParse(result.Tokens[0].Value, out bool parsed) && parsed;
-        }
-
         return option;
     }
 
@@ -141,8 +136,19 @@ internal static class FormatOptions
     /// Reads the parsed value of <paramref name="parameter"/> from
     /// <paramref name="parseResult"/>.
     /// </summary>
-    internal static T? GetValue<T>(ParseResult parseResult, IFormatParameter parameter) =>
-        parseResult.GetValue((Option<T>)ToOption(parameter));
+    internal static T? GetValue<T>(ParseResult parseResult, IFormatParameter parameter)
+    {
+        // A boolean parameter is carried by an Option<string> (see Create), so its value
+        // is interpreted here the way Java's Boolean.parseBoolean does.
+        if (typeof(T) == typeof(bool))
+        {
+            string? raw = parseResult.GetValue((Option<string?>)ToOption(parameter));
+            object parsed = ToolParams.JavaBooleanValue(raw);
+            return (T)parsed;
+        }
+
+        return parseResult.GetValue((Option<T>)ToOption(parameter));
+    }
 }
 
 /// <summary>
