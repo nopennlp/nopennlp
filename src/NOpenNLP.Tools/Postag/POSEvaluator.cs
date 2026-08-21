@@ -18,6 +18,7 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
+using System.Globalization;
 using NOpenNLP.Tools.Util.Eval;
 
 namespace NOpenNLP.Tools.Postag;
@@ -84,9 +85,13 @@ public class POSEvaluator : Evaluator<POSSample>
     /// </summary>
     public virtual long WordCount => wordAccuracy.Count;
 
+    // NOpenNLP: upstream concatenates the mean, which Java renders with Double.toString --
+    // a perfect accuracy prints "1.0" where .NET's default formatting prints "1". J2N's "J"
+    // format reproduces that, matching the sibling evaluators in the port.
     /// <summary>
     /// Represents this objects as human readable <see cref="string"/>.
     /// </summary>
     public override string ToString() =>
-        $"Accuracy:{wordAccuracy.Value} Number of Samples: {wordAccuracy.Count}";
+        "Accuracy:" + J2N.Numerics.Double.ToString(wordAccuracy.Value, "J", CultureInfo.InvariantCulture) +
+            " Number of Samples: " + wordAccuracy.Count.ToString(CultureInfo.InvariantCulture);
 }

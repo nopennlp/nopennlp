@@ -18,6 +18,7 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
+using System.Globalization;
 using NOpenNLP.Tools.Ml.Model;
 using NOpenNLP.Tools.Util;
 
@@ -210,7 +211,12 @@ public class NaiveBayesTrainer : AbstractEventTrainer
         }
 
         double trainingAccuracy = (double)numCorrect / numEvents;
-        Display("Stats: (" + numCorrect + "/" + numEvents + ") " + trainingAccuracy + "\n");
+        // NOpenNLP: Java's Double.toString always renders a decimal point -- a perfect
+        // training accuracy prints "1.0" where .NET's default formatting prints "1".
+        // J2N's "J" format reproduces Java's rendering so the training log matches
+        // upstream line for line.
+        Display("Stats: (" + numCorrect + "/" + numEvents + ") "
+            + J2N.Numerics.Double.ToString(trainingAccuracy, "J", CultureInfo.InvariantCulture) + "\n");
         return trainingAccuracy;
     }
 }

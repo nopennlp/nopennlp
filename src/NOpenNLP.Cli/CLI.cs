@@ -74,7 +74,8 @@ public static class CLI
 
     private static void Usage()
     {
-        Console.Write("NOpenNLP " + Version.CurrentVersion() + ". ");
+        // NOpenNLP: Version is ambiguous with System.Version here, so it is qualified.
+        Console.Write("NOpenNLP " + Util.Version.CurrentVersion() + ". ");
         Console.WriteLine("Usage: " + Cmd + " TOOL");
         Console.WriteLine("where TOOL is one of:");
 
@@ -174,13 +175,44 @@ public static class CLI
 
             ParseResult parseResult = root.Parse(args);
 
-            int result = parseResult.Invoke();
-
-            if (result != 0)
+            if (parseResult.Errors.Count > 0)
             {
-                // System.CommandLine already reported the parse errors; upstream reaches
-                // the same place through TerminateToolException(1, ...).
-                return result;
+                // Report the parse errors and the tool's usage, then exit 1 -- which is
+                // where upstream lands through TerminateToolException(1, errorMessage +
+                // "\n" + getHelp()). Invoke() would print these itself, but it also
+                // swallows what the action throws (see below), so the two paths are
+                // separated here.
+                foreach (var error in parseResult.Errors)
+                {
+                    Console.Error.WriteLine(error.Message);
+                }
+
+                Console.Error.WriteLine(tool.GetHelp());
+
+                return 1;
+            }
+
+            // NOpenNLP: the action is invoked directly rather than through
+            // ParseResult.Invoke(). Invoke() wraps the action in its own exception
+            // handling, which catches a TerminateToolException, prints its stack trace
+            // and returns 0 -- so every failure inside a tool would report success and
+            // show the user a stack trace instead of the message. Calling the action
+            // lets the exception reach the handler below, which is what gives upstream's
+            // message and exit code.
+            if (parseResult.Action is System.CommandLine.Invocation.SynchronousCommandLineAction action)
+            {
+                int result = action.Invoke(parseResult);
+
+                if (result != 0)
+                {
+                    return result;
+                }
+            }
+            else
+            {
+                // The help and version actions are the only others System.CommandLine
+                // installs, and both are safe to run through the pipeline.
+                return parseResult.Invoke();
             }
         }
         catch (TerminateToolException e)

@@ -61,6 +61,28 @@ public abstract class TypedCmdLineTool : CmdLineTool
     protected abstract IEnumerable<IFormatParameter>? GetFormatParameters(string format);
 
     /// <summary>
+    /// Renders what upstream puts between the tool name and its arguments in a usage
+    /// line: the concrete <c>.format</c> suffix when the user named one, and the
+    /// <c>[.fmt1|.fmt2]</c> alternation of everything available when they did not.
+    /// </summary>
+    /// <remarks>
+    /// This mirrors the two branches of upstream's
+    /// <c>AbstractTypedParamTool.getHelp(String)</c>. Printing the alternation for a
+    /// named format would answer a question about one format with a menu of all of them,
+    /// and the usage line would not be a command the user could copy.
+    /// </remarks>
+    protected string GetFormatsHelp(string format)
+    {
+        if (!string.IsNullOrEmpty(format)
+            && !StreamFactoryRegistry.DefaultFormat.Equals(format, System.StringComparison.Ordinal))
+        {
+            return "." + format + " ";
+        }
+
+        return GetFormatsHelp();
+    }
+
+    /// <summary>
     /// Renders the <c>[.fmt1|.fmt2]</c> alternation upstream puts between the tool name
     /// and its arguments when more than one format is registered.
     /// </summary>

@@ -42,7 +42,7 @@ public class EvalitaNameSampleStreamFactory : LanguageSampleStreamFactory<NameSa
 
     /// <inheritdoc/>
     public override IEnumerable<IFormatParameter> Parameters =>
-        [FormatParameters.Data, LangParam, TypesParam];
+        [FormatParameters.Data, FormatParameters.Encoding, LangParam, TypesParam];
 
     /// <inheritdoc/>
     public override IObjectStream<NameSample?> Create(IFormatParameterValues values)

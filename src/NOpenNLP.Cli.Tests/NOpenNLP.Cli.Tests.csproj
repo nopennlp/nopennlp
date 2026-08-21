@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!--
+      The CLI ships as a net10.0 dotnet tool, so unlike NOpenNLP.Tools.Tests there is
+      only one target to test against.
+    -->
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>12.0</LangVersion>
+    <RootNamespace>NOpenNLP.Tools.Cmdline</RootNamespace>
+    <AssemblyName>NOpenNLP.Cli.Tests</AssemblyName>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <RunSettingsFilePath>$(MSBuildProjectDirectory)/NOpenNLP.Cli.Tests.runsettings</RunSettingsFilePath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="NUnit" Version="4.6.1" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NOpenNLP.Cli\NOpenNLP.Cli.csproj" />
+  </ItemGroup>
+
+  <!--
+    Corpora for the end-to-end tests, copied from opennlp-tools/src/test/resources and
+    embedded under their upstream classpath names, as NOpenNLP.Tools.Tests does. The CLI
+    takes file paths rather than streams, so the tests materialize these to a temp
+    directory before invoking a tool.
+  -->
+  <ItemGroup>
+    <EmbeddedResource Include="Data\*"
+                      LogicalName="opennlp.tools.cmdline.%(Filename)%(Extension)" />
+  </ItemGroup>
+
+</Project>

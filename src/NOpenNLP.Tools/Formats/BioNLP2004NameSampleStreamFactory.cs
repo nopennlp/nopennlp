@@ -33,7 +33,7 @@ public class BioNLP2004NameSampleStreamFactory : AbstractSampleStreamFactory<Nam
 
     /// <inheritdoc/>
     public override IEnumerable<IFormatParameter> Parameters =>
-        [FormatParameters.Data, TypesParam];
+        [FormatParameters.Data, FormatParameters.Encoding, TypesParam];
 
     /// <inheritdoc/>
     public override IObjectStream<NameSample?> Create(IFormatParameterValues values)

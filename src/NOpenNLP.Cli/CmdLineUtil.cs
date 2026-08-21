@@ -389,9 +389,10 @@ public static class CmdLineUtil
                     "Training parameters file '" + paramFile + "' is invalid!");
             }
 
-            TrainerType? trainerType = TrainerFactory.GetTrainerType(parameters);
+            TrainerFactory.TrainerType? trainerType = TrainerFactory.GetTrainerType(parameters);
 
-            if (!supportSequenceTraining && trainerType == TrainerType.EventModelSequenceTrainer)
+            if (!supportSequenceTraining
+                && trainerType == TrainerFactory.TrainerType.EVENT_MODEL_SEQUENCE_TRAINER)
             {
                 throw new TerminateToolException(1, "Sequence training is not supported!");
             }
