@@ -39,7 +39,7 @@ public sealed class ParserTrainerTool : AbstractTrainerTool<Parse?>
     private readonly Option<string> parserType = TrainingParams.ParserType();
     private readonly Option<string?> headRulesSerializerImpl = TrainingParams.HeadRulesSerializerImpl();
     private readonly Option<FileInfo> headRules = TrainingParams.HeadRules();
-    private readonly Option<bool> fun = TrainingParams.Fun();
+    private readonly Option<string?> fun = TrainingParams.Fun();
     private readonly Option<string> lang = ToolParams.Lang();
     private readonly Option<string?> @params = ToolParams.Params();
     private readonly Option<FileInfo> model = ToolParams.ModelForTraining();
@@ -197,7 +197,7 @@ public sealed class ParserTrainerTool : AbstractTrainerTool<Parse?>
                 parseResult.GetRequiredValue(lang), parseResult.GetRequiredValue(headRules));
 
             ParserType? type = ParseParserType(parseResult.GetValue(parserType));
-            if (parseResult.GetValue(fun))
+            if (ToolParams.JavaBooleanValue(parseResult.GetValue(fun)))
             {
                 Parse.UseFunctionTags(true);
             }

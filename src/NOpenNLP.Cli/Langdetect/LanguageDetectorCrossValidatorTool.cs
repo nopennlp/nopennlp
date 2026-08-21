@@ -32,7 +32,7 @@ public sealed class LanguageDetectorCrossValidatorTool
     : AbstractCrossValidatorTool<LanguageSample?>
 {
     private readonly Option<int> folds = ToolParams.Folds();
-    private readonly Option<bool> misclassified = ToolParams.Misclassified();
+    private readonly Option<string?> misclassified = ToolParams.Misclassified();
     private readonly Option<string?> @params = TrainingParams.Params();
     private readonly Option<string?> factoryName = TrainingParams.Factory();
     private readonly Option<FileInfo?> reportOutputFile = ToolParams.ReportOutputFile();
@@ -60,7 +60,7 @@ public sealed class LanguageDetectorCrossValidatorTool
         }
 
         var listeners = new List<ILanguageDetectorEvaluationMonitor>();
-        if (parseResult.GetValue(misclassified))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValue(misclassified)))
         {
             listeners.Add(new LanguageDetectorEvaluationErrorListener());
         }

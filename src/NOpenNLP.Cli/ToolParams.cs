@@ -105,26 +105,47 @@ public static class ToolParams
             DefaultValueFactory = _ => 10,
         };
 
-    /// <summary>From <c>EvaluatorParams</c> and <c>CVParams</c>.</summary>
-    public static Option<bool> Misclassified() =>
-        new Option<bool>("-misclassified")
+    /// <summary>
+    /// A boolean option that parses the way Java's <c>Boolean.parseBoolean</c> does.
+    /// </summary>
+    // NOpenNLP: upstream's BooleanArgumentFactory calls Boolean.parseBoolean, which maps
+    // any string other than a case-insensitive "true" to false and never fails, so
+    // `-detailedF 0` and `-misclassified no` -- both meaningful (false) under Apache
+    // OpenNLP -- run there rather than aborting.
+    //
+    // This is declared as Option<string> rather than Option<bool> because
+    // System.CommandLine validates a bool token itself, before any CustomParser runs, and
+    // rejects anything that is not true/false. Taking the raw string and interpreting it
+    // through JavaBooleanValue is what makes those command lines work here too. The
+    // HelpName still reads "true|false", as upstream's valueName does.
+    internal static Option<string?> JavaBoolean(string name, string description, bool defaultValue) =>
+        new Option<string?>(name)
         {
-            Description = "if true will print false negatives and false positives.",
+            Description = description,
             HelpName = "true|false",
-            DefaultValueFactory = _ => false,
+            DefaultValueFactory = _ => defaultValue ? "true" : "false",
         };
+
+    /// <summary>
+    /// Interprets a <see cref="JavaBoolean"/> option's value the way Java's
+    /// <c>Boolean.parseBoolean</c> does: anything but a case-insensitive <c>"true"</c>
+    /// is <c>false</c>.
+    /// </summary>
+    internal static bool JavaBooleanValue(string? value) =>
+        "true".Equals(value, System.StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>From <c>EvaluatorParams</c> and <c>CVParams</c>.</summary>
+    public static Option<string?> Misclassified() =>
+        JavaBoolean("-misclassified",
+            "if true will print false negatives and false positives.", false);
 
     /// <summary>From <c>DetailedFMeasureEvaluatorParams</c>.</summary>
     // NOpenNLP: upstream marks this @Deprecated with the note "this will be removed in
     // 1.8.0"; it is still present and still defaults to true in 1.9.4, so it is ported
     // as it stands rather than dropped.
-    public static Option<bool> DetailedF() =>
-        new Option<bool>("-detailedF")
-        {
-            Description = "if true (default) will print detailed FMeasure results.",
-            HelpName = "true|false",
-            DefaultValueFactory = _ => true,
-        };
+    public static Option<string?> DetailedF() =>
+        JavaBoolean("-detailedF",
+            "if true (default) will print detailed FMeasure results.", true);
 
     /// <summary>From <c>FineGrainedEvaluatorParams</c>.</summary>
     public static Option<FileInfo?> ReportOutputFile() =>

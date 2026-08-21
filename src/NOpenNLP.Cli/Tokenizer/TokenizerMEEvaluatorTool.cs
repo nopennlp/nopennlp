@@ -32,7 +32,7 @@ public sealed class TokenizerMEEvaluatorTool : AbstractEvaluatorTool<TokenSample
     // NOpenNLP: upstream's EvalToolParams interface extends EvaluatorParams; the
     // options it declares are created here instead.
     private readonly Option<FileInfo> model = ToolParams.ModelForEvaluation();
-    private readonly Option<bool> misclassified = ToolParams.Misclassified();
+    private readonly Option<string?> misclassified = ToolParams.Misclassified();
 
     /// <inheritdoc/>
     protected override IEnumerable<Option> GetToolOptions() => [model, misclassified];
@@ -51,7 +51,7 @@ public sealed class TokenizerMEEvaluatorTool : AbstractEvaluatorTool<TokenSample
         TokenizerModel model = new TokenizerModelLoader().Load(parseResult.GetValue(this.model)!);
 
         ITokenizerEvaluationMonitor? misclassifiedListener = null;
-        if (parseResult.GetValue(misclassified))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValue(misclassified)))
         {
             misclassifiedListener = new TokenEvaluationErrorListener();
         }

@@ -33,7 +33,7 @@ namespace NOpenNLP.Tools.Cmdline.Postag;
 public sealed class POSTaggerCrossValidatorTool : AbstractCrossValidatorTool<POSSample?>
 {
     private readonly Option<int> folds = ToolParams.Folds();
-    private readonly Option<bool> misclassified = ToolParams.Misclassified();
+    private readonly Option<string?> misclassified = ToolParams.Misclassified();
     private readonly Option<FileInfo?> featuregen = TrainingParams.Featuregen();
     private readonly Option<DirectoryInfo?> resources = TrainingParams.Resources();
     private readonly Option<FileInfo?> dict = TrainingParams.Dict();
@@ -68,7 +68,7 @@ public sealed class POSTaggerCrossValidatorTool : AbstractCrossValidatorTool<POS
         }
 
         IPOSTaggerEvaluationMonitor? missclassifiedListener = null;
-        if (parseResult.GetValue(misclassified))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValue(misclassified)))
         {
             missclassifiedListener = new POSEvaluationErrorListener();
         }

@@ -39,8 +39,8 @@ public sealed class TokenNameFinderCrossValidatorTool : AbstractCrossValidatorTo
     private readonly Option<string> lang = ToolParams.Lang();
     private readonly Option<string?> @params = ToolParams.Params();
     private readonly Option<int> folds = ToolParams.Folds();
-    private readonly Option<bool> misclassified = ToolParams.Misclassified();
-    private readonly Option<bool> detailedF = ToolParams.DetailedF();
+    private readonly Option<string?> misclassified = ToolParams.Misclassified();
+    private readonly Option<string?> detailedF = ToolParams.DetailedF();
     private readonly Option<FileInfo?> reportOutputFile = ToolParams.ReportOutputFile();
 
     /// <inheritdoc/>
@@ -87,18 +87,18 @@ public sealed class TokenNameFinderCrossValidatorTool : AbstractCrossValidatorTo
         string? nameTypesValue = parseResult.GetValue(nameTypes);
         if (nameTypesValue != null)
         {
-            string[] nameTypesArr = nameTypesValue.Split(',');
+            string[] nameTypesArr = StringUtil.SplitDroppingTrailingEmpty(nameTypesValue, ',');
             sampleStream = new NameSampleTypeFilter(nameTypesArr, sampleStream!);
         }
 
         var listeners = new List<ITokenNameFinderEvaluationMonitor>();
-        if (parseResult.GetValue(misclassified))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValue(misclassified)))
         {
             listeners.Add(new NameEvaluationErrorListener());
         }
 
         TokenNameFinderDetailedFMeasureListener? detailedFListener = null;
-        if (parseResult.GetValue(detailedF))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValue(detailedF)))
         {
             detailedFListener = new TokenNameFinderDetailedFMeasureListener();
             listeners.Add(detailedFListener);

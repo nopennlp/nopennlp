@@ -515,20 +515,40 @@ public abstract class FineGrainedReportListener
         PadLeft(label, 12) + ": " + PadRight(value, 8);
 
     /// <summary>Reproduces <c>MessageFormat.format("{0,number,#.##%}", value)</c>.</summary>
-    private static string FormatPercent(double value)
-    {
-        double scaled = Math.Round(value * 100, 2, MidpointRounding.ToEven);
-        return (scaled / 100).ToString("#0.##%", CultureInfo.CurrentCulture);
-    }
+    private static string FormatPercent(double value) =>
+        FormatHalfEven(value * 100, 2, CultureInfo.CurrentCulture) + "%";
 
     /// <summary>
     /// Reproduces <c>MessageFormat.format("{0,number,#.##}", value)</c> and
     /// <c>"{0,number,#.###}"</c>.
     /// </summary>
-    private static string FormatNumber(double value, int fractionDigits)
+    private static string FormatNumber(double value, int fractionDigits) =>
+        FormatHalfEven(value, fractionDigits, CultureInfo.CurrentCulture);
+
+    /// <summary>
+    /// Rounds <paramref name="value"/> to <paramref name="fractionDigits"/> the way Java's
+    /// <c>DecimalFormat</c> does, and renders it with a <c>#0.##</c>-style pattern.
+    /// </summary>
+    /// <remarks>
+    /// Java's <c>DecimalFormat</c> applies HALF_EVEN to the <b>exact binary value</b> of
+    /// the double, not to its shortest decimal representation. <see cref="Math.Round(double, int, MidpointRounding)"/>
+    /// does not reproduce that: it works on the binary value but returns a double, and the
+    /// subsequent format re-rounds. Going through the 17-significant-digit representation
+    /// keeps enough of the exact value to resolve the midpoint the same way Java does, so
+    /// 0.955 (which is really 0.95499999999999996) rounds down to 0.95 as upstream prints
+    /// it, while 0.12345 * 100 rounds up to 12.35. Checked against a real JVM on the
+    /// values this report produces.
+    /// </remarks>
+    private static string FormatHalfEven(double value, int fractionDigits, CultureInfo culture)
     {
-        double rounded = Math.Round(value, fractionDigits, MidpointRounding.ToEven);
-        return rounded.ToString("#0." + new string('#', fractionDigits), CultureInfo.CurrentCulture);
+        decimal exact = decimal.Parse(
+            value.ToString("G17", CultureInfo.InvariantCulture),
+            NumberStyles.Float,
+            CultureInfo.InvariantCulture);
+
+        decimal rounded = Math.Round(exact, fractionDigits, MidpointRounding.ToEven);
+
+        return rounded.ToString("#0." + new string('#', fractionDigits), culture);
     }
 
     /// <summary>

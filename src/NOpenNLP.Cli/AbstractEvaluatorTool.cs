@@ -18,6 +18,7 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
+using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.Linq;
@@ -93,19 +94,41 @@ public abstract class AbstractEvaluatorTool<T> : TypedCmdLineTool
     {
         var command = new Command(commandName, ShortDescription);
 
-        foreach (Option option in GetToolOptions())
-        {
-            command.Options.Add(option);
-        }
-
         // The selected format contributes its own options, so `Tool.format -data x` gets
         // one merged option list -- which is what upstream assembles by validating the
         // tool's params and the factory's params against the same argument array.
         IObjectStreamFactory<T> streamFactory = GetStreamFactory(Format);
 
+        // NOpenNLP: the format's options are added FIRST, and a tool option that repeats
+        // one of their names is skipped, so exactly one Option instance carries each name.
+        //
+        // A tool and its format can legitimately declare the same option: ParserTrainer's
+        // params extend EncodingParameter while every parse format also declares
+        // -encoding. Upstream parses one flat string[], so the two declarations are just
+        // two views of the same argument text and both readers see the user's value.
+        // System.CommandLine binds a parsed value to an Option INSTANCE, so registering
+        // two instances of the same name binds the value to the first and leaves the
+        // second empty -- and the factory reads through the second, so `-encoding
+        // ISO-8859-1` was silently ignored and the corpus decoded as UTF-8.
+        //
+        // The format's instance wins because it is the one the factory reads back
+        // through; the tool's declaration only needs the option to be accepted and shown
+        // in help, which it still is.
+        var formatOptionNames = new HashSet<string>(StringComparer.Ordinal);
+
         foreach (IFormatParameter parameter in streamFactory.Parameters)
         {
-            command.Options.Add(FormatOptions.ToOption(parameter));
+            Option option = FormatOptions.ToOption(parameter);
+            formatOptionNames.Add(option.Name);
+            command.Options.Add(option);
+        }
+
+        foreach (Option option in GetToolOptions())
+        {
+            if (!formatOptionNames.Contains(option.Name))
+            {
+                command.Options.Add(option);
+            }
         }
 
         command.SetAction(parseResult =>

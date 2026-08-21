@@ -55,11 +55,8 @@ internal static class TrainingParams
             Required = true,
         };
 
-    public static Option<bool> Fun() =>
-        new Option<bool>("-fun")
-        {
-            Description = "Learn to generate function tags.",
-            HelpName = "true|false",
-            DefaultValueFactory = _ => false,
-        };
+    // NOpenNLP: parsed leniently, the way Java's Boolean.parseBoolean is. See
+    // ToolParams.JavaBoolean.
+    public static Option<string?> Fun() =>
+        ToolParams.JavaBoolean("-fun", "Learn to generate function tags.", false);
 }

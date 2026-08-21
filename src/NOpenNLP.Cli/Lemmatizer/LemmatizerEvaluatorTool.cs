@@ -33,7 +33,7 @@ public sealed class LemmatizerEvaluatorTool : AbstractEvaluatorTool<LemmaSample?
     // NOpenNLP: upstream's EvalToolParams interface extends EvaluatorParams and
     // FineGrainedEvaluatorParams; the options those declare are created here instead.
     private readonly Option<FileInfo> model = ToolParams.ModelForEvaluation();
-    private readonly Option<bool> misclassified = ToolParams.Misclassified();
+    private readonly Option<string?> misclassified = ToolParams.Misclassified();
     private readonly Option<FileInfo?> reportOutputFile = ToolParams.ReportOutputFile();
 
     /// <inheritdoc/>
@@ -55,7 +55,7 @@ public sealed class LemmatizerEvaluatorTool : AbstractEvaluatorTool<LemmaSample?
         LemmatizerModel model = new LemmatizerModelLoader().Load(parseResult.GetValue(this.model)!);
 
         ILemmatizerEvaluationMonitor? missclassifiedListener = null;
-        if (parseResult.GetValue(misclassified))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValue(misclassified)))
         {
             missclassifiedListener = new LemmaEvaluationErrorListener();
         }

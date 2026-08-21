@@ -31,7 +31,7 @@ namespace NOpenNLP.Tools.Cmdline.Doccat;
 public sealed class DoccatCrossValidatorTool : AbstractCrossValidatorTool<DocumentSample?>
 {
     private readonly Option<int> folds = ToolParams.Folds();
-    private readonly Option<bool> misclassified = ToolParams.Misclassified();
+    private readonly Option<string?> misclassified = ToolParams.Misclassified();
     private readonly Option<string> lang = ToolParams.Lang();
     private readonly Option<string?> @params = ToolParams.Params();
     private readonly Option<string?> featureGenerators = TrainingParams.FeatureGenerators();
@@ -61,7 +61,7 @@ public sealed class DoccatCrossValidatorTool : AbstractCrossValidatorTool<Docume
         }
 
         var listeners = new List<IDoccatEvaluationMonitor>();
-        if (parseResult.GetValue(misclassified))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValue(misclassified)))
         {
             listeners.Add(new DoccatEvaluationErrorListener());
         }

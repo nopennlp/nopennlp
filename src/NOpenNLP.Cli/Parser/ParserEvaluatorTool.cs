@@ -32,7 +32,7 @@ public class ParserEvaluatorTool : AbstractEvaluatorTool<Parse?>
     // NOpenNLP: this tool uses EvaluatorParams directly rather than declaring an
     // EvalToolParams sub-interface of its own; the options it declares are created here.
     private readonly Option<FileInfo> model = ToolParams.ModelForEvaluation();
-    private readonly Option<bool> misclassified = ToolParams.Misclassified();
+    private readonly Option<string?> misclassified = ToolParams.Misclassified();
 
     /// <inheritdoc/>
     protected override IEnumerable<Option> GetToolOptions() => [model, misclassified];

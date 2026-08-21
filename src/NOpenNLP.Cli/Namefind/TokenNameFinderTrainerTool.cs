@@ -162,7 +162,7 @@ public sealed class TokenNameFinderTrainerTool : AbstractTrainerTool<NameSample?
         string? nameTypesValue = parseResult.GetValue(nameTypes);
         if (nameTypesValue != null)
         {
-            string[] nameTypesArr = nameTypesValue.Split(',');
+            string[] nameTypesArr = StringUtil.SplitDroppingTrailingEmpty(nameTypesValue, ',');
             sampleStream = new NameSampleTypeFilter(nameTypesArr, sampleStream!);
         }
 

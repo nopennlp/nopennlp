@@ -34,8 +34,8 @@ public sealed class ChunkerCrossValidatorTool : AbstractCrossValidatorTool<Chunk
     private readonly Option<string> lang = ToolParams.Lang();
     private readonly Option<string?> @params = ToolParams.Params();
     private readonly Option<int> folds = ToolParams.Folds();
-    private readonly Option<bool> misclassified = ToolParams.Misclassified();
-    private readonly Option<bool> detailedF = ToolParams.DetailedF();
+    private readonly Option<string?> misclassified = ToolParams.Misclassified();
+    private readonly Option<string?> detailedF = ToolParams.DetailedF();
 
     /// <inheritdoc/>
     public override string ShortDescription => "K-fold cross validator for the chunker";
@@ -60,12 +60,12 @@ public sealed class ChunkerCrossValidatorTool : AbstractCrossValidatorTool<Chunk
 
         var listeners = new List<IChunkerEvaluationMonitor>();
         ChunkerDetailedFMeasureListener? detailedFMeasureListener = null;
-        if (parseResult.GetValue(misclassified))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValue(misclassified)))
         {
             listeners.Add(new ChunkEvaluationErrorListener());
         }
 
-        if (parseResult.GetValue(detailedF))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValue(detailedF)))
         {
             detailedFMeasureListener = new ChunkerDetailedFMeasureListener();
             listeners.Add(detailedFMeasureListener);

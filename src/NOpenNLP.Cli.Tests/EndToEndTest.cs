@@ -108,6 +108,45 @@ public class EndToEndTest
         StringAssert.Contains("_", result.Out);
     }
 
+    /// <summary>
+    /// Two tools run in one process must not share parsed option values.
+    /// </summary>
+    /// <remarks>
+    /// The format descriptors are shared -- every text-based format declares
+    /// <c>FormatParameters.Data</c> -- and System.CommandLine binds a parsed value to the
+    /// <c>Option</c> instance. Caching those instances process-wide would let the
+    /// <c>-data</c> value from one invocation still be bound when the next tool builds its
+    /// command, so <see cref="FormatOptions"/> scopes them per invocation. A single-shot
+    /// CLI would never notice; these tests would, and so would anything hosting the CLI.
+    /// </remarks>
+    [Test]
+    public void TestOptionValuesDoNotLeakBetweenInvocations()
+    {
+        string conllu = temp.CopyResource("de-ud-train-sample.conllu");
+        string tokenTrain = temp.CopyResource("token.train");
+
+        CliResult first = CliRunner.Run(
+            ["POSTaggerConverter", "conllu", "-data", conllu, "-encoding", "UTF-8"]);
+
+        ClassicAssert.AreEqual(0, first.ExitCode, "stderr was: " + first.Error);
+        ClassicAssert.IsNotEmpty(first.Out);
+
+        // A different tool, over a different corpus, in the same process.
+        CliResult second = CliRunner.Run(
+            ["TokenizerTrainer", "-model", temp.PathOf("tok.bin"), "-lang", "eng",
+             "-data", tokenTrain, "-encoding", "UTF-8"]);
+
+        ClassicAssert.AreEqual(0, second.ExitCode, "stderr was: " + second.Error);
+        FileAssert.Exists(temp.PathOf("tok.bin"));
+
+        // And the first tool again, to catch a stale binding in the other direction.
+        CliResult third = CliRunner.Run(
+            ["POSTaggerConverter", "conllu", "-data", conllu, "-encoding", "UTF-8"]);
+
+        ClassicAssert.AreEqual(0, third.ExitCode, "stderr was: " + third.Error);
+        ClassicAssert.AreEqual(first.Out, third.Out, "the same command should give the same output");
+    }
+
     [Test]
     public void TestConverterWithoutAFormatPrintsHelp()
     {

@@ -35,7 +35,7 @@ public sealed class DoccatEvaluatorTool : AbstractEvaluatorTool<DocumentSample?>
     // NOpenNLP: upstream's EvalToolParams interface extends EvaluatorParams and
     // FineGrainedEvaluatorParams; the options those declare are created here instead.
     private readonly Option<FileInfo> model = ToolParams.ModelForEvaluation();
-    private readonly Option<bool> misclassified = ToolParams.Misclassified();
+    private readonly Option<string?> misclassified = ToolParams.Misclassified();
     private readonly Option<FileInfo?> reportOutputFile = ToolParams.ReportOutputFile();
 
     /// <inheritdoc/>
@@ -57,7 +57,7 @@ public sealed class DoccatEvaluatorTool : AbstractEvaluatorTool<DocumentSample?>
         DoccatModel model = new DoccatModelLoader().Load(parseResult.GetValue(this.model)!);
 
         var listeners = new JCG.List<IDoccatEvaluationMonitor>();
-        if (parseResult.GetValue(misclassified))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValue(misclassified)))
         {
             listeners.Add(new DoccatEvaluationErrorListener());
         }

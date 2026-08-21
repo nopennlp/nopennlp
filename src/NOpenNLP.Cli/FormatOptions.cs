@@ -35,24 +35,41 @@ namespace NOpenNLP.Tools.Cmdline;
 /// </remarks>
 internal static class FormatOptions
 {
-    // NOpenNLP: one Option instance per parameter per invocation, cached so
-    // ToOption and the value lookup agree on the same instance -- System.CommandLine
-    // binds a parsed value to the instance, so a second Option with the same name would
-    // read back nothing.
-    private static readonly Dictionary<IFormatParameter, Option> options = new Dictionary<IFormatParameter, Option>();
+    // NOpenNLP: ToOption must return the same Option instance for a given parameter
+    // within one invocation, because System.CommandLine binds a parsed value to the
+    // instance -- a second Option with the same name would read back nothing.
+    //
+    // The cache is per invocation rather than static. Descriptors are shared: every
+    // text-based format declares FormatParameters.Data, so a process-wide cache would
+    // hand the same Option instance to more than one Command. That is harmless for the
+    // real CLI, which builds one command and exits, but the tests drive CLI.Run many
+    // times in one process, where a value parsed for one tool would still be bound to
+    // the instance the next tool adds to its command. NewScope() is called once per
+    // command construction; Current is what ToOption and the value lookup share.
+    [ThreadStatic]
+    private static Dictionary<IFormatParameter, Option>? current;
+
+    private static Dictionary<IFormatParameter, Option> Current =>
+        current ??= new Dictionary<IFormatParameter, Option>();
 
     /// <summary>
-    /// Returns the option for <paramref name="parameter"/>, creating it on first use.
+    /// Starts a fresh set of options, discarding any bound to a previous invocation.
+    /// </summary>
+    internal static void NewScope() => current = new Dictionary<IFormatParameter, Option>();
+
+    /// <summary>
+    /// Returns the option for <paramref name="parameter"/>, creating it on first use
+    /// within the current scope.
     /// </summary>
     internal static Option ToOption(IFormatParameter parameter)
     {
-        if (options.TryGetValue(parameter, out Option? existing))
+        if (Current.TryGetValue(parameter, out Option? existing))
         {
             return existing;
         }
 
         Option created = Create(parameter);
-        options[parameter] = created;
+        Current[parameter] = created;
         return created;
     }
 
@@ -95,6 +112,26 @@ internal static class FormatOptions
         {
             T defaultValue = (T)parameter.DefaultValue;
             option.DefaultValueFactory = _ => defaultValue;
+        }
+
+        // NOpenNLP: upstream parses a boolean argument with Boolean.parseBoolean, which
+        // maps any string other than a case-insensitive "true" to false and never fails.
+        // Option<bool> accepts only true/false and reports a parse error otherwise, so a
+        // command line using `-includeTitles 0` -- meaningful (false) under Apache
+        // OpenNLP -- would abort here. See ToolParams.JavaBoolean for the same fix on the
+        // tools' own options.
+        if (option is Option<bool> booleanOption)
+        {
+            bool defaultValue = parameter.DefaultValue is bool value && value;
+
+            // Pinned to one token for the same reason as ToolParams.JavaBoolean: without
+            // it System.CommandLine treats the option as a flag and reads an
+            // unrecognized value as a separate argument.
+            booleanOption.Arity = ArgumentArity.ExactlyOne;
+            booleanOption.CustomParser = result =>
+                result.Tokens.Count == 0
+                    ? defaultValue
+                    : bool.TryParse(result.Tokens[0].Value, out bool parsed) && parsed;
         }
 
         return option;

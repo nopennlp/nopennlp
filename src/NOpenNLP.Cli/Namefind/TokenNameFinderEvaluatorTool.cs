@@ -35,8 +35,8 @@ public sealed class TokenNameFinderEvaluatorTool : AbstractEvaluatorTool<NameSam
     // DetailedFMeasureEvaluatorParams and FineGrainedEvaluatorParams, and adds
     // getNameTypes() of its own; the options those declare are created here instead.
     private readonly Option<FileInfo> model = ToolParams.ModelForEvaluation();
-    private readonly Option<bool> misclassified = ToolParams.Misclassified();
-    private readonly Option<bool> detailedF = ToolParams.DetailedF();
+    private readonly Option<string?> misclassified = ToolParams.Misclassified();
+    private readonly Option<string?> detailedF = ToolParams.DetailedF();
     private readonly Option<FileInfo?> reportOutputFile = ToolParams.ReportOutputFile();
 
     private readonly Option<string?> nameTypes = new Option<string?>("-nameTypes")
@@ -65,13 +65,13 @@ public sealed class TokenNameFinderEvaluatorTool : AbstractEvaluatorTool<NameSam
             new TokenNameFinderModelLoader().Load(parseResult.GetValue(this.model)!);
 
         var listeners = new JCG.List<ITokenNameFinderEvaluationMonitor>();
-        if (parseResult.GetValue(misclassified))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValue(misclassified)))
         {
             listeners.Add(new NameEvaluationErrorListener());
         }
 
         TokenNameFinderDetailedFMeasureListener? detailedFListener = null;
-        if (parseResult.GetValue(detailedF))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValue(detailedF)))
         {
             detailedFListener = new TokenNameFinderDetailedFMeasureListener();
             listeners.Add(detailedFListener);
@@ -102,7 +102,7 @@ public sealed class TokenNameFinderEvaluatorTool : AbstractEvaluatorTool<NameSam
         string? nameTypesValue = parseResult.GetValue(nameTypes);
         if (nameTypesValue != null)
         {
-            string[] types = nameTypesValue.Split(',');
+            string[] types = StringUtil.SplitDroppingTrailingEmpty(nameTypesValue, ',');
             sampleStream = new NameSampleTypeFilter(types, sampleStream!);
         }
 

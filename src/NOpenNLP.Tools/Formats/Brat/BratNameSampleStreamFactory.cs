@@ -175,7 +175,11 @@ public class BratNameSampleStreamFactory : AbstractSampleStreamFactory<NameSampl
         string? nameTypesValue = values.Get<string>(NameTypesParam);
         if (nameTypesValue != null)
         {
-            string[] nameTypesArr = nameTypesValue.Split(',');
+            // NOpenNLP: upstream's String.split(",") discards trailing empty strings, so
+            // a trailing comma is ignored and a value of "," yields an empty array --
+            // leaving nameTypes null, which means "accept every type". string.Split would
+            // instead produce empty entries, filtering to a type name no annotation has.
+            string[] nameTypesArr = StringUtil.SplitDroppingTrailingEmpty(nameTypesValue, ',');
             if (nameTypesArr.Length > 0)
             {
                 var types = new JCG.HashSet<string>();

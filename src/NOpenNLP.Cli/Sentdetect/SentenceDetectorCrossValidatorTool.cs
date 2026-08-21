@@ -38,7 +38,7 @@ public sealed class SentenceDetectorCrossValidatorTool
     private readonly Option<string> lang = ToolParams.Lang();
     private readonly Option<string?> @params = ToolParams.Params();
     private readonly Option<int> folds = ToolParams.Folds();
-    private readonly Option<bool> misclassified = ToolParams.Misclassified();
+    private readonly Option<string?> misclassified = ToolParams.Misclassified();
 
     /// <inheritdoc/>
     public override string ShortDescription =>
@@ -65,7 +65,7 @@ public sealed class SentenceDetectorCrossValidatorTool
         SDCrossValidator validator;
 
         ISentenceDetectorEvaluationMonitor? errorListener = null;
-        if (parseResult.GetValue(misclassified))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValue(misclassified)))
         {
             errorListener = new SentenceEvaluationErrorListener();
         }

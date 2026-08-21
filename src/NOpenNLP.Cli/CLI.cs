@@ -169,6 +169,9 @@ public static class CLI
                 throw new TerminateToolException(1, "Tool " + toolName + " does not support formats.");
             }
 
+            // Each invocation gets its own format options; see FormatOptions.
+            FormatOptions.NewScope();
+
             Command command = tool.CreateCommand(args[0]);
             var root = new RootCommand(Cmd);
             root.Subcommands.Add(command);

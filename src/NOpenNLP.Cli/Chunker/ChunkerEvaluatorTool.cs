@@ -34,8 +34,8 @@ public sealed class ChunkerEvaluatorTool : AbstractEvaluatorTool<ChunkSample?>
     // NOpenNLP: upstream's EvalToolParams interface extends EvaluatorParams and
     // DetailedFMeasureEvaluatorParams; the options those declare are created here.
     private readonly Option<FileInfo> model = ToolParams.ModelForEvaluation();
-    private readonly Option<bool> misclassified = ToolParams.Misclassified();
-    private readonly Option<bool> detailedF = ToolParams.DetailedF();
+    private readonly Option<string?> misclassified = ToolParams.Misclassified();
+    private readonly Option<string?> detailedF = ToolParams.DetailedF();
 
     /// <inheritdoc/>
     protected override IEnumerable<Option> GetToolOptions() => [model, misclassified, detailedF];
@@ -56,12 +56,12 @@ public sealed class ChunkerEvaluatorTool : AbstractEvaluatorTool<ChunkSample?>
 
         var listeners = new JCG.List<IChunkerEvaluationMonitor>();
         ChunkerDetailedFMeasureListener? detailedFMeasureListener = null;
-        if (parseResult.GetValue(misclassified))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValue(misclassified)))
         {
             listeners.Add(new ChunkEvaluationErrorListener());
         }
 
-        if (parseResult.GetValue(detailedF))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValue(detailedF)))
         {
             detailedFMeasureListener = new ChunkerDetailedFMeasureListener();
             listeners.Add(detailedFMeasureListener);

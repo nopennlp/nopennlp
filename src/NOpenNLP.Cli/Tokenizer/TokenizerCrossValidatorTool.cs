@@ -32,7 +32,7 @@ namespace NOpenNLP.Tools.Cmdline.Tokenizer;
 public sealed class TokenizerCrossValidatorTool : AbstractCrossValidatorTool<TokenSample?>
 {
     private readonly Option<int> folds = ToolParams.Folds();
-    private readonly Option<bool> misclassified = ToolParams.Misclassified();
+    private readonly Option<string?> misclassified = ToolParams.Misclassified();
     private readonly Option<bool> alphaNumOpt = TrainingParams.AlphaNumOpt();
     private readonly Option<FileInfo?> abbDict = TrainingParams.AbbDict();
     private readonly Option<string?> factoryName = TrainingParams.Factory();
@@ -63,7 +63,7 @@ public sealed class TokenizerCrossValidatorTool : AbstractCrossValidatorTool<Tok
         TokenizerCrossValidator validator;
 
         ITokenizerEvaluationMonitor? listener = null;
-        if (parseResult.GetValue(misclassified))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValue(misclassified)))
         {
             listener = new TokenEvaluationErrorListener();
         }
