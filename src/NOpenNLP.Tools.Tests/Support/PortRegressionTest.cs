@@ -20,6 +20,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using NOpenNLP.Tools.Chunker;
+using NOpenNLP.Tools.Formats;
+using NOpenNLP.Tools.Formats.Ad;
+using NOpenNLP.Tools.Formats.Conllu;
 using NOpenNLP.Tools.Ml.Maxent;
 using NOpenNLP.Tools.Ml.Maxent.Io;
 using NOpenNLP.Tools.Ml.Model;
@@ -727,5 +730,199 @@ public class PortRegressionTest
         ClassicAssert.NotNull(roundTripped.ParserChunkerModel);
         ClassicAssert.NotNull(roundTripped.HeadRules);
         ClassicAssert.AreEqual(ParserType.CHUNKING, roundTripped.ParserTypeValue);
+    }
+
+    /// <summary>
+    /// <see cref="InvalidFormatException"/> must derive from <see cref="IOException"/>,
+    /// as upstream's does.
+    /// </summary>
+    /// <remarks>
+    /// The command line tools and the format factories catch IOException to turn a
+    /// malformed corpus into a diagnostic and an exit code. Deriving from Exception
+    /// instead made every one of those handlers dead code, so a malformed file escaped
+    /// as an unhandled exception with a stack trace.
+    /// </remarks>
+    [Test]
+    public void TestInvalidFormatExceptionIsAnIOException()
+    {
+        ClassicAssert.IsInstanceOf<IOException>(new InvalidFormatException("boom"));
+
+        // The catch that upstream relies on must actually run.
+        bool caught = false;
+        try
+        {
+            throw new InvalidFormatException("boom");
+        }
+        catch (IOException)
+        {
+            caught = true;
+        }
+
+        ClassicAssert.IsTrue(caught);
+    }
+
+    /// <summary>
+    /// <c>StringUtil.SplitDroppingTrailingEmpty</c> must match Java's
+    /// <c>String.split</c>, which drops trailing empty strings but keeps interior ones,
+    /// and returns a single empty element for the empty input.
+    /// </summary>
+    /// <remarks>
+    /// Verified against a real JDK. The readers gate on an exact field count, so a line
+    /// ending in the separator counted one field too many and was rejected where
+    /// upstream accepts it.
+    /// </remarks>
+    [Test]
+    public void TestSplitDroppingTrailingEmptyMatchesJava()
+    {
+        CollectionAssert.AreEqual(new[] { "a", "b", "c" },
+            StringUtil.SplitDroppingTrailingEmpty("a b c ", ' '));
+        CollectionAssert.AreEqual(new[] { "a", "b", "c" },
+            StringUtil.SplitDroppingTrailingEmpty("a b c   ", ' '));
+        CollectionAssert.AreEqual(new[] { "a", "", "b" },
+            StringUtil.SplitDroppingTrailingEmpty("a  b", ' '));
+        CollectionAssert.AreEqual(new[] { "abc" },
+            StringUtil.SplitDroppingTrailingEmpty("abc", ' '));
+
+        // "".split(",") is one element in Java, while ",".split(",") is none.
+        CollectionAssert.AreEqual(new[] { "" },
+            StringUtil.SplitDroppingTrailingEmpty("", ','));
+        CollectionAssert.AreEqual(System.Array.Empty<string>(),
+            StringUtil.SplitDroppingTrailingEmpty(",", ','));
+    }
+
+    /// <summary>
+    /// A CoNLL 2002 line with a trailing separator must parse, as it does upstream.
+    /// </summary>
+    /// <remarks>
+    /// Java's split drops the trailing empty string, so the line has three fields and
+    /// passes the reader's exact-count check; .NET's keeps it, so the port counted four
+    /// and threw.
+    /// </remarks>
+    [Test]
+    public void TestConll02AcceptsALineWithATrailingSeparator()
+    {
+        byte[] data = Encoding.UTF8.GetBytes("Foo NN B-PER \nBar NN O \n\n");
+
+        IInputStreamFactory factory = new ByteArrayInputStreamFactory(data);
+
+        using var stream = new Conll02NameSampleStream(
+            Conll02NameSampleStream.Language.NLD, factory,
+            Conll02NameSampleStream.GeneratePersonEntities);
+
+        NameSample sample = stream.Read()!;
+
+        ClassicAssert.NotNull(sample);
+        CollectionAssert.AreEqual(new[] { "Foo", "Bar" }, sample.Sentence);
+        ClassicAssert.AreEqual(1, sample.Names.Length);
+        ClassicAssert.AreEqual("person", sample.Names[0].Type);
+    }
+
+    /// <summary>
+    /// A CoNLL-U line with a trailing tab must be rejected, as it is upstream.
+    /// </summary>
+    /// <remarks>
+    /// The mirror of the CoNLL 2002 case: here .NET's extra empty field made a
+    /// nine-column line count as ten, so the port accepted a line upstream rejects and
+    /// read the empty tenth field as MISC.
+    /// </remarks>
+    [Test]
+    public void TestConlluRejectsALineWithATrailingSeparator()
+    {
+        string nineFieldsWithTrailingTab = string.Join("\t",
+            "1", "Die", "der", "DET", "ART", "_", "2", "det", "_") + "\t";
+
+        byte[] data = Encoding.UTF8.GetBytes(nineFieldsWithTrailingTab + "\n\n");
+
+        IInputStreamFactory factory = new ByteArrayInputStreamFactory(data);
+
+        using var stream = new ConlluStream(factory);
+
+        Assert.Throws<InvalidFormatException>(new TestDelegate(() => stream.Read()));
+    }
+
+    /// <summary>
+    /// <c>PortugueseContractionUtility.ToContraction</c> must not throw on an empty left
+    /// part.
+    /// </summary>
+    /// <remarks>
+    /// It reads the last element of the split, and a private copy of the split helper
+    /// lacked the empty-input case, so it indexed an empty array and threw
+    /// IndexOutOfRangeException where upstream returns null.
+    /// </remarks>
+    [Test]
+    public void TestToContractionHandlesAnEmptyLeftPart()
+    {
+        ClassicAssert.IsNull(PortugueseContractionUtility.ToContraction("", "x"));
+
+        // The ordinary case still works.
+        ClassicAssert.AreEqual("da", PortugueseContractionUtility.ToContraction("de", "a"));
+    }
+
+    /// <summary>
+    /// <see cref="XmlUtil.CreateDocument"/> must parse an internal DTD subset and expand
+    /// the entities it declares, and must keep whitespace-only text nodes.
+    /// </summary>
+    /// <remarks>
+    /// Java sets FEATURE_SECURE_PROCESSING, which blocks external entities but still
+    /// parses an internal subset; DtdProcessing.Prohibit was stricter and threw on any
+    /// DOCTYPE. Java's DocumentBuilder also keeps every text node, while XmlDocument
+    /// drops whitespace-only ones unless PreserveWhitespace is set -- which both shifted
+    /// child indices and lost a character from the reconstructed text.
+    /// </remarks>
+    [Test]
+    public void TestXmlUtilMatchesJavaDtdAndWhitespaceHandling()
+    {
+        const string withDtd =
+            "<!DOCTYPE sentences [ <!ENTITY oe \"oe\" > ]><sentences><s>c&oe;ur</s></sentences>";
+
+        var parsed = XmlUtil.CreateDocument(
+            new MemoryStream(Encoding.UTF8.GetBytes(withDtd)));
+
+        ClassicAssert.AreEqual("coeur", parsed.DocumentElement!.InnerText);
+
+        const string withSpace =
+            "<sentences><s><token>A</token> <token>B</token></s></sentences>";
+
+        var spaced = XmlUtil.CreateDocument(
+            new MemoryStream(Encoding.UTF8.GetBytes(withSpace)));
+
+        // Java's DOM reports three children here: token, the space, token.
+        ClassicAssert.AreEqual(3, spaced.DocumentElement!.FirstChild!.ChildNodes.Count);
+        ClassicAssert.AreEqual("A B", spaced.DocumentElement.FirstChild.InnerText);
+    }
+
+    /// <summary>
+    /// A reader must decode a UTF-8 BOM as U+FEFF rather than consuming it, the way
+    /// Java's <c>InputStreamReader</c> does.
+    /// </summary>
+    /// <remarks>
+    /// This matters most for brat, whose .ann files carry character offsets into the
+    /// .txt: silently dropping a leading BOM shifts every annotation span by one.
+    /// </remarks>
+    [Test]
+    public void TestPlainTextByLineStreamKeepsAByteOrderMark()
+    {
+        byte[] withBom = [0xEF, 0xBB, 0xBF, (byte)'h', (byte)'i'];
+
+        IInputStreamFactory factory = new ByteArrayInputStreamFactory(withBom);
+
+        using var stream = new PlainTextByLineStream(factory, Encoding.UTF8);
+
+        string line = stream.Read()!;
+
+        ClassicAssert.AreEqual(3, line.Length);
+        ClassicAssert.AreEqual('\uFEFF', line[0]);
+        ClassicAssert.AreEqual("hi", line[1..]);
+    }
+
+    /// <summary>
+    /// Serves a fixed byte array as an <see cref="IInputStreamFactory"/>, so a reader can
+    /// be driven from an in-memory corpus rather than an embedded resource.
+    /// </summary>
+    private sealed class ByteArrayInputStreamFactory(byte[] bytes) : IInputStreamFactory
+    {
+        private readonly byte[] bytes = bytes;
+
+        public Stream CreateInputStream() => new MemoryStream(bytes, writable: false);
     }
 }

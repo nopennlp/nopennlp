@@ -65,7 +65,7 @@ public abstract class ModelUpdaterTool : AbstractEvaluatorTool<Parse?>
     protected sealed override void Run(ParseResult parseResult)
     {
         // Load model to be updated
-        FileInfo modelFile = parseResult.GetRequiredValue(model);
+        FileInfo modelFile = parseResult.GetRequiredValueByName(model);
         ParserModel originalParserModel = new ParserModelLoader().Load(modelFile);
 
         ParserModel updatedParserModel;

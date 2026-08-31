@@ -57,7 +57,7 @@ public sealed class POSTaggerTrainerTool : AbstractTrainerTool<POSSample?>
     /// <inheritdoc/>
     protected override void Run(ParseResult parseResult)
     {
-        string? paramsFile = parseResult.GetValue(@params);
+        string? paramsFile = parseResult.GetValueByName(@params);
 
         mlParams = CmdLineUtil.LoadTrainingParameters(paramsFile, true);
         if (mlParams != null && !TrainerFactory.IsValid(mlParams))
@@ -71,17 +71,17 @@ public sealed class POSTaggerTrainerTool : AbstractTrainerTool<POSSample?>
             mlParams = ModelUtil.CreateDefaultTrainingParameters();
         }
 
-        FileInfo modelOutFile = parseResult.GetRequiredValue(model);
+        FileInfo modelOutFile = parseResult.GetRequiredValueByName(model);
         CmdLineUtil.CheckOutputFile("pos tagger model", modelOutFile);
 
-        FileInfo? featuregenFile = parseResult.GetValue(featuregen);
+        FileInfo? featuregenFile = parseResult.GetValueByName(featuregen);
 
         IDictionary<string, object> resourcesMap;
 
         try
         {
             resourcesMap = TokenNameFinderTrainerTool.LoadResources(
-                parseResult.GetValue(resources), featuregenFile);
+                parseResult.GetValueByName(resources), featuregenFile);
         }
         catch (IOException e)
         {
@@ -97,7 +97,7 @@ public sealed class POSTaggerTrainerTool : AbstractTrainerTool<POSSample?>
             // NOpenNLP: POSTaggerFactory.Create takes a concrete Dictionary<string,
             // object> where TokenNameFinderFactory.Create takes the interface, so the
             // map LoadResources returns is copied into one here.
-            postaggerFactory = POSTaggerFactory.Create(parseResult.GetValue(factoryName),
+            postaggerFactory = POSTaggerFactory.Create(parseResult.GetValueByName(factoryName),
                 featureGeneratorBytes, new Dictionary<string, object>(resourcesMap), null);
         }
         catch (InvalidFormatException e)
@@ -105,7 +105,7 @@ public sealed class POSTaggerTrainerTool : AbstractTrainerTool<POSSample?>
             throw new TerminateToolException(-1, e.Message, e);
         }
 
-        FileInfo? dictFile = parseResult.GetValue(dict);
+        FileInfo? dictFile = parseResult.GetValueByName(dict);
         if (dictFile != null)
         {
             try
@@ -118,7 +118,7 @@ public sealed class POSTaggerTrainerTool : AbstractTrainerTool<POSSample?>
             }
         }
 
-        int? cutoff = parseResult.GetValue(tagDictCutoff);
+        int? cutoff = parseResult.GetValueByName(tagDictCutoff);
         if (cutoff != null)
         {
             try
@@ -152,7 +152,7 @@ public sealed class POSTaggerTrainerTool : AbstractTrainerTool<POSSample?>
         POSModel posModel;
         try
         {
-            posModel = POSTaggerME.Train(parseResult.GetRequiredValue(lang), sampleStream!,
+            posModel = POSTaggerME.Train(parseResult.GetRequiredValueByName(lang), sampleStream!,
                 mlParams, postaggerFactory);
         }
         catch (IOException e)

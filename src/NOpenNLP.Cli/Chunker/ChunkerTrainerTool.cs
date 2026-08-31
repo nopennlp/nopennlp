@@ -50,13 +50,13 @@ public class ChunkerTrainerTool : AbstractTrainerTool<ChunkSample?>
     /// <inheritdoc/>
     protected override void Run(ParseResult parseResult)
     {
-        mlParams = CmdLineUtil.LoadTrainingParameters(parseResult.GetValue(@params), false);
+        mlParams = CmdLineUtil.LoadTrainingParameters(parseResult.GetValueByName(@params), false);
         if (mlParams == null)
         {
             mlParams = ModelUtil.CreateDefaultTrainingParameters();
         }
 
-        FileInfo modelOutFile = parseResult.GetRequiredValue(model);
+        FileInfo modelOutFile = parseResult.GetRequiredValueByName(model);
 
         // NOpenNLP: upstream names this "sentence detector model" here, which is a
         // copy-paste slip -- the model is the chunker's. It is reproduced because the
@@ -66,8 +66,8 @@ public class ChunkerTrainerTool : AbstractTrainerTool<ChunkSample?>
         ChunkerModel chunkerModel;
         try
         {
-            ChunkerFactory chunkerFactory = ChunkerFactory.Create(parseResult.GetValue(factoryName));
-            chunkerModel = ChunkerME.Train(parseResult.GetRequiredValue(lang), sampleStream!,
+            ChunkerFactory chunkerFactory = ChunkerFactory.Create(parseResult.GetValueByName(factoryName));
+            chunkerModel = ChunkerME.Train(parseResult.GetRequiredValueByName(lang), sampleStream!,
                 mlParams, chunkerFactory);
         }
         catch (IOException e)

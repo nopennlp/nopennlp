@@ -61,13 +61,13 @@ public sealed class TokenNameFinderCrossValidatorTool : AbstractCrossValidatorTo
     /// <inheritdoc/>
     protected override void Run(ParseResult parseResult)
     {
-        mlParams = CmdLineUtil.LoadTrainingParameters(parseResult.GetValue(@params), true);
+        mlParams = CmdLineUtil.LoadTrainingParameters(parseResult.GetValueByName(@params), true);
         if (mlParams == null)
         {
             mlParams = new TrainingParameters();
         }
 
-        FileInfo? featuregenFile = parseResult.GetValue(featuregen);
+        FileInfo? featuregenFile = parseResult.GetValueByName(featuregen);
 
         byte[]? featureGeneratorBytes =
             TokenNameFinderTrainerTool.OpenFeatureGeneratorBytes(featuregenFile);
@@ -77,14 +77,14 @@ public sealed class TokenNameFinderCrossValidatorTool : AbstractCrossValidatorTo
         try
         {
             resourcesMap = TokenNameFinderTrainerTool.LoadResources(
-                parseResult.GetValue(resources), featuregenFile);
+                parseResult.GetValueByName(resources), featuregenFile);
         }
         catch (IOException e)
         {
             throw new TerminateToolException(-1, "IO error while loading resources", e);
         }
 
-        string? nameTypesValue = parseResult.GetValue(nameTypes);
+        string? nameTypesValue = parseResult.GetValueByName(nameTypes);
         if (nameTypesValue != null)
         {
             string[] nameTypesArr = StringUtil.SplitDroppingTrailingEmpty(nameTypesValue, ',');
@@ -92,19 +92,19 @@ public sealed class TokenNameFinderCrossValidatorTool : AbstractCrossValidatorTo
         }
 
         var listeners = new List<ITokenNameFinderEvaluationMonitor>();
-        if (ToolParams.JavaBooleanValue(parseResult.GetValue(misclassified)))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValueByName(misclassified)))
         {
             listeners.Add(new NameEvaluationErrorListener());
         }
 
         TokenNameFinderDetailedFMeasureListener? detailedFListener = null;
-        if (ToolParams.JavaBooleanValue(parseResult.GetValue(detailedF)))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValueByName(detailedF)))
         {
             detailedFListener = new TokenNameFinderDetailedFMeasureListener();
             listeners.Add(detailedFListener);
         }
 
-        string? sequenceCodecImplName = parseResult.GetValue(sequenceCodec);
+        string? sequenceCodecImplName = parseResult.GetValueByName(sequenceCodec);
 
         if ("BIO".Equals(sequenceCodecImplName, StringComparison.Ordinal))
         {
@@ -119,7 +119,7 @@ public sealed class TokenNameFinderCrossValidatorTool : AbstractCrossValidatorTo
             TokenNameFinderFactory.InstantiateSequenceCodec(sequenceCodecImplName);
 
         TokenNameFinderFineGrainedReportListener? reportListener = null;
-        FileInfo? reportFile = parseResult.GetValue(reportOutputFile);
+        FileInfo? reportFile = parseResult.GetValueByName(reportOutputFile);
         Stream? reportOutputStream = null;
 
         if (reportFile != null)
@@ -146,7 +146,7 @@ public sealed class TokenNameFinderCrossValidatorTool : AbstractCrossValidatorTo
         TokenNameFinderFactory nameFinderFactory;
         try
         {
-            nameFinderFactory = TokenNameFinderFactory.Create(parseResult.GetValue(factoryName),
+            nameFinderFactory = TokenNameFinderFactory.Create(parseResult.GetValueByName(factoryName),
                 featureGeneratorBytes, resourcesMap, codec);
         }
         catch (InvalidFormatException e)
@@ -157,9 +157,9 @@ public sealed class TokenNameFinderCrossValidatorTool : AbstractCrossValidatorTo
         TokenNameFinderCrossValidator validator;
         try
         {
-            validator = new TokenNameFinderCrossValidator(parseResult.GetRequiredValue(lang),
-                parseResult.GetValue(type), mlParams, nameFinderFactory, listeners.ToArray());
-            validator.Evaluate(sampleStream!, parseResult.GetRequiredValue(folds));
+            validator = new TokenNameFinderCrossValidator(parseResult.GetRequiredValueByName(lang),
+                parseResult.GetValueByName(type), mlParams, nameFinderFactory, listeners.ToArray());
+            validator.Evaluate(sampleStream!, parseResult.GetRequiredValueByName(folds));
         }
         catch (IOException e)
         {

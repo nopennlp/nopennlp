@@ -67,7 +67,7 @@ public sealed class SentenceDetectorTrainerTool : AbstractTrainerTool<SentenceSa
     /// <inheritdoc/>
     protected override void Run(ParseResult parseResult)
     {
-        mlParams = CmdLineUtil.LoadTrainingParameters(parseResult.GetValue(@params), false);
+        mlParams = CmdLineUtil.LoadTrainingParameters(parseResult.GetValueByName(@params), false);
 
         if (mlParams != null)
         {
@@ -83,11 +83,11 @@ public sealed class SentenceDetectorTrainerTool : AbstractTrainerTool<SentenceSa
             mlParams = ModelUtil.CreateDefaultTrainingParameters();
         }
 
-        FileInfo modelOutFile = parseResult.GetRequiredValue(model);
+        FileInfo modelOutFile = parseResult.GetRequiredValueByName(model);
         CmdLineUtil.CheckOutputFile("sentence detector model", modelOutFile);
 
         char[]? eos = null;
-        string? eosCharsValue = parseResult.GetValue(eosChars);
+        string? eosCharsValue = parseResult.GetValueByName(eosChars);
         if (eosCharsValue != null)
         {
             string eosString = SentenceSampleStream.ReplaceNewLineEscapeTags(eosCharsValue);
@@ -98,11 +98,11 @@ public sealed class SentenceDetectorTrainerTool : AbstractTrainerTool<SentenceSa
 
         try
         {
-            OpenNlpDictionary? dict = LoadDict(parseResult.GetValue(abbDict));
+            OpenNlpDictionary? dict = LoadDict(parseResult.GetValueByName(abbDict));
             SentenceDetectorFactory sdFactory = SentenceDetectorFactory.Create(
-                parseResult.GetValue(factoryName), parseResult.GetRequiredValue(lang), true,
+                parseResult.GetValueByName(factoryName), parseResult.GetRequiredValueByName(lang), true,
                 dict!, eos!);
-            sentenceModel = SentenceDetectorME.Train(parseResult.GetRequiredValue(lang),
+            sentenceModel = SentenceDetectorME.Train(parseResult.GetRequiredValueByName(lang),
                 sampleStream!, sdFactory, mlParams);
         }
         catch (IOException e)

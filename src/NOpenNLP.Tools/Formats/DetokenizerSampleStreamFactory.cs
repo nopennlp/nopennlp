@@ -37,6 +37,10 @@ public abstract class DetokenizerSampleStreamFactory<T> : AbstractSampleStreamFa
 
         try
         {
+            // NOpenNLP-specific: upstream passes a new FileInputStream straight into
+            // DetokenizationDictionary and never closes it, leaking the handle. The
+            // constructor reads the stream to completion, so disposing it here is safe and
+            // changes nothing a caller can observe.
             using Stream @in = new FileInfo(path).OpenRead();
             return new DictionaryDetokenizer(new DetokenizationDictionary(@in));
         }

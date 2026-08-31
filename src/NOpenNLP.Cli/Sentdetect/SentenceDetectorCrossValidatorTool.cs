@@ -56,7 +56,7 @@ public sealed class SentenceDetectorCrossValidatorTool
     /// <inheritdoc/>
     protected override void Run(ParseResult parseResult)
     {
-        mlParams = CmdLineUtil.LoadTrainingParameters(parseResult.GetValue(@params), false);
+        mlParams = CmdLineUtil.LoadTrainingParameters(parseResult.GetValueByName(@params), false);
         if (mlParams == null)
         {
             mlParams = ModelUtil.CreateDefaultTrainingParameters();
@@ -65,13 +65,13 @@ public sealed class SentenceDetectorCrossValidatorTool
         SDCrossValidator validator;
 
         ISentenceDetectorEvaluationMonitor? errorListener = null;
-        if (ToolParams.JavaBooleanValue(parseResult.GetValue(misclassified)))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValueByName(misclassified)))
         {
             errorListener = new SentenceEvaluationErrorListener();
         }
 
         char[]? eos = null;
-        string? eosCharsValue = parseResult.GetValue(eosChars);
+        string? eosCharsValue = parseResult.GetValueByName(eosChars);
         if (eosCharsValue != null)
         {
             string eosString = SentenceSampleStream.ReplaceNewLineEscapeTags(eosCharsValue);
@@ -81,14 +81,14 @@ public sealed class SentenceDetectorCrossValidatorTool
         try
         {
             OpenNlpDictionary? abbreviations =
-                SentenceDetectorTrainerTool.LoadDict(parseResult.GetValue(abbDict));
+                SentenceDetectorTrainerTool.LoadDict(parseResult.GetValueByName(abbDict));
             SentenceDetectorFactory sdFactory = SentenceDetectorFactory.Create(
-                parseResult.GetValue(factoryName), parseResult.GetRequiredValue(lang), true,
+                parseResult.GetValueByName(factoryName), parseResult.GetRequiredValueByName(lang), true,
                 abbreviations!, eos!);
-            validator = new SDCrossValidator(parseResult.GetRequiredValue(lang), mlParams,
+            validator = new SDCrossValidator(parseResult.GetRequiredValueByName(lang), mlParams,
                 sdFactory, errorListener);
 
-            validator.Evaluate(sampleStream!, parseResult.GetRequiredValue(folds));
+            validator.Evaluate(sampleStream!, parseResult.GetRequiredValueByName(folds));
         }
         catch (IOException e)
         {

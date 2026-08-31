@@ -120,7 +120,10 @@ public class Conll02NameSampleStream : ObjectStreamBase<NameSample?>
                     continue;
                 }
 
-                string[] fields = line.Split(' ');
+                // NOpenNLP: Java's String.split drops trailing empty strings; .NET's keeps them, so a
+                // line ending in the separator would fail the exact field count below that
+                // upstream accepts.
+                string[] fields = StringUtil.SplitDroppingTrailingEmpty(line, ' ');
 
                 if (fields.Length == 3)
                 {

@@ -32,9 +32,9 @@ Leipzig, LETSMT, French Treebank, OntoNotes, Irish Sentence Bank, Moses,
 Évalita, BioNLP/NLPBA 2004, 20 Newsgroups, Census90, and the Portuguese Árvores
 Deitadas (AD) corpus, plus converters between sample types.
 
-The matching `*SampleStreamFactory` classes are not ported. They exist to expose
-these readers to the OpenNLP command-line tools through the `cmdline`
-`ObjectStreamFactory` SPI, and they arrive with that package; constructing a
+The matching `*SampleStreamFactory` classes are ported too. They expose these
+readers to the command line tools as the format suffix on a tool name
+(`POSTaggerTrainer.conllu`) and as a converter's format argument; constructing a
 reader directly does not need them.
 
 ### Stemmers
@@ -133,6 +133,22 @@ installed):
 ```
 dotnet test NOpenNLP.slnx -p:TestFrameworks=true
 ```
+
+### Comparing the CLI against Apache OpenNLP
+
+`build/regress.sh` runs the same invocation through both the `nopennlp` tool and
+the real `opennlp` command and diffs stdout and the exit code, so a change in the
+CLI's observable behaviour shows up as a failing case. It is a developer tool
+rather than part of CI: it needs a JVM, the OpenNLP 1.9.4 jar, a clone of the
+upstream source for its test corpora, and the models `build/download-test-models.ps1`
+fetches. Its value is at rebase time, after pulling a new upstream release.
+
+Differences that are expected are normalized away rather than reported: the
+command and product name, timings, absolute paths, and the order of a tool's
+options and of a format list. Java derives those last two from `Class.getMethods()`
+and `HashMap` iteration, neither of which the JDK specifies, so `build/canon.py`
+sorts both sides before diffing. Everything else is compared verbatim. The usage
+notes at the top of the script cover the setup and the differences that remain.
 
 ## Attribution
 

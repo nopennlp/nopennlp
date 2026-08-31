@@ -49,7 +49,7 @@ public class ParserEvaluatorTool : AbstractEvaluatorTool<Parse?>
     /// <inheritdoc/>
     protected override void Run(ParseResult parseResult)
     {
-        ParserModel model = new ParserModelLoader().Load(parseResult.GetValue(this.model)!);
+        ParserModel model = new ParserModelLoader().Load(parseResult.GetValueByName(this.model)!);
 
         IParser parser = ParserFactory.Create(model);
 

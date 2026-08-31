@@ -53,20 +53,20 @@ public sealed class LanguageDetectorCrossValidatorTool
     /// <inheritdoc/>
     protected override void Run(ParseResult parseResult)
     {
-        mlParams = CmdLineUtil.LoadTrainingParameters(parseResult.GetValue(@params), false);
+        mlParams = CmdLineUtil.LoadTrainingParameters(parseResult.GetValueByName(@params), false);
         if (mlParams == null)
         {
             mlParams = ModelUtil.CreateDefaultTrainingParameters();
         }
 
         var listeners = new List<ILanguageDetectorEvaluationMonitor>();
-        if (ToolParams.JavaBooleanValue(parseResult.GetValue(misclassified)))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValueByName(misclassified)))
         {
             listeners.Add(new LanguageDetectorEvaluationErrorListener());
         }
 
         LanguageDetectorFineGrainedReportListener? reportListener = null;
-        FileInfo? reportFile = parseResult.GetValue(reportOutputFile);
+        FileInfo? reportFile = parseResult.GetValueByName(reportOutputFile);
         Stream? reportOutputStream = null;
         if (reportFile != null)
         {
@@ -92,10 +92,10 @@ public sealed class LanguageDetectorCrossValidatorTool
         try
         {
             LanguageDetectorFactory factory =
-                LanguageDetectorFactory.Create(parseResult.GetValue(factoryName));
+                LanguageDetectorFactory.Create(parseResult.GetValueByName(factoryName));
             validator = new LanguageDetectorCrossValidator(mlParams, factory, listenersArr);
 
-            validator.Evaluate(sampleStream!, parseResult.GetRequiredValue(folds));
+            validator.Evaluate(sampleStream!, parseResult.GetRequiredValueByName(folds));
         }
         catch (IOException e)
         {

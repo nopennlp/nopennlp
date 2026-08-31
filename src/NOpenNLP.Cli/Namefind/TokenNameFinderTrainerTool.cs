@@ -131,15 +131,15 @@ public sealed class TokenNameFinderTrainerTool : AbstractTrainerTool<NameSample?
     /// <inheritdoc/>
     protected override void Run(ParseResult parseResult)
     {
-        mlParams = CmdLineUtil.LoadTrainingParameters(parseResult.GetValue(@params), true);
+        mlParams = CmdLineUtil.LoadTrainingParameters(parseResult.GetValueByName(@params), true);
         if (mlParams == null)
         {
             mlParams = new TrainingParameters();
         }
 
-        FileInfo modelOutFile = parseResult.GetRequiredValue(model);
+        FileInfo modelOutFile = parseResult.GetRequiredValueByName(model);
 
-        FileInfo? featuregenFile = parseResult.GetValue(featuregen);
+        FileInfo? featuregenFile = parseResult.GetValueByName(featuregen);
 
         byte[]? featureGeneratorBytes = OpenFeatureGeneratorBytes(featuregenFile);
 
@@ -150,7 +150,7 @@ public sealed class TokenNameFinderTrainerTool : AbstractTrainerTool<NameSample?
         IDictionary<string, object> resourcesMap;
         try
         {
-            resourcesMap = LoadResources(parseResult.GetValue(resources), featuregenFile);
+            resourcesMap = LoadResources(parseResult.GetValueByName(resources), featuregenFile);
         }
         catch (IOException e)
         {
@@ -159,14 +159,14 @@ public sealed class TokenNameFinderTrainerTool : AbstractTrainerTool<NameSample?
 
         CmdLineUtil.CheckOutputFile("name finder model", modelOutFile);
 
-        string? nameTypesValue = parseResult.GetValue(nameTypes);
+        string? nameTypesValue = parseResult.GetValueByName(nameTypes);
         if (nameTypesValue != null)
         {
             string[] nameTypesArr = StringUtil.SplitDroppingTrailingEmpty(nameTypesValue, ',');
             sampleStream = new NameSampleTypeFilter(nameTypesArr, sampleStream!);
         }
 
-        string? sequenceCodecImplName = parseResult.GetValue(sequenceCodec);
+        string? sequenceCodecImplName = parseResult.GetValueByName(sequenceCodec);
 
         if ("BIO".Equals(sequenceCodecImplName, StringComparison.Ordinal))
         {
@@ -183,7 +183,7 @@ public sealed class TokenNameFinderTrainerTool : AbstractTrainerTool<NameSample?
         TokenNameFinderFactory nameFinderFactory;
         try
         {
-            nameFinderFactory = TokenNameFinderFactory.Create(parseResult.GetValue(factoryName),
+            nameFinderFactory = TokenNameFinderFactory.Create(parseResult.GetValueByName(factoryName),
                 featureGeneratorBytes, resourcesMap, codec);
         }
         catch (InvalidFormatException e)
@@ -197,8 +197,8 @@ public sealed class TokenNameFinderTrainerTool : AbstractTrainerTool<NameSample?
         TokenNameFinderModel nameFinderModel;
         try
         {
-            nameFinderModel = NameFinderME.Train(parseResult.GetRequiredValue(lang),
-                parseResult.GetValue(type), sampleStream, mlParams, nameFinderFactory);
+            nameFinderModel = NameFinderME.Train(parseResult.GetRequiredValueByName(lang),
+                parseResult.GetValueByName(type), sampleStream, mlParams, nameFinderFactory);
         }
         catch (IOException e)
         {

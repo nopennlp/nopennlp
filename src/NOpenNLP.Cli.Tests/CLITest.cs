@@ -27,9 +27,14 @@ namespace NOpenNLP.Tools.Cmdline;
 /// Tests the tool registry and the dispatch behaviour of <see cref="CLI"/>.
 /// </summary>
 /// <remarks>
-/// Authored for NOpenNLP; upstream has no CLI test. The tool names, their order and the
-/// exit codes are the CLI's user-facing contract, and a typo in any of them is invisible
-/// at compile time, so they are pinned here.
+/// Authored for NOpenNLP. Upstream's <c>CLITest</c> covers the same ground -- a bare
+/// invocation, an unknown tool, a bad parameter, a missing model file, and <c>help</c> for
+/// every registered tool -- by installing a <c>SecurityManager</c> that turns
+/// <c>System.exit</c> into a catchable exception. That mechanism was removed from the JDK,
+/// and this port returns the exit code from <see cref="CLI.Run"/> rather than exiting, so
+/// the same behaviours are asserted directly on the return value instead. The tool names
+/// and their order are pinned here as well: they are the CLI's user-facing contract, and a
+/// typo in either is invisible at compile time.
 /// </remarks>
 [NOpenNLPSpecific]
 public class CLITest

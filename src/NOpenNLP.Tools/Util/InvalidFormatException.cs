@@ -18,13 +18,19 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using System;
+using System.IO;
 
 namespace NOpenNLP.Tools.Util;
 
 /// <summary>
 /// This exception indicates that a resource violates the expected data format.
 /// </summary>
-public class InvalidFormatException : Exception
+// NOpenNLP: upstream extends IOException, and callers rely on it -- the command line
+// tools and the format factories catch IOException to turn a malformed corpus into a
+// message and an exit code. Deriving from Exception instead made every one of those
+// `catch (IOException)` blocks dead code, so a malformed file escaped as an unhandled
+// exception with a stack trace instead of upstream's diagnostic.
+public class InvalidFormatException : IOException
 {
     public InvalidFormatException()
     {

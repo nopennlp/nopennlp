@@ -50,21 +50,21 @@ public class LemmatizerTrainerTool : AbstractTrainerTool<LemmaSample?>
     /// <inheritdoc/>
     protected override void Run(ParseResult parseResult)
     {
-        mlParams = CmdLineUtil.LoadTrainingParameters(parseResult.GetValue(@params), false);
+        mlParams = CmdLineUtil.LoadTrainingParameters(parseResult.GetValueByName(@params), false);
         if (mlParams == null)
         {
             mlParams = ModelUtil.CreateDefaultTrainingParameters();
         }
 
-        FileInfo modelOutFile = parseResult.GetRequiredValue(model);
+        FileInfo modelOutFile = parseResult.GetRequiredValueByName(model);
         CmdLineUtil.CheckOutputFile("lemmatizer model", modelOutFile);
 
         LemmatizerModel lemmatizerModel;
         try
         {
             LemmatizerFactory lemmatizerFactory =
-                LemmatizerFactory.Create(parseResult.GetValue(factoryName));
-            lemmatizerModel = LemmatizerME.Train(parseResult.GetRequiredValue(lang), sampleStream!,
+                LemmatizerFactory.Create(parseResult.GetValueByName(factoryName));
+            lemmatizerModel = LemmatizerME.Train(parseResult.GetRequiredValueByName(lang), sampleStream!,
                 mlParams, lemmatizerFactory);
         }
         catch (IOException e)

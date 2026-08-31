@@ -152,7 +152,7 @@ public sealed class ParserTrainerTool : AbstractTrainerTool<Parse?>
     /// <inheritdoc/>
     protected override void Run(ParseResult parseResult)
     {
-        mlParams = CmdLineUtil.LoadTrainingParameters(parseResult.GetValue(@params), true);
+        mlParams = CmdLineUtil.LoadTrainingParameters(parseResult.GetValueByName(@params), true);
 
         if (mlParams != null)
         {
@@ -187,29 +187,29 @@ public sealed class ParserTrainerTool : AbstractTrainerTool<Parse?>
             mlParams = ModelUtil.CreateDefaultTrainingParameters();
         }
 
-        FileInfo modelOutFile = parseResult.GetRequiredValue(model);
+        FileInfo modelOutFile = parseResult.GetRequiredValueByName(model);
         CmdLineUtil.CheckOutputFile("parser model", modelOutFile);
 
         ParserModel parserModel;
         try
         {
-            IHeadRules rules = CreateHeadRules(parseResult.GetValue(headRulesSerializerImpl),
-                parseResult.GetRequiredValue(lang), parseResult.GetRequiredValue(headRules));
+            IHeadRules rules = CreateHeadRules(parseResult.GetValueByName(headRulesSerializerImpl),
+                parseResult.GetRequiredValueByName(lang), parseResult.GetRequiredValueByName(headRules));
 
-            ParserType? type = ParseParserType(parseResult.GetValue(parserType));
-            if (ToolParams.JavaBooleanValue(parseResult.GetValue(fun)))
+            ParserType? type = ParseParserType(parseResult.GetValueByName(parserType));
+            if (ToolParams.JavaBooleanValue(parseResult.GetValueByName(fun)))
             {
                 Parse.UseFunctionTags(true);
             }
 
             if (ParserType.CHUNKING == type)
             {
-                parserModel = ChunkingParser.Train(parseResult.GetRequiredValue(lang),
+                parserModel = ChunkingParser.Train(parseResult.GetRequiredValueByName(lang),
                     sampleStream!, rules, mlParams);
             }
             else if (ParserType.TREEINSERT == type)
             {
-                parserModel = TreeinsertParser.Train(parseResult.GetRequiredValue(lang),
+                parserModel = TreeinsertParser.Train(parseResult.GetRequiredValueByName(lang),
                     sampleStream!, rules, mlParams);
             }
             else

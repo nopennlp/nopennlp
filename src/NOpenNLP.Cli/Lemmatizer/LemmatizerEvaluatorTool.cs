@@ -52,16 +52,16 @@ public sealed class LemmatizerEvaluatorTool : AbstractEvaluatorTool<LemmaSample?
     /// <inheritdoc/>
     protected override void Run(ParseResult parseResult)
     {
-        LemmatizerModel model = new LemmatizerModelLoader().Load(parseResult.GetValue(this.model)!);
+        LemmatizerModel model = new LemmatizerModelLoader().Load(parseResult.GetValueByName(this.model)!);
 
         ILemmatizerEvaluationMonitor? missclassifiedListener = null;
-        if (ToolParams.JavaBooleanValue(parseResult.GetValue(misclassified)))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValueByName(misclassified)))
         {
             missclassifiedListener = new LemmaEvaluationErrorListener();
         }
 
         LemmatizerFineGrainedReportListener? reportListener = null;
-        FileInfo? reportFile = parseResult.GetValue(reportOutputFile);
+        FileInfo? reportFile = parseResult.GetValueByName(reportOutputFile);
         Stream? reportOutputStream = null;
         if (reportFile != null)
         {

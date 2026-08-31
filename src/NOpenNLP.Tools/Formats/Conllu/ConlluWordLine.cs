@@ -54,7 +54,11 @@ public class ConlluWordLine
     /// <exception cref="InvalidFormatException">if the line does not have exactly 10 fields</exception>
     internal ConlluWordLine(string line)
     {
-        string[] fields = line.Split('\t');
+        // NOpenNLP: Java's String.split drops trailing empty strings; .NET's keeps them.
+        // A nine-column line with a trailing tab counts as 10 fields here and would be
+        // accepted, where upstream counts 9 and rejects it -- and the empty tenth field
+        // would then be read as MISC.
+        string[] fields = StringUtil.SplitDroppingTrailingEmpty(line, '\t');
 
         if (fields.Length != 10)
         {

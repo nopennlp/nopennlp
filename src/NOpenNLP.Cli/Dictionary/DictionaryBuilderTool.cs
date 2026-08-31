@@ -67,8 +67,8 @@ public class DictionaryBuilderTool : BasicCmdLineTool
 
         command.SetAction(parseResult =>
         {
-            Build(parseResult.GetValue(inputFile)!, parseResult.GetValue(outputFile)!,
-                FormatParameters.ResolveEncoding(parseResult.GetValue(encoding)));
+            Build(parseResult.GetValueByName(inputFile)!, parseResult.GetValueByName(outputFile)!,
+                FormatParameters.ResolveEncoding(parseResult.GetValueByName(encoding)));
             return 0;
         });
 
@@ -115,7 +115,12 @@ public class DictionaryBuilderTool : BasicCmdLineTool
 
         try
         {
-            using var @in = new StreamReader(dictInFile.OpenRead(), encoding);
+            // NOpenNLP: detectEncodingFromByteOrderMarks is off to match Java's
+            // InputStreamReader, which never sniffs a BOM. Leaving it on let a UTF-8 BOM
+            // silently override the encoding the user asked for with -encoding, and
+            // dropped the U+FEFF that upstream keeps as the first character of the entry.
+            using var @in = new StreamReader(dictInFile.OpenRead(), encoding,
+                detectEncodingFromByteOrderMarks: false);
             using Stream @out = dictOutFile.Create();
 
             JDict.Dictionary dict = JDict.Dictionary.ParseOneEntryPerLine(@in);

@@ -76,8 +76,8 @@ public class CensusDictionaryCreatorTool : BasicCmdLineTool
 
         command.SetAction(parseResult =>
         {
-            Build(parseResult.GetValue(censusData)!, parseResult.GetValue(dict)!,
-                parseResult.GetValue(encoding)!);
+            Build(parseResult.GetValueByName(censusData)!, parseResult.GetValueByName(dict)!,
+                parseResult.GetValueByName(encoding)!);
             return 0;
         });
 

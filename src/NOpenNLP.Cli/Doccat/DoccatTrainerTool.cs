@@ -51,25 +51,25 @@ public class DoccatTrainerTool : AbstractTrainerTool<DocumentSample?>
     /// <inheritdoc/>
     protected override void Run(ParseResult parseResult)
     {
-        mlParams = CmdLineUtil.LoadTrainingParameters(parseResult.GetValue(@params), false);
+        mlParams = CmdLineUtil.LoadTrainingParameters(parseResult.GetValueByName(@params), false);
         if (mlParams == null)
         {
             mlParams = ModelUtil.CreateDefaultTrainingParameters();
         }
 
-        FileInfo modelOutFile = parseResult.GetRequiredValue(model);
+        FileInfo modelOutFile = parseResult.GetRequiredValueByName(model);
 
         CmdLineUtil.CheckOutputFile("document categorizer model", modelOutFile);
 
         IFeatureGenerator[] featureGeneratorsArr =
-            CreateFeatureGenerators(parseResult.GetValue(featureGenerators));
+            CreateFeatureGenerators(parseResult.GetValueByName(featureGenerators));
 
         DoccatModel doccatModel;
         try
         {
-            DoccatFactory factory = DoccatFactory.Create(parseResult.GetValue(factoryName),
+            DoccatFactory factory = DoccatFactory.Create(parseResult.GetValueByName(factoryName),
                 featureGeneratorsArr);
-            doccatModel = DocumentCategorizerME.Train(parseResult.GetRequiredValue(lang),
+            doccatModel = DocumentCategorizerME.Train(parseResult.GetRequiredValueByName(lang),
                 sampleStream!, mlParams, factory);
         }
         catch (IOException e)

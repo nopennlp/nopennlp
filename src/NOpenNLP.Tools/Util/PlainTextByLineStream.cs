@@ -29,6 +29,19 @@ namespace NOpenNLP.Tools.Util;
 /// </summary>
 public class PlainTextByLineStream : ObjectStreamBase<string?>
 {
+    /// <summary>
+    /// UTF-8 without a preamble, so a byte order mark is decoded as U+FEFF rather than
+    /// consumed -- the way Java's <c>InputStreamReader</c> reads one.
+    /// </summary>
+    /// <remarks>
+    /// NOpenNLP: <see cref="Encoding.UTF8"/> carries a preamble, and <c>StreamReader</c>
+    /// strips a leading BOM that matches it even when
+    /// <c>detectEncodingFromByteOrderMarks</c> is false. Readers that compute offsets over
+    /// the text they decode need this instead. See <see cref="WithoutPreamble"/>.
+    /// </remarks>
+    internal static readonly Encoding Utf8NoPreamble =
+        new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+
     private readonly Encoding encoding;
 
     private readonly IInputStreamFactory inputStreamFactory; // NOpenNLP: made readonly
@@ -44,9 +57,40 @@ public class PlainTextByLineStream : ObjectStreamBase<string?>
     {
         this.inputStreamFactory = inputStreamFactory
             ?? throw new ArgumentNullException(nameof(inputStreamFactory), "inputStreamFactory must not be null!");
-        encoding = charset;
+        encoding = WithoutPreamble(charset);
 
         Reset();
+    }
+
+    /// <summary>
+    /// Returns an equivalent of <paramref name="charset"/> that carries no preamble, so a
+    /// byte order mark at the start of the input is decoded rather than consumed.
+    /// </summary>
+    /// <remarks>
+    /// NOpenNLP: Java's <c>InputStreamReader</c> has no notion of a preamble -- it decodes
+    /// a BOM as U+FEFF, an ordinary character of the first line. <c>StreamReader</c> strips
+    /// a leading BOM whenever it matches the encoding's <c>GetPreamble()</c>, and it does so
+    /// even with <c>detectEncodingFromByteOrderMarks: false</c>, which only governs
+    /// <b>switching</b> encodings. Since <see cref="Encoding.UTF8"/> is preamble-carrying,
+    /// the flag alone was not enough; the encoding has to be preamble-free as well. The
+    /// dropped character mattered wherever offsets are computed over the text, most sharply
+    /// in brat, whose .ann files index into the .txt this stream reads.
+    /// </remarks>
+    private static Encoding WithoutPreamble(Encoding charset)
+    {
+        if (charset is null || charset.GetPreamble().Length == 0)
+        {
+            return charset!;
+        }
+
+        if (charset is UTF8Encoding)
+        {
+            return new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+        }
+
+        // Any other preamble-carrying encoding (the UTF-16 and UTF-32 families) keeps its
+        // byte order, since that is what tells the decoder how to read the rest of the file.
+        return charset;
     }
 
     public override string? Read() => @in!.ReadLine();
@@ -55,7 +99,12 @@ public class PlainTextByLineStream : ObjectStreamBase<string?>
     {
         @in?.Dispose();
 
-        @in = new StreamReader(inputStreamFactory.CreateInputStream(), encoding);
+        // NOpenNLP: detectEncodingFromByteOrderMarks is off to match Java's
+        // InputStreamReader, which decodes a BOM as U+FEFF -- an ordinary character of the
+        // first line -- rather than consuming it. Letting .NET strip it would drop a
+        // character upstream keeps, and would also let a BOM override the caller's encoding.
+        @in = new StreamReader(inputStreamFactory.CreateInputStream(), encoding,
+            detectEncodingFromByteOrderMarks: false);
     }
 
     protected override void Dispose(bool disposing)

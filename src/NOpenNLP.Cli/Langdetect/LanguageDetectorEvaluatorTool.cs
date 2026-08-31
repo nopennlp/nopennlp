@@ -54,16 +54,16 @@ public sealed class LanguageDetectorEvaluatorTool : AbstractEvaluatorTool<Langua
     protected override void Run(ParseResult parseResult)
     {
         LanguageDetectorModel model =
-            new LanguageDetectorModelLoader().Load(parseResult.GetValue(this.model)!);
+            new LanguageDetectorModelLoader().Load(parseResult.GetValueByName(this.model)!);
 
         var listeners = new JCG.List<ILanguageDetectorEvaluationMonitor>();
-        if (ToolParams.JavaBooleanValue(parseResult.GetValue(misclassified)))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValueByName(misclassified)))
         {
             listeners.Add(new LanguageDetectorEvaluationErrorListener());
         }
 
         LanguageDetectorFineGrainedReportListener? reportListener = null;
-        FileInfo? reportFile = parseResult.GetValue(reportOutputFile);
+        FileInfo? reportFile = parseResult.GetValueByName(reportOutputFile);
         Stream? reportOutputStream = null;
         if (reportFile != null)
         {

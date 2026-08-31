@@ -50,13 +50,13 @@ public class LanguageDetectorTrainerTool : AbstractTrainerTool<LanguageSample?>
     /// <inheritdoc/>
     protected override void Run(ParseResult parseResult)
     {
-        mlParams = CmdLineUtil.LoadTrainingParameters(parseResult.GetValue(@params), false);
+        mlParams = CmdLineUtil.LoadTrainingParameters(parseResult.GetValueByName(@params), false);
         if (mlParams == null)
         {
             mlParams = ModelUtil.CreateDefaultTrainingParameters();
         }
 
-        FileInfo modelOutFile = parseResult.GetRequiredValue(model);
+        FileInfo modelOutFile = parseResult.GetRequiredValueByName(model);
 
         CmdLineUtil.CheckOutputFile("language detector model", modelOutFile);
 
@@ -64,7 +64,7 @@ public class LanguageDetectorTrainerTool : AbstractTrainerTool<LanguageSample?>
         try
         {
             LanguageDetectorFactory factory =
-                LanguageDetectorFactory.Create(parseResult.GetValue(factoryName));
+                LanguageDetectorFactory.Create(parseResult.GetValueByName(factoryName));
             languageDetectorModel = LanguageDetectorME.Train(sampleStream!, mlParams, factory);
         }
         catch (IOException e)

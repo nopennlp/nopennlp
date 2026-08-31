@@ -52,16 +52,16 @@ public sealed class POSTaggerEvaluatorTool : AbstractEvaluatorTool<POSSample?>
     /// <inheritdoc/>
     protected override void Run(ParseResult parseResult)
     {
-        POSModel model = new POSModelLoader().Load(parseResult.GetValue(this.model)!);
+        POSModel model = new POSModelLoader().Load(parseResult.GetValueByName(this.model)!);
 
         IPOSTaggerEvaluationMonitor? missclassifiedListener = null;
-        if (ToolParams.JavaBooleanValue(parseResult.GetValue(misclassified)))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValueByName(misclassified)))
         {
             missclassifiedListener = new POSEvaluationErrorListener();
         }
 
         POSTaggerFineGrainedReportListener? reportListener = null;
-        FileInfo? reportFile = parseResult.GetValue(reportOutputFile);
+        FileInfo? reportFile = parseResult.GetValueByName(reportOutputFile);
         Stream? reportOutputStream = null;
         if (reportFile != null)
         {

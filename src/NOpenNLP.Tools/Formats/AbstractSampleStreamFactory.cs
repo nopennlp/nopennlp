@@ -18,6 +18,7 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -88,10 +89,34 @@ public abstract class AbstractSampleStreamFactory<T> : IObjectStreamFactory<T>
         {
             isFailure = "The " + name + " file does not exist!";
         }
+        else if (!CanRead(inFile))
+        {
+            isFailure = "No permissions to read the " + name + " file!";
+        }
 
         if (null != isFailure)
         {
             throw new TerminateToolException(-1, isFailure + " Path: " + inFile.FullName);
+        }
+    }
+
+    // NOpenNLP: stands in for java.io.File.canRead(), which has no direct .NET equivalent
+    // -- opening the file is the only reliable way to learn whether it is readable. This
+    // matches the copy in CmdLineUtil, which the tools reach without going through a
+    // factory; without it an unreadable corpus surfaced as a raw
+    // UnauthorizedAccessException rather than upstream's message and exit code.
+    private static bool CanRead(FileInfo file)
+    {
+        try
+        {
+            using (file.OpenRead())
+            {
+                return true;
+            }
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            return false;
         }
     }
 

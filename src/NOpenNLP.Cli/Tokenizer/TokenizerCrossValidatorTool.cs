@@ -54,7 +54,7 @@ public sealed class TokenizerCrossValidatorTool : AbstractCrossValidatorTool<Tok
     /// <inheritdoc/>
     protected override void Run(ParseResult parseResult)
     {
-        mlParams = CmdLineUtil.LoadTrainingParameters(parseResult.GetValue(@params), false);
+        mlParams = CmdLineUtil.LoadTrainingParameters(parseResult.GetValueByName(@params), false);
         if (mlParams == null)
         {
             mlParams = ModelUtil.CreateDefaultTrainingParameters();
@@ -63,21 +63,21 @@ public sealed class TokenizerCrossValidatorTool : AbstractCrossValidatorTool<Tok
         TokenizerCrossValidator validator;
 
         ITokenizerEvaluationMonitor? listener = null;
-        if (ToolParams.JavaBooleanValue(parseResult.GetValue(misclassified)))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValueByName(misclassified)))
         {
             listener = new TokenEvaluationErrorListener();
         }
 
         try
         {
-            OpenNlpDictionary? dict = TokenizerTrainerTool.LoadDict(parseResult.GetValue(abbDict));
+            OpenNlpDictionary? dict = TokenizerTrainerTool.LoadDict(parseResult.GetValueByName(abbDict));
 
             TokenizerFactory? tokFactory = TokenizerFactory.Create(
-                parseResult.GetValue(factoryName), parseResult.GetRequiredValue(lang), dict,
-                ToolParams.JavaBooleanValue(parseResult.GetValue(alphaNumOpt)), null!);
+                parseResult.GetValueByName(factoryName), parseResult.GetRequiredValueByName(lang), dict,
+                ToolParams.JavaBooleanValue(parseResult.GetValueByName(alphaNumOpt)), null!);
             validator = new TokenizerCrossValidator(mlParams, tokFactory!, listener);
 
-            validator.Evaluate(sampleStream!, parseResult.GetRequiredValue(folds));
+            validator.Evaluate(sampleStream!, parseResult.GetRequiredValueByName(folds));
         }
         catch (IOException e)
         {

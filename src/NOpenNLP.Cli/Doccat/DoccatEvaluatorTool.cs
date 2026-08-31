@@ -54,16 +54,16 @@ public sealed class DoccatEvaluatorTool : AbstractEvaluatorTool<DocumentSample?>
     /// <inheritdoc/>
     protected override void Run(ParseResult parseResult)
     {
-        DoccatModel model = new DoccatModelLoader().Load(parseResult.GetValue(this.model)!);
+        DoccatModel model = new DoccatModelLoader().Load(parseResult.GetValueByName(this.model)!);
 
         var listeners = new JCG.List<IDoccatEvaluationMonitor>();
-        if (ToolParams.JavaBooleanValue(parseResult.GetValue(misclassified)))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValueByName(misclassified)))
         {
             listeners.Add(new DoccatEvaluationErrorListener());
         }
 
         DoccatFineGrainedReportListener? reportListener = null;
-        FileInfo? reportFile = parseResult.GetValue(reportOutputFile);
+        FileInfo? reportFile = parseResult.GetValueByName(reportOutputFile);
         Stream? reportOutputStream = null;
         if (reportFile != null)
         {

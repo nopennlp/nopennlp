@@ -142,12 +142,12 @@ internal static class FormatOptions
         // is interpreted here the way Java's Boolean.parseBoolean does.
         if (typeof(T) == typeof(bool))
         {
-            string? raw = parseResult.GetValue((Option<string?>)ToOption(parameter));
+            string? raw = parseResult.GetValueByName((Option<string?>)ToOption(parameter));
             object parsed = ToolParams.JavaBooleanValue(raw);
             return (T)parsed;
         }
 
-        return parseResult.GetValue((Option<T>)ToOption(parameter));
+        return parseResult.GetValueByName((Option<T>)ToOption(parameter));
     }
 }
 

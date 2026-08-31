@@ -42,17 +42,17 @@ public static class CLI
     public const string Cmd = "nopennlp";
 
     // NOpenNLP: upstream uses a LinkedHashMap so the usage listing follows registration
-    // order; JCG.LinkedDictionary is the counterpart. The order below is upstream's
+    // order; JCG.OrderedDictionary is the counterpart. The order below is upstream's
     // CLI.java registration order and is user-visible, so keep it.
-    private static readonly JCG.LinkedDictionary<string, CmdLineTool> toolLookupMap = CreateToolLookupMap();
+    private static readonly JCG.OrderedDictionary<string, CmdLineTool> toolLookupMap = CreateToolLookupMap();
 
-    private static JCG.LinkedDictionary<string, CmdLineTool> CreateToolLookupMap()
+    private static JCG.OrderedDictionary<string, CmdLineTool> CreateToolLookupMap()
     {
         var tools = new List<CmdLineTool>();
 
         ToolRegistry.AddTools(tools);
 
-        var map = new JCG.LinkedDictionary<string, CmdLineTool>();
+        var map = new JCG.OrderedDictionary<string, CmdLineTool>();
 
         foreach (CmdLineTool tool in tools)
         {

@@ -52,7 +52,7 @@ public sealed class ChunkerCrossValidatorTool : AbstractCrossValidatorTool<Chunk
     /// <inheritdoc/>
     protected override void Run(ParseResult parseResult)
     {
-        mlParams = CmdLineUtil.LoadTrainingParameters(parseResult.GetValue(@params), false);
+        mlParams = CmdLineUtil.LoadTrainingParameters(parseResult.GetValueByName(@params), false);
         if (mlParams == null)
         {
             mlParams = ModelUtil.CreateDefaultTrainingParameters();
@@ -60,12 +60,12 @@ public sealed class ChunkerCrossValidatorTool : AbstractCrossValidatorTool<Chunk
 
         var listeners = new List<IChunkerEvaluationMonitor>();
         ChunkerDetailedFMeasureListener? detailedFMeasureListener = null;
-        if (ToolParams.JavaBooleanValue(parseResult.GetValue(misclassified)))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValueByName(misclassified)))
         {
             listeners.Add(new ChunkEvaluationErrorListener());
         }
 
-        if (ToolParams.JavaBooleanValue(parseResult.GetValue(detailedF)))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValueByName(detailedF)))
         {
             detailedFMeasureListener = new ChunkerDetailedFMeasureListener();
             listeners.Add(detailedFMeasureListener);
@@ -75,11 +75,11 @@ public sealed class ChunkerCrossValidatorTool : AbstractCrossValidatorTool<Chunk
 
         try
         {
-            ChunkerFactory chunkerFactory = ChunkerFactory.Create(parseResult.GetValue(factoryName));
+            ChunkerFactory chunkerFactory = ChunkerFactory.Create(parseResult.GetValueByName(factoryName));
 
-            validator = new ChunkerCrossValidator(parseResult.GetRequiredValue(lang), mlParams,
+            validator = new ChunkerCrossValidator(parseResult.GetRequiredValueByName(lang), mlParams,
                 chunkerFactory, listeners.ToArray());
-            validator.Evaluate(sampleStream!, parseResult.GetRequiredValue(folds));
+            validator.Evaluate(sampleStream!, parseResult.GetRequiredValueByName(folds));
         }
         catch (IOException e)
         {

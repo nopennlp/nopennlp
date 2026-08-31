@@ -52,16 +52,16 @@ public sealed class ChunkerEvaluatorTool : AbstractEvaluatorTool<ChunkSample?>
     /// <inheritdoc/>
     protected override void Run(ParseResult parseResult)
     {
-        ChunkerModel model = new ChunkerModelLoader().Load(parseResult.GetValue(this.model)!);
+        ChunkerModel model = new ChunkerModelLoader().Load(parseResult.GetValueByName(this.model)!);
 
         var listeners = new JCG.List<IChunkerEvaluationMonitor>();
         ChunkerDetailedFMeasureListener? detailedFMeasureListener = null;
-        if (ToolParams.JavaBooleanValue(parseResult.GetValue(misclassified)))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValueByName(misclassified)))
         {
             listeners.Add(new ChunkEvaluationErrorListener());
         }
 
-        if (ToolParams.JavaBooleanValue(parseResult.GetValue(detailedF)))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValueByName(detailedF)))
         {
             detailedFMeasureListener = new ChunkerDetailedFMeasureListener();
             listeners.Add(detailedFMeasureListener);

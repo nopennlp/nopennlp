@@ -67,7 +67,7 @@ public sealed class TokenizerTrainerTool : AbstractTrainerTool<TokenSample?>
     /// <inheritdoc/>
     protected override void Run(ParseResult parseResult)
     {
-        string? paramsFile = parseResult.GetValue(@params);
+        string? paramsFile = parseResult.GetValueByName(@params);
 
         mlParams = CmdLineUtil.LoadTrainingParameters(paramsFile, false);
 
@@ -91,17 +91,17 @@ public sealed class TokenizerTrainerTool : AbstractTrainerTool<TokenSample?>
             mlParams = ModelUtil.CreateDefaultTrainingParameters();
         }
 
-        FileInfo modelOutFile = parseResult.GetRequiredValue(model);
+        FileInfo modelOutFile = parseResult.GetRequiredValueByName(model);
         CmdLineUtil.CheckOutputFile("tokenizer model", modelOutFile);
 
         TokenizerModel tokenizerModel;
         try
         {
-            OpenNlpDictionary? dict = LoadDict(parseResult.GetValue(abbDict));
+            OpenNlpDictionary? dict = LoadDict(parseResult.GetValueByName(abbDict));
 
             TokenizerFactory? tokFactory = TokenizerFactory.Create(
-                parseResult.GetValue(factoryName), parseResult.GetRequiredValue(lang), dict,
-                ToolParams.JavaBooleanValue(parseResult.GetValue(alphaNumOpt)), null!);
+                parseResult.GetValueByName(factoryName), parseResult.GetRequiredValueByName(lang), dict,
+                ToolParams.JavaBooleanValue(parseResult.GetValueByName(alphaNumOpt)), null!);
             tokenizerModel = TokenizerME.Train(sampleStream!, tokFactory!, mlParams);
         }
         catch (IOException e)

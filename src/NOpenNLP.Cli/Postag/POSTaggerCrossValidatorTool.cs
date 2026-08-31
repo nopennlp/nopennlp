@@ -61,20 +61,20 @@ public sealed class POSTaggerCrossValidatorTool : AbstractCrossValidatorTool<POS
     /// <inheritdoc/>
     protected override void Run(ParseResult parseResult)
     {
-        mlParams = CmdLineUtil.LoadTrainingParameters(parseResult.GetValue(@params), false);
+        mlParams = CmdLineUtil.LoadTrainingParameters(parseResult.GetValueByName(@params), false);
         if (mlParams == null)
         {
             mlParams = ModelUtil.CreateDefaultTrainingParameters();
         }
 
         IPOSTaggerEvaluationMonitor? missclassifiedListener = null;
-        if (ToolParams.JavaBooleanValue(parseResult.GetValue(misclassified)))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValueByName(misclassified)))
         {
             missclassifiedListener = new POSEvaluationErrorListener();
         }
 
         POSTaggerFineGrainedReportListener? reportListener = null;
-        FileInfo? reportFile = parseResult.GetValue(reportOutputFile);
+        FileInfo? reportFile = parseResult.GetValueByName(reportOutputFile);
         Stream? reportOutputStream = null;
         if (reportFile != null)
         {
@@ -93,13 +93,13 @@ public sealed class POSTaggerCrossValidatorTool : AbstractCrossValidatorTool<POS
             }
         }
 
-        FileInfo? featuregenFile = parseResult.GetValue(featuregen);
+        FileInfo? featuregenFile = parseResult.GetValueByName(featuregen);
 
         IDictionary<string, object> resourcesMap;
         try
         {
             resourcesMap = TokenNameFinderTrainerTool.LoadResources(
-                parseResult.GetValue(resources), featuregenFile);
+                parseResult.GetValueByName(resources), featuregenFile);
         }
         catch (IOException e)
         {
@@ -114,12 +114,12 @@ public sealed class POSTaggerCrossValidatorTool : AbstractCrossValidatorTool<POS
         {
             // NOpenNLP: the validator takes a concrete Dictionary<string, object>, so
             // the map LoadResources returns is copied into one here.
-            validator = new POSTaggerCrossValidator(parseResult.GetRequiredValue(lang), mlParams,
-                parseResult.GetValue(dict), featureGeneratorBytes,
-                new Dictionary<string, object>(resourcesMap), parseResult.GetValue(tagDictCutoff),
-                parseResult.GetValue(factoryName), missclassifiedListener, reportListener);
+            validator = new POSTaggerCrossValidator(parseResult.GetRequiredValueByName(lang), mlParams,
+                parseResult.GetValueByName(dict), featureGeneratorBytes,
+                new Dictionary<string, object>(resourcesMap), parseResult.GetValueByName(tagDictCutoff),
+                parseResult.GetValueByName(factoryName), missclassifiedListener, reportListener);
 
-            validator.Evaluate(sampleStream!, parseResult.GetRequiredValue(folds));
+            validator.Evaluate(sampleStream!, parseResult.GetRequiredValueByName(folds));
         }
         catch (IOException e)
         {

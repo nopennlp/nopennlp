@@ -21,6 +21,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using NOpenNLP.Tools.Util;
 using NOpenNLP.Tools.Tokenize;
 using JCG = J2N.Collections.Generic;
 
@@ -59,8 +60,10 @@ public class AnnotationConfiguration(IDictionary<string, string> typeToClassMap)
 
         // NOpenNLP: leaveOpen keeps the reader from closing the caller's stream, matching
         // upstream, which never closes the BufferedReader it wraps around the stream.
-        using var reader = new StreamReader(@in, Encoding.UTF8, detectEncodingFromByteOrderMarks: true,
-            bufferSize: 1024, leaveOpen: true);
+        // detectEncodingFromByteOrderMarks is off to match Java's InputStreamReader, which
+        // decodes a BOM as U+FEFF rather than consuming it.
+        using var reader = new StreamReader(@in, PlainTextByLineStream.Utf8NoPreamble,
+            detectEncodingFromByteOrderMarks: false, bufferSize: 1024, leaveOpen: true);
 
         // Note: This only supports entities and relations section
         string? sectionType = null;

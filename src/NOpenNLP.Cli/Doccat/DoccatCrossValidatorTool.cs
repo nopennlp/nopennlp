@@ -54,20 +54,20 @@ public sealed class DoccatCrossValidatorTool : AbstractCrossValidatorTool<Docume
     /// <inheritdoc/>
     protected override void Run(ParseResult parseResult)
     {
-        mlParams = CmdLineUtil.LoadTrainingParameters(parseResult.GetValue(@params), false);
+        mlParams = CmdLineUtil.LoadTrainingParameters(parseResult.GetValueByName(@params), false);
         if (mlParams == null)
         {
             mlParams = ModelUtil.CreateDefaultTrainingParameters();
         }
 
         var listeners = new List<IDoccatEvaluationMonitor>();
-        if (ToolParams.JavaBooleanValue(parseResult.GetValue(misclassified)))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValueByName(misclassified)))
         {
             listeners.Add(new DoccatEvaluationErrorListener());
         }
 
         DoccatFineGrainedReportListener? reportListener = null;
-        FileInfo? reportFile = parseResult.GetValue(reportOutputFile);
+        FileInfo? reportFile = parseResult.GetValueByName(reportOutputFile);
         Stream? reportOutputStream = null;
         if (reportFile != null)
         {
@@ -88,19 +88,19 @@ public sealed class DoccatCrossValidatorTool : AbstractCrossValidatorTool<Docume
         }
 
         IFeatureGenerator[] featureGeneratorsArr =
-            DoccatTrainerTool.CreateFeatureGenerators(parseResult.GetValue(featureGenerators));
+            DoccatTrainerTool.CreateFeatureGenerators(parseResult.GetValueByName(featureGenerators));
 
         IDoccatEvaluationMonitor[] listenersArr = listeners.ToArray();
 
         DoccatCrossValidator validator;
         try
         {
-            DoccatFactory factory = DoccatFactory.Create(parseResult.GetValue(factoryName),
+            DoccatFactory factory = DoccatFactory.Create(parseResult.GetValueByName(factoryName),
                 featureGeneratorsArr);
-            validator = new DoccatCrossValidator(parseResult.GetRequiredValue(lang), mlParams,
+            validator = new DoccatCrossValidator(parseResult.GetRequiredValueByName(lang), mlParams,
                 factory, listenersArr);
 
-            validator.Evaluate(sampleStream!, parseResult.GetRequiredValue(folds));
+            validator.Evaluate(sampleStream!, parseResult.GetRequiredValueByName(folds));
         }
         catch (IOException e)
         {

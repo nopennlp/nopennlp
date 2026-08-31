@@ -154,7 +154,11 @@ public class BratAnnotationStream : ObjectStreamBase<BratAnnotation?>
         /// <inheritdoc/>
         internal override BratAnnotation Parse(Span[] tokens, string line)
         {
-            string[] typeParts = tokens[TYPE_OFFSET].GetCoveredText(line.AsCharSequence()).ToString().Split(':');
+            // NOpenNLP: Java's String.split drops trailing empty strings; .NET's keeps them,
+            // so "type:" would count as 2 parts here and pass the check below that upstream
+            // fails with 1.
+            string[] typeParts = StringUtil.SplitDroppingTrailingEmpty(
+                tokens[TYPE_OFFSET].GetCoveredText(line.AsCharSequence()).ToString(), ':');
 
             if (typeParts.Length != 2)
             {
@@ -169,7 +173,9 @@ public class BratAnnotationStream : ObjectStreamBase<BratAnnotation?>
 
             for (int i = TYPE_OFFSET + 1; i < tokens.Length; i++)
             {
-                string[] parts = tokens[i].GetCoveredText(line.AsCharSequence()).ToString().Split(':');
+                // NOpenNLP: see the note above -- Java drops the trailing empty string.
+                string[] parts = StringUtil.SplitDroppingTrailingEmpty(
+                    tokens[i].GetCoveredText(line.AsCharSequence()).ToString(), ':');
 
                 if (parts.Length != 2)
                 {
@@ -238,7 +244,9 @@ public class BratAnnotationStream : ObjectStreamBase<BratAnnotation?>
         this.config = config;
         this.id = id;
 
-        reader = new StreamReader(@in, Encoding.UTF8);
+        // NOpenNLP: detectEncodingFromByteOrderMarks is off to match Java's
+        // InputStreamReader, which decodes a BOM as U+FEFF rather than consuming it.
+        reader = new StreamReader(@in, PlainTextByLineStream.Utf8NoPreamble, detectEncodingFromByteOrderMarks: false);
     }
 
     /// <inheritdoc/>

@@ -186,7 +186,7 @@ public abstract class DetailedFMeasureListener<T> : IEvaluationMonitor<T>
     // the result to a width of 7.
     private static string FormatPercent(CultureInfo locale, double value)
     {
-        string text = value.ToString("F2", locale);
+        string text = FormatHalfUp(value, 2, locale);
 
         if (value >= 0)
         {
@@ -194,6 +194,38 @@ public abstract class DetailedFMeasureListener<T> : IEvaluationMonitor<T>
         }
 
         return PadLeft(text, 7);
+    }
+
+    /// <summary>
+    /// Rounds <paramref name="value"/> to <paramref name="fractionDigits"/> the way Java's
+    /// <c>String.format("%.2f")</c> does, and renders it with a fixed-point pattern.
+    /// </summary>
+    /// <remarks>
+    /// NOpenNLP: Java's <c>Formatter</c> rounds HALF_UP on the <b>exact binary value</b> of
+    /// the double; .NET's <c>"F2"</c> rounds half-to-even on its shortest representation, so
+    /// the two disagree on every midpoint. A precision of 1 true positive out of 32 is
+    /// exactly 3.125, which upstream prints as <c>3.13</c> and <c>"F2"</c> as <c>3.12</c>;
+    /// denominators of 32, 160 and 800 are ordinary span counts, so this is reached by an
+    /// ordinary evaluation run. Going through the 17-significant-digit representation keeps
+    /// enough of the exact value to resolve the midpoint the way Java does. This mirrors
+    /// <c>FineGrainedReportListener.FormatHalfEven</c>, which solves the same problem for
+    /// <c>MessageFormat</c>'s HALF_EVEN rounding.
+    /// </remarks>
+    private static string FormatHalfUp(double value, int fractionDigits, CultureInfo locale)
+    {
+        if (double.IsNaN(value) || double.IsInfinity(value))
+        {
+            return value.ToString("F" + fractionDigits.ToString(CultureInfo.InvariantCulture), locale);
+        }
+
+        decimal exact = decimal.Parse(
+            value.ToString("G17", CultureInfo.InvariantCulture),
+            NumberStyles.Float,
+            CultureInfo.InvariantCulture);
+
+        decimal rounded = Math.Round(exact, fractionDigits, MidpointRounding.AwayFromZero);
+
+        return rounded.ToString("F" + fractionDigits.ToString(CultureInfo.InvariantCulture), locale);
     }
 
     private static string PadLeft(string value, int width) =>

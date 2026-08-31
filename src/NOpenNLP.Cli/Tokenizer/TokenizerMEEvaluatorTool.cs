@@ -48,10 +48,10 @@ public sealed class TokenizerMEEvaluatorTool : AbstractEvaluatorTool<TokenSample
     /// <inheritdoc/>
     protected override void Run(ParseResult parseResult)
     {
-        TokenizerModel model = new TokenizerModelLoader().Load(parseResult.GetValue(this.model)!);
+        TokenizerModel model = new TokenizerModelLoader().Load(parseResult.GetValueByName(this.model)!);
 
         ITokenizerEvaluationMonitor? misclassifiedListener = null;
-        if (ToolParams.JavaBooleanValue(parseResult.GetValue(misclassified)))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValueByName(misclassified)))
         {
             misclassifiedListener = new TokenEvaluationErrorListener();
         }

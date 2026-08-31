@@ -62,23 +62,23 @@ public sealed class TokenNameFinderEvaluatorTool : AbstractEvaluatorTool<NameSam
     protected override void Run(ParseResult parseResult)
     {
         TokenNameFinderModel model =
-            new TokenNameFinderModelLoader().Load(parseResult.GetValue(this.model)!);
+            new TokenNameFinderModelLoader().Load(parseResult.GetValueByName(this.model)!);
 
         var listeners = new JCG.List<ITokenNameFinderEvaluationMonitor>();
-        if (ToolParams.JavaBooleanValue(parseResult.GetValue(misclassified)))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValueByName(misclassified)))
         {
             listeners.Add(new NameEvaluationErrorListener());
         }
 
         TokenNameFinderDetailedFMeasureListener? detailedFListener = null;
-        if (ToolParams.JavaBooleanValue(parseResult.GetValue(detailedF)))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValueByName(detailedF)))
         {
             detailedFListener = new TokenNameFinderDetailedFMeasureListener();
             listeners.Add(detailedFListener);
         }
 
         TokenNameFinderFineGrainedReportListener? reportListener = null;
-        FileInfo? reportFile = parseResult.GetValue(reportOutputFile);
+        FileInfo? reportFile = parseResult.GetValueByName(reportOutputFile);
         Stream? reportOutputStream = null;
 
         if (reportFile != null)
@@ -99,7 +99,7 @@ public sealed class TokenNameFinderEvaluatorTool : AbstractEvaluatorTool<NameSam
             }
         }
 
-        string? nameTypesValue = parseResult.GetValue(nameTypes);
+        string? nameTypesValue = parseResult.GetValueByName(nameTypes);
         if (nameTypesValue != null)
         {
             string[] types = StringUtil.SplitDroppingTrailingEmpty(nameTypesValue, ',');

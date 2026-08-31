@@ -34,8 +34,8 @@ public static class StreamFactoryRegistry
     // user-visible -- it drives the [.fmt1|.fmt2] alternation in a typed tool's help
     // and the parenthesized format list in a converter's description -- so both levels
     // are insertion-ordered here and the registrations below run in upstream's order.
-    private static readonly JCG.LinkedDictionary<Type, JCG.LinkedDictionary<string, object>> registry =
-        new JCG.LinkedDictionary<Type, JCG.LinkedDictionary<string, object>>();
+    private static readonly JCG.OrderedDictionary<Type, JCG.OrderedDictionary<string, object>> registry =
+        new JCG.OrderedDictionary<Type, JCG.OrderedDictionary<string, object>>();
 
     /// <summary>
     /// The format assumed when the user names none.
@@ -113,9 +113,9 @@ public static class StreamFactoryRegistry
     /// <returns><c>true</c> if the factory was successfully registered</returns>
     public static bool RegisterFactory<T>(string formatName, IObjectStreamFactory<T> factory)
     {
-        if (!registry.TryGetValue(typeof(T), out JCG.LinkedDictionary<string, object>? formats))
+        if (!registry.TryGetValue(typeof(T), out JCG.OrderedDictionary<string, object>? formats))
         {
-            formats = new JCG.LinkedDictionary<string, object>();
+            formats = new JCG.OrderedDictionary<string, object>();
             registry[typeof(T)] = formats;
         }
 
@@ -135,7 +135,7 @@ public static class StreamFactoryRegistry
     /// </summary>
     public static void UnregisterFactory<T>(string formatName)
     {
-        if (registry.TryGetValue(typeof(T), out JCG.LinkedDictionary<string, object>? formats))
+        if (registry.TryGetValue(typeof(T), out JCG.OrderedDictionary<string, object>? formats))
         {
             formats.Remove(formatName);
         }
@@ -150,9 +150,9 @@ public static class StreamFactoryRegistry
     // without the NullReferenceException.
     public static IReadOnlyDictionary<string, IObjectStreamFactory<T>> GetFactories<T>()
     {
-        var result = new JCG.LinkedDictionary<string, IObjectStreamFactory<T>>();
+        var result = new JCG.OrderedDictionary<string, IObjectStreamFactory<T>>();
 
-        if (registry.TryGetValue(typeof(T), out JCG.LinkedDictionary<string, object>? formats))
+        if (registry.TryGetValue(typeof(T), out JCG.OrderedDictionary<string, object>? formats))
         {
             foreach (KeyValuePair<string, object> entry in formats)
             {
@@ -183,7 +183,7 @@ public static class StreamFactoryRegistry
     {
         formatName ??= DefaultFormat;
 
-        if (registry.TryGetValue(typeof(T), out JCG.LinkedDictionary<string, object>? formats)
+        if (registry.TryGetValue(typeof(T), out JCG.OrderedDictionary<string, object>? formats)
             && formats.TryGetValue(formatName, out object? factory))
         {
             return (IObjectStreamFactory<T>)factory;

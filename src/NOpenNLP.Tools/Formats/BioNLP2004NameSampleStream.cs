@@ -87,7 +87,10 @@ public class BioNLP2004NameSampleStream : ObjectStreamBase<NameSample?>
                 if (line.Contains("ABSTRACT TRUNCATED"))
                     continue;
 
-                string[] fields = line.Split('\t');
+                // NOpenNLP: Java's String.split drops trailing empty strings; .NET's keeps them, so a
+                // line ending in the separator would fail the exact field count below that
+                // upstream accepts.
+                string[] fields = StringUtil.SplitDroppingTrailingEmpty(line, '\t');
 
                 if (fields.Length == 2)
                 {

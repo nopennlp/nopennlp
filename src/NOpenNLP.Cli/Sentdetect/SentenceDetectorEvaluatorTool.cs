@@ -48,10 +48,10 @@ public sealed class SentenceDetectorEvaluatorTool : AbstractEvaluatorTool<Senten
     /// <inheritdoc/>
     protected override void Run(ParseResult parseResult)
     {
-        SentenceModel model = new SentenceModelLoader().Load(parseResult.GetValue(this.model)!);
+        SentenceModel model = new SentenceModelLoader().Load(parseResult.GetValueByName(this.model)!);
 
         ISentenceDetectorEvaluationMonitor? errorListener = null;
-        if (ToolParams.JavaBooleanValue(parseResult.GetValue(misclassified)))
+        if (ToolParams.JavaBooleanValue(parseResult.GetValueByName(misclassified)))
         {
             errorListener = new SentenceEvaluationErrorListener();
         }

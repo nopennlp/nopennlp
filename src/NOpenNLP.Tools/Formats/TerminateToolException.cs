@@ -20,6 +20,9 @@
 
 using System;
 
+// NOpenNLP: upstream keeps this in opennlp.tools.cmdline, alongside the tools that throw
+// it. The format factories throw it too, and they ship in this library rather than in the
+// CLI project, so it lives here to keep NOpenNLP.Tools from depending on NOpenNLP.Cli.
 namespace NOpenNLP.Tools.Formats;
 
 /// <summary>
