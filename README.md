@@ -136,19 +136,21 @@ dotnet test NOpenNLP.slnx -p:TestFrameworks=true
 
 ### Comparing the CLI against Apache OpenNLP
 
-`build/regress.sh` runs the same invocation through both the `nopennlp` tool and
+`build/regress.ps1` runs the same invocation through both the `nopennlp` tool and
 the real `opennlp` command and diffs stdout and the exit code, so a change in the
 CLI's observable behaviour shows up as a failing case. It is a developer tool
-rather than part of CI: it needs a JVM, the OpenNLP 1.9.4 jar, a clone of the
-upstream source for its test corpora, and the models `build/download-test-models.ps1`
-fetches. Its value is at rebase time, after pulling a new upstream release.
+rather than part of CI: it needs PowerShell 7, a JVM, the OpenNLP 1.9.4 jar, a
+clone of the upstream source for its test corpora, and the models
+`build/download-test-models.ps1` fetches. Its value is at rebase time, after
+pulling a new upstream release. Its scratch space is `_artifacts/regress`, which
+is gitignored and cleared at the start of each run.
 
 Differences that are expected are normalized away rather than reported: the
 command and product name, timings, absolute paths, and the order of a tool's
 options and of a format list. Java derives those last two from `Class.getMethods()`
-and `HashMap` iteration, neither of which the JDK specifies, so `build/canon.py`
-sorts both sides before diffing. Everything else is compared verbatim. The usage
-notes at the top of the script cover the setup and the differences that remain.
+and `HashMap` iteration, neither of which the JDK specifies, so the script sorts
+both sides before diffing. Everything else is compared verbatim. The comment-based
+help at the top of the script covers the setup and the differences that remain.
 
 ## Attribution
 
