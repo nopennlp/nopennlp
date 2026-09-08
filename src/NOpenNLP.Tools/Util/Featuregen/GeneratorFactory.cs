@@ -33,9 +33,10 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 
 /// <summary>
 /// Creates a set of feature generators based on a provided XML descriptor.
-///
+/// <para/>
 /// Example of an XML descriptor:
 /// <para/>
+/// <code>
 /// &lt;featureGenerators name="namefind"&gt;
 ///     &lt;generator class="opennlp.tools.util.featuregen.CachedFeatureGeneratorFactory"&gt;
 ///         &lt;generator class="opennlp.tools.util.featuregen.WindowFeatureGeneratorFactory"&gt;
@@ -57,8 +58,8 @@ namespace NOpenNLP.Tools.Util.Featuregen;
 ///         &lt;/generator&gt;
 ///     &lt;/generator&gt;
 /// &lt;/featureGenerators&gt;
-///
-///
+/// </code>
+/// <para/>
 /// Each XML element is mapped to a <see cref="GeneratorFactory.IXmlFeatureGeneratorFactory"/> which
 /// is responsible to process the element and create the specified
 /// <see cref="IAdaptiveFeatureGenerator"/>. Elements can contain other

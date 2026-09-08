@@ -253,6 +253,23 @@ workflow builds it and publishes it to GitHub Pages from `main`.
   `build/verify-package-docs.ps1` reads every `package.md` after a build and
   requires its text to appear on the page its uid names. Run it after touching a
   namespace name or adding a `package.md`.
+- **A blank `///` line inside a summary breaks the whole page.** docfx emits
+  such a comment as a multi-line YAML string and indents every continuation
+  line four spaces, which Markdown then reads as a code block: the summary
+  renders as literal text with `<xref>` and `<p>` showing as markup. Write
+  `<para/>` on its own line instead of leaving a `///` line blank. The same
+  happens to a `<code>` block containing `<br/>`, which is how upstream's
+  javadoc writes a sample; let the block use real line breaks instead.
+- **`<code>` is a block element, `<c>` is the inline one.** An inline
+  `<code>foo</code>` opens a block that swallows the rest of the summary. This
+  is what broke `TokenizerME`, whose whole class doc rendered as one code block.
+  Verbatim sample text that is not inside `<code>` has the opposite problem: it
+  reflows into a paragraph and loses its indentation, as the XML descriptor in
+  `GeneratorFactory` did.
+- **`verify-package-docs.ps1` catches both.** It scans the generated metadata
+  for an indented summary, so neither can come back silently. Upstream's javadoc
+  has these same defects, so porting a comment faithfully can reintroduce one:
+  keep the wording, fix the markup.
 - **`--warningsAsErrors` is not usable here.** docfx compiles both projects on
   the way to generating metadata and relays the C# warnings already present in
   the ported source, which would fail the build for reasons that have nothing to

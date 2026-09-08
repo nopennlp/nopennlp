@@ -42,7 +42,7 @@ public class PerceptronModelReader : AbstractModelReader
     /// <summary>
     /// Retrieve a model from disk. It assumes that models are saved in the
     /// following sequence:
-    ///
+    /// <para/>
     /// <br/>Perceptron (model type identifier)
     /// <br/>1. # of parameters (int)
     /// <br/>2. # of outcomes (int)
@@ -52,8 +52,8 @@ public class PerceptronModelReader : AbstractModelReader
     /// <br/>   [# of predicates for which outcome pattern is true] [outcome pattern]
     /// <br/>4. # of predicates (int)
     /// <br/>   * list of predicate names (String)
-    ///
-    /// <para/>If you are creating a reader for a format which won't work with this
+    /// <para/>
+    /// If you are creating a reader for a format which won't work with this
     /// (perhaps a database or xml file), override this method and ignore the
     /// other methods provided in this abstract class.
     /// </summary>

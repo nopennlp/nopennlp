@@ -1,8 +1,9 @@
 #!/usr/bin/env pwsh
 <#
 .SYNOPSIS
-    Checks a rendered docfx site for broken references and for namespace
-    documentation that failed to attach.
+    Checks a rendered docfx site for broken references, for namespace
+    documentation that failed to attach, and for doc comments that render as a
+    literal code block.
 
 .DESCRIPTION
     The namespace documentation is ported from Apache OpenNLP's package-info.java
@@ -37,6 +38,10 @@
     The structured log from `docfx --log <file> --logLevel warning`. When given,
     any docfx-issued warning in it fails the check.
 
+.PARAMETER MetadataDirectory
+    The YAML docfx generates from the assemblies. Defaults to the api directory
+    beside the site. Scanned for summaries that would render as a code block.
+
 .EXAMPLE
     dotnet docfx websites/apidocs/docfx.json --log docfx.log --logLevel warning
     build/verify-package-docs.ps1 -LogFile docfx.log
@@ -45,7 +50,8 @@
 param(
     [string] $SiteDirectory,
     [string] $SourceDirectory,
-    [string] $LogFile
+    [string] $LogFile,
+    [string] $MetadataDirectory
 )
 
 Set-StrictMode -Version Latest
@@ -57,6 +63,9 @@ if (-not $SiteDirectory) {
 }
 if (-not $SourceDirectory) {
     $SourceDirectory = Join-Path $repoRoot 'src'
+}
+if (-not $MetadataDirectory) {
+    $MetadataDirectory = Join-Path $repoRoot 'websites/apidocs/api'
 }
 
 if (-not (Test-Path $SiteDirectory)) {
@@ -88,6 +97,37 @@ if ($LogFile) {
         if (-not $code -or [string]::IsNullOrWhiteSpace($code.Value)) { continue }
 
         $failures += "docfx $($entry.severity) $($code.Value): $($entry.message)"
+    }
+}
+
+# A doc comment whose text docfx emits as a multi-line YAML string gets every
+# continuation line indented four spaces, and four spaces in Markdown means a
+# code block. The whole summary then renders as literal text, with <xref> and
+# <p> tags showing as markup rather than as links and paragraphs. It is silent:
+# the page builds, and only looks wrong.
+#
+# The trigger is a blank /// line inside a summary, or a <br/> inside a <code>
+# block. Fixes are to write <para/> on its own line instead of leaving the line
+# blank, and to let a <code> block use real line breaks. Use <c> for an inline
+# code span; <code> is a block element and swallows whatever follows it.
+if (Test-Path $MetadataDirectory) {
+    $metadataFiles = @(Get-ChildItem -Path $MetadataDirectory -Filter '*.yml' -File)
+    foreach ($file in $metadataFiles) {
+        $yaml = Get-Content -Path $file.FullName -Raw
+
+        foreach ($match in [regex]::Matches($yaml, '(?m)^\s*(summary|remarks|example): "((?:[^"\\]|\\.)*)"\s*$')) {
+            $value = $match.Groups[2].Value
+            if ($value -notmatch '(^|\\n)\s{4,}\S') { continue }
+
+            # Name the member from the nearest preceding uid.
+            $uid = 'unknown'
+            $preceding = [regex]::Matches($yaml.Substring(0, $match.Index), '(?m)^\s*- uid: (\S+)\s*$')
+            if ($preceding.Count -gt 0) {
+                $uid = $preceding[$preceding.Count - 1].Groups[1].Value
+            }
+
+            $failures += "$uid has a $($match.Groups[1].Value) that docfx indented, so it renders as a literal code block. Remove the blank /// line inside it, or the <br/> tags inside its <code> block."
+        }
     }
 }
 
@@ -147,4 +187,4 @@ if ($failures.Count -gt 0) {
     exit 1
 }
 
-Write-Host "All $($packageDocs.Count) package.md files reached their namespace pages." -ForegroundColor Green
+Write-Host "All $($packageDocs.Count) package.md files reached their namespace pages, and no doc comment renders as a code block." -ForegroundColor Green
