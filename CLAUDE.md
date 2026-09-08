@@ -258,3 +258,11 @@ reaching for a container wants to try the working tree rather than a release.
 - **Smoke-test in the final stage.** A `nopennlp Doccat help` in the runtime
   image proves the copied tool directory runs there, so a broken image fails the
   build rather than the user's first `docker run`.
+- **CI builds the image but does not push it.** The `Docker` workflow needs a
+  full-depth checkout, because the version comes from commit height and the
+  Dockerfile copies `.git` in; a shallow clone breaks the build inside the
+  container. What it verifies is what only a container can show: that the tool
+  directory copied out of the build stage runs against the runtime image, that
+  PATH reaches the command, and that stdin-driven invocation works. Packing and
+  installing the tool are already covered by the Pack job in
+  `build-and-test.yml`, so do not duplicate that here.

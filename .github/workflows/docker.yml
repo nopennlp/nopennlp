@@ -1,0 +1,104 @@
+# Builds the container image from the root Dockerfile and checks that the
+# `nopennlp` command inside it actually runs, per issue #58.
+#
+# This is separate from build-and-test.yml because it shares none of that
+# workflow's setup: the image build needs Docker and no .NET SDK, no test model
+# cache and no NuGet cache, since everything happens inside the build stage. It
+# is scoped to the paths that can change what the image contains rather than
+# running on every change.
+#
+# The image is built but never pushed. Nothing publishes it yet, and a build
+# alone answers the question this workflow exists to answer.
+
+name: Docker
+
+# The two path lists are identical and must stay that way. They are written out
+# twice rather than shared through a YAML anchor, because anchors are not
+# reliably supported across the Actions tooling that reads these files.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'Dockerfile'
+      - '.dockerignore'
+      - '.github/workflows/docker.yml'
+      # What the image builds. A change to either project can break the build
+      # inside the container without breaking anything the other jobs run.
+      - 'src/NOpenNLP.Cli/**'
+      - 'src/NOpenNLP.Tools/**'
+      # The version the pack produces, which the install in the image resolves.
+      - 'version.json'
+      - '!**/*.md'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'Dockerfile'
+      - '.dockerignore'
+      - '.github/workflows/docker.yml'
+      - 'src/NOpenNLP.Cli/**'
+      - 'src/NOpenNLP.Tools/**'
+      - 'version.json'
+      - '!**/*.md'
+
+jobs:
+  build:
+    name: Build image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The image build runs Nerdbank.GitVersioning, which derives the
+          # version from commit height and fails on the default shallow clone.
+          # The Dockerfile copies .git in for exactly this reason, so a shallow
+          # checkout here would break the build inside the container.
+          fetch-depth: 0
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
+
+      # load: true rather than push, so the image lands in the runner's local
+      # daemon and the steps below can run it. The GitHub Actions cache keeps
+      # the restore and build layers between runs; without it every run
+      # re-downloads the NuGet packages the CLI depends on.
+      - name: Build image
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: .
+          load: true
+          tags: nopennlp:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Packing and installing the tool is already covered by the Pack job in
+      # build-and-test.yml. What is only checkable here is that the tool
+      # directory copied out of the build stage runs against the runtime image,
+      # that PATH reaches it, and that stdin-driven invocation works, which is
+      # how the container is meant to be used.
+      - name: Verify the image runs the CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # A bare invocation prints the usage listing and exits 0.
+          docker run --rm nopennlp:ci nopennlp > usage.txt
+          grep -q "Usage: nopennlp TOOL" usage.txt
+          grep -q "SimpleTokenizer" usage.txt
+
+          # The command is on PATH for the shell the image drops into, rather
+          # than only working when named by its full path.
+          docker run --rm nopennlp:ci sh -lc 'command -v nopennlp'
+
+          # A tool reading stdin and writing stdout, the way the README shows.
+          echo "Dr. Smith went to Washington." \
+            | docker run --rm -i nopennlp:ci nopennlp SimpleTokenizer 2>/dev/null > tokens.txt
+          cat tokens.txt
+          grep -qx "Dr . Smith went to Washington ." tokens.txt
+
+          # The Apache 2.0 terms on the ported OpenNLP source require the image
+          # to carry these, the same way the Pack job checks the packages do.
+          docker run --rm nopennlp:ci sh -lc 'test -s /usr/share/nopennlp/LICENSE && test -s /usr/share/nopennlp/NOTICE'
+
+          echo "The image built and the nopennlp command ran."

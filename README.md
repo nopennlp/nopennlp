@@ -137,6 +137,10 @@ working tree, and pulling from NuGet would run a release instead of whatever
 change prompted the build. The build needs `.git`, since Nerdbank.GitVersioning
 derives the version from the commit height.
 
+A `Docker` workflow builds the image and runs the `nopennlp` command inside it,
+scoped to the paths that can change what the image contains. It builds the image
+without pushing it anywhere.
+
 ## Building and testing
 
 ```
