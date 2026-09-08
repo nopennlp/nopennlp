@@ -173,7 +173,7 @@ everything is trained on demand from corpora committed alongside it. A separate
 that can affect serialization. Loading a model that another runtime wrote is the
 only check that can catch a serialization difference, since both halves of a
 .NET-only round trip share any bug in it. See
-[the harness README](src/java/model-compat/README.md) for what it found.
+[the harness README](src/java/model-compat/README.md) for the details.
 
 ## Attribution
 

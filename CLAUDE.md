@@ -196,9 +196,8 @@ trains, Apache OpenNLP 1.9.5 reads on a real JVM, and vice versa. See its
 README for how to run it.
 
 This is the only coverage that can catch a serialization difference, because
-both halves of a .NET-only round trip share the same bug. It found three on its
-first run, all of which made every NOpenNLP-written model unloadable by Apache
-OpenNLP. When touching model serialization:
+both halves of a .NET-only round trip share the same bug. When touching model
+serialization:
 
 - **Write what upstream writes, not what .NET produces.** A class name recorded
   in a manifest must be the Java one (`ExtensionLoader.ToJavaClassName`), since

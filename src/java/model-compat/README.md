@@ -133,28 +133,6 @@ five models entirely within .NET. It proves nothing about Java, but it runs on
 every build with no JDK, so a change that breaks the shared contract fails
 immediately rather than waiting for the compatibility job.
 
-## What this found
-
-The harness paid for itself on its first run. Apache OpenNLP could not load a
-single NOpenNLP-written model, for three reasons that no amount of .NET-only
-testing would have surfaced:
-
-1. **Class names.** The port recorded its factory, sequence codec and artifact
-   serializers under their .NET names (`NOpenNLP.Tools.Sentdetect.SentenceDetectorFactory`).
-   Apache OpenNLP's `ExtensionLoader` rejects any class name outside the allowed
-   `opennlp.` package, so it failed before reading a single byte of the model.
-   The port's own loader already resolved both spellings, so writing the Java
-   name costs nothing and is what upstream does.
-2. **Version.** The embedded `opennlp.version` resource still said `1.9.4` after
-   the port moved to 1.9.5, so every model was stamped with the wrong version.
-3. **Boolean casing.** .NET's `bool.ToString()` writes `True`; Java's
-   `Boolean.toString()` writes `true`. Both runtimes parse either, so this one
-   was harmless — but it made the model bytes gratuitously different from what
-   Apache OpenNLP would have written for the same inputs.
-
-The first two are covered by `PortRegressionTest` so they cannot regress without
-a JDK present.
-
 ## Not wired into the main CI build
 
 Run by the separate [`model-compatibility.yml`](../../../.github/workflows/model-compatibility.yml)
