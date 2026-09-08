@@ -74,5 +74,16 @@ public abstract class CmdLineTool
     // tool) and does its own validation through ArgumentParser. Here each tool
     // contributes a System.CommandLine Command instead, which parses and validates the
     // arguments and reports errors, so the ArgumentParser layer has no counterpart.
+    //
+    // Because of that, upstream's ArgumentParserTest is deliberately not ported. Its
+    // eleven tests are about the ArgumentParser machinery itself: an interface of
+    // annotated getters (@ParameterDescription, @OptionalParameter) reflected into a
+    // dynamic proxy, plus the checks that reject a malformed interface -- no methods, a
+    // getter that is not named getX, a getter returning an unsupported type. None of
+    // that exists here: options are declared as System.CommandLine objects and binding
+    // is the library's job, so the equivalent tests would assert System.CommandLine's
+    // behaviour rather than this port's. The argument handling that is observable to a
+    // user -- defaults being applied, a missing required argument rejected, the usage
+    // text a bad invocation prints -- is covered by CLITest and EndToEndTest instead.
     public abstract Command CreateCommand(string commandName);
 }
