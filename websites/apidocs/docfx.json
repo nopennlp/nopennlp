@@ -1,0 +1,76 @@
+{
+  "metadata": [
+    {
+      "src": [
+        {
+          "files": [
+            "NOpenNLP.Tools/NOpenNLP.Tools.csproj",
+            "NOpenNLP.Cli/NOpenNLP.Cli.csproj"
+          ],
+          "src": "../../src"
+        }
+      ],
+      "dest": "api",
+      "properties": {
+        "TargetFramework": "net10.0"
+      },
+      "namespaceLayout": "nested",
+      "enumSortOrder": "declaringOrder"
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "files": [
+          "**/*.{md,yml}"
+        ],
+        "exclude": [
+          "api/**",
+          "_site/**"
+        ]
+      },
+      {
+        "files": [
+          "api/**/*.{md,yml}"
+        ]
+      }
+    ],
+    "resource": [
+      {
+        "files": [
+          "logo.svg"
+        ]
+      }
+    ],
+    "overwrite": [
+      {
+        "files": [
+          "**/package.md"
+        ],
+        "src": "../../src"
+      }
+    ],
+    "output": "_site",
+    "template": [
+      "default",
+      "modern",
+      "template"
+    ],
+    "globalMetadata": {
+      "_appName": "NOpenNLP",
+      "_appLogoPath": "logo.svg",
+      "_appTitle": "NOpenNLP API Documentation",
+      "_appFooter": "Apache OpenNLP, OpenNLP, Apache and the Apache feather logo are trademarks of The Apache Software Foundation. NOpenNLP is not affiliated with, endorsed by, or a product of The Apache Software Foundation.",
+      "_enableSearch": true,
+      "_disableContribution": false,
+      "_gitContribute": {
+        "repo": "https://github.com/nopennlp/nopennlp",
+        "branch": "main"
+      },
+      "pdf": false
+    },
+    "sitemap": {
+      "baseUrl": "https://nopennlp.github.io/nopennlp/"
+    }
+  }
+}

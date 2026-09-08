@@ -34,3 +34,13 @@ src/java/model-compat/work/
 # Scratch space for build/regress.ps1: the corpora copies and captured CLI
 # output it diffs. Cleared at the start of each run; never committed.
 _artifacts/
+
+# docfx output. `api` holds the metadata docfx generates from the compiled
+# assemblies on each run, and `_site` the rendered site; both are derived from
+# the source beside them. The package.md files under src/ are the hand-written
+# input and are committed.
+websites/apidocs/api/
+websites/apidocs/_site/
+
+# The structured log build/verify-package-docs.ps1 reads.
+docfx.log

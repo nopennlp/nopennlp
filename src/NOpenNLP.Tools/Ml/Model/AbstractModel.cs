@@ -101,7 +101,7 @@ public abstract class AbstractModel : IMaxentModel
     /// Return the name of the outcome corresponding to the highest likelihood
     /// in the parameter ocs.
     /// </summary>
-    /// <param name="ocs">A <see cref="double[]"/> as returned by the <see cref="Eval(string[])"/>
+    /// <param name="ocs">A <see langword="double"/> array as returned by the <see cref="Eval(string[])"/>
     ///            method.</param>
     /// <returns>   The name of the most likely outcome.</returns>
     public string GetBestOutcome(double[] ocs)
@@ -119,7 +119,7 @@ public abstract class AbstractModel : IMaxentModel
     /// probabilities produced by the <see cref="Eval(string[])"/>
     /// method.
     /// </summary>
-    /// <param name="ocs">A <see cref="double[]"/> as returned by the
+    /// <param name="ocs">A <see langword="double"/> array as returned by the
     ///            <see cref="Eval(string[])"/>
     ///            method.</param>
     /// <returns>   String containing outcome names paired with the normalized
@@ -156,9 +156,9 @@ public abstract class AbstractModel : IMaxentModel
     }
 
     /// <summary>
-    /// Gets the index associated with the String name of the given outcome.
+    /// Gets the index associated with the string name of the given outcome.
     /// </summary>
-    /// <param name="outcome">the String name of the outcome for which the
+    /// <param name="outcome">the string name of the outcome for which the
     ///          index is desired</param>
     /// <returns>the index if the given outcome label exists for this
     ///     model, -1 if it does not.</returns>

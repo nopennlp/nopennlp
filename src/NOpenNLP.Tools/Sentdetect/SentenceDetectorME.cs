@@ -310,8 +310,8 @@ public class SentenceDetectorME : ISentenceDetector
     /// Allows subclasses to check an overzealous (read: poorly
     /// trained) model from flagging obvious non-breaks as breaks based
     /// on some boolean determination of a break's acceptability.
-    ///
-    /// <para/>The implementation here always returns true, which means
+    /// <para/>
+    /// The implementation here always returns true, which means
     /// that the IMaxentModel's outcome is taken as is.
     /// </summary>
     /// <param name="s">the string in which the break occurred.</param>

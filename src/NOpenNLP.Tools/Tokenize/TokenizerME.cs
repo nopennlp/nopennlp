@@ -42,24 +42,23 @@ namespace NOpenNLP.Tools.Tokenize;
 /// methods to create it from the binary representation.
 /// <para/>
 /// A tokenizer instance is not thread safe. For each thread one tokenizer
-/// must be instantiated which can share one <code>TokenizerModel</code> instance
+/// must be instantiated which can share one <c>TokenizerModel</c> instance
 /// to safe memory.
 /// <para/>
 /// To train a new model the <see cref="Train(IObjectStream{TokenSample}, TokenizerFactory, TrainingParameters)"/>
 /// method can be used.
 /// <para/>
 /// Sample usage:
-/// <para/>
 /// <code>
-/// Stream modelIn;<br/>
-/// <br/>
-/// ...<br/>
-/// <br/>
-/// TokenizerModel model = TokenizerModel(modelIn);<br/>
-/// <br/>
-/// ITokenizer tokenizer = new TokenizerME(model);<br/>
-/// <br/>
-/// String tokens[] = tokenizer.tokenize("A sentence to be tokenized.");
+/// Stream modelIn;
+///
+/// ...
+///
+/// TokenizerModel model = new TokenizerModel(modelIn);
+///
+/// ITokenizer tokenizer = new TokenizerME(model);
+///
+/// string[] tokens = tokenizer.Tokenize("A sentence to be tokenized.");
 /// </code>
 /// </summary>
 /// <remarks>

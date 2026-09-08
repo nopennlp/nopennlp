@@ -1,0 +1,138 @@
+# Builds the docfx documentation site and publishes it to GitHub Pages, per
+# issue #66.
+#
+# The API reference is generated from the compiled assemblies rather than from
+# the source text, so docfx has to build NOpenNLP.Tools and NOpenNLP.Cli first.
+# That is why this needs the .NET SDK and cannot run as a plain static-site job.
+#
+# It is separate from build-and-test.yml because the two answer different
+# questions and would otherwise block each other: a docs build that fails must
+# not gate a release, and the test matrix's nine legs have no reason to rerun
+# because a prose page changed.
+
+name: Docs
+
+# Markdown is not excluded here the way the other workflows exclude it: the
+# guides under websites/apidocs/docs and the package.md files are markdown, and
+# they are the site's content. The two path lists are identical and must stay
+# that way; they are written out twice rather than shared through a YAML anchor,
+# because anchors are not reliably supported across the Actions tooling that
+# reads these files.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'websites/**'
+      - '.github/workflows/docs.yml'
+      - '.config/dotnet-tools.json'
+      - 'build/verify-package-docs.ps1'
+      # The API reference is generated from these two projects, so any change to
+      # a doc comment, a public member or a package.md belongs on the site.
+      - 'src/NOpenNLP.Tools/**'
+      - 'src/NOpenNLP.Cli/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'websites/**'
+      - '.github/workflows/docs.yml'
+      - '.config/dotnet-tools.json'
+      - 'build/verify-package-docs.ps1'
+      - 'src/NOpenNLP.Tools/**'
+      - 'src/NOpenNLP.Cli/**'
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  DOTNET_NOLOGO: 1
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+
+# Lets the deploy job mint the token that actions/deploy-pages exchanges for a
+# Pages deployment. `contents: read` is spelled out because naming any
+# permission drops the rest to none.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Pages accepts one deployment at a time. Queue rather than cancel, so a run
+# that is midway through publishing finishes instead of leaving the site on a
+# half-written deployment.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build site
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          # The site documents the net10.0 build of both projects, so the other
+          # targets the library ships are not needed here.
+          dotnet-version: 10.0.x
+
+      # docfx is pinned in .config/dotnet-tools.json so CI and a local build
+      # render with the same version.
+      - name: Restore tools
+        run: dotnet tool restore
+
+      # Only the two projects the site documents. A solution-wide restore would
+      # pull NOpenNLP.Benchmarks' IKVM dependency, which unpacks to over 4 GB,
+      # to build something the docs never reference. Same reasoning as the
+      # per-project restores in build-and-test.yml.
+      - name: Restore projects
+        run: |
+          dotnet restore src/NOpenNLP.Tools/NOpenNLP.Tools.csproj
+          dotnet restore src/NOpenNLP.Cli/NOpenNLP.Cli.csproj
+
+      # The structured log is what the verify step reads. --warningsAsErrors is
+      # not used here because it cannot be scoped: docfx compiles the two
+      # projects on the way to generating metadata, so it would also fail on the
+      # C# warnings already present in the ported source, which are defects
+      # tracked against that source rather than against this site.
+      - name: Build docs
+        run: dotnet docfx websites/apidocs/docfx.json --log docfx.log --logLevel warning
+
+      # Two checks that the build itself will not make. docfx reports a
+      # cross-reference to a type that was renamed or never ported, and a link
+      # to a page that does not exist, as warnings and still exits 0; and it
+      # drops a package.md whose uid no longer names a namespace without saying
+      # anything at all, leaving the page to render with no summary. Without
+      # this step the namespace documentation ported from upstream could vanish
+      # entirely and the site would still publish.
+      - name: Verify the rendered site
+        shell: pwsh
+        run: build/verify-package-docs.ps1 -LogFile docfx.log
+
+      - name: Configure Pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+
+      - name: Upload artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: websites/apidocs/_site
+
+  # Split from the build so the pull request runs stop after rendering: a fork's
+  # token cannot deploy, and publishing an unmerged branch to the live site
+  # would be wrong even from a branch that could.
+  deploy:
+    name: Deploy to Pages
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

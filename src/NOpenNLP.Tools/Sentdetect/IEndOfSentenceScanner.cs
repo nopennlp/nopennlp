@@ -26,8 +26,8 @@ namespace NOpenNLP.Tools.Sentdetect;
 /// <summary>
 /// Scans Strings, StringBuffers, and char[] arrays for the offsets of
 /// sentence ending characters.
-///
-/// <para/>Implementations of this interface can use regular expressions,
+/// <para/>
+/// Implementations of this interface can use regular expressions,
 /// hand-coded DFAs, and other scanning techniques to locate end of
 /// sentence offsets.
 /// </summary>
@@ -65,7 +65,7 @@ public interface IEndOfSentenceScanner
     /// The receiver scans `cbuf' for sentence ending characters and
     /// returns their offsets.
     /// </summary>
-    /// <param name="cbuf">a <see cref="char[]"/> value</param>
+    /// <param name="cbuf">a <see langword="char"/> array value</param>
     /// <returns>a <see cref="List{T}"/> of <see cref="int"/>s.</returns>
     IList<int> GetPositions(char[] cbuf);
 }

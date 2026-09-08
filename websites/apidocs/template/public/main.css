@@ -1,0 +1,17 @@
+/* The default template gives the navbar logo no intrinsic size, so an SVG
+   without width/height attributes renders at its container's height and
+   overlaps the site name. The brand is a flexbox with no gap of its own, so the
+   icon also needs spacing to sit off the wordmark. */
+.navbar-brand > img {
+    height: 24px;
+    width: 24px;
+    margin-right: 0.5rem;
+}
+
+/* Keeps the long ported type names (SentenceDetectorFactory, NameFinderME) from
+   wrapping mid-identifier in the navigation and API tables. */
+.toc .nav > li > a,
+table td code {
+    word-break: normal;
+    overflow-wrap: anywhere;
+}
