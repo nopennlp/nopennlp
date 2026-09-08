@@ -19,6 +19,7 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -158,7 +159,7 @@ public class NaiveBayesSerializedCorrectnessTest
         }
         finally
         {
-            file.Delete();
+            TryDelete(file);
         }
     }
 
@@ -183,5 +184,32 @@ public class NaiveBayesSerializedCorrectnessTest
             labels[i] = model.GetOutcome(i);
         }
         return labels;
+    }
+
+    /// <summary>
+    /// Deletes a temporary file, ignoring failure.
+    /// </summary>
+    /// <remarks>
+    /// NOpenNLP: upstream calls File.delete(), which returns false rather than throwing
+    /// when the file cannot be removed. The model readers hold their stream open (they
+    /// are not disposable, here or upstream), so on Windows the file is still locked at
+    /// this point and File.Delete throws IOException, failing an otherwise passing test.
+    /// Swallowing the failure matches what upstream's delete() does. The file is in the
+    /// system temp directory, so the OS reclaims it.
+    /// </remarks>
+    private static void TryDelete(FileInfo file)
+    {
+        try
+        {
+            file.Delete();
+        }
+        catch (IOException)
+        {
+            // The reader still holds the file open; leave it to the OS.
+        }
+        catch (UnauthorizedAccessException)
+        {
+            // As above.
+        }
     }
 }
