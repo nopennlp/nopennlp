@@ -35,8 +35,11 @@ if (-not $TargetDirectory) {
     $TargetDirectory = Join-Path $repositoryRoot 'testdata' | Join-Path -ChildPath 'models-sf'
 }
 
-# Model name and expected SHA-256. The parser model is deliberately absent: it
-# is 34 MB, and the parser is not ported, so nothing would exercise it.
+# Model name and expected SHA-256. The parser model is deliberately absent: at
+# 34 MB it is larger than the other twelve combined, and every CI leg would pay
+# that download and cache cost. The parser itself is ported, so adding
+# 'en-parser-chunking.bin' here is all that stands between this set and parser
+# coverage in SourceForgeModelTest.
 $Models = [ordered] @{
     'en-sent.bin'             = 'bd6adffc85d66ccffd09ad1545ab798248193672c4da5c6669150e6a3b35e5b1'
     'en-token.bin'            = '2d0dd64ffb3d084382d7bdb65e7bd004c5001ba5503c36413d97c3e46321437c'

@@ -122,9 +122,8 @@ public class LanguageDetectorMETest
 
     public static LanguageDetectorSampleStream CreateSampleStream()
     {
-        // NOpenNLP: upstream uses opennlp.tools.formats.ResourceAsStreamFactory,
-        // which is not ported; the ResourceAsStreamFactory in Support does the
-        // same job over an embedded resource.
+        // NOpenNLP: ResourceAsStreamFactory reads an embedded resource here, where
+        // upstream reads one from the classpath.
         ResourceAsStreamFactory streamFactory = new("/opennlp/tools/doccat/DoccatSample.txt");
 
         PlainTextByLineStream lineStream = new(streamFactory, Encoding.UTF8);

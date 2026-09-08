@@ -35,10 +35,10 @@ public class ByteArraySerializerTest
 
         ByteArraySerializer serializer = new ByteArraySerializer();
 
-        // NOpenNLP: upstream also round-trips through serializer.serialize(...) and
-        // asserts the written bytes match. IArtifactSerializer.Serialize is not
-        // ported yet (it is commented out in the port), so only Create is covered
-        // here. Restore the serialize half of this test when Serialize is ported.
+        using var bOut = new MemoryStream();
+        serializer.Serialize((byte[])b.Clone(), bOut);
+
+        Assert.That(bOut.ToArray(), Is.EqualTo(b));
         Assert.That(serializer.Create(new MemoryStream(b)), Is.EqualTo(b));
     }
 }

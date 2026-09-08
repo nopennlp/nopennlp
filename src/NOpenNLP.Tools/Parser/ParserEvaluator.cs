@@ -49,8 +49,9 @@ public class ParserEvaluator : Evaluator<Parse>
     private readonly IParser parser;
 
     // NOpenNLP: upstream calls opennlp.tools.cmdline.parser.ParserTool.parseLine to
-    // turn a sentence into an unparsed Parse. The cmdline package is not ported, so
-    // that method's body is inlined below, along with the two patterns it uses.
+    // turn a sentence into an unparsed Parse. The port's counterpart lives in
+    // NOpenNLP.Cli, which depends on this project rather than the other way round,
+    // so that method's body is inlined below, along with the two patterns it uses.
     private static readonly Regex untokenizedParenPattern1 = new("([^ ])([({)}])", RegexOptions.Compiled);
     private static readonly Regex untokenizedParenPattern2 = new("([({)}])([^ ])", RegexOptions.Compiled);
 

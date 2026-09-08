@@ -29,9 +29,9 @@ namespace NOpenNLP.Tools.Namefind;
 /// </summary>
 /// <remarks>
 /// NOpenNLP: upstream wraps the sentence and spans in a NameSample and then calls
-/// Encode with nameSample.getNames() and nameSample.getSentence().length. NameSample
-/// is not ported yet, so the encode tests pass the same spans and token count to
-/// Encode directly, which is what NameSample forwarded anyway.
+/// Encode with nameSample.getNames() and nameSample.getSentence().length. The encode
+/// tests here pass the same spans and token count to Encode directly, which is what
+/// NameSample forwarded anyway.
 /// </remarks>
 public class BioCodecTest
 {

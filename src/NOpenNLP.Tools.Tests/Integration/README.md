@@ -40,16 +40,17 @@ clone builds and tests green without downloading anything.
 Adapted from upstream's `SourceForgeModelEval`, with two deliberate differences:
 
 - **No parser.** `en-parser-chunking.bin` is 34 MB — more than the other twelve
-  models combined — and the parser is not ported, so nothing would exercise it.
+  models combined — so every CI leg would pay that download and cache cost. The
+  parser itself is ported, so this is purely a size trade-off.
 - **No Leipzig corpus.** Upstream hashes each model's output over a 300K
-  sentence news corpus (63 MB) and compares the digest to a constant. That needs
-  the `ObjectStream` sample-stream stack, which is not ported. These tests check
-  the same models against fixed sentences with the expected analysis stated
-  inline instead. Weaker than a hash over 300K sentences, but it covers the same
-  code paths and a failure is readable rather than a changed digest.
+  sentence news corpus (63 MB) and compares the digest to a constant. These
+  tests check the same models against fixed sentences with the expected analysis
+  stated inline instead. Weaker than a hash over 300K sentences, but it covers
+  the same code paths and a failure is readable rather than a changed digest.
 
-Restoring either is worthwhile once the parser and the sample-stream stack are
-ported.
+Both are now blocked only on download size, not on missing functionality: the
+parser and the sample-stream stack are ported. Adding `en-parser-chunking.bin`
+to `build/download-test-models.ps1` is all the first one needs.
 
 ## CI
 

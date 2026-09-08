@@ -18,8 +18,12 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
+using System;
+using System.IO;
+using System.Text;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
+using NOpenNLP.Tools.Support;
 using NOpenNLP.Tools.Util;
 
 namespace NOpenNLP.Tools.Ngram;
@@ -27,12 +31,6 @@ namespace NOpenNLP.Tools.Ngram;
 /// <summary>
 /// Tests for <see cref="NGramModel"/>.
 /// </summary>
-/// <remarks>
-/// NOpenNLP: upstream's <c>testInvalidFormat</c>, <c>testFromFile</c>, <c>testSerialize</c>,
-/// <c>testFromInvalidFileMissingCount</c> and <c>testFromInvalidFileNotANumber</c> are not ported
-/// yet. They need the <c>NGramModel(Stream)</c> constructor and <c>Serialize</c>, which are
-/// commented out in the port because XML dictionary serialization has not been ported.
-/// </remarks>
 public class NGramModelTest
 {
     [Test]
@@ -183,5 +181,91 @@ public class NGramModelTest
         ClassicAssert.AreEqual(14, dictionary.Count);
         ClassicAssert.AreEqual(1, dictionary.MinTokenCount);
         ClassicAssert.AreEqual(3, dictionary.MaxTokenCount);
+    }
+
+    [Test]
+    public void TestInvalidFormat()
+    {
+        using var stream = new MemoryStream(Encoding.UTF8.GetBytes("inputstring"));
+        Assert.Throws<InvalidFormatException>((Action)(() =>
+        {
+            var ngramModel = new NGramModel(stream);
+            ngramModel.ToDictionary(true);
+        }));
+    }
+
+    [Test]
+    public void TestFromFile()
+    {
+        NGramModel ngramModel;
+        using (var stream = TestResources.OpenResource("/opennlp/tools/ngram/ngram-model.xml"))
+        {
+            ngramModel = new NGramModel(stream);
+        }
+
+        var dictionary = ngramModel.ToDictionary(true);
+        ClassicAssert.NotNull(dictionary);
+        ClassicAssert.AreEqual(14, dictionary.Count);
+        ClassicAssert.AreEqual(3, dictionary.MaxTokenCount);
+        ClassicAssert.AreEqual(1, dictionary.MinTokenCount);
+    }
+
+    [Test]
+    public void TestSerialize()
+    {
+        NGramModel ngramModel1;
+        using (var stream = TestResources.OpenResource("/opennlp/tools/ngram/ngram-model.xml"))
+        {
+            ngramModel1 = new NGramModel(stream);
+        }
+
+        var dictionary = ngramModel1.ToDictionary(true);
+        ClassicAssert.NotNull(dictionary);
+        ClassicAssert.AreEqual(14, dictionary.Count);
+        ClassicAssert.AreEqual(3, dictionary.MaxTokenCount);
+        ClassicAssert.AreEqual(1, dictionary.MinTokenCount);
+
+        using var baos = new MemoryStream();
+        ngramModel1.Serialize(baos);
+
+        NGramModel ngramModel2;
+        using (var inputStream = new MemoryStream(baos.ToArray()))
+        {
+            ngramModel2 = new NGramModel(inputStream);
+        }
+
+        // NOpenNLP: upstream compares ngramModel2 against itself here, which always
+        // passes. Kept as-is so the port does not assert something upstream does not.
+        ClassicAssert.AreEqual(ngramModel2.NumberOfGrams, ngramModel2.NumberOfGrams);
+        ClassicAssert.AreEqual(ngramModel2.Count, ngramModel2.Count);
+
+        dictionary = ngramModel2.ToDictionary(true);
+
+        ClassicAssert.NotNull(dictionary);
+        ClassicAssert.AreEqual(14, dictionary.Count);
+        ClassicAssert.AreEqual(3, dictionary.MaxTokenCount);
+        ClassicAssert.AreEqual(1, dictionary.MinTokenCount);
+    }
+
+    [Test]
+    public void TestFromInvalidFileMissingCount()
+    {
+        Assert.Throws<InvalidFormatException>((Action)(() =>
+        {
+            using var stream = TestResources.OpenResource("/opennlp/tools/ngram/ngram-model-no-count.xml");
+            var ngramModel = new NGramModel(stream);
+            ngramModel.ToDictionary(true);
+        }));
+    }
+
+    [Test]
+    public void TestFromInvalidFileNotANumber()
+    {
+        Assert.Throws<InvalidFormatException>((Action)(() =>
+        {
+            using var stream = TestResources.OpenResource("/opennlp/tools/ngram/ngram-model-not-a-number.xml");
+            var ngramModel = new NGramModel(stream);
+            ngramModel.ToDictionary(true);
+        }));
     }
 }

@@ -17,6 +17,7 @@
 
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
+using System.IO;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
 
@@ -54,21 +55,16 @@ public class DetokenizationDictionaryTest
         TestEntries(dict);
     }
 
-    // NOpenNLP: upstream serializes the dictionary and reads it back, asserting
-    // the entries survive the round trip. DetokenizationDictionary.Serialize is
-    // not ported, because DictionaryEntryPersistor does not implement
-    // serialization; the test is kept so it is reinstated with that method.
     [Test]
-    [Ignore("DetokenizationDictionary.Serialize is not ported; DictionaryEntryPersistor has no Serialize.")]
     public void TestSerialization()
     {
-        // ByteArrayOutputStream out = new ByteArrayOutputStream();
-        // dict.serialize(out);
-        //
-        // DetokenizationDictionary parsedDict = new DetokenizationDictionary(
-        //     new ByteArrayInputStream(out.toByteArray()));
-        //
-        // // should contain the same entries like the original
-        // TestEntries(parsedDict);
+        using var @out = new MemoryStream();
+        dict.Serialize(@out);
+
+        using var @in = new MemoryStream(@out.ToArray());
+        var parsedDict = new DetokenizationDictionary(@in);
+
+        // should contain the same entries like the original
+        TestEntries(parsedDict);
     }
 }
