@@ -7,12 +7,22 @@ on:
       - '**/*.md'
       - 'LICENSE'
       - 'NOTICE'
+      # The documentation site. Its own Docs workflow builds it, and nothing
+      # here reads it, so a prose or styling change has no reason to rerun the
+      # nine test legs. The API reference is generated from the library source,
+      # which is outside this directory and so still triggers a full run.
+      - 'websites/**'
   pull_request:
     branches: [main]
     paths-ignore:
       - '**/*.md'
       - 'LICENSE'
       - 'NOTICE'
+      # The documentation site. Its own Docs workflow builds it, and nothing
+      # here reads it, so a prose or styling change has no reason to rerun the
+      # nine test legs. The API reference is generated from the library source,
+      # which is outside this directory and so still triggers a full run.
+      - 'websites/**'
   workflow_dispatch:
 
 env:
