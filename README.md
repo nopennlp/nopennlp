@@ -106,6 +106,37 @@ and converters take their format as the first argument
 The name follows Apache OpenNLP's own post-1.9.4 layout, which moved these tools
 into an `opennlp-cli` module.
 
+### Docker
+
+The `Dockerfile` at the repository root builds an image with the tools already
+installed, for trying them without a .NET SDK or a tool install:
+
+```
+docker build -t nopennlp .
+docker run --rm -it nopennlp
+```
+
+That drops into a shell in `/data` with `nopennlp` on the PATH. A single command
+works too:
+
+```
+echo "Dr. Smith went to Washington." | docker run --rm -i nopennlp nopennlp SimpleTokenizer
+```
+
+The image carries no models. Mount a directory holding them onto `/data`, which
+is where the container starts:
+
+```
+docker run --rm -it -v "$PWD/models:/data" nopennlp
+```
+
+Unlike upstream's Dockerfile, which takes a release tarball as a build argument,
+this one builds `NOpenNLP.Cli` from the source next to it and installs the
+package it just packed. Someone reaching for a container wants to try the
+working tree, and pulling from NuGet would run a release instead of whatever
+change prompted the build. The build needs `.git`, since Nerdbank.GitVersioning
+derives the version from the commit height.
+
 ## Building and testing
 
 ```
