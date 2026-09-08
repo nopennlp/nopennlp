@@ -105,7 +105,10 @@ public abstract class BaseModel : IArtifactProvider
         finishedLoadingArtifacts = true;
         if (factory != null)
         {
-            SetManifestProperty(FACTORY_NAME, factory.GetType().FullName ?? throw new InvalidOperationException("Factory class must have a full name"));
+            // NOpenNLP: the Java class name rather than the .NET one, so a model
+            // written here loads in Apache OpenNLP as well as in the port.
+            // ExtensionLoader resolves either spelling on the way back in.
+            SetManifestProperty(FACTORY_NAME, ExtensionLoader.ToJavaClassName(factory.GetType()));
             artifactMap.PutAll(factory.CreateArtifactMap());
 
             // new manifest entries
@@ -556,12 +559,12 @@ public abstract class BaseModel : IArtifactProvider
             object artifact = entry.Value;
             if (artifact is ISerializableArtifact serializableArtifact)
             {
-                // NOpenNLP: upstream records the Java class name here. The port already
-                // writes .NET type names for the factory entry, and ExtensionLoader
-                // resolves either spelling on the way back in, so Type.FullName is used
-                // for consistency with how the factory name is written.
-                string artifactSerializerName = serializableArtifact.ArtifactSerializerClass.FullName
-                    ?? throw new InvalidOperationException("Serializer class must have a full name");
+                // NOpenNLP: the Java class name, as upstream records here and as the
+                // factory entry is written above, so a model written here loads in
+                // Apache OpenNLP as well as in the port. ExtensionLoader resolves
+                // either spelling on the way back in.
+                string artifactSerializerName =
+                    ExtensionLoader.ToJavaClassName(serializableArtifact.ArtifactSerializerClass);
 
                 SetManifestProperty(SERIALIZER_CLASS_NAME_PREFIX + name, artifactSerializerName);
             }
@@ -585,8 +588,10 @@ public abstract class BaseModel : IArtifactProvider
             // If model is serialize-able always use the provided serializer
             if (artifact is ISerializableArtifact serializableArtifact)
             {
-                string artifactSerializerName = serializableArtifact.ArtifactSerializerClass.FullName
-                    ?? throw new InvalidOperationException("Serializer class must have a full name");
+                // The same name recorded in the manifest above, so the serializer
+                // that writes an artifact is the one the manifest says will read it.
+                string artifactSerializerName =
+                    ExtensionLoader.ToJavaClassName(serializableArtifact.ArtifactSerializerClass);
 
                 serializer = ExtensionLoader.InstantiateExtension<IArtifactSerializer>(artifactSerializerName);
             }

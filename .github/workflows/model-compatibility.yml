@@ -1,0 +1,188 @@
+# Verifies two-way model compatibility between NOpenNLP and Apache OpenNLP 1.9.5
+# running on a real JVM, per issue #46. Each runtime trains the same five models
+# from the same corpora, and the other loads them and must produce the same
+# inference output. See src/java/model-compat/README.md.
+#
+# This is separate from build-and-test.yml because it needs a JDK and a Maven
+# repository that the main build does not otherwise require, and because it is
+# scoped to the paths that can actually affect model serialization rather than
+# running on every change.
+
+name: Model Compatibility
+
+# The two path lists are identical and must stay that way. They are written out
+# twice rather than shared through a YAML anchor, because anchors are not
+# reliably supported across the Actions tooling that reads these files.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      # The harness itself.
+      - 'src/java/model-compat/**'
+      - 'src/NOpenNLP.Tools.Tests/Compat/**'
+      # Production code whose on-disk format the harness validates.
+      - 'src/NOpenNLP.Tools/Util/Model/**'
+      - 'src/NOpenNLP.Tools/Util/Ext/**'
+      - 'src/NOpenNLP.Tools/Ml/**'
+      - 'src/NOpenNLP.Tools/Chunker/**'
+      - 'src/NOpenNLP.Tools/Namefind/**'
+      - 'src/NOpenNLP.Tools/Postag/**'
+      - 'src/NOpenNLP.Tools/Sentdetect/**'
+      - 'src/NOpenNLP.Tools/Tokenize/**'
+      # Build inputs that can change what gets written.
+      - 'src/NOpenNLP.Tools/NOpenNLP.Tools.csproj'
+      - 'src/NOpenNLP.Tools.Tests/NOpenNLP.Tools.Tests.csproj'
+      - '.github/workflows/model-compatibility.yml'
+      - '!**/*.md'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/java/model-compat/**'
+      - 'src/NOpenNLP.Tools.Tests/Compat/**'
+      - 'src/NOpenNLP.Tools/Util/Model/**'
+      - 'src/NOpenNLP.Tools/Util/Ext/**'
+      - 'src/NOpenNLP.Tools/Ml/**'
+      - 'src/NOpenNLP.Tools/Chunker/**'
+      - 'src/NOpenNLP.Tools/Namefind/**'
+      - 'src/NOpenNLP.Tools/Postag/**'
+      - 'src/NOpenNLP.Tools/Sentdetect/**'
+      - 'src/NOpenNLP.Tools/Tokenize/**'
+      - 'src/NOpenNLP.Tools/NOpenNLP.Tools.csproj'
+      - 'src/NOpenNLP.Tools.Tests/NOpenNLP.Tools.Tests.csproj'
+      - '.github/workflows/model-compatibility.yml'
+      - '!**/*.md'
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  DOTNET_NOLOGO: 1
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+  NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+  compat_dir: ./src/java/model-compat
+  test_project: ./src/NOpenNLP.Tools.Tests/NOpenNLP.Tools.Tests.csproj
+
+jobs:
+  compatibility:
+    name: ${{ matrix.os }} / ${{ matrix.framework }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # Both operating systems, since the harness writes and reads files that
+        # cross between runtimes and a line-ending or encoding difference would
+        # show up here first. The two frameworks cover both library builds the
+        # test project can be pointed at: net10.0 against net10.0, and net9.0
+        # against netstandard2.0, which is the leg most likely to break.
+        os: [ubuntu-latest, windows-latest]
+        framework: [net10.0, net9.0]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Nerdbank.GitVersioning derives the version from commit height, so it
+          # needs the full history rather than the default shallow clone.
+          fetch-depth: 0
+
+      - name: Setup Java
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: |
+            9.0.x
+            10.0.x
+
+      - name: Cache NuGet packages
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.NUGET_PACKAGES }}
+          # A 'compat-' prefixed key so this cache lives in its own namespace.
+          # This job restores only the library and test projects, a smaller
+          # closure than the main build's; sharing that key would let whichever
+          # job ran first populate a partial cache the other then hit.
+          key: compat-nuget-${{ runner.os }}-${{ hashFiles('src/NOpenNLP.Tools/*.csproj', 'src/NOpenNLP.Tools.Tests/*.csproj') }}
+          restore-keys: compat-nuget-${{ runner.os }}-
+
+      - name: Cache Maven packages
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.m2/repository
+          key: maven-${{ runner.os }}-${{ hashFiles('src/java/model-compat/pom.xml') }}
+          restore-keys: maven-${{ runner.os }}-
+
+      - name: Restore
+        run: |
+          dotnet restore src/NOpenNLP.Tools/NOpenNLP.Tools.csproj
+          dotnet restore ${{ env.test_project }} -p:TestFrameworks=true
+
+      - name: Build
+        run: >
+          dotnet build ${{ env.test_project }}
+          --configuration Release
+          --framework ${{ matrix.framework }}
+          --no-restore
+          -p:TestFrameworks=true
+
+      # -----------------------------------------------------------------
+      # Direction 1: NOpenNLP trains, Apache OpenNLP reads
+      # -----------------------------------------------------------------
+      # dotnet test exits 0 when a --filter matches nothing and when the only
+      # matching test is skipped, either of which would hide a broken pipeline.
+      # Requiring "Passed: 1" is what makes these steps meaningful.
+      - name: NOpenNLP trains and writes models
+        shell: bash
+        run: |
+          set -o pipefail
+          out=$(dotnet test "${{ env.test_project }}" \
+            --configuration Release --framework "${{ matrix.framework }}" \
+            --no-build --no-restore -p:TestFrameworks=true \
+            --logger "console;verbosity=normal" \
+            --filter "FullyQualifiedName~JavaCompatibilityTest.TestWriteModelsForJava" 2>&1)
+          echo "$out"
+          echo "$out" | grep -Eq 'Passed:[[:space:]]*1\b' \
+            || { echo "::error::TestWriteModelsForJava did not run or did not pass"; exit 1; }
+        env:
+          NOPENNLP_COMPAT_WRITE_DIR: ${{ github.workspace }}/src/java/model-compat/work/dotnet
+
+      - name: Apache OpenNLP reads NOpenNLP models
+        shell: bash
+        working-directory: ${{ env.compat_dir }}
+        run: mvn -q -B test "-Dnopennlp.model.dir=${{ github.workspace }}/src/java/model-compat/work/dotnet"
+
+      # -----------------------------------------------------------------
+      # Direction 2: Apache OpenNLP trains, NOpenNLP reads
+      # -----------------------------------------------------------------
+      - name: Apache OpenNLP trains and writes models
+        shell: bash
+        working-directory: ${{ env.compat_dir }}
+        run: mvn -q -B compile exec:java "-Dexec.args=${{ github.workspace }}/src/java/model-compat/work/java"
+
+      - name: NOpenNLP reads Apache OpenNLP models
+        shell: bash
+        run: |
+          set -o pipefail
+          out=$(dotnet test "${{ env.test_project }}" \
+            --configuration Release --framework "${{ matrix.framework }}" \
+            --no-build --no-restore -p:TestFrameworks=true \
+            --logger "console;verbosity=normal" \
+            --filter "FullyQualifiedName~JavaCompatibilityTest.TestReadJavaTrainedModels" 2>&1)
+          echo "$out"
+          echo "$out" | grep -Eq 'Passed:[[:space:]]*1\b' \
+            || { echo "::error::TestReadJavaTrainedModels did not run or did not pass (skipped as inconclusive?)"; exit 1; }
+        env:
+          NOPENNLP_COMPAT_READ_DIR: ${{ github.workspace }}/src/java/model-compat/work/java
+
+      # The models and the recorded results are what a failure is diagnosed
+      # from: the results files diff directly against each other.
+      - name: Upload generated models and results
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ !cancelled() }}
+        with:
+          name: compat-models-${{ matrix.os }}-${{ matrix.framework }}
+          path: src/java/model-compat/work
+          if-no-files-found: warn

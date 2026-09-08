@@ -275,6 +275,66 @@ public class ExtensionLoader
     }
 
     /// <summary>
+    /// NOpenNLP: Renders a ported type under the Java class name that Apache
+    /// OpenNLP writes for it, so a model serialized here can be loaded by Apache
+    /// OpenNLP as well as by this port.
+    /// <para/>
+    /// This is the inverse of the translation <see cref="ResolveType"/> applies on
+    /// the way in: the namespace segments are lowercased and a nested type's
+    /// <c>'+'</c> separator becomes Java's <c>'$'</c>, turning
+    /// <c>NOpenNLP.Tools.Sentdetect.SentenceDetectorFactory</c> back into
+    /// <c>opennlp.tools.sentdetect.SentenceDetectorFactory</c>. Only the final
+    /// segment, the type name itself, keeps its casing, which is what makes the
+    /// round trip exact for every ported type: the port renames a Java package by
+    /// title-casing it and nothing else.
+    /// <para/>
+    /// Only types defined in this assembly are translated, since those are exactly
+    /// the ones with an upstream counterpart to name. A custom factory or
+    /// serializer supplied by a caller is returned unchanged: it has no Java class
+    /// to point at, and inventing one would be actively harmful, because the
+    /// invented name no longer resolves to the caller's own type on the way back in
+    /// and <see cref="ResolveType"/>'s simple-name fallback could bind it to an
+    /// unrelated same-named type. Testing the assembly rather than the namespace
+    /// matters: a caller's extension may perfectly well sit in a
+    /// <c>NOpenNLP.</c>-prefixed namespace of its own.
+    /// </summary>
+    /// <param name="type">the type to name</param>
+    /// <returns>the Java class name for a ported type, otherwise its .NET full name</returns>
+    /// <exception cref="InvalidOperationException">if the type has no full name,
+    ///     which is the case only for a generic parameter or similar construct that
+    ///     could never be an extension.</exception>
+    internal static string ToJavaClassName(Type type)
+    {
+        string fullName = type.FullName
+            ?? throw new InvalidOperationException($"Type {type.Name} has no full name");
+
+        if (type.Assembly != typeof(ExtensionLoader).Assembly
+            || !fullName.StartsWith("NOpenNLP.", StringComparison.Ordinal))
+        {
+            return fullName;
+        }
+
+        string[] parts = fullName.Replace('+', '$').Split('.');
+
+        // Every segment but the last is a namespace segment, which Java writes in
+        // lower case. The last is the type name and keeps its casing; for a nested
+        // type it is the whole "Outer$Inner" tail, whose parts are all type names.
+        for (int i = 0; i < parts.Length - 1; i++)
+        {
+            if (parts[i].Length > 0)
+            {
+                parts[i] = char.ToLowerInvariant(parts[i][0]) + parts[i][1..];
+            }
+        }
+
+        // "NOpenNLP" lowercases to "nOpenNLP" by the rule above; upstream's root
+        // package is "opennlp".
+        parts[0] = "opennlp";
+
+        return string.Join(".", parts);
+    }
+
+    /// <summary>
     /// NOpenNLP: this assembly first, then the rest of the loaded assemblies, so a
     /// factory supplied by the calling application is reachable the way it would be
     /// on the Java classpath. Framework assemblies are skipped: they cannot define

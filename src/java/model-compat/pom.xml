@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+ Copyright 2026 NOpenNLP Contributors
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.nopennlp</groupId>
+  <artifactId>model-compat</artifactId>
+  <version>1.9.5</version>
+  <packaging>jar</packaging>
+
+  <name>NOpenNLP model compatibility harness</name>
+  <description>
+    Trains and reads Apache OpenNLP models on a real JVM to verify two-way model
+    compatibility with NOpenNLP. See README.md and issue #46.
+  </description>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <!--
+      Must match the version the C# port targets (see CLAUDE.md). Reading a
+      different OpenNLP release would prove compatibility with something the
+      port does not claim to be compatible with.
+    -->
+    <opennlp.version>1.9.5</opennlp.version>
+
+    <!--
+      OpenNLP 1.9.5 is Java 8 bytecode, but -source/-target 8 is deprecated in
+      current JDKs and slated for removal. 11 is the oldest release modern javac
+      supports without a deprecation warning, and it runs the 1.9.5 classes
+      unchanged. Nothing here uses a language feature past 8 anyway. This
+      matches src/java/opennlp-benchmarks.
+    -->
+    <maven.compiler.release>11</maven.compiler.release>
+
+    <!--
+      Where the JUnit test reads NOpenNLP-written models from. Empty by default
+      so the test fails with a useful message rather than reading some stale
+      path; overridden on the command line with -Dnopennlp.model.dir=...
+    -->
+    <nopennlp.model.dir></nopennlp.model.dir>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.opennlp</groupId>
+      <artifactId>opennlp-tools</artifactId>
+      <version>${opennlp.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.13.2</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.2.5</version>
+        <configuration>
+          <!-- Pass the NOpenNLP model directory through to the JUnit test. -->
+          <systemPropertyVariables>
+            <nopennlp.model.dir>${nopennlp.model.dir}</nopennlp.model.dir>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <!-- Used to run TrainModels.main(): ./mvnw compile exec:java -->
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.2.0</version>
+        <configuration>
+          <mainClass>org.nopennlp.compat.TrainModels</mainClass>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

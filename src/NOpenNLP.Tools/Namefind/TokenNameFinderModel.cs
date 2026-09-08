@@ -21,6 +21,7 @@
 using NOpenNLP.Tools.Ml;
 using NOpenNLP.Tools.Ml.Model;
 using NOpenNLP.Tools.Util;
+using NOpenNLP.Tools.Util.Ext;
 using NOpenNLP.Tools.Util.Model;
 using NOpenNLP.Tools.Util.Featuregen;
 using System;
@@ -130,7 +131,11 @@ public class TokenNameFinderModel : BaseModel
         ISequenceCodec<string> seqCodec)
     {
         Properties manifest = (Properties)artifactMap[MANIFEST_ENTRY];
-        manifest.Put(SEQUENCE_CODEC_CLASS_NAME_PARAMETER, seqCodec.GetType().FullName);
+        // NOpenNLP: the Java class name rather than the .NET one, so a model written
+        // here loads in Apache OpenNLP as well as in the port, matching how the
+        // factory and serializer names are written. ExtensionLoader resolves either
+        // spelling on the way back in.
+        manifest.Put(SEQUENCE_CODEC_CLASS_NAME_PARAMETER, ExtensionLoader.ToJavaClassName(seqCodec.GetType()));
         artifactMap.Put(MAXENT_MODEL_ENTRY_NAME, nameFinderModel);
         if (generatorDescriptor is { Length: > 0 })
             artifactMap.Put(GENERATOR_DESCRIPTOR_ENTRY_NAME, generatorDescriptor);

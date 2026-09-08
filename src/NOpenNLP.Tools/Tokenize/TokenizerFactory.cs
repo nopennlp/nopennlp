@@ -105,7 +105,7 @@ public class TokenizerFactory : BaseToolFactory
     public override IDictionary<string, string> CreateManifestEntries()
     {
         var manifestEntries = base.CreateManifestEntries();
-        manifestEntries.Put(USE_ALPHA_NUMERIC_OPTIMIZATION, UseAlphaNumericOptmization.ToString());
+        manifestEntries.Put(USE_ALPHA_NUMERIC_OPTIMIZATION, UseAlphaNumericOptmization.ToJavaString());
 
         // alphanumeric pattern is optional
         if (AlphaNumericPattern is { } alpha)

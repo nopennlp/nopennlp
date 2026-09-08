@@ -1,0 +1,21 @@
+The training corpora in this folder are copied verbatim from the Apache OpenNLP
+test resources (opennlp-tools/src/test/resources), which are licensed under the
+Apache License 2.0:
+
+    Apache OpenNLP
+    Copyright 2017 The Apache Software Foundation
+
+    sentences.train   <- opennlp/tools/sentdetect/Sentences.txt
+    token.train       <- opennlp/tools/tokenize/token.train
+    namefinder.train  <- opennlp/tools/namefind/AnnotatedSentences.txt
+    postagger.train   <- opennlp/tools/postag/AnnotatedSentences.txt
+    chunker.train     <- opennlp/tools/chunker/test.txt
+
+They live here, rather than being read from either project's test resources,
+because both runtimes have to train on byte-identical input for the resulting
+models to be comparable. The .NET test project embeds its own copies of the same
+upstream files for the ported unit tests; those are loaded from the assembly
+manifest and are not interchangeable with a path on disk, so the harness reads
+these instead. Keep them byte-identical to the upstream originals: a change to
+either copy that is not made to the other silently makes the two sides train on
+different data.
