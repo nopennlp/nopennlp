@@ -34,8 +34,8 @@ namespace NOpenNLP.Tools.Util;
 /// on the runtime or do not compile, so there is no partial-support case to tolerate.
 /// <para/>
 /// What the 1.9.5 options were there to guarantee does carry over, so this file asserts the
-/// guarantees rather than the mechanism: no external DTD, schema, or entity is ever fetched,
-/// and an entity bomb is rejected rather than expanded.
+/// guarantees rather than the mechanism: a DOCTYPE is refused outright, as upstream's
+/// <c>disallow-doctype-decl</c> does, and with it every entity vector a DOCTYPE would carry.
 /// </summary>
 [NOpenNLPSpecific]
 public class XmlUtilTest
@@ -47,6 +47,7 @@ public class XmlUtilTest
     /// An external general entity pointing at a local file must not be resolved. This is the
     /// classic XXE read primitive, and the counterpart of
     /// <c>external-general-entities</c>/<c>ACCESS_EXTERNAL_DTD</c> being switched off upstream.
+    /// The DOCTYPE that would declare it is refused first, so the entity never exists.
     /// </summary>
     [Test]
     public void TestExternalGeneralEntityIsNotResolved()
@@ -56,11 +57,8 @@ public class XmlUtilTest
 
         try
         {
-            var doc = Parse(
-                $"<!DOCTYPE r [ <!ENTITY x SYSTEM \"file://{secret}\"> ]><r>&x;</r>");
-
-            ClassicAssert.IsFalse(doc.DocumentElement!.InnerText.Contains("TOP-SECRET"),
-                "an external entity must never be resolved");
+            Assert.Throws<XmlException>((Action)(() => Parse(
+                $"<!DOCTYPE r [ <!ENTITY x SYSTEM \"file://{secret}\"> ]><r>&x;</r>")));
         }
         finally
         {
@@ -70,8 +68,7 @@ public class XmlUtilTest
 
     /// <summary>
     /// An external DTD subset must not be loaded, the counterpart of
-    /// <c>nonvalidating/load-external-dtd</c> being switched off upstream. The document itself
-    /// still parses; only the external reference is ignored.
+    /// <c>nonvalidating/load-external-dtd</c> being switched off upstream.
     /// </summary>
     [Test]
     public void TestExternalDtdIsNotLoaded()
@@ -81,9 +78,8 @@ public class XmlUtilTest
 
         try
         {
-            var doc = Parse($"<!DOCTYPE r SYSTEM \"file://{secret}\"><r>hi</r>");
-
-            ClassicAssert.AreEqual("hi", doc.DocumentElement!.InnerText);
+            Assert.Throws<XmlException>((Action)(() =>
+                Parse($"<!DOCTYPE r SYSTEM \"file://{secret}\"><r>hi</r>")));
         }
         finally
         {
@@ -104,10 +100,8 @@ public class XmlUtilTest
 
         try
         {
-            var doc = Parse(
-                $"<!DOCTYPE r [ <!ENTITY % p SYSTEM \"file://{secret}\"> %p; ]><r>hi</r>");
-
-            ClassicAssert.AreEqual("hi", doc.DocumentElement!.InnerText);
+            Assert.Throws<XmlException>((Action)(() => Parse(
+                $"<!DOCTYPE r [ <!ENTITY % p SYSTEM \"file://{secret}\"> %p; ]><r>hi</r>")));
         }
         finally
         {
@@ -116,10 +110,8 @@ public class XmlUtilTest
     }
 
     /// <summary>
-    /// A nested-entity bomb must be rejected rather than expanded. Parsing an internal DTD
-    /// subset is deliberate here -- upstream's FEATURE_SECURE_PROCESSING does the same, and a
-    /// French Treebank corpus depends on it -- so the amplification it permits has to be
-    /// bounded instead.
+    /// A nested-entity bomb must be rejected rather than expanded. Prohibiting the DOCTYPE
+    /// forecloses this outright, since the declarations the bomb needs can never be made.
     /// </summary>
     [Test]
     public void TestBillionLaughsIsRejected()
@@ -145,15 +137,28 @@ public class XmlUtilTest
     }
 
     /// <summary>
-    /// The hardening must not cost the behaviour the corpus readers rely on: an internal DTD
-    /// subset still parses and the entities it declares still expand.
+    /// An internal DTD subset is refused too, matching upstream's <c>disallow-doctype-decl</c>.
+    /// The port previously parsed one, to keep 1.9.4's <c>FEATURE_SECURE_PROCESSING</c>
+    /// behaviour; 1.9.5 turned the feature on for both its parsers, so no document upstream
+    /// accepts is rejected by this being stricter.
     /// </summary>
     [Test]
-    public void TestInternalEntityStillExpands()
+    public void TestInternalDtdSubsetIsRefused()
     {
-        var doc = Parse("<!DOCTYPE r [ <!ENTITY oe \"oe\" > ]><r>c&oe;ur</r>");
+        Assert.Throws<XmlException>((Action)(() =>
+            Parse("<!DOCTYPE r [ <!ENTITY oe \"oe\" > ]><r>c&oe;ur</r>")));
+    }
 
-        ClassicAssert.AreEqual("coeur", doc.DocumentElement!.InnerText);
+    /// <summary>
+    /// A document without a DOCTYPE -- which is every corpus in the test suite, and every XML
+    /// file in upstream's own test resources -- parses normally.
+    /// </summary>
+    [Test]
+    public void TestDocumentWithoutDoctypeParses()
+    {
+        var doc = Parse("<sentences><s>c\u0153ur</s></sentences>");
+
+        ClassicAssert.AreEqual("c\u0153ur", doc.DocumentElement!.InnerText);
     }
 
     /// <summary>
@@ -168,7 +173,7 @@ public class XmlUtilTest
         // NOpenNLP: XmlReaderSettings.XmlResolver is write-only, so the null resolver cannot
         // be read back and asserted. The behaviour it produces is covered by the parse tests
         // above, which drive CreateDocument through these same settings.
-        ClassicAssert.AreEqual(DtdProcessing.Parse, settings.DtdProcessing);
+        ClassicAssert.AreEqual(DtdProcessing.Prohibit, settings.DtdProcessing);
         ClassicAssert.Greater(settings.MaxCharactersFromEntities, 0,
             "entity expansion must stay bounded");
         ClassicAssert.Greater(settings.MaxCharactersInDocument, 0,

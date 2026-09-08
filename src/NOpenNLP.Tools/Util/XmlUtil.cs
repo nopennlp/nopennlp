@@ -34,7 +34,7 @@ public class XmlUtil
     // return the JAXP factory objects a caller then parses with. .NET has no
     // DocumentBuilder equivalent -- XmlDocument parses directly -- so the secure
     // settings and the parse are combined here. See CreateSecureReaderSettings for
-    // why the DTD is parsed rather than prohibited.
+    // how its settings map onto the JAXP features upstream sets.
     public static XmlDocument CreateDocument(Stream input)
     {
         var settings = CreateSecureReaderSettings();
@@ -60,38 +60,37 @@ public class XmlUtil
     /// <summary>
     /// Creates <see cref="XmlReaderSettings"/> which process XML securely.
     /// </summary>
-    /// <returns>settings that resolve no external entities</returns>
-    // NOpenNLP: Java sets FEATURE_SECURE_PROCESSING, which blocks EXTERNAL entity
-    // resolution but still parses an internal DTD subset and expands the entities it
-    // declares. DtdProcessing.Prohibit is stricter than that, not equivalent: it throws
-    // on any DOCTYPE at all, so a corpus upstream reads happily -- a French Treebank
-    // distribution declaring <!ENTITY oe "oe">, for instance -- failed here with an
-    // XmlException. DtdProcessing.Parse restores upstream's behaviour, and the null
-    // XmlResolver is what actually supplies the security property, refusing to fetch
-    // any external DTD or entity the document points at.
+    /// <returns>settings that reject a DOCTYPE and resolve no external entities</returns>
+    // NOpenNLP: this mirrors what 1.9.5's createDocumentBuilder() and createSaxParser()
+    // both configure. Their settings map onto .NET as follows:
+    //
+    //   disallow-doctype-decl=true             -> DtdProcessing.Prohibit
+    //   ACCESS_EXTERNAL_DTD/SCHEMA=""          -> XmlResolver = null
+    //   external-general-entities=false        -> XmlResolver = null
+    //   external-parameter-entities=false      -> XmlResolver = null
+    //   nonvalidating/load-external-dtd=false  -> XmlResolver = null
+    //   setExpandEntityReferences(false)       -> implied by Prohibit
+    //   setXIncludeAware(false)                -> no counterpart needed
+    //
+    // The five external-resource flags collapse into one knob here: a null XmlResolver is
+    // what refuses to fetch any external DTD, schema, or entity. XInclude needs nothing --
+    // the BCL XmlReader does not implement it, so there is nothing to switch off.
+    //
+    // Prohibit is what upstream's disallow-doctype-decl does, so no document upstream 1.9.5
+    // accepts is rejected here. It also removes the billion-laughs amplification entirely,
+    // since there is no internal subset left to expand.
     public static XmlReaderSettings CreateSecureReaderSettings()
         => new XmlReaderSettings
         {
-            DtdProcessing = DtdProcessing.Parse,
+            DtdProcessing = DtdProcessing.Prohibit,
             XmlResolver = null,
 
-            // NOpenNLP: 1.9.5 added a second layer of hardening on top of
-            // FEATURE_SECURE_PROCESSING -- ACCESS_EXTERNAL_DTD and ACCESS_EXTERNAL_SCHEMA set
-            // to "", external-general-entities and external-parameter-entities off,
-            // load-external-dtd off, and XInclude off. In .NET the first five are all one
-            // knob: a null XmlResolver, already set above, is what refuses to fetch an
-            // external DTD, schema, or entity. XInclude has no counterpart at all -- the BCL
-            // XmlReader does not implement XInclude, so there is nothing to switch off.
-            //
-            // What .NET does have and Java's flags do not cover is the billion-laughs
-            // amplification an internal DTD subset still permits once DtdProcessing.Parse
-            // allows one. MaxCharactersFromEntities caps the characters an entity expansion
-            // may produce and already defaults to this value, so it is restated rather than
-            // introduced -- pinning it here keeps the guarantee from resting on a framework
-            // default that a future runtime could change. MaxCharactersInDocument defaults to
-            // 0, meaning unbounded, and is the one genuinely new limit: it bounds the parsed
-            // document itself, so a small compressed model artifact cannot inflate without
-            // limit. Both are far above any real corpus; the largest here are a few MB.
+            // NOpenNLP: belt and braces behind Prohibit, which already forecloses entity
+            // expansion. MaxCharactersFromEntities is restated at its own default rather than
+            // introduced, so the guarantee does not rest on a framework default alone;
+            // MaxCharactersInDocument defaults to 0, meaning unbounded, and bounds the parsed
+            // document so a small compressed artifact cannot inflate without limit. Both sit
+            // far above any real corpus; the largest here are a few MB.
             MaxCharactersFromEntities = 10_000_000,
             MaxCharactersInDocument = 512L * 1024 * 1024,
         };

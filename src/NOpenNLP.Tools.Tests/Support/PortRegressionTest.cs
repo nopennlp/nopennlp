@@ -859,27 +859,21 @@ public class PortRegressionTest
     }
 
     /// <summary>
-    /// <see cref="XmlUtil.CreateDocument"/> must parse an internal DTD subset and expand
-    /// the entities it declares, and must keep whitespace-only text nodes.
+    /// <see cref="XmlUtil.CreateDocument"/> must keep whitespace-only text nodes.
     /// </summary>
     /// <remarks>
-    /// Java sets FEATURE_SECURE_PROCESSING, which blocks external entities but still
-    /// parses an internal subset; DtdProcessing.Prohibit was stricter and threw on any
-    /// DOCTYPE. Java's DocumentBuilder also keeps every text node, while XmlDocument
-    /// drops whitespace-only ones unless PreserveWhitespace is set -- which both shifted
-    /// child indices and lost a character from the reconstructed text.
+    /// Java's DocumentBuilder keeps every text node, while XmlDocument drops whitespace-only
+    /// ones unless PreserveWhitespace is set -- which both shifted child indices and lost a
+    /// character from the reconstructed text.
+    /// <para/>
+    /// This test also used to assert that an internal DTD subset parsed and its entities
+    /// expanded, matching 1.9.4's FEATURE_SECURE_PROCESSING. 1.9.5 sets
+    /// disallow-doctype-decl on both of its parsers, so a DOCTYPE is now refused here as it
+    /// is upstream; <see cref="XmlUtilTest"/> covers that.
     /// </remarks>
     [Test]
-    public void TestXmlUtilMatchesJavaDtdAndWhitespaceHandling()
+    public void TestXmlUtilMatchesJavaWhitespaceHandling()
     {
-        const string withDtd =
-            "<!DOCTYPE sentences [ <!ENTITY oe \"oe\" > ]><sentences><s>c&oe;ur</s></sentences>";
-
-        var parsed = XmlUtil.CreateDocument(
-            new MemoryStream(Encoding.UTF8.GetBytes(withDtd)));
-
-        ClassicAssert.AreEqual("coeur", parsed.DocumentElement!.InnerText);
-
         const string withSpace =
             "<sentences><s><token>A</token> <token>B</token></s></sentences>";
 
@@ -925,11 +919,12 @@ public class PortRegressionTest
     /// called <c>XmlDocument.Load(Stream)</c> instead and inherited its XXE safety from the
     /// framework's default null <c>XmlResolver</c>. That default holds on every runtime targeted
     /// here, so the port was not vulnerable -- this test pins the guarantee to the library's own
-    /// code rather than to a framework default, and would have caught the regression on a
-    /// runtime whose default differed. Nothing in 1.9.5 covers this, and no upstream test does.
+    /// code rather than to a framework default. Going through <c>XmlUtil</c> also means a
+    /// descriptor carrying a DOCTYPE is refused outright, as upstream's
+    /// <c>disallow-doctype-decl</c> refuses it. No upstream test covers this.
     /// </remarks>
     [Test]
-    public void TestGeneratorFactoryDoesNotResolveExternalEntities()
+    public void TestGeneratorFactoryRefusesDescriptorWithDoctype()
     {
         string secret = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
         File.WriteAllText(secret, "TOP-SECRET");
@@ -941,24 +936,33 @@ public class PortRegressionTest
                 "<generators><generator class=\"opennlp.tools.util.featuregen." +
                 "TokenFeatureGeneratorFactory\">&xxe;</generator></generators>";
 
-            // The descriptor is well formed, so the parse itself succeeds; what matters is
-            // that the external entity expanded to nothing rather than to the file's contents.
-            // GeneratorFactory does not hand back the document, so the descriptor is parsed a
-            // second time through the same helper to inspect what the entity became.
-            var mappings = GeneratorFactory.ExtractArtifactSerializerMappings(
-                new MemoryStream(Encoding.UTF8.GetBytes(descriptor)));
-            ClassicAssert.IsNotNull(mappings);
+            var ex = Assert.Throws<InvalidFormatException>((Action)(() =>
+                GeneratorFactory.ExtractArtifactSerializerMappings(
+                    new MemoryStream(Encoding.UTF8.GetBytes(descriptor)))));
 
-            var document = XmlUtil.CreateDocument(
-                new MemoryStream(Encoding.UTF8.GetBytes(descriptor)));
-
-            ClassicAssert.IsFalse(document.DocumentElement!.InnerText.Contains("TOP-SECRET"),
-                "the external entity must not have been resolved");
+            ClassicAssert.IsInstanceOf<System.Xml.XmlException>(ex!.InnerException);
         }
         finally
         {
             File.Delete(secret);
         }
+    }
+
+    /// <summary>
+    /// The descriptors that models actually carry have no DOCTYPE, so hardening the parser
+    /// must not have cost the ordinary path.
+    /// </summary>
+    [Test]
+    public void TestGeneratorFactoryStillReadsOrdinaryDescriptor()
+    {
+        const string descriptor =
+            "<generators><generator class=\"opennlp.tools.util.featuregen." +
+            "TokenFeatureGeneratorFactory\"/></generators>";
+
+        var mappings = GeneratorFactory.ExtractArtifactSerializerMappings(
+            new MemoryStream(Encoding.UTF8.GetBytes(descriptor)));
+
+        ClassicAssert.IsNotNull(mappings);
     }
 
     /// <summary>

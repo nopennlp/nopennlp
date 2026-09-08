@@ -61,11 +61,9 @@ public static class DictionaryEntryPersistor // NOpenNLP-specific: made static
 
         // NOpenNLP: 1.9.5 replaced the raw XMLReaderFactory.createXMLReader() call here with
         // XmlUtil.createSaxParser(), so that this reader picks up the same hardening as every
-        // other parser in the library. The settings are built from XmlUtil for that reason,
-        // then tightened: a dictionary file has no legitimate DOCTYPE, so Prohibit rejects one
-        // outright rather than parsing an internal subset the way the corpus readers must.
+        // other parser in the library. XmlUtil already prohibits a DOCTYPE, as upstream's
+        // parser does; only the two reader-loop settings below are specific to this caller.
         var settings = XmlUtil.CreateSecureReaderSettings();
-        settings.DtdProcessing = DtdProcessing.Prohibit;
         settings.IgnoreWhitespace = false;
         settings.CloseInput = false;
 
