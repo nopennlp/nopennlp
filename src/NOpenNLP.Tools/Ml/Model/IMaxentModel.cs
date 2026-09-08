@@ -55,42 +55,41 @@ public interface IMaxentModel
 
     /// <summary>
     /// Simple function to return the outcome associated with the index
-    /// containing the highest probability in the double[].
+    /// containing the highest probability in the array.
     /// </summary>
-    /// <param name="outcomes">A <c>double[]</c> as returned by the
-    ///            <c>eval(String[] context)</c>
+    /// <param name="outcomes">A <see langword="double"/> array as returned by the
+    ///            <see cref="Eval(string[])"/>
     ///            method.</param>
-    /// <returns>the String name of the best outcome</returns>
+    /// <returns>the name of the best outcome</returns>
     string GetBestOutcome(double[] outcomes);
 
     /// <summary>
     /// Return a string matching all the outcome names with all the
-    /// probabilities produced by the <c>eval(String[]
-    /// context)</c> method.
+    /// probabilities produced by the <see cref="Eval(string[])"/> method.
     /// </summary>
-    /// <param name="outcomes">A <c>double[]</c> as returned by the
-    ///            <c>eval(String[] context)</c>
+    /// <param name="outcomes">A <see langword="double"/> array as returned by the
+    ///            <see cref="Eval(string[])"/>
     ///            method.</param>
     /// <returns>   String containing outcome names paired with the normalized
-    ///            probability (contained in the <c>double[] ocs</c>)
+    ///            probability (contained in the <paramref name="outcomes"/>)
     ///            for each one.</returns>
     // TODO: This should be removed, can't be used anyway without format spec
     string GetAllOutcomes(double[] outcomes);
 
     /// <summary>
-    /// Gets the String name of the outcome associated with the index
+    /// Gets the string name of the outcome associated with the index
     /// i.
     /// </summary>
     /// <param name="i">the index for which the name of the associated outcome is
     ///          desired.</param>
-    /// <returns>the String name of the outcome</returns>
+    /// <returns>the string name of the outcome</returns>
     string GetOutcome(int i);
 
     /// <summary>
-    /// Gets the index associated with the String name of the given
+    /// Gets the index associated with the string name of the given
     /// outcome.
     /// </summary>
-    /// <param name="outcome">the String name of the outcome for which the
+    /// <param name="outcome">the string name of the outcome for which the
     ///          index is desired</param>
     /// <returns>the index if the given outcome label exists for this
     ///     model, -1 if it does not.</returns>

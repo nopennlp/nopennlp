@@ -156,9 +156,9 @@ public abstract class AbstractModel : IMaxentModel
     }
 
     /// <summary>
-    /// Gets the index associated with the String name of the given outcome.
+    /// Gets the index associated with the string name of the given outcome.
     /// </summary>
-    /// <param name="outcome">the String name of the outcome for which the
+    /// <param name="outcome">the string name of the outcome for which the
     ///          index is desired</param>
     /// <returns>the index if the given outcome label exists for this
     ///     model, -1 if it does not.</returns>
