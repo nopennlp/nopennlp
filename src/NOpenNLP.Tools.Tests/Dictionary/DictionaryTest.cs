@@ -28,11 +28,6 @@ namespace NOpenNLP.Tools.Dictionary;
 /// <summary>
 /// Tests for the <see cref="Dictionary"/> class.
 /// </summary>
-/// <remarks>
-/// NOpenNLP: upstream's <c>testSerialization</c> is not ported yet. It needs
-/// <c>Dictionary.Serialize</c> and the <c>Dictionary(Stream)</c> constructor, which are
-/// commented out in the port because XML dictionary serialization has not been ported.
-/// </remarks>
 public class DictionaryTest
 {
     /// <summary>
@@ -81,6 +76,31 @@ public class DictionaryTest
         ClassicAssert.IsTrue(dict.Contains(entry1));
         ClassicAssert.IsTrue(!dict.Contains(entry1u));
         ClassicAssert.IsTrue(!dict.Contains(entry2));
+    }
+
+    /// <summary>
+    /// Tests serialization of a <see cref="Dictionary"/> and reading it back.
+    /// </summary>
+    [Test]
+    public void TestSerialization()
+    {
+        var reference = GetCaseInsensitive();
+
+        const string a1 = "a1";
+        const string a2 = "a2";
+        const string a3 = "a3";
+        const string a5 = "a5";
+
+        reference.Put(new StringList(a1, a2, a3, a5));
+
+        using var @out = new MemoryStream();
+
+        reference.Serialize(@out);
+
+        using var @in = new MemoryStream(@out.ToArray());
+        var recreated = new Dictionary(@in);
+
+        ClassicAssert.IsTrue(reference.Equals(recreated));
     }
 
     /// <summary>

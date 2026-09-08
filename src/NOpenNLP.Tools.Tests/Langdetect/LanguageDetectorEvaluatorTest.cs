@@ -83,7 +83,8 @@ public class LanguageDetectorEvaluatorTest
     /// NOpenNLP: upstream uses
     /// <c>opennlp.tools.cmdline.langdetect.LanguageDetectorEvaluationErrorListener</c>,
     /// which writes a tab-separated report to an <c>OutputStream</c>. The <c>cmdline</c>
-    /// package is not ported, so this test-local stand-in reproduces the same
+    /// package lives in NOpenNLP.Cli, which this project does not reference, so this
+    /// test-local stand-in reproduces the same
     /// format, which the assertion above checks verbatim.
     /// </summary>
     private sealed class LanguageDetectorEvaluationErrorListener

@@ -69,7 +69,8 @@ public class LemmatizerEvaluatorTest
     /// <summary>
     /// NOpenNLP: upstream uses <c>opennlp.tools.cmdline.lemmatizer.LemmaEvaluationErrorListener</c>,
     /// which writes a formatted error report to an <c>OutputStream</c>. The <c>cmdline</c>
-    /// package is not ported, so this test-local stand-in takes its place. It records
+    /// package lives in NOpenNLP.Cli, which this project does not reference, so this
+    /// test-local stand-in takes its place. It records
     /// misclassifications and writes nothing for correct ones, which is all the
     /// assertion above -- a non-empty buffer once something is misclassified --
     /// actually observes about the upstream listener.

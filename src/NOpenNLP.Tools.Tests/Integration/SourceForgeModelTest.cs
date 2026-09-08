@@ -35,14 +35,15 @@ namespace NOpenNLP.Tools.Integration;
 /// <para/>
 /// Upstream hashes the output of each model over the 300K sentence Leipzig news
 /// corpus and compares the digest to a constant. That needs a 63 MB corpus
-/// download and the ObjectStream sample-stream stack, neither of which is
-/// available here, so this checks the same models against fixed sentences whose
+/// download, so this checks the same models against fixed sentences whose
 /// expected analysis is stated inline. It is a weaker guarantee than upstream's
 /// hash over 300K sentences, but it exercises the same code paths, and the
 /// expected values are readable enough to tell a real regression from a change
 /// in behaviour.
 /// <para/>
-/// The parser model is excluded: it is 34 MB and the parser is not ported.
+/// The parser model is excluded only for its size: 34 MB, more than the other
+/// twelve combined. The parser is ported, so this is a download-cost trade-off
+/// rather than a coverage gap that cannot be closed.
 /// <para/>
 /// The models are fetched by build/download-test-models.ps1. Without them these
 /// tests report inconclusive rather than failing; see <see cref="TestData"/>.

@@ -17,28 +17,54 @@
 
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
+
 using System.IO;
-using J2N;
+using NOpenNLP.Tools.Util.Model;
 using NUnit.Framework;
 
-namespace NOpenNLP.Tools.Util.Model;
+namespace NOpenNLP.Tools.Postag;
 
-public class ByteArraySerializerTest
+public class POSModelTest
 {
     [Test]
-    public void TestSerialization()
+    public void TestPOSModelSerializationMaxent()
     {
-        // NOpenNLP: J2N's Randomizer reproduces java.util.Random, so seed 23
-        // yields the same bytes the upstream test exercises.
-        byte[] b = new byte[1024];
-        new Randomizer(23).NextBytes(b);
+        var posModel = POSTaggerMETest.TrainPOSModel(ModelType.MAXENT);
 
-        ByteArraySerializer serializer = new ByteArraySerializer();
+        var @out = new MemoryStream();
 
-        using var bOut = new MemoryStream();
-        serializer.Serialize((byte[])b.Clone(), bOut);
+        try
+        {
+            posModel.Serialize(@out);
+        }
+        finally
+        {
+            @out.Dispose();
+        }
 
-        Assert.That(bOut.ToArray(), Is.EqualTo(b));
-        Assert.That(serializer.Create(new MemoryStream(b)), Is.EqualTo(b));
+        var recreatedPosModel = new POSModel(new MemoryStream(@out.ToArray()));
+
+        // TODO: add equals to pos model
+    }
+
+    [Test]
+    public void TestPOSModelSerializationPerceptron()
+    {
+        var posModel = POSTaggerMETest.TrainPOSModel(ModelType.PERCEPTRON);
+
+        var @out = new MemoryStream();
+
+        try
+        {
+            posModel.Serialize(@out);
+        }
+        finally
+        {
+            @out.Dispose();
+        }
+
+        var recreatedPosModel = new POSModel(new MemoryStream(@out.ToArray()));
+
+        // TODO: add equals to pos model
     }
 }

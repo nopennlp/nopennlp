@@ -66,9 +66,8 @@ public class ParserTestUtil
             // counterpart and Encoding.UTF8 cannot throw it -- upstream's own comment
             // says "Should never happen" -- so there is nothing to catch here.
 
-            // NOpenNLP: upstream uses opennlp.tools.formats.ResourceAsStreamFactory,
-            // which is not ported; the ResourceAsStreamFactory in Support does the
-            // same job over an embedded resource.
+            // NOpenNLP: ResourceAsStreamFactory reads an embedded resource here, where
+            // upstream reads one from the classpath.
             IInputStreamFactory @in = new ResourceAsStreamFactory("/opennlp/tools/parser/parser.train");
             samples = new ParseSampleStream(new PlainTextByLineStream(@in, Encoding.UTF8));
         }

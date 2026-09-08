@@ -24,6 +24,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using J2N.Globalization;
+using NOpenNLP.Tools.Ml;
 using NOpenNLP.Tools.Support;
 using JCG = J2N.Collections.Generic;
 
@@ -455,10 +456,7 @@ public class TrainingParameters
     {
         TrainingParameters mlParams = new();
         mlParams.Put(ALGORITHM_PARAM, "MAXENT");
-        // NOpenNLP: upstream references EventTrainer.EVENT_VALUE, which is part of the
-        // trainer API and is not ported yet. The literal is inlined here and should be
-        // replaced with the constant once opennlp.tools.ml.EventTrainer is ported.
-        mlParams.Put(TRAINER_TYPE_PARAM, "Event");
+        mlParams.Put(TRAINER_TYPE_PARAM, EventTrainer.EVENT_VALUE);
         mlParams.Put(ITERATIONS_PARAM, 100);
         mlParams.Put(CUTOFF_PARAM, 5);
 

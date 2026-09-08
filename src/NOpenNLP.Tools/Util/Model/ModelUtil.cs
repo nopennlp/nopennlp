@@ -19,6 +19,7 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using NOpenNLP.Tools.Support;
+using NOpenNLP.Tools.Ml.Maxent;
 using NOpenNLP.Tools.Ml.Model;
 using System;
 using System.Collections.Generic;
@@ -129,10 +130,7 @@ public static class ModelUtil // NOpenNLP: made static
     public static TrainingParameters CreateDefaultTrainingParameters()
     {
         TrainingParameters mlParams = new TrainingParameters();
-        // NOpenNLP: upstream uses GISTrainer.MAXENT_VALUE, which is part of the
-        // trainer API and is not ported yet; the literal it is defined as is
-        // inlined here, matching TrainingParameters.DefaultParams().
-        mlParams.Put(TrainingParameters.ALGORITHM_PARAM, "MAXENT");
+        mlParams.Put(TrainingParameters.ALGORITHM_PARAM, GISTrainer.MAXENT_VALUE);
         mlParams.Put(TrainingParameters.ITERATIONS_PARAM, 100);
         mlParams.Put(TrainingParameters.CUTOFF_PARAM, 5);
         return mlParams;

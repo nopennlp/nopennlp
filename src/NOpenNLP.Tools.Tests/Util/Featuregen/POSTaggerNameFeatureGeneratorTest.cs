@@ -17,28 +17,29 @@
 
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using System.IO;
-using J2N;
+
+using System;
+using System.Collections.Generic;
+using NOpenNLP.Tools.Postag;
+using NOpenNLP.Tools.Util.Model;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 
-namespace NOpenNLP.Tools.Util.Model;
+namespace NOpenNLP.Tools.Util.Featuregen;
 
-public class ByteArraySerializerTest
+public class POSTaggerNameFeatureGeneratorTest
 {
     [Test]
-    public void TestSerialization()
+    public void TestFeatureGeneration()
     {
-        // NOpenNLP: J2N's Randomizer reproduces java.util.Random, so seed 23
-        // yields the same bytes the upstream test exercises.
-        byte[] b = new byte[1024];
-        new Randomizer(23).NextBytes(b);
+        var fg = new POSTaggerNameFeatureGenerator(POSTaggerMETest.TrainPOSModel(ModelType.MAXENT));
 
-        ByteArraySerializer serializer = new ByteArraySerializer();
-
-        using var bOut = new MemoryStream();
-        serializer.Serialize((byte[])b.Clone(), bOut);
-
-        Assert.That(bOut.ToArray(), Is.EqualTo(b));
-        Assert.That(serializer.Create(new MemoryStream(b)), Is.EqualTo(b));
+        string[] tokens = ["Hi", "Mike", ",", "it", "'s", "Stefanie", "Schmidt", "."];
+        for (int i = 0; i < tokens.Length; i++)
+        {
+            List<string> feats = [];
+            fg.CreateFeatures(feats, tokens, i, null!);
+            ClassicAssert.IsTrue(feats[0].StartsWith("pos=", StringComparison.Ordinal));
+        }
     }
 }

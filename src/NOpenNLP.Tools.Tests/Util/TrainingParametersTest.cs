@@ -20,6 +20,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using NOpenNLP.Tools.Ml;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
 
@@ -54,10 +55,7 @@ public class TrainingParametersTest
 
         ClassicAssert.AreEqual(4, tr.GetSettings().Count);
         ClassicAssert.AreEqual("MAXENT", tr.Algorithm());
-        // NOpenNLP: upstream asserts against EventTrainer.EVENT_VALUE, which is part
-        // of the trainer API and is not ported yet; the literal is inlined here to
-        // match the value DefaultParams() puts in place.
-        ClassicAssert.AreEqual("Event",
+        ClassicAssert.AreEqual(EventTrainer.EVENT_VALUE,
             tr.GetStringParameter(TrainingParameters.TRAINER_TYPE_PARAM,
                 "v11"));  // use different defaults
         ClassicAssert.AreEqual(100,

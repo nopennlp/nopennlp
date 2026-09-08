@@ -58,7 +58,8 @@ public class POSEvaluatorTest
     /// <summary>
     /// NOpenNLP: upstream uses <c>opennlp.tools.cmdline.postag.POSEvaluationErrorListener</c>,
     /// which writes a formatted error report to an <c>OutputStream</c>. The <c>cmdline</c>
-    /// package is not ported, so this test-local stand-in takes its place. It records
+    /// package lives in NOpenNLP.Cli, which this project does not reference, so this
+    /// test-local stand-in takes its place. It records
     /// misclassifications and writes nothing for correct ones, which is all the two
     /// assertions above -- an empty buffer on a match, a non-empty one on a mismatch --
     /// actually observe about the upstream listener.

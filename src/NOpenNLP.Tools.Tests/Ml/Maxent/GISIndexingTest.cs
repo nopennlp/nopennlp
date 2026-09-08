@@ -155,11 +155,21 @@ public class GISIndexingTest
         ClassicAssert.AreEqual(2, di.OutcomeLabels.Length);
         ClassicAssert.AreEqual(6, di.PredLabels.Length);
 
-        // NOpenNLP: upstream continues here by switching the algorithm to
-        // QNTrainer.MAXENT_QN_VALUE and the indexer to TwoPass, asserting that a
-        // QNTrainer and a TwoPassDataIndexer come back. The quasi-newton trainer
-        // is not ported yet, so that half of the test is left out; it belongs
-        // with the QNTrainer port.
+        // change the parameters and try again...
+
+        eventStream.Reset();
+
+        parameters.Put(TrainingParameters.ALGORITHM_PARAM,
+            global::NOpenNLP.Tools.Ml.Maxent.Quasinewton.QNTrainer.MAXENT_QN_VALUE);
+        parameters.Put(AbstractEventTrainer.DATA_INDEXER_PARAM,
+            AbstractEventTrainer.DATA_INDEXER_TWO_PASS_VALUE);
+        parameters.Put(AbstractEventTrainer.CUTOFF_PARAM, 2);
+
+        trainer = TrainerFactory.GetEventTrainer(parameters, new Dictionary<string, string>());
+        ClassicAssert.AreEqual("NOpenNLP.Tools.Ml.Maxent.Quasinewton.QNTrainer", trainer.GetType().FullName);
+        aeTrainer = (AbstractEventTrainer)trainer;
+        di = aeTrainer.GetDataIndexer(eventStream);
+        ClassicAssert.AreEqual("NOpenNLP.Tools.Ml.Model.TwoPassDataIndexer", di.GetType().FullName);
 
         eventStream.Dispose();
     }

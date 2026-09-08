@@ -17,28 +17,28 @@
 
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
-using System.IO;
-using J2N;
+
+
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 
-namespace NOpenNLP.Tools.Util.Model;
+namespace NOpenNLP.Tools.Formats;
 
-public class ByteArraySerializerTest
+/// <summary>
+/// Tests for the <see cref="TerminateToolException"/> class.
+/// </summary>
+/// <remarks>
+/// NOpenNLP: upstream keeps this test in opennlp.tools.cmdline, beside the class it
+/// covers. It sits here instead because the port moved TerminateToolException into
+/// NOpenNLP.Tools.Formats, so that the format factories that throw it do not drag a
+/// dependency on the CLI project into the library. See the notes on the ported class.
+/// </remarks>
+public class TerminateToolExceptionTest
 {
     [Test]
-    public void TestSerialization()
+    public void TestCreation()
     {
-        // NOpenNLP: J2N's Randomizer reproduces java.util.Random, so seed 23
-        // yields the same bytes the upstream test exercises.
-        byte[] b = new byte[1024];
-        new Randomizer(23).NextBytes(b);
-
-        ByteArraySerializer serializer = new ByteArraySerializer();
-
-        using var bOut = new MemoryStream();
-        serializer.Serialize((byte[])b.Clone(), bOut);
-
-        Assert.That(bOut.ToArray(), Is.EqualTo(b));
-        Assert.That(serializer.Create(new MemoryStream(b)), Is.EqualTo(b));
+        TerminateToolException e = new(-500);
+        ClassicAssert.AreEqual(-500, e.Code);
     }
 }

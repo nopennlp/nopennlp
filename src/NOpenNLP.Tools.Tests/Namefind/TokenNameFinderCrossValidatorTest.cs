@@ -82,8 +82,9 @@ public class TokenNameFinderCrossValidatorTest
 
         var @out = new StringBuilder();
         // NOpenNLP: upstream uses opennlp.tools.cmdline.namefind.NameEvaluationErrorListener;
-        // the cmdline package is not ported, so the test-local stand-in in
-        // TokenNameFinderEvaluatorTest is reused here. The assertion below only
+        // the cmdline package lives in NOpenNLP.Cli, which this project does not
+        // reference, so the test-local stand-in in TokenNameFinderEvaluatorTest is
+        // reused here. The assertion below only
         // observes that the listener wrote something for a misclassification.
         var listener = new CrossValidatorErrorListener(@out);
 

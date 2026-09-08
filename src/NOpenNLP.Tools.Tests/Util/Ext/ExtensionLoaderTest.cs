@@ -18,33 +18,35 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
-using System.Text;
-using NOpenNLP.Tools.Formats;
-using NOpenNLP.Tools.Util;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
 
-namespace NOpenNLP.Tools.Parser;
+namespace NOpenNLP.Tools.Util.Ext;
 
-public class ParseSampleStreamTest
+public class ExtensionLoaderTest
 {
-    private static IObjectStream<Parse?> CreateParseSampleStream()
+    // define an interface here
+    // NOpenNLP: interfaces are prefixed with I per .NET convention.
+    internal interface ITestStringGenerator
     {
-        // NOpenNLP: ResourceAsStreamFactory reads an embedded resource here, where
-        // upstream reads one from the classpath.
-        IInputStreamFactory @in = new ResourceAsStreamFactory("/opennlp/tools/parser/test.parse");
+        string GenerateTestString();
+    }
 
-        return new ParseSampleStream(new PlainTextByLineStream(@in, Encoding.UTF8));
+    internal class TestStringGeneratorImpl : ITestStringGenerator
+    {
+        public string GenerateTestString() => "test";
     }
 
     [Test]
-    public void TestReadTestStream()
+    public void TestLoadingStringGenerator()
     {
-        var parseStream = CreateParseSampleStream();
-        ClassicAssert.NotNull(parseStream.Read());
-        ClassicAssert.NotNull(parseStream.Read());
-        ClassicAssert.NotNull(parseStream.Read());
-        ClassicAssert.NotNull(parseStream.Read());
-        ClassicAssert.IsNull(parseStream.Read());
+        // NOpenNLP: upstream passes the interface as a Class<T> argument, which becomes
+        // the type parameter here. It names the implementation with
+        // TestStringGeneratorImpl.class.getName(); the port's ResolveType goes through
+        // Type.GetType, so the assembly-qualified name is what it can resolve for a type
+        // outside the NOpenNLP.Tools assembly.
+        var g = ExtensionLoader.InstantiateExtension<ITestStringGenerator>(
+            typeof(TestStringGeneratorImpl).AssemblyQualifiedName!);
+        ClassicAssert.AreEqual("test", g!.GenerateTestString());
     }
 }

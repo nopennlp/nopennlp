@@ -34,8 +34,8 @@ namespace NOpenNLP.Tools.Support;
 /// <remarks>
 /// Authored for NOpenNLP; not part of the Apache OpenNLP source. Upstream covers
 /// the write path only indirectly, through training tests that persist a model and
-/// load it again. Those depend on the trainers, which are not ported yet, so the
-/// write path restored here would otherwise ship with no coverage at all.
+/// load it again. This exercises it directly, so a serializer regression surfaces
+/// here rather than as a puzzling failure inside an unrelated training test.
 /// </remarks>
 [NOpenNLPSpecific]
 public class ArtifactRoundTripTest
@@ -465,9 +465,9 @@ public class ArtifactRoundTripTest
     }
 
     /// <summary>
-    /// A BaseModel subclass holding only artifacts whose serializers are ported.
-    /// The generic "model" artifact is deliberately absent: it serializes through
-    /// GenericModelWriter, which is part of the ml.model write path and not ported yet.
+    /// A BaseModel subclass holding the artifacts this test round-trips. The
+    /// generic "model" artifact is deliberately absent: it serializes through
+    /// GenericModelWriter, which the model-specific tests already cover.
     /// </summary>
     private sealed class RoundTripModel : BaseModel
     {

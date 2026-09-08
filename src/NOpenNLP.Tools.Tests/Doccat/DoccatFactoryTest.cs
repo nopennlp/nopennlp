@@ -34,9 +34,8 @@ public class DoccatFactoryTest
 {
     private static IObjectStream<DocumentSample?> CreateSampleStream()
     {
-        // NOpenNLP: upstream uses opennlp.tools.formats.ResourceAsStreamFactory,
-        // which is not ported; the ResourceAsStreamFactory in Support does the
-        // same job over an embedded resource.
+        // NOpenNLP: ResourceAsStreamFactory reads an embedded resource here, where
+        // upstream reads one from the classpath.
         IInputStreamFactory isf = new ResourceAsStreamFactory("/opennlp/tools/doccat/DoccatSample.txt");
 
         return new DocumentSampleStream(new PlainTextByLineStream(isf, Encoding.UTF8));
