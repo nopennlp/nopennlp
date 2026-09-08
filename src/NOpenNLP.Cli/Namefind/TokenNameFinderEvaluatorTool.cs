@@ -46,23 +46,22 @@ public sealed class TokenNameFinderEvaluatorTool : AbstractEvaluatorTool<NameSam
     };
 
     /// <inheritdoc/>
-    protected override IEnumerable<Option> GetToolOptions() =>
-        [model, misclassified, detailedF, reportOutputFile, nameTypes];
+    protected override IEnumerable<Option> GetToolOptions()
+        => [model, misclassified, detailedF, reportOutputFile, nameTypes];
 
     /// <inheritdoc/>
-    public override string ShortDescription =>
-        "Measures the performance of the NameFinder model with the reference data";
+    public override string ShortDescription
+        => "Measures the performance of the NameFinder model with the reference data";
 
     /// <inheritdoc/>
-    public override string GetHelp(string format) =>
-        "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format)
+    public override string GetHelp(string format)
+        => "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format)
             + OptionUsage.CreateUsage(GetToolOptions(), GetStreamFactory(format).Parameters);
 
     /// <inheritdoc/>
     protected override void Run(ParseResult parseResult)
     {
-        TokenNameFinderModel model =
-            new TokenNameFinderModelLoader().Load(parseResult.GetValueByName(this.model)!);
+        var model = new TokenNameFinderModelLoader().Load(parseResult.GetValueByName(this.model)!);
 
         var listeners = new JCG.List<ITokenNameFinderEvaluationMonitor>();
         if (ToolParams.JavaBooleanValue(parseResult.GetValueByName(misclassified)))
@@ -78,7 +77,7 @@ public sealed class TokenNameFinderEvaluatorTool : AbstractEvaluatorTool<NameSam
         }
 
         TokenNameFinderFineGrainedReportListener? reportListener = null;
-        FileInfo? reportFile = parseResult.GetValueByName(reportOutputFile);
+        var reportFile = parseResult.GetValueByName(reportOutputFile);
         Stream? reportOutputStream = null;
 
         if (reportFile != null)
@@ -87,15 +86,12 @@ public sealed class TokenNameFinderEvaluatorTool : AbstractEvaluatorTool<NameSam
             try
             {
                 reportOutputStream = reportFile.Create();
-                reportListener = new TokenNameFinderFineGrainedReportListener(
-                    model.SequenceCodec, reportOutputStream);
+                reportListener = new TokenNameFinderFineGrainedReportListener(model.SequenceCodec, reportOutputStream);
                 listeners.Add(reportListener);
             }
             catch (Exception e) when (e is IOException or UnauthorizedAccessException)
             {
-                throw new TerminateToolException(-1,
-                    "IO error while creating Name Finder fine-grained report file: "
-                        + e.Message);
+                throw new TerminateToolException(-1, $"IO error while creating Name Finder fine-grained report file: {e.Message}");
             }
         }
 
@@ -122,8 +118,7 @@ public sealed class TokenNameFinderEvaluatorTool : AbstractEvaluatorTool<NameSam
         catch (IOException e)
         {
             Console.Error.WriteLine("failed");
-            throw new TerminateToolException(-1, "IO error while reading test data: "
-                + e.Message, e);
+            throw new TerminateToolException(-1, $"IO error while reading test data: {e.Message}", e);
         }
 
         // sorry that this can fail

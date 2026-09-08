@@ -38,8 +38,7 @@ public abstract class DetailedFMeasureListener<T> : IEvaluationMonitor<T>
 {
     private int samples = 0;
     private readonly Stats generalStats = new Stats(); // NOpenNLP: made readonly
-    private readonly JCG.Dictionary<string, Stats> statsForOutcome =
-        new JCG.Dictionary<string, Stats>(); // NOpenNLP: made readonly
+    private readonly JCG.Dictionary<string, Stats> statsForOutcome = new(); // NOpenNLP: made readonly
 
     protected abstract Span[] AsSpanArray(T sample);
 
@@ -47,8 +46,8 @@ public abstract class DetailedFMeasureListener<T> : IEvaluationMonitor<T>
     {
         samples++;
         // add all true positives!
-        Span[] spans = AsSpanArray(reference);
-        foreach (Span span in spans)
+        var spans = AsSpanArray(reference);
+        foreach (var span in spans)
         {
             AddTruePositive(span.Type);
         }
@@ -57,13 +56,13 @@ public abstract class DetailedFMeasureListener<T> : IEvaluationMonitor<T>
     public virtual void Misclassified(T reference, T prediction)
     {
         samples++;
-        Span[] references = AsSpanArray(reference);
-        Span[] predictions = AsSpanArray(prediction);
+        var references = AsSpanArray(reference);
+        var predictions = AsSpanArray(prediction);
 
         var refSet = new JCG.HashSet<Span>(references);
         var predSet = new JCG.HashSet<Span>(predictions);
 
-        foreach (Span @ref in refSet)
+        foreach (var @ref in refSet)
         {
             if (predSet.Contains(@ref))
             {
@@ -75,7 +74,7 @@ public abstract class DetailedFMeasureListener<T> : IEvaluationMonitor<T>
             }
         }
 
-        foreach (Span pred in predSet)
+        foreach (var pred in predSet)
         {
             if (!refSet.Contains(pred))
             {
@@ -86,7 +85,7 @@ public abstract class DetailedFMeasureListener<T> : IEvaluationMonitor<T>
 
     private void AddTruePositive(string? type)
     {
-        Stats s = InitStatsForOutcomeAndGet(type);
+        var s = InitStatsForOutcomeAndGet(type);
         s.IncrementTruePositive();
         s.IncrementTarget();
 
@@ -96,14 +95,14 @@ public abstract class DetailedFMeasureListener<T> : IEvaluationMonitor<T>
 
     private void AddFalsePositive(string? type)
     {
-        Stats s = InitStatsForOutcomeAndGet(type);
+        var s = InitStatsForOutcomeAndGet(type);
         s.IncrementFalsePositive();
         generalStats.IncrementFalsePositive();
     }
 
     private void AddFalseNegative(string? type)
     {
-        Stats s = InitStatsForOutcomeAndGet(type);
+        var s = InitStatsForOutcomeAndGet(type);
         s.IncrementTarget();
         generalStats.IncrementTarget();
     }
@@ -153,7 +152,7 @@ public abstract class DetailedFMeasureListener<T> : IEvaluationMonitor<T>
 
         foreach (string type in set)
         {
-            Stats stats = statsForOutcome[type]!;
+            var stats = statsForOutcome[type]!;
 
             ret.Append(FormatExtra(locale, type,
                 ZeroOrPositive(stats.PrecisionScore * 100),
@@ -168,16 +167,16 @@ public abstract class DetailedFMeasureListener<T> : IEvaluationMonitor<T>
 
     // NOpenNLP: reproduces "%12s: precision: % 7.2f%%;  recall: % 7.2f%%; F1: % 7.2f%%."
     private static string Format(CultureInfo locale, string label,
-        double precision, double recall, double fmeasure) =>
-        PadLeft(label, 12) + ": precision: " + FormatPercent(locale, precision)
+        double precision, double recall, double fmeasure)
+        => PadLeft(label, 12) + ": precision: " + FormatPercent(locale, precision)
             + "%;  recall: " + FormatPercent(locale, recall)
             + "%; F1: " + FormatPercent(locale, fmeasure) + "%.";
 
     // NOpenNLP: reproduces FORMAT_EXTRA, which is FORMAT + " [target: %3d; tp: %3d; fp: %3d]"
     private static string FormatExtra(CultureInfo locale, string label,
         double precision, double recall, double fmeasure,
-        int target, int truePositives, int falsePositives) =>
-        Format(locale, label, precision, recall, fmeasure)
+        int target, int truePositives, int falsePositives)
+        => Format(locale, label, precision, recall, fmeasure)
             + " [target: " + PadLeft(target.ToString(locale), 3)
             + "; tp: " + PadLeft(truePositives.ToString(locale), 3)
             + "; fp: " + PadLeft(falsePositives.ToString(locale), 3) + "]";
@@ -190,7 +189,7 @@ public abstract class DetailedFMeasureListener<T> : IEvaluationMonitor<T>
 
         if (value >= 0)
         {
-            text = " " + text;
+            text = $" {text}";
         }
 
         return PadLeft(text, 7);
@@ -228,8 +227,8 @@ public abstract class DetailedFMeasureListener<T> : IEvaluationMonitor<T>
         return rounded.ToString("F" + fractionDigits.ToString(CultureInfo.InvariantCulture), locale);
     }
 
-    private static string PadLeft(string value, int width) =>
-        value.Length >= width ? value : value.PadLeft(width);
+    private static string PadLeft(string value, int width)
+        => value.Length >= width ? value : value.PadLeft(width);
 
     public override string ToString() => CreateReport();
 

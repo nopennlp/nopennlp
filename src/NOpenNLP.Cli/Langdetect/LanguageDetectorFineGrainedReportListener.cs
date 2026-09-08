@@ -60,15 +60,15 @@ public class LanguageDetectorFineGrainedReportListener : FineGrainedReportListen
     // methods inherited from EvaluationMonitor
 
     /// <inheritdoc/>
-    public void Misclassified(LanguageSample reference, LanguageSample prediction) =>
-        StatsAdd(reference, prediction);
+    public void Misclassified(LanguageSample reference, LanguageSample prediction)
+        => StatsAdd(reference, prediction);
 
     /// <inheritdoc/>
-    public void CorrectlyClassified(LanguageSample reference, LanguageSample prediction) =>
-        StatsAdd(reference, prediction);
+    public void CorrectlyClassified(LanguageSample reference, LanguageSample prediction)
+        => StatsAdd(reference, prediction);
 
-    private void StatsAdd(LanguageSample reference, LanguageSample prediction) =>
-        GetStats().Add(reference.Context,
+    private void StatsAdd(LanguageSample reference, LanguageSample prediction)
+        => GetStats().Add(reference.Context,
             reference.Language.Lang, prediction.Language.Lang);
 
     /// <inheritdoc/>

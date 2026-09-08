@@ -37,7 +37,7 @@ public class NameSampleCountersStream : FilterObjectStream<NameSample?, NameSamp
 
     // NOpenNLP: Span.Type is nullable and Java's HashMap admits a null key, so a J2N
     // dictionary is used -- the BCL Dictionary throws on a null key.
-    private JCG.Dictionary<string?, int> nameCounters = new JCG.Dictionary<string?, int>();
+    private JCG.Dictionary<string?, int> nameCounters = new();
 
     protected internal NameSampleCountersStream(IObjectStream<NameSample?> samples)
         : base(samples)
@@ -48,14 +48,14 @@ public class NameSampleCountersStream : FilterObjectStream<NameSample?, NameSamp
     /// <exception cref="IOException">if reading from the underlying stream fails</exception>
     public override NameSample? Read()
     {
-        NameSample? sample = samples.Read();
+        var sample = samples.Read();
 
         if (sample != null)
         {
             sentenceCount++;
             tokenCount += sample.Sentence.Length;
 
-            foreach (Span nameSpan in sample.Names)
+            foreach (var nameSpan in sample.Names)
             {
                 // NOpenNLP: upstream reads the counter out of the map, which yields null
                 // for an absent type, and substitutes zero. TryGetValue says the same
@@ -92,20 +92,20 @@ public class NameSampleCountersStream : FilterObjectStream<NameSample?, NameSamp
     // ReadOnlyDictionary constrains its key to notnull, which a nullable Span.Type
     // cannot satisfy, so the defence is a copy instead -- callers still cannot reach
     // the counters this stream keeps updating.
-    public virtual IDictionary<string?, int> NameCounters =>
-        new JCG.Dictionary<string?, int>(nameCounters);
+    public virtual IDictionary<string?, int> NameCounters
+        => new JCG.Dictionary<string?, int>(nameCounters);
 
     public virtual void PrintSummary()
     {
         Console.WriteLine("Training data summary:");
-        Console.WriteLine("#Sentences: " + SentenceCount);
-        Console.WriteLine("#Tokens: " + TokenCount);
+        Console.WriteLine($"#Sentences: {SentenceCount}");
+        Console.WriteLine($"#Tokens: {TokenCount}");
 
         // NOpenNLP: upstream accumulates totalNames here but never prints it; the
         // accumulation is dropped rather than kept as an unused local.
-        foreach (KeyValuePair<string?, int> counter in NameCounters)
+        foreach (var counter in NameCounters)
         {
-            Console.WriteLine("#" + counter.Key + " entities: " + counter.Value);
+            Console.WriteLine($"#{counter.Key} entities: {counter.Value}");
         }
     }
 }

@@ -38,16 +38,16 @@ public sealed class LanguageDetectorEvaluatorTool : AbstractEvaluatorTool<Langua
     private readonly Option<FileInfo?> reportOutputFile = ToolParams.ReportOutputFile();
 
     /// <inheritdoc/>
-    protected override IEnumerable<Option> GetToolOptions() =>
-        [model, misclassified, reportOutputFile];
+    protected override IEnumerable<Option> GetToolOptions()
+        => [model, misclassified, reportOutputFile];
 
     /// <inheritdoc/>
-    public override string ShortDescription =>
-        "Measures the performance of the Language Detector model with the reference data";
+    public override string ShortDescription
+        => "Measures the performance of the Language Detector model with the reference data";
 
     /// <inheritdoc/>
-    public override string GetHelp(string format) =>
-        "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format)
+    public override string GetHelp(string format)
+        => "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format)
             + OptionUsage.CreateUsage(GetToolOptions(), GetStreamFactory(format).Parameters);
 
     /// <inheritdoc/>
@@ -63,7 +63,7 @@ public sealed class LanguageDetectorEvaluatorTool : AbstractEvaluatorTool<Langua
         }
 
         LanguageDetectorFineGrainedReportListener? reportListener = null;
-        FileInfo? reportFile = parseResult.GetValueByName(reportOutputFile);
+        var reportFile = parseResult.GetValueByName(reportOutputFile);
         Stream? reportOutputStream = null;
         if (reportFile != null)
         {

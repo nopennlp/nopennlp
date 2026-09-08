@@ -60,15 +60,15 @@ public class DoccatFineGrainedReportListener : FineGrainedReportListener,
     // methods inherited from EvaluationMonitor
 
     /// <inheritdoc/>
-    public void Misclassified(DocumentSample reference, DocumentSample prediction) =>
-        StatsAdd(reference, prediction);
+    public void Misclassified(DocumentSample reference, DocumentSample prediction)
+        => StatsAdd(reference, prediction);
 
     /// <inheritdoc/>
-    public void CorrectlyClassified(DocumentSample reference, DocumentSample prediction) =>
-        StatsAdd(reference, prediction);
+    public void CorrectlyClassified(DocumentSample reference, DocumentSample prediction)
+        => StatsAdd(reference, prediction);
 
-    private void StatsAdd(DocumentSample reference, DocumentSample prediction) =>
-        GetStats().Add(reference.Text, reference.Category, prediction.Category);
+    private void StatsAdd(DocumentSample reference, DocumentSample prediction)
+        => GetStats().Add(reference.Text, reference.Category, prediction.Category);
 
     /// <inheritdoc/>
     public override void WriteReport()

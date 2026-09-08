@@ -50,8 +50,8 @@ public class LeipzigLanguageSampleStreamFactory : AbstractSampleStreamFactory<La
     // NOpenNLP: upstream's Parameters extends EncodingParameter rather than
     // BasicFormatParams, so this format takes -encoding but no -data.
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [
+    public override IEnumerable<IFormatParameter> Parameters
+        => [
             FormatParameters.Encoding, SentencesDirParam, SentencesPerSampleParam,
             SamplesPerLanguageParam, SamplesToSkipParam
         ];
@@ -86,7 +86,7 @@ public class LeipzigLanguageSampleStreamFactory : AbstractSampleStreamFactory<La
         }
     }
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<LanguageSample?>("leipzig",
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<LanguageSample?>("leipzig",
             new LeipzigLanguageSampleStreamFactory());
 }

@@ -30,14 +30,14 @@ namespace NOpenNLP.Tools.Formats;
 public class SentenceSampleStreamFactory : AbstractSampleStreamFactory<SentenceSample?>
 {
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [FormatParameters.Data, FormatParameters.Encoding];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [FormatParameters.Data, FormatParameters.Encoding];
 
     /// <inheritdoc/>
-    public override IObjectStream<SentenceSample?> Create(IFormatParameterValues values) =>
-        new SentenceSampleStream(ReadData(values));
+    public override IObjectStream<SentenceSample?> Create(IFormatParameterValues values)
+        => new SentenceSampleStream(ReadData(values));
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<SentenceSample?>(
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<SentenceSample?>(
             StreamFactoryRegistry.DefaultFormat, new SentenceSampleStreamFactory());
 }

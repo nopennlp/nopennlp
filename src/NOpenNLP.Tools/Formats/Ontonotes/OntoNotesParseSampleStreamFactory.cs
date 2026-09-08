@@ -36,8 +36,8 @@ public class OntoNotesParseSampleStreamFactory : AbstractSampleStreamFactory<Par
     // implicit and public rather than blocking the POS factory from composing one.
 
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [OntoNotesFormatParameters.OntoNotesDir];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [OntoNotesFormatParameters.OntoNotesDir];
 
     /// <inheritdoc/>
     public override IObjectStream<Parse?> Create(IFormatParameterValues values)
@@ -62,7 +62,7 @@ public class OntoNotesParseSampleStreamFactory : AbstractSampleStreamFactory<Par
             new FileToStringSampleStream(documentStream, Encoding.UTF8)));
     }
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<Parse?>(
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<Parse?>(
             "ontonotes", new OntoNotesParseSampleStreamFactory());
 }

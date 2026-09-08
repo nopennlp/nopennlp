@@ -41,9 +41,9 @@ internal static class TestResources
     /// </exception>
     public static Stream OpenResource(string name)
     {
-        string manifestName = "opennlp.tools.cmdline." + name;
+        string manifestName = $"opennlp.tools.cmdline.{name}";
 
-        Stream? stream = typeof(TestResources).Assembly.GetManifestResourceStream(manifestName);
+        var stream = typeof(TestResources).Assembly.GetManifestResourceStream(manifestName);
 
         return stream ?? throw new InvalidOperationException(
             $"Test resource '{name}' (manifest name '{manifestName}') is not embedded in the " +
@@ -68,7 +68,7 @@ internal sealed class TempDirectory : IDisposable
     {
         Path = System.IO.Path.Combine(
             System.IO.Path.GetTempPath(),
-            prefix + "-" + System.IO.Path.GetFileNameWithoutExtension(System.IO.Path.GetRandomFileName()));
+            $"{prefix}-{System.IO.Path.GetFileNameWithoutExtension(System.IO.Path.GetRandomFileName())}");
 
         Directory.CreateDirectory(Path);
     }
@@ -82,8 +82,8 @@ internal sealed class TempDirectory : IDisposable
     {
         string path = System.IO.Path.Combine(Path, name);
 
-        using Stream source = TestResources.OpenResource(name);
-        using FileStream target = File.Create(path);
+        using var source = TestResources.OpenResource(name);
+        using var target = File.Create(path);
         source.CopyTo(target);
 
         return path;

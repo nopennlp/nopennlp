@@ -32,8 +32,8 @@ namespace NOpenNLP.Tools.Cmdline.Languagemodel;
 public class NGramLanguageModelTool : BasicCmdLineTool
 {
     /// <inheritdoc/>
-    public override string ShortDescription =>
-        "gives the probability and most probable next token(s) of a sequence of tokens in a " +
+    public override string ShortDescription
+        => "gives the probability and most probable next token(s) of a sequence of tokens in a " +
         "language model";
 
     /// <inheritdoc/>
@@ -45,8 +45,6 @@ public class NGramLanguageModelTool : BasicCmdLineTool
             using Stream stream = lmFile.OpenRead();
             var nGramLanguageModel = new NGramLanguageModel(stream);
 
-            IObjectStream<string?> lineStream;
-
             // NOpenNLP: upstream leaves perfMon null until inside the try, so an
             // IOException from the stream construction makes the
             // stopAndPrintFinalResult() call below throw a NullPointerException over the
@@ -55,11 +53,10 @@ public class NGramLanguageModelTool : BasicCmdLineTool
 
             try
             {
-                lineStream = new PlainTextByLineStream(new SystemInputStreamFactory(),
+                var lineStream = new PlainTextByLineStream(new SystemInputStreamFactory(),
                     SystemInputStreamFactory.Encoding);
                 perfMon.Start();
-                string? line;
-                while ((line = lineStream.Read()) != null)
+                while (lineStream.Read() is { } line)
                 {
                     double probability;
                     string[]? predicted;
@@ -75,7 +72,7 @@ public class NGramLanguageModelTool : BasicCmdLineTool
                     }
                     catch (Exception e)
                     {
-                        Console.Error.WriteLine("Error:" + e.Message);
+                        Console.Error.WriteLine($"Error: {e.Message}");
                         Console.Error.WriteLine(line);
                         continue;
                     }
@@ -84,9 +81,7 @@ public class NGramLanguageModelTool : BasicCmdLineTool
                     // concatenation always shows a decimal point; both are reproduced so
                     // the output line reads the same. A null from predictNextTokens
                     // renders as "null", which is what Arrays.toString(null) prints.
-                    Console.WriteLine(ToStringJava(tokens) + " -> prob:"
-                        + J2N.Numerics.Double.ToString(probability, "J", CultureInfo.InvariantCulture)
-                        + ", " + "next:" + ToStringJava(predicted));
+                    Console.WriteLine($"{ToStringJava(tokens)} -> prob:{J2N.Numerics.Double.ToString(probability, "J", CultureInfo.InvariantCulture)}, next:{ToStringJava(predicted)}");
 
                     perfMon.IncrementCounter();
                 }
@@ -106,9 +101,9 @@ public class NGramLanguageModelTool : BasicCmdLineTool
     }
 
     // NOpenNLP: stands in for java.util.Arrays.toString(Object[]).
-    private static string ToStringJava(string[]? array) =>
-        array is null ? "null" : "[" + string.Join(", ", array) + "]";
+    private static string ToStringJava(string[]? array)
+        => array is null ? "null" : $"[{string.Join(", ", array)}]";
 
     /// <inheritdoc/>
-    public override string GetHelp() => "Usage: " + CLI.Cmd + " " + Name + " model";
+    public override string GetHelp() => $"Usage: {CLI.Cmd} {Name} model";
 }

@@ -31,8 +31,8 @@ public class IrishSentenceBankTokenSampleStreamFactory : DetokenizerSampleStream
     // BasicFormatParams and never calls createDetokenizer, so -detokenizer is not among
     // the parameters here either.
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [FormatParameters.Data, FormatParameters.Encoding];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [FormatParameters.Data, FormatParameters.Encoding];
 
     /// <inheritdoc/>
     public override IObjectStream<TokenSample?> Create(IFormatParameterValues values)
@@ -57,7 +57,7 @@ public class IrishSentenceBankTokenSampleStreamFactory : DetokenizerSampleStream
         return new IrishSentenceBankTokenSampleStream(isbDoc);
     }
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<TokenSample?>("irishsentencebank",
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<TokenSample?>("irishsentencebank",
             new IrishSentenceBankTokenSampleStreamFactory());
 }

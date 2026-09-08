@@ -33,8 +33,8 @@ public class LetsmtSentenceStreamFactory : AbstractSampleStreamFactory<SentenceS
             "specifies the file with detokenizer dictionary.");
 
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [FormatParameters.Data, FormatParameters.Encoding, DetokenizerParam];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [FormatParameters.Data, FormatParameters.Encoding, DetokenizerParam];
 
     /// <inheritdoc/>
     public override IObjectStream<SentenceSample?> Create(IFormatParameterValues values)
@@ -84,7 +84,7 @@ public class LetsmtSentenceStreamFactory : AbstractSampleStreamFactory<SentenceS
         return samples;
     }
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<SentenceSample?>("letsmt",
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<SentenceSample?>("letsmt",
             new LetsmtSentenceStreamFactory());
 }

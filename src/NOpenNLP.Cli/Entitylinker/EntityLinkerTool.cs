@@ -45,7 +45,7 @@ public class EntityLinkerTool : BasicCmdLineTool
         {
             // TODO: Ask Mark if we can remove the type, the user knows upfront if he tries
             // to link place names or company mentions ...
-            string entityType = "location";
+            const string entityType = "location";
 
             // Load the properties, they should contain everything that is necessary to instantiate
             // the component
@@ -79,7 +79,7 @@ public class EntityLinkerTool : BasicCmdLineTool
             catch (Exception e)
             {
                 throw new TerminateToolException(-1,
-                    "Failed to instantiate the Entity Linker: " + e.Message);
+                    $"Failed to instantiate the Entity Linker: {e.Message}");
             }
 
             using var perfMon = new PerformanceMonitor(Console.Error, "sent");
@@ -92,27 +92,26 @@ public class EntityLinkerTool : BasicCmdLineTool
 
                 List<NameSample> document = [];
 
-                string? line;
-                while ((line = untokenizedLineStream.Read()) != null)
+                while (untokenizedLineStream.Read() is { } line)
                 {
                     if (line.Trim().Length == 0)
                     {
                         // Run entity linker ... and output result ...
 
                         var text = new StringBuilder();
-                        Span[] sentences = new Span[document.Count];
-                        Span[][] tokensBySentence = new Span[document.Count][];
-                        Span[][] namesBySentence = new Span[document.Count][];
+                        var sentences = new Span[document.Count];
+                        var tokensBySentence = new Span[document.Count][];
+                        var namesBySentence = new Span[document.Count][];
 
                         for (int i = 0; i < document.Count; i++)
                         {
-                            NameSample sample = document[i];
+                            var sample = document[i];
 
                             namesBySentence[i] = sample.Names;
 
                             int sentenceBegin = text.Length;
 
-                            Span[] tokens = new Span[sample.Sentence.Length];
+                            var tokens = new Span[sample.Sentence.Length];
 
                             // for all tokens
                             for (int ti = 0; ti < sample.Sentence.Length; ti++)
@@ -129,10 +128,10 @@ public class EntityLinkerTool : BasicCmdLineTool
                             text.Append('\n');
                         }
 
-                        IList<LinkedSpan<BaseLink>> linkedSpans = entityLinker.Find(
+                        var linkedSpans = entityLinker.Find(
                             text.ToString(), sentences, tokensBySentence, namesBySentence);
 
-                        foreach (LinkedSpan<BaseLink> linkedSpan in linkedSpans)
+                        foreach (var linkedSpan in linkedSpans)
                         {
                             Console.WriteLine(linkedSpan);
                         }
@@ -156,5 +155,5 @@ public class EntityLinkerTool : BasicCmdLineTool
     }
 
     /// <inheritdoc/>
-    public override string GetHelp() => "Usage: " + CLI.Cmd + " " + Name + " model < sentences";
+    public override string GetHelp() => $"Usage: {CLI.Cmd} {Name} model < sentences";
 }

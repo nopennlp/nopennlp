@@ -33,8 +33,8 @@ public class ConlluSentenceSampleStreamFactory : AbstractSampleStreamFactory<Sen
             "number of sentences per sample");
 
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [FormatParameters.Data, FormatParameters.Encoding, SentencesPerSampleParam];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [FormatParameters.Data, FormatParameters.Encoding, SentencesPerSampleParam];
 
     /// <inheritdoc/>
     public override IObjectStream<SentenceSample?> Create(IFormatParameterValues values)
@@ -57,7 +57,7 @@ public class ConlluSentenceSampleStreamFactory : AbstractSampleStreamFactory<Sen
         }
     }
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<SentenceSample?>(
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<SentenceSample?>(
             ConlluPOSSampleStreamFactory.ConlluFormat, new ConlluSentenceSampleStreamFactory());
 }

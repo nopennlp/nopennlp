@@ -41,8 +41,8 @@ public class EvalitaNameSampleStreamFactory : LanguageSampleStreamFactory<NameSa
         new FormatParameter<string>("-types", "per,loc,org,gpe");
 
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [FormatParameters.Data, FormatParameters.Encoding, LangParam, TypesParam];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [FormatParameters.Data, FormatParameters.Encoding, LangParam, TypesParam];
 
     /// <inheritdoc/>
     public override IObjectStream<NameSample?> Create(IFormatParameterValues values)
@@ -99,7 +99,7 @@ public class EvalitaNameSampleStreamFactory : LanguageSampleStreamFactory<NameSa
         }
     }
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<NameSample?>(
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<NameSample?>(
             "evalita", new EvalitaNameSampleStreamFactory());
 }

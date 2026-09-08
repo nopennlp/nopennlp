@@ -22,7 +22,6 @@ using System;
 using System.CommandLine;
 using System.IO;
 using System.Text;
-using NOpenNLP.Tools.Dictionary;
 using NOpenNLP.Tools.Formats;
 using NOpenNLP.Tools.Util;
 
@@ -50,8 +49,8 @@ public class CensusDictionaryCreatorTool : BasicCmdLineTool
     // NOpenNLP: reproduces what upstream's ArgumentParser.createUsage() emits for the
     // Parameters interface. None of these four parameters carries a description upstream,
     // so the details block lists the names alone.
-    public override string GetHelp() =>
-        "Usage: " + CLI.Cmd + " " + Name
+    public override string GetHelp()
+        => "Usage: " + CLI.Cmd + " " + Name
             + " [-encoding charsetName] [-lang code] -censusData censusDict -dict dict\n"
             + "\n"
             + "Arguments description:\n"
@@ -63,10 +62,10 @@ public class CensusDictionaryCreatorTool : BasicCmdLineTool
     /// <inheritdoc/>
     public override Command CreateCommand(string commandName)
     {
-        Option<string> encoding = EncodingOption();
-        Option<string> lang = LangOption();
-        Option<string> censusData = CensusDataOption();
-        Option<string> dict = DictOption();
+        var encoding = EncodingOption();
+        var lang = LangOption();
+        var censusData = CensusDataOption();
+        var dict = DictOption();
 
         var command = new Command(commandName, ShortDescription);
         command.Options.Add(encoding);
@@ -89,32 +88,32 @@ public class CensusDictionaryCreatorTool : BasicCmdLineTool
     /// one is a plain string with no description, and it defaults to <c>UTF-8</c> rather
     /// than to the platform default.
     /// </summary>
-    private static Option<string> EncodingOption() =>
-        new Option<string>("-encoding")
+    private static Option<string> EncodingOption()
+        => new("-encoding")
         {
             HelpName = "charsetName",
             DefaultValueFactory = _ => "UTF-8",
         };
 
     /// <summary>From the upstream <c>Parameters</c> interface.</summary>
-    private static Option<string> LangOption() =>
-        new Option<string>("-lang")
+    private static Option<string> LangOption()
+        => new("-lang")
         {
             HelpName = "code",
             DefaultValueFactory = _ => "eng",
         };
 
     /// <summary>From the upstream <c>Parameters</c> interface.</summary>
-    private static Option<string> CensusDataOption() =>
-        new Option<string>("-censusData")
+    private static Option<string> CensusDataOption()
+        => new("-censusData")
         {
             HelpName = "censusDict",
             Required = true,
         };
 
     /// <summary>From the upstream <c>Parameters</c> interface.</summary>
-    private static Option<string> DictOption() =>
-        new Option<string>("-dict")
+    private static Option<string> DictOption()
+        => new("-dict")
         {
             HelpName = "dict",
             Required = true,
@@ -132,9 +131,8 @@ public class CensusDictionaryCreatorTool : BasicCmdLineTool
     public static Tools.Dictionary.Dictionary CreateDictionary(IObjectStream<StringList?> sampleStream)
     {
         var mNameDictionary = new Tools.Dictionary.Dictionary(true);
-        StringList? entry;
 
-        entry = sampleStream.Read();
+        var entry = sampleStream.Read();
         while (entry != null)
         {
             if (!mNameDictionary.Contains(entry))
@@ -154,10 +152,9 @@ public class CensusDictionaryCreatorTool : BasicCmdLineTool
     public override void Run(string[] args)
     {
         string censusData = CmdLineUtil.GetParameter("-censusData", args)
-            ?? throw new TerminateToolException(1,
-                "-censusData is a required parameter.\n" + GetHelp());
+            ?? throw new TerminateToolException(1, $"-censusData is a required parameter.\n{GetHelp()}");
         string dict = CmdLineUtil.GetParameter("-dict", args)
-            ?? throw new TerminateToolException(1, "-dict is a required parameter.\n" + GetHelp());
+            ?? throw new TerminateToolException(1, $"-dict is a required parameter.\n{GetHelp()}");
 
         Build(censusData, dict, CmdLineUtil.GetParameter("-encoding", args) ?? "UTF-8");
     }
@@ -170,7 +167,7 @@ public class CensusDictionaryCreatorTool : BasicCmdLineTool
         CmdLineUtil.CheckInputFile("Name data", testData);
         CmdLineUtil.CheckOutputFile("Dictionary file", dictOutFile);
 
-        IInputStreamFactory sampleDataIn = CmdLineUtil.CreateInputStreamFactory(testData);
+        var sampleDataIn = CmdLineUtil.CreateInputStreamFactory(testData);
 
         Tools.Dictionary.Dictionary mDictionary;
         try
@@ -182,8 +179,7 @@ public class CensusDictionaryCreatorTool : BasicCmdLineTool
         }
         catch (IOException e)
         {
-            throw new TerminateToolException(-1,
-                "IO error while reading training data or indexing data: " + e.Message, e);
+            throw new TerminateToolException(-1, $"IO error while reading training data or indexing data: {e.Message}", e);
         }
 
         Console.WriteLine("Saving Dictionary...");
@@ -195,8 +191,7 @@ public class CensusDictionaryCreatorTool : BasicCmdLineTool
         }
         catch (IOException e)
         {
-            throw new TerminateToolException(-1,
-                "IO error while writing dictionary file: " + e.Message, e);
+            throw new TerminateToolException(-1, $"IO error while writing dictionary file: {e.Message}", e);
         }
     }
 
@@ -212,9 +207,7 @@ public class CensusDictionaryCreatorTool : BasicCmdLineTool
         }
         catch (ArgumentException e)
         {
-            throw new TerminateToolException(1,
-                "Invalid argument: -encoding " + encodingName + " \nEncoding " + encodingName
-                    + " is not supported on this platform.", e);
+            throw new TerminateToolException(1, $"Invalid argument: -encoding {encodingName} \nEncoding {encodingName} is not supported on this platform.", e);
         }
     }
 }

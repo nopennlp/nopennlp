@@ -44,8 +44,8 @@ public class NKJPSegmentationDocument
 
         public Span ToSpan() => new Span(offset, offset + length);
 
-        public override string ToString() =>
-            $"{doc}#string-range({id},{offset.ToString(CultureInfo.InvariantCulture)},{length.ToString(CultureInfo.InvariantCulture)})";
+        public override string ToString()
+            => $"{doc}#string-range({id},{offset.ToString(CultureInfo.InvariantCulture)},{length.ToString(CultureInfo.InvariantCulture)})";
     }
 
     // NOpenNLP: upstream exposes getSegments(); the outer map preserves insertion order
@@ -182,8 +182,8 @@ public class NKJPSegmentationDocument
     /// runs; normalizing them back to "#text" keeps them out of the seg/nkjp:paren branches
     /// exactly as upstream leaves them out.
     /// </remarks>
-    private static string NodeName(XmlNode node) =>
-        node.NodeType is XmlNodeType.Whitespace or XmlNodeType.SignificantWhitespace
+    private static string NodeName(XmlNode node)
+        => node.NodeType is XmlNodeType.Whitespace or XmlNodeType.SignificantWhitespace
             ? "#text"
             : node.Name;
 

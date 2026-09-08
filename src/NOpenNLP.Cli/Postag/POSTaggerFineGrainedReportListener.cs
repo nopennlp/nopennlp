@@ -60,15 +60,15 @@ public class POSTaggerFineGrainedReportListener : FineGrainedReportListener,
     // methods inherited from EvaluationMonitor
 
     /// <inheritdoc/>
-    public void Misclassified(POSSample reference, POSSample prediction) =>
-        StatsAdd(reference, prediction);
+    public void Misclassified(POSSample reference, POSSample prediction)
+        => StatsAdd(reference, prediction);
 
     /// <inheritdoc/>
-    public void CorrectlyClassified(POSSample reference, POSSample prediction) =>
-        StatsAdd(reference, prediction);
+    public void CorrectlyClassified(POSSample reference, POSSample prediction)
+        => StatsAdd(reference, prediction);
 
-    private void StatsAdd(POSSample reference, POSSample prediction) =>
-        GetStats().Add(reference.Sentence, reference.Tags, prediction.Tags);
+    private void StatsAdd(POSSample reference, POSSample prediction)
+        => GetStats().Add(reference.Sentence, reference.Tags, prediction.Tags);
 
     /// <inheritdoc/>
     public override void WriteReport()

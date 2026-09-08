@@ -31,6 +31,5 @@ internal sealed class DetokenizationDictionaryLoader : ModelLoader<Detokenizatio
     }
 
     /// <inheritdoc/>
-    protected override DetokenizationDictionary LoadModel(Stream modelIn) =>
-        new DetokenizationDictionary(modelIn);
+    protected override DetokenizationDictionary LoadModel(Stream modelIn) => new(modelIn);
 }

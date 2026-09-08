@@ -28,13 +28,8 @@ namespace NOpenNLP.Tools.Cmdline.Doccat;
 /// <para/>
 /// <b>Note:</b> Do not use this class, internal use only!
 /// </summary>
-public class DoccatModelLoader : ModelLoader<DoccatModel>
+public class DoccatModelLoader() : ModelLoader<DoccatModel>("Document Categorizer")
 {
-    public DoccatModelLoader()
-        : base("Document Categorizer")
-    {
-    }
-
     /// <inheritdoc/>
-    protected override DoccatModel LoadModel(Stream modelIn) => new DoccatModel(modelIn);
+    protected override DoccatModel LoadModel(Stream modelIn) => new(modelIn);
 }

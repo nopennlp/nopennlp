@@ -57,6 +57,6 @@ public class DoccatEvaluationErrorListener : EvaluationErrorPrinter<DocumentSamp
     }
 
     /// <inheritdoc/>
-    public override void Misclassified(DocumentSample reference, DocumentSample prediction) =>
-        PrintError(reference, prediction);
+    public override void Misclassified(DocumentSample reference, DocumentSample prediction)
+        => PrintError(reference, prediction);
 }

@@ -43,12 +43,12 @@ public sealed class TokenizerCrossValidatorTool : AbstractCrossValidatorTool<Tok
     public override string ShortDescription => "K-fold cross validator for the learnable tokenizer";
 
     /// <inheritdoc/>
-    protected override IEnumerable<Option> GetToolOptions() =>
-        [folds, misclassified, alphaNumOpt, abbDict, factoryName, lang, @params];
+    protected override IEnumerable<Option> GetToolOptions()
+        => [folds, misclassified, alphaNumOpt, abbDict, factoryName, lang, @params];
 
     /// <inheritdoc/>
-    public override string GetHelp(string format) =>
-        "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format) +
+    public override string GetHelp(string format)
+        => "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format) +
         OptionUsage.CreateUsage(GetToolOptions(), GetStreamFactory(format).Parameters);
 
     /// <inheritdoc/>
@@ -70,9 +70,9 @@ public sealed class TokenizerCrossValidatorTool : AbstractCrossValidatorTool<Tok
 
         try
         {
-            OpenNlpDictionary? dict = TokenizerTrainerTool.LoadDict(parseResult.GetValueByName(abbDict));
+            var dict = TokenizerTrainerTool.LoadDict(parseResult.GetValueByName(abbDict));
 
-            TokenizerFactory? tokFactory = TokenizerFactory.Create(
+            var tokFactory = TokenizerFactory.Create(
                 parseResult.GetValueByName(factoryName), parseResult.GetRequiredValueByName(lang), dict,
                 ToolParams.JavaBooleanValue(parseResult.GetValueByName(alphaNumOpt)), null!);
             validator = new TokenizerCrossValidator(mlParams, tokFactory!, listener);
@@ -95,7 +95,7 @@ public sealed class TokenizerCrossValidatorTool : AbstractCrossValidatorTool<Tok
             }
         }
 
-        FMeasure result = validator.FMeasure;
+        var result = validator.FMeasure;
 
         Console.WriteLine(result);
     }

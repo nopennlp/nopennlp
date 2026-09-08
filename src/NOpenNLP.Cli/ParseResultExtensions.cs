@@ -48,8 +48,8 @@ internal static class ParseResultExtensions
     /// Reads the value of <paramref name="option"/>, falling back to a lookup by name
     /// when the command carries a different instance of the same option.
     /// </summary>
-    public static T? GetValueByName<T>(this ParseResult parseResult, Option<T> option) =>
-        IsRegistered(parseResult, option)
+    public static T? GetValueByName<T>(this ParseResult parseResult, Option<T> option)
+        => IsRegistered(parseResult, option)
             ? parseResult.GetValue(option)
             : parseResult.GetValue<T>(option.Name);
 
@@ -64,15 +64,14 @@ internal static class ParseResultExtensions
             return parseResult.GetRequiredValue(option);
         }
 
-        T? value = parseResult.GetValue<T>(option.Name);
+        var value = parseResult.GetValue<T>(option.Name);
 
         // The registered instance carries the Required flag, so the parser has already
         // rejected a missing value before the action runs. This guards the case where a
         // format declares the option as optional while the tool requires it.
         if (value is null)
         {
-            throw new InvalidOperationException(
-                $"{option.Name} is required but was not provided.");
+            throw new InvalidOperationException($"{option.Name} is required but was not provided.");
         }
 
         return value;
@@ -80,7 +79,7 @@ internal static class ParseResultExtensions
 
     private static bool IsRegistered<T>(ParseResult parseResult, Option<T> option)
     {
-        for (CommandResult? result = parseResult.CommandResult; result is not null;
+        for (var result = parseResult.CommandResult; result is not null;
             result = result.Parent as CommandResult)
         {
             if (result.Command.Options.Any(registered => ReferenceEquals(registered, option)))

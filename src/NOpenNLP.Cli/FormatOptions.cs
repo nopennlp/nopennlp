@@ -49,8 +49,8 @@ internal static class FormatOptions
     [ThreadStatic]
     private static Dictionary<IFormatParameter, Option>? current;
 
-    private static Dictionary<IFormatParameter, Option> Current =>
-        current ??= new Dictionary<IFormatParameter, Option>();
+    private static Dictionary<IFormatParameter, Option> Current
+        => current ??= new Dictionary<IFormatParameter, Option>();
 
     /// <summary>
     /// Starts a fresh set of options, discarding any bound to a previous invocation.
@@ -68,7 +68,7 @@ internal static class FormatOptions
             return existing;
         }
 
-        Option created = Create(parameter);
+        var created = Create(parameter);
         Current[parameter] = created;
         return created;
     }
@@ -99,7 +99,7 @@ internal static class FormatOptions
                 Required = !parameter.IsOptional,
             };
 
-            bool defaultValue = parameter.DefaultValue is bool value && value;
+            bool defaultValue = parameter.DefaultValue is true;
             option.DefaultValueFactory = _ => defaultValue ? "true" : "false";
 
             return option;
@@ -110,8 +110,7 @@ internal static class FormatOptions
             return Build<FileInfo>(parameter);
         }
 
-        throw new NotSupportedException(
-            "Unsupported format parameter type: " + parameter.ValueType);
+        throw new NotSupportedException($"Unsupported format parameter type: {parameter.ValueType}");
     }
 
     private static Option<T> Build<T>(IFormatParameter parameter)
@@ -123,9 +122,9 @@ internal static class FormatOptions
             Required = !parameter.IsOptional,
         };
 
-        if (parameter.IsOptional && parameter.DefaultValue is not null)
+        if (parameter is { IsOptional: true, DefaultValue: not null })
         {
-            T defaultValue = (T)parameter.DefaultValue;
+            var defaultValue = (T)parameter.DefaultValue;
             option.DefaultValueFactory = _ => defaultValue;
         }
 

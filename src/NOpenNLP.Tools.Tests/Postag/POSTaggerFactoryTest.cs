@@ -43,8 +43,8 @@ public class POSTaggerFactoryTest
         return new WordTagSampleStream(new PlainTextByLineStream(@in, Encoding.UTF8));
     }
 
-    private static POSModel TrainPOSModel(POSTaggerFactory factory) =>
-        POSTaggerME.Train("eng", CreateSampleStream(), TrainingParameters.DefaultParams(), factory);
+    private static POSModel TrainPOSModel(POSTaggerFactory factory)
+        => POSTaggerME.Train("eng", CreateSampleStream(), TrainingParameters.DefaultParams(), factory);
 
     [Test]
     public void TestPOSTaggerWithCustomFactory()
@@ -98,12 +98,12 @@ public class POSTaggerFactoryTest
     }
 
     [Test]
-    public void TestCreateWithInvalidName() =>
-        Assert.Throws<InvalidFormatException>((Action)(() => BaseToolFactory.Create("X", null!)));
+    public void TestCreateWithInvalidName()
+        => Assert.Throws<InvalidFormatException>((Action)(() => BaseToolFactory.Create("X", null!)));
 
     [Test]
-    public void TestCreateWithInvalidName2() =>
-        Assert.Throws<InvalidFormatException>((Action)(() => POSTaggerFactory.Create("X", null, null)));
+    public void TestCreateWithInvalidName2()
+        => Assert.Throws<InvalidFormatException>((Action)(() => POSTaggerFactory.Create("X", null, null)));
 
     [Test]
     public void TestCreateWithHierarchy()

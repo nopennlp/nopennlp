@@ -43,8 +43,8 @@ public class LemmatizerTrainerTool : AbstractTrainerTool<LemmaSample?>
     protected override IEnumerable<Option> GetToolOptions() => [factoryName, lang, @params, model];
 
     /// <inheritdoc/>
-    public override string GetHelp(string format) =>
-        "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format) +
+    public override string GetHelp(string format)
+        => "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format) +
         OptionUsage.CreateUsage(GetToolOptions(), GetStreamFactory(format).Parameters);
 
     /// <inheritdoc/>
@@ -56,16 +56,14 @@ public class LemmatizerTrainerTool : AbstractTrainerTool<LemmaSample?>
             mlParams = ModelUtil.CreateDefaultTrainingParameters();
         }
 
-        FileInfo modelOutFile = parseResult.GetRequiredValueByName(model);
+        var modelOutFile = parseResult.GetRequiredValueByName(model);
         CmdLineUtil.CheckOutputFile("lemmatizer model", modelOutFile);
 
         LemmatizerModel lemmatizerModel;
         try
         {
-            LemmatizerFactory lemmatizerFactory =
-                LemmatizerFactory.Create(parseResult.GetValueByName(factoryName));
-            lemmatizerModel = LemmatizerME.Train(parseResult.GetRequiredValueByName(lang), sampleStream!,
-                mlParams, lemmatizerFactory);
+            var lemmatizerFactory = LemmatizerFactory.Create(parseResult.GetValueByName(factoryName));
+            lemmatizerModel = LemmatizerME.Train(parseResult.GetRequiredValueByName(lang), sampleStream!, mlParams, lemmatizerFactory);
         }
         catch (IOException e)
         {

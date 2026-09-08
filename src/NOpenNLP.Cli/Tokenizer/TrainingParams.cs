@@ -36,20 +36,19 @@ internal static class TrainingParams
     // rather than a flag. An Option<bool> would reject `-alphaNumOpt 0` -- which upstream
     // reads as false -- and would silently take a bare `-alphaNumOpt` as true, training a
     // different model where upstream rejects the missing value. See ToolParams.JavaBoolean.
-    public static Option<string?> AlphaNumOpt() =>
-        ToolParams.JavaBoolean("-alphaNumOpt",
+    public static Option<string?> AlphaNumOpt()
+        => ToolParams.JavaBoolean("-alphaNumOpt",
             "Optimization flag to skip alpha numeric tokens for further tokenization",
             defaultValue: false,
             helpName: "isAlphaNumOpt");
 
-    public static Option<FileInfo?> AbbDict() =>
-        new Option<FileInfo?>("-abbDict")
+    public static Option<FileInfo?> AbbDict()
+        => new("-abbDict")
         {
             Description = "abbreviation dictionary in XML format.",
             HelpName = "path",
         };
 
-    public static Option<string?> Factory() =>
-        ToolParams.Factory(
-            "A sub-class of TokenizerFactory where to get implementation and resources.");
+    public static Option<string?> Factory()
+        => ToolParams.Factory("A sub-class of TokenizerFactory where to get implementation and resources.");
 }

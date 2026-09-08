@@ -42,12 +42,12 @@ public class DoccatFactoryTest
         return new DocumentSampleStream(new PlainTextByLineStream(isf, Encoding.UTF8));
     }
 
-    private static DoccatModel Train() =>
-        DocumentCategorizerME.Train("x-unspecified", CreateSampleStream(),
+    private static DoccatModel Train()
+        => DocumentCategorizerME.Train("x-unspecified", CreateSampleStream(),
             TrainingParameters.DefaultParams(), new DoccatFactory());
 
-    private static DoccatModel Train(DoccatFactory factory) =>
-        DocumentCategorizerME.Train("x-unspecified", CreateSampleStream(),
+    private static DoccatModel Train(DoccatFactory factory)
+        => DocumentCategorizerME.Train("x-unspecified", CreateSampleStream(),
             TrainingParameters.DefaultParams(), factory);
 
     [Test]

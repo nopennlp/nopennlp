@@ -36,8 +36,8 @@ public class ParseToPOSSampleStreamFactory : LanguageSampleStreamFactory<POSSamp
 
     /// <inheritdoc/>
     // NOpenNLP: upstream reuses ParseSampleStreamFactory.Parameters, which is BasicFormatParams.
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [FormatParameters.Data, FormatParameters.Encoding];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [FormatParameters.Data, FormatParameters.Encoding];
 
     /// <inheritdoc/>
     public override IObjectStream<POSSample?> Create(IFormatParameterValues values)
@@ -51,7 +51,7 @@ public class ParseToPOSSampleStreamFactory : LanguageSampleStreamFactory<POSSamp
         return new ParseToPOSSampleStream(parseSampleStream);
     }
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<POSSample?>(
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<POSSample?>(
             "parse", new ParseToPOSSampleStreamFactory());
 }

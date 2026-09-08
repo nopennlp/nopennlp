@@ -33,8 +33,8 @@ public class NameToSentenceSampleStreamFactory : DetokenizerSampleStreamFactory<
     /// <inheritdoc/>
     // NOpenNLP: upstream's Parameters interface extends NameSampleDataStreamFactory.Parameters
     // (which is BasicFormatParams) and DetokenizerParameter.
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [FormatParameters.Data, FormatParameters.Encoding, FormatParameters.Detokenizer];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [FormatParameters.Data, FormatParameters.Encoding, FormatParameters.Detokenizer];
 
     /// <inheritdoc/>
     public override IObjectStream<SentenceSample?> Create(IFormatParameterValues values)
@@ -51,7 +51,7 @@ public class NameToSentenceSampleStreamFactory : DetokenizerSampleStreamFactory<
         return new NameToSentenceSampleStream(CreateDetokenizer(values), nameSampleStream, 30);
     }
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<SentenceSample?>(
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<SentenceSample?>(
             "namefinder", new NameToSentenceSampleStreamFactory());
 }

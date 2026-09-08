@@ -33,8 +33,8 @@ public sealed class TaggerModelReplacerTool : BasicCmdLineTool
     public override string ShortDescription => "replaces the tagger model in a parser model";
 
     /// <inheritdoc/>
-    public override string GetHelp() =>
-        "Usage: " + CLI.Cmd + " " + Name + " parser.model tagger.model";
+    public override string GetHelp()
+        => $"Usage: {CLI.Cmd} {Name} parser.model tagger.model";
 
     /// <inheritdoc/>
     public override void Run(string[] args)
@@ -46,12 +46,12 @@ public sealed class TaggerModelReplacerTool : BasicCmdLineTool
         else
         {
             var parserModelInFile = new FileInfo(args[0]);
-            ParserModel parserModel = new ParserModelLoader().Load(parserModelInFile);
+            var parserModel = new ParserModelLoader().Load(parserModelInFile);
 
             var taggerModelInFile = new FileInfo(args[1]);
-            POSModel taggerModel = new POSModelLoader().Load(taggerModelInFile);
+            var taggerModel = new POSModelLoader().Load(taggerModelInFile);
 
-            ParserModel updatedParserModel = parserModel.UpdateTaggerModel(taggerModel);
+            var updatedParserModel = parserModel.UpdateTaggerModel(taggerModel);
 
             // NOpenNLP: upstream writes back over args[0], overwriting the parser model
             // that was just read. That is deliberate -- the tool replaces the tagger

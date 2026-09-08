@@ -57,7 +57,7 @@ public class POSEvaluationErrorListener : EvaluationErrorPrinter<POSSample>,
     }
 
     /// <inheritdoc/>
-    public override void Misclassified(POSSample reference, POSSample prediction) =>
-        PrintError(reference.Tags, prediction.Tags, reference,
+    public override void Misclassified(POSSample reference, POSSample prediction)
+        => PrintError(reference.Tags, prediction.Tags, reference,
             prediction, reference.Sentence);
 }

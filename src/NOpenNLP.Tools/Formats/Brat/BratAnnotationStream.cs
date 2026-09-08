@@ -142,8 +142,8 @@ public class BratAnnotationStream : ObjectStreamBase<BratAnnotation?>
         }
 
         /// <inheritdoc/>
-        internal override BratAnnotation Parse(Span[] tokens, string line) =>
-            new RelationAnnotation(tokens[ID_OFFSET].GetCoveredText(line.AsCharSequence()).ToString(),
+        internal override BratAnnotation Parse(Span[] tokens, string line)
+            => new RelationAnnotation(tokens[ID_OFFSET].GetCoveredText(line.AsCharSequence()).ToString(),
                 tokens[TYPE_OFFSET].GetCoveredText(line.AsCharSequence()).ToString(),
                 ParseArg(tokens[ARG1_OFFSET].GetCoveredText(line.AsCharSequence()).ToString()),
                 ParseArg(tokens[ARG2_OFFSET].GetCoveredText(line.AsCharSequence()).ToString()));

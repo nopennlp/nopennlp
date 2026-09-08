@@ -61,13 +61,13 @@ public class LanguageDetectorEvaluationErrorListener : EvaluationErrorPrinter<La
     }
 
     /// <inheritdoc/>
-    public override void Misclassified(LanguageSample reference, LanguageSample prediction) =>
-        PrintError(reference, prediction);
+    public override void Misclassified(LanguageSample reference, LanguageSample prediction)
+        => PrintError(reference, prediction);
 
     /// <inheritdoc/>
     protected override void PrintError(LanguageSample referenceSample,
-        LanguageSample predictedSample) =>
-        printStream.WriteLine(string.Join("\t", referenceSample.Language.Lang,
+        LanguageSample predictedSample)
+        => printStream.WriteLine(string.Join("\t", referenceSample.Language.Lang,
             predictedSample.Language.Lang,
             referenceSample.Context));
 }

@@ -44,7 +44,7 @@ public class EndToEndTest
     [Test]
     public void TestSimpleTokenizerTokenizesStandardInput()
     {
-        CliResult result = CliRunner.Run(["SimpleTokenizer"], stdin: "Hi. How are you?\n");
+        var result = CliRunner.Run(["SimpleTokenizer"], stdin: "Hi. How are you?\n");
 
         ClassicAssert.AreEqual(0, result.ExitCode);
         // The tokenizer splits the sentence-final punctuation off each token.
@@ -57,7 +57,7 @@ public class EndToEndTest
     {
         // SimpleTokenizer is the only tool with HasParams == false, so a bare invocation
         // tokenizes standard input instead of printing help.
-        CliResult result = CliRunner.Run(["SimpleTokenizer"], stdin: "Hello world.\n");
+        var result = CliRunner.Run(["SimpleTokenizer"], stdin: "Hello world.\n");
 
         ClassicAssert.AreEqual(0, result.ExitCode);
         StringAssert.DoesNotContain("Usage:", result.Out);
@@ -70,7 +70,7 @@ public class EndToEndTest
         string data = temp.CopyResource("token.train");
         string model = temp.PathOf("token.bin");
 
-        CliResult result = CliRunner.Run(
+        var result = CliRunner.Run(
             ["TokenizerTrainer", "-model", model, "-lang", "eng", "-data", data, "-encoding", "UTF-8"]);
 
         ClassicAssert.AreEqual(0, result.ExitCode, "stderr was: " + result.Error);
@@ -85,7 +85,7 @@ public class EndToEndTest
     [Test]
     public void TestExecutionTimeIsPrintedToStandardErrorOnSuccess()
     {
-        CliResult result = CliRunner.Run(["SimpleTokenizer"], stdin: "Hello world.\n");
+        var result = CliRunner.Run(["SimpleTokenizer"], stdin: "Hello world.\n");
 
         ClassicAssert.AreEqual(0, result.ExitCode);
         StringAssert.Contains("Execution time:", result.Error);
@@ -99,7 +99,7 @@ public class EndToEndTest
 
         // A converter takes its format as a positional argument rather than a .format
         // suffix, which is upstream's shape.
-        CliResult result = CliRunner.Run(
+        var result = CliRunner.Run(
             ["POSTaggerConverter", "conllu", "-data", data, "-encoding", "UTF-8"]);
 
         ClassicAssert.AreEqual(0, result.ExitCode, "stderr was: " + result.Error);
@@ -125,14 +125,14 @@ public class EndToEndTest
         string conllu = temp.CopyResource("de-ud-train-sample.conllu");
         string tokenTrain = temp.CopyResource("token.train");
 
-        CliResult first = CliRunner.Run(
+        var first = CliRunner.Run(
             ["POSTaggerConverter", "conllu", "-data", conllu, "-encoding", "UTF-8"]);
 
         ClassicAssert.AreEqual(0, first.ExitCode, "stderr was: " + first.Error);
         ClassicAssert.IsNotEmpty(first.Out);
 
         // A different tool, over a different corpus, in the same process.
-        CliResult second = CliRunner.Run(
+        var second = CliRunner.Run(
             ["TokenizerTrainer", "-model", temp.PathOf("tok.bin"), "-lang", "eng",
              "-data", tokenTrain, "-encoding", "UTF-8"]);
 
@@ -140,7 +140,7 @@ public class EndToEndTest
         FileAssert.Exists(temp.PathOf("tok.bin"));
 
         // And the first tool again, to catch a stale binding in the other direction.
-        CliResult third = CliRunner.Run(
+        var third = CliRunner.Run(
             ["POSTaggerConverter", "conllu", "-data", conllu, "-encoding", "UTF-8"]);
 
         ClassicAssert.AreEqual(0, third.ExitCode, "stderr was: " + third.Error);
@@ -150,7 +150,7 @@ public class EndToEndTest
     [Test]
     public void TestConverterWithoutAFormatPrintsHelp()
     {
-        CliResult result = CliRunner.Run(["POSTaggerConverter"]);
+        var result = CliRunner.Run(["POSTaggerConverter"]);
 
         ClassicAssert.AreEqual(0, result.ExitCode);
         StringAssert.Contains("Usage: nopennlp POSTaggerConverter", result.Out);
@@ -164,7 +164,7 @@ public class EndToEndTest
 
         // The .conllu suffix selects the format, and -tagset is that format's own option,
         // merged into the same command as the tool's -model and -lang.
-        CliResult result = CliRunner.Run(
+        var result = CliRunner.Run(
             ["POSTaggerTrainer.conllu", "-model", model, "-lang", "deu", "-data", data, "-tagset", "u"]);
 
         ClassicAssert.AreEqual(0, result.ExitCode, "stderr was: " + result.Error);
@@ -175,7 +175,7 @@ public class EndToEndTest
     public void TestMissingRequiredOptionExitsNonZero()
     {
         // -model is required; omitting it must fail rather than train into nowhere.
-        CliResult result = CliRunner.Run(["TokenizerTrainer", "-lang", "eng"]);
+        var result = CliRunner.Run(["TokenizerTrainer", "-lang", "eng"]);
 
         ClassicAssert.AreEqual(1, result.ExitCode);
     }
@@ -198,7 +198,7 @@ public class EndToEndTest
 
         // A missing input file is an IO error, which upstream exits -1 for; on POSIX that
         // surfaces as 255, exactly as it does from the JVM.
-        CliResult missingFile = CliRunner.Run(
+        var missingFile = CliRunner.Run(
             ["TokenizerTrainer", "-model", temp.PathOf("m.bin"), "-lang", "eng",
              "-data", temp.PathOf("nonexistent.train"), "-encoding", "UTF-8"]);
 
@@ -208,7 +208,7 @@ public class EndToEndTest
         StringAssert.DoesNotContain("   at ", missingFile.Error);
 
         // A bad parameter value is exit 1, and likewise must not surface as a stack trace.
-        CliResult badLanguage = CliRunner.Run(
+        var badLanguage = CliRunner.Run(
             ["TokenNameFinderConverter", "conll02", "-data", data, "-lang", "eng", "-types", "per"]);
 
         ClassicAssert.AreEqual(1, badLanguage.ExitCode);

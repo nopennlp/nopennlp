@@ -60,15 +60,15 @@ public class LemmatizerFineGrainedReportListener : FineGrainedReportListener,
     // methods inherited from EvaluationMonitor
 
     /// <inheritdoc/>
-    public void Misclassified(LemmaSample reference, LemmaSample prediction) =>
-        StatsAdd(reference, prediction);
+    public void Misclassified(LemmaSample reference, LemmaSample prediction)
+        => StatsAdd(reference, prediction);
 
     /// <inheritdoc/>
-    public void CorrectlyClassified(LemmaSample reference, LemmaSample prediction) =>
-        StatsAdd(reference, prediction);
+    public void CorrectlyClassified(LemmaSample reference, LemmaSample prediction)
+        => StatsAdd(reference, prediction);
 
-    private void StatsAdd(LemmaSample reference, LemmaSample prediction) =>
-        GetStats().Add(reference.Tokens, reference.Tags, prediction.Tags);
+    private void StatsAdd(LemmaSample reference, LemmaSample prediction)
+        => GetStats().Add(reference.Tokens, reference.Tags, prediction.Tags);
 
     /// <inheritdoc/>
     public override void WriteReport()

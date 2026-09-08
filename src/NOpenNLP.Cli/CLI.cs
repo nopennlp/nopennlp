@@ -22,9 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.Globalization;
-using System.Linq;
 using NOpenNLP.Tools.Formats;
-using NOpenNLP.Tools.Util;
 using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Cmdline;
@@ -54,7 +52,7 @@ public static class CLI
 
         var map = new JCG.OrderedDictionary<string, CmdLineTool>();
 
-        foreach (CmdLineTool tool in tools)
+        foreach (var tool in tools)
         {
             map[tool.Name] = tool;
         }
@@ -75,8 +73,8 @@ public static class CLI
     private static void Usage()
     {
         // NOpenNLP: Version is ambiguous with System.Version here, so it is qualified.
-        Console.Write("NOpenNLP " + Util.Version.CurrentVersion() + ". ");
-        Console.WriteLine("Usage: " + Cmd + " TOOL");
+        Console.Write($"NOpenNLP {Util.Version.CurrentVersion()}. ");
+        Console.WriteLine($"Usage: {Cmd} TOOL");
         Console.WriteLine("where TOOL is one of:");
 
         // distance of tool name from line start
@@ -90,9 +88,9 @@ public static class CLI
         }
         numberOfSpaces = numberOfSpaces + 4;
 
-        foreach (CmdLineTool tool in toolLookupMap.Values)
+        foreach (var tool in toolLookupMap.Values)
         {
-            Console.Write("  " + tool.Name);
+            Console.Write($"  {tool.Name}");
 
             for (int i = 0; i < Math.Abs(tool.Name.Length - numberOfSpaces); i++)
             {
@@ -103,7 +101,7 @@ public static class CLI
         }
 
         Console.WriteLine("All tools print help when invoked with help parameter");
-        Console.WriteLine("Example: " + Cmd + " SimpleTokenizer help");
+        Console.WriteLine($"Example: {Cmd} SimpleTokenizer help");
     }
 
     /// <summary>
@@ -132,8 +130,8 @@ public static class CLI
         int idx = toolName.IndexOf('.');
         if (-1 < idx)
         {
-            formatName = toolName.Substring(idx + 1);
-            toolName = toolName.Substring(0, idx);
+            formatName = toolName[(idx + 1)..];
+            toolName = toolName[..idx];
         }
 
         toolLookupMap.TryGetValue(toolName, out CmdLineTool? tool);
@@ -142,7 +140,7 @@ public static class CLI
         {
             if (tool is null)
             {
-                throw new TerminateToolException(1, "Tool " + toolName + " is not found.");
+                throw new TerminateToolException(1, $"Tool {toolName} is not found.");
             }
 
             if ((0 == toolArguments.Length && tool.HasParams)
@@ -166,17 +164,17 @@ public static class CLI
             }
             else if (-1 != idx)
             {
-                throw new TerminateToolException(1, "Tool " + toolName + " does not support formats.");
+                throw new TerminateToolException(1, $"Tool {toolName} does not support formats.");
             }
 
             // Each invocation gets its own format options; see FormatOptions.
             FormatOptions.NewScope();
 
-            Command command = tool.CreateCommand(args[0]);
+            var command = tool.CreateCommand(args[0]);
             var root = new RootCommand(Cmd);
             root.Subcommands.Add(command);
 
-            ParseResult parseResult = root.Parse(args);
+            var parseResult = root.Parse(args);
 
             if (parseResult.Errors.Count > 0)
             {

@@ -31,8 +31,8 @@ namespace NOpenNLP.Tools.Formats.Moses;
 public class MosesSentenceSampleStreamFactory : AbstractSampleStreamFactory<SentenceSample?>
 {
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [FormatParameters.Data, FormatParameters.Encoding];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [FormatParameters.Data, FormatParameters.Encoding];
 
     /// <inheritdoc/>
     public override IObjectStream<SentenceSample?> Create(IFormatParameterValues values)
@@ -55,7 +55,7 @@ public class MosesSentenceSampleStreamFactory : AbstractSampleStreamFactory<Sent
         return new MosesSentenceSampleStream(lineStream);
     }
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<SentenceSample?>("moses",
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<SentenceSample?>("moses",
             new MosesSentenceSampleStreamFactory());
 }

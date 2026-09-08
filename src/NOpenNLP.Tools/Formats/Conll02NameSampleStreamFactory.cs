@@ -41,8 +41,8 @@ public class Conll02NameSampleStreamFactory : LanguageSampleStreamFactory<NameSa
         new FormatParameter<string>("-types", "per,loc,org,misc");
 
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [FormatParameters.Data, FormatParameters.Encoding, LangParam, TypesParam];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [FormatParameters.Data, FormatParameters.Encoding, LangParam, TypesParam];
 
     /// <inheritdoc/>
     public override IObjectStream<NameSample?> Create(IFormatParameterValues values)
@@ -106,7 +106,7 @@ public class Conll02NameSampleStreamFactory : LanguageSampleStreamFactory<NameSa
         }
     }
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<NameSample?>(
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<NameSample?>(
             "conll02", new Conll02NameSampleStreamFactory());
 }

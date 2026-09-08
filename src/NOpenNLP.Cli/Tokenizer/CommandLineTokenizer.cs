@@ -40,17 +40,14 @@ internal sealed class CommandLineTokenizer(ITokenizer tokenizer)
 
         try
         {
-            IObjectStream<string?> untokenizedLineStream =
-                new PlainTextByLineStream(new SystemInputStreamFactory(),
+            var untokenizedLineStream = new PlainTextByLineStream(new SystemInputStreamFactory(),
                     SystemInputStreamFactory.Encoding);
 
-            IObjectStream<string?> tokenizedLineStream = new WhitespaceTokenStream(
-                new TokenizerStream(tokenizer, untokenizedLineStream));
+            var tokenizedLineStream = new WhitespaceTokenStream(new TokenizerStream(tokenizer, untokenizedLineStream));
 
             perfMon.Start();
 
-            string? tokenizedLine;
-            while ((tokenizedLine = tokenizedLineStream.Read()) != null)
+            while (tokenizedLineStream.Read() is { } tokenizedLine)
             {
                 Console.WriteLine(tokenizedLine);
                 perfMon.IncrementCounter();

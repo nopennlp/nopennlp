@@ -39,20 +39,17 @@ public sealed class CheckModelUpdaterTool : ModelUpdaterTool
     protected override ParserModel TrainAndUpdate(ParserModel originalModel,
         IObjectStream<Parse?> parseSamples)
     {
-        OpenNlpDictionary? mdict = ParserTrainerTool.BuildDictionary(parseSamples,
-            originalModel.HeadRules!, 5);
+        var mdict = ParserTrainerTool.BuildDictionary(parseSamples, originalModel.HeadRules!, 5);
 
         parseSamples.Reset();
 
         // TODO: Maybe that should be part of the ChunkingParser ...
         // Training build
         Console.WriteLine("Training check model");
-        IObjectStream<Event?> bes = new ParserEventStream(parseSamples, originalModel.HeadRules!,
-            ParserEventTypeEnum.CHECK, mdict);
+        var bes = new ParserEventStream(parseSamples, originalModel.HeadRules!, ParserEventTypeEnum.CHECK, mdict);
 
-        IEventTrainer trainer = TrainerFactory.GetEventTrainer(
-            ModelUtil.CreateDefaultTrainingParameters(), null);
-        IMaxentModel checkModel = trainer.Train(bes);
+        var trainer = TrainerFactory.GetEventTrainer(ModelUtil.CreateDefaultTrainingParameters(), null);
+        var checkModel = trainer.Train(bes);
 
         parseSamples.Dispose();
 

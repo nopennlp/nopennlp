@@ -86,8 +86,8 @@ public class BratDocument
     /// <returns>the annotation, or <c>null</c> if no annotation has that id</returns>
     // NOpenNLP: upstream returns Map.get, which yields null for an unknown id; the C#
     // indexer would throw, so this uses TryGetValue and keeps the null.
-    public BratAnnotation? GetAnnotation(string id) =>
-        annotationMap.TryGetValue(id, out var annotation) ? annotation : null;
+    public BratAnnotation? GetAnnotation(string id)
+        => annotationMap.TryGetValue(id, out var annotation) ? annotation : null;
 
     public ICollection<BratAnnotation> Annotations => annotationMap.Values;
 

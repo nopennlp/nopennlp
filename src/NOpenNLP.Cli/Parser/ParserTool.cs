@@ -38,19 +38,19 @@ public sealed class ParserTool : BasicCmdLineTool
     /// <inheritdoc/>
     // NOpenNLP: the text is reproduced verbatim, including upstream's "log-probablities"
     // typo and the trailing space after "sentences", because it is what users see.
-    public override string GetHelp() =>
-        "Usage: " + CLI.Cmd + " " + Name + " [-bs n -ap n -k n -tk tok_model] model < sentences \n"
+    public override string GetHelp()
+        => "Usage: " + CLI.Cmd + " " + Name + " [-bs n -ap n -k n -tk tok_model] model < sentences \n"
             + "-bs n: Use a beam size of n.\n"
             + "-ap f: Advance outcomes in with at least f% of the probability mass.\n"
             + "-k n: Show the top n parses.  This will also display their log-probablities.\n"
             + "-tk tok_model: Use the specified tokenizer model to tokenize the sentences. "
             + "Defaults to a WhitespaceTokenizer.";
 
-    private static readonly Regex untokenizedParenPattern1 = new Regex("([^ ])([({)}])");
-    private static readonly Regex untokenizedParenPattern2 = new Regex("([({)}])([^ ])");
+    private static readonly Regex untokenizedParenPattern1 = new("([^ ])([({)}])");
+    private static readonly Regex untokenizedParenPattern2 = new("([({)}])([^ ])");
 
-    public static Parse[] ParseLine(string line, IParser parser, int numParses) =>
-        ParseLine(line, parser, WhitespaceTokenizer.INSTANCE, numParses);
+    public static Parse[] ParseLine(string line, IParser parser, int numParses)
+        => ParseLine(line, parser, WhitespaceTokenizer.INSTANCE, numParses);
 
     public static Parse[] ParseLine(string line, IParser parser, ITokenizer tokenizer, int numParses)
     {
@@ -95,7 +95,7 @@ public sealed class ParserTool : BasicCmdLineTool
         }
         else
         {
-            ParserModel model = new ParserModelLoader().Load(new FileInfo(args[args.Length - 1]));
+            var model = new ParserModelLoader().Load(new FileInfo(args[^1]));
 
             int? beamSize = CmdLineUtil.GetIntParameter("-bs", args);
             if (beamSize == null)
@@ -126,14 +126,11 @@ public sealed class ParserTool : BasicCmdLineTool
             string? tokenizerModelName = CmdLineUtil.GetParameter("-tk", args);
             if (tokenizerModelName != null)
             {
-                TokenizerModel tokenizerModel =
-                    new TokenizerModelLoader().Load(new FileInfo(tokenizerModelName));
+                var tokenizerModel = new TokenizerModelLoader().Load(new FileInfo(tokenizerModelName));
                 tokenizer = new TokenizerME(tokenizerModel);
             }
 
-            IParser parser = ParserFactory.Create(model, beamSize.Value, advancePercentage.Value);
-
-            IObjectStream<string?> lineStream;
+            var parser = ParserFactory.Create(model, beamSize.Value, advancePercentage.Value);
 
             // NOpenNLP: upstream leaves perfMon null until inside the try, so an
             // IOException from the stream construction makes the
@@ -143,11 +140,9 @@ public sealed class ParserTool : BasicCmdLineTool
 
             try
             {
-                lineStream = new PlainTextByLineStream(new SystemInputStreamFactory(),
-                    SystemInputStreamFactory.Encoding);
+                var lineStream = new PlainTextByLineStream(new SystemInputStreamFactory(), SystemInputStreamFactory.Encoding);
                 perfMon.Start();
-                string? line;
-                while ((line = lineStream.Read()) != null)
+                while (lineStream.Read() is { } line)
                 {
                     if (line.Trim().Length == 0)
                     {
@@ -155,7 +150,7 @@ public sealed class ParserTool : BasicCmdLineTool
                     }
                     else
                     {
-                        Parse[] parses = ParseLine(line, parser, tokenizer, numParses.Value);
+                        var parses = ParseLine(line, parser, tokenizer, numParses.Value);
 
                         for (int pi = 0, pn = parses.Length; pi < pn; pi++)
                         {
@@ -165,8 +160,7 @@ public sealed class ParserTool : BasicCmdLineTool
                                 // Double.toString, which always renders a decimal point
                                 // and uses the invariant format. J2N's "J" format
                                 // reproduces that, as elsewhere in the port.
-                                Console.Write(pi + " " + J2N.Numerics.Double.ToString(
-                                    parses[pi].Prob, "J", CultureInfo.InvariantCulture) + " ");
+                                Console.Write($"{pi} {J2N.Numerics.Double.ToString(parses[pi].Prob, "J", CultureInfo.InvariantCulture)} ");
                             }
 
                             parses[pi].Show();

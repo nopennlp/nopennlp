@@ -28,14 +28,8 @@ namespace NOpenNLP.Tools.Cmdline.Langdetect;
 /// <para/>
 /// <b>Note:</b> Do not use this class, internal use only!
 /// </summary>
-public class LanguageDetectorModelLoader : ModelLoader<LanguageDetectorModel>
+public class LanguageDetectorModelLoader() : ModelLoader<LanguageDetectorModel>("Language Detector")
 {
-    public LanguageDetectorModelLoader()
-        : base("Language Detector")
-    {
-    }
-
     /// <inheritdoc/>
-    protected override LanguageDetectorModel LoadModel(Stream modelIn) =>
-        new LanguageDetectorModel(modelIn);
+    protected override LanguageDetectorModel LoadModel(Stream modelIn) => new(modelIn);
 }

@@ -32,7 +32,7 @@ public sealed class POSTaggerTool : BasicCmdLineTool
     public override string ShortDescription => "learnable part of speech tagger";
 
     /// <inheritdoc/>
-    public override string GetHelp() => "Usage: " + CLI.Cmd + " " + Name + " model < sentences";
+    public override string GetHelp() => $"Usage: {CLI.Cmd} {Name} model < sentences";
 
     /// <inheritdoc/>
     public override void Run(string[] args)
@@ -43,11 +43,9 @@ public sealed class POSTaggerTool : BasicCmdLineTool
         }
         else
         {
-            POSModel model = new POSModelLoader().Load(new FileInfo(args[0]));
+            var model = new POSModelLoader().Load(new FileInfo(args[0]));
 
             var tagger = new POSTaggerME(model);
-
-            IObjectStream<string?> lineStream;
 
             // NOpenNLP: upstream declares perfMon null before the try and calls
             // stopAndPrintFinalResult() after the catch, so an IOException from the
@@ -58,11 +56,9 @@ public sealed class POSTaggerTool : BasicCmdLineTool
 
             try
             {
-                lineStream = new PlainTextByLineStream(new SystemInputStreamFactory(),
-                    SystemInputStreamFactory.Encoding);
+                var lineStream = new PlainTextByLineStream(new SystemInputStreamFactory(), SystemInputStreamFactory.Encoding);
                 perfMon.Start();
-                string? line;
-                while ((line = lineStream.Read()) != null)
+                while (lineStream.Read() is { } line)
                 {
                     string[] whitespaceTokenizerLine = WhitespaceTokenizer.INSTANCE.Tokenize(line);
                     string[] tags = tagger.Tag(whitespaceTokenizerLine);

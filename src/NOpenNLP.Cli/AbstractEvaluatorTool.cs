@@ -21,7 +21,6 @@
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
-using System.Linq;
 using NOpenNLP.Tools.Formats;
 using NOpenNLP.Tools.Util;
 
@@ -50,12 +49,12 @@ public abstract class AbstractEvaluatorTool<T> : TypedCmdLineTool
     protected IObjectStream<T>? sampleStream;
 
     /// <inheritdoc/>
-    protected override IEnumerable<string> GetFormatNames() =>
-        StreamFactoryRegistry.GetFactories<T>().Keys;
+    protected override IEnumerable<string> GetFormatNames()
+        => StreamFactoryRegistry.GetFactories<T>().Keys;
 
     /// <inheritdoc/>
-    protected override IEnumerable<IFormatParameter>? GetFormatParameters(string format) =>
-        StreamFactoryRegistry.GetFactory<T>(format)?.Parameters;
+    protected override IEnumerable<IFormatParameter>? GetFormatParameters(string format)
+        => StreamFactoryRegistry.GetFactory<T>(format)?.Parameters;
 
     /// <summary>
     /// The options this tool accepts, beyond the selected format's own.
@@ -77,16 +76,14 @@ public abstract class AbstractEvaluatorTool<T> : TypedCmdLineTool
     // help a user with a bad format name needs.
     protected IObjectStreamFactory<T> GetStreamFactory(string format)
     {
-        IObjectStreamFactory<T>? streamFactory = StreamFactoryRegistry.GetFactory<T>(format);
+        var streamFactory = StreamFactoryRegistry.GetFactory<T>(format);
 
         if (null != streamFactory)
         {
             return streamFactory;
         }
 
-        throw new TerminateToolException(1, "Format " + format + " is not found.\n"
-            + "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp()
-            + "[options...]");
+        throw new TerminateToolException(1, $"Format {format} is not found.\nUsage: {CLI.Cmd} {Name}{GetFormatsHelp()}[options...]");
     }
 
     /// <inheritdoc/>
@@ -97,7 +94,7 @@ public abstract class AbstractEvaluatorTool<T> : TypedCmdLineTool
         // The selected format contributes its own options, so `Tool.format -data x` gets
         // one merged option list -- which is what upstream assembles by validating the
         // tool's params and the factory's params against the same argument array.
-        IObjectStreamFactory<T> streamFactory = GetStreamFactory(Format);
+        var streamFactory = GetStreamFactory(Format);
 
         // NOpenNLP: the format's options are added FIRST, and a tool option that repeats
         // one of their names is skipped, so exactly one Option instance carries each name.
@@ -116,14 +113,14 @@ public abstract class AbstractEvaluatorTool<T> : TypedCmdLineTool
         // in help, which it still is.
         var formatOptionNames = new HashSet<string>(StringComparer.Ordinal);
 
-        foreach (IFormatParameter parameter in streamFactory.Parameters)
+        foreach (var parameter in streamFactory.Parameters)
         {
-            Option option = FormatOptions.ToOption(parameter);
+            var option = FormatOptions.ToOption(parameter);
             formatOptionNames.Add(option.Name);
             command.Options.Add(option);
         }
 
-        foreach (Option option in GetToolOptions())
+        foreach (var option in GetToolOptions())
         {
             if (!formatOptionNames.Contains(option.Name))
             {

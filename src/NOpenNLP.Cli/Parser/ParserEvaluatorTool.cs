@@ -38,20 +38,20 @@ public class ParserEvaluatorTool : AbstractEvaluatorTool<Parse?>
     protected override IEnumerable<Option> GetToolOptions() => [model, misclassified];
 
     /// <inheritdoc/>
-    public override string ShortDescription =>
-        "Measures the performance of the Parser model with the reference data";
+    public override string ShortDescription
+        => "Measures the performance of the Parser model with the reference data";
 
     /// <inheritdoc/>
-    public override string GetHelp(string format) =>
-        "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format)
+    public override string GetHelp(string format)
+        => "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format)
             + OptionUsage.CreateUsage(GetToolOptions(), GetStreamFactory(format).Parameters);
 
     /// <inheritdoc/>
     protected override void Run(ParseResult parseResult)
     {
-        ParserModel model = new ParserModelLoader().Load(parseResult.GetValueByName(this.model)!);
+        var model = new ParserModelLoader().Load(parseResult.GetValueByName(this.model)!);
 
-        IParser parser = ParserFactory.Create(model);
+        var parser = ParserFactory.Create(model);
 
         var evaluator = new ParserEvaluator(parser);
 
@@ -63,8 +63,7 @@ public class ParserEvaluatorTool : AbstractEvaluatorTool<Parse?>
         catch (IOException e)
         {
             Console.Error.WriteLine("failed");
-            throw new TerminateToolException(-1, "IO error while reading test data: "
-                + e.Message, e);
+            throw new TerminateToolException(-1, $"IO error while reading test data: {e.Message}", e);
         }
         finally
         {

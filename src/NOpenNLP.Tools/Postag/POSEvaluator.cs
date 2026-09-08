@@ -91,7 +91,7 @@ public class POSEvaluator : Evaluator<POSSample>
     /// <summary>
     /// Represents this objects as human readable <see cref="string"/>.
     /// </summary>
-    public override string ToString() =>
-        "Accuracy:" + J2N.Numerics.Double.ToString(wordAccuracy.Value, "J", CultureInfo.InvariantCulture) +
+    public override string ToString()
+        => "Accuracy:" + J2N.Numerics.Double.ToString(wordAccuracy.Value, "J", CultureInfo.InvariantCulture) +
             " Number of Samples: " + wordAccuracy.Count.ToString(CultureInfo.InvariantCulture);
 }

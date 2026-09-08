@@ -57,7 +57,7 @@ public class TokenEvaluationErrorListener : EvaluationErrorPrinter<TokenSample>,
     }
 
     /// <inheritdoc/>
-    public override void Misclassified(TokenSample reference, TokenSample prediction) =>
-        PrintError(reference.TokenSpans, prediction.TokenSpans,
+    public override void Misclassified(TokenSample reference, TokenSample prediction)
+        => PrintError(reference.TokenSpans, prediction.TokenSpans,
             reference, prediction, reference.Text);
 }

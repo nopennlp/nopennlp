@@ -32,7 +32,7 @@ public class ChunkerMETool : BasicCmdLineTool
     public override string ShortDescription => "learnable chunker";
 
     /// <inheritdoc/>
-    public override string GetHelp() => "Usage: " + CLI.Cmd + " " + Name + " model < sentences";
+    public override string GetHelp() => $"Usage: {CLI.Cmd} {Name} model < sentences";
 
     /// <inheritdoc/>
     public override void Run(string[] args)
@@ -43,11 +43,9 @@ public class ChunkerMETool : BasicCmdLineTool
         }
         else
         {
-            ChunkerModel model = new ChunkerModelLoader().Load(new FileInfo(args[0]));
+            var model = new ChunkerModelLoader().Load(new FileInfo(args[0]));
 
             var chunker = new ChunkerME(model);
-
-            IObjectStream<string?> lineStream;
 
             // NOpenNLP: upstream leaves perfMon null until inside the try, so an
             // IOException from the stream construction makes the
@@ -57,11 +55,10 @@ public class ChunkerMETool : BasicCmdLineTool
 
             try
             {
-                lineStream = new PlainTextByLineStream(new SystemInputStreamFactory(),
+                var lineStream = new PlainTextByLineStream(new SystemInputStreamFactory(),
                     SystemInputStreamFactory.Encoding);
                 perfMon.Start();
-                string? line;
-                while ((line = lineStream.Read()) != null)
+                while (lineStream.Read() is { } line)
                 {
                     POSSample posSample;
                     try

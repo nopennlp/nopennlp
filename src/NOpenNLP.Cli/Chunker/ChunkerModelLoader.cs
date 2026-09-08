@@ -28,13 +28,8 @@ namespace NOpenNLP.Tools.Cmdline.Chunker;
 /// <para/>
 /// <b>Note:</b> Do not use this class, internal use only!
 /// </summary>
-public class ChunkerModelLoader : ModelLoader<ChunkerModel>
+public class ChunkerModelLoader() : ModelLoader<ChunkerModel>("Chunker")
 {
-    public ChunkerModelLoader()
-        : base("Chunker")
-    {
-    }
-
     /// <inheritdoc/>
-    protected override ChunkerModel LoadModel(Stream modelIn) => new ChunkerModel(modelIn);
+    protected override ChunkerModel LoadModel(Stream modelIn) => new(modelIn);
 }

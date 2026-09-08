@@ -47,8 +47,8 @@ public class ADPOSSampleStreamFactory : LanguageSampleStreamFactory<POSSample?>
             "combine POS Tags with word features, like number and gender.", false);
 
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [EncodingParam, FormatParameters.Data, FormatParameters.Lang,
+    public override IEnumerable<IFormatParameter> Parameters
+        => [EncodingParam, FormatParameters.Data, FormatParameters.Lang,
             ExpandMEParam, IncludeFeaturesParam];
 
     /// <inheritdoc/>
@@ -68,7 +68,7 @@ public class ADPOSSampleStreamFactory : LanguageSampleStreamFactory<POSSample?>
             values.Get<bool>(ExpandMEParam), values.Get<bool>(IncludeFeaturesParam));
     }
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<POSSample?>(
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<POSSample?>(
             "ad", new ADPOSSampleStreamFactory());
 }

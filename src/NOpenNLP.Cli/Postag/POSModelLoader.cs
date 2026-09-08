@@ -28,13 +28,8 @@ namespace NOpenNLP.Tools.Cmdline.Postag;
 /// <para/>
 /// <b>Note:</b> Do not use this class, internal use only!
 /// </summary>
-public sealed class POSModelLoader : ModelLoader<POSModel>
+public sealed class POSModelLoader() : ModelLoader<POSModel>("POS Tagger")
 {
-    public POSModelLoader()
-        : base("POS Tagger")
-    {
-    }
-
     /// <inheritdoc/>
-    protected override POSModel LoadModel(Stream modelIn) => new POSModel(modelIn);
+    protected override POSModel LoadModel(Stream modelIn) => new(modelIn);
 }

@@ -192,8 +192,8 @@ public class PerceptronTrainer : AbstractEventTrainer
         set => useSkippedlAveraging = value;
     }
 
-    public virtual AbstractModel TrainModel(int iterations, IDataIndexer di, int cutoff) =>
-        TrainModel(iterations, di, cutoff, true);
+    public virtual AbstractModel TrainModel(int iterations, IDataIndexer di, int cutoff)
+        => TrainModel(iterations, di, cutoff, true);
 
     public virtual AbstractModel TrainModel(int iterations, IDataIndexer di, int cutoff, bool useAverage)
     {

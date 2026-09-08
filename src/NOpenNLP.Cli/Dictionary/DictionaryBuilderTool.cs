@@ -41,8 +41,8 @@ public class DictionaryBuilderTool : BasicCmdLineTool
     // NOpenNLP: reproduces what upstream's ArgumentParser.createUsage() emits for
     // DictionaryBuilderParams, including the option order, which comes from Java
     // reflection and is what the OpenNLP manual documents.
-    public override string GetHelp() =>
-        "Usage: " + CLI.Cmd + " " + Name
+    public override string GetHelp()
+        => "Usage: " + CLI.Cmd + " " + Name
             + " -outputFile out -inputFile in [-encoding charsetName]\n"
             + "\n"
             + "Arguments description:\n"
@@ -56,9 +56,9 @@ public class DictionaryBuilderTool : BasicCmdLineTool
     /// <inheritdoc/>
     public override Command CreateCommand(string commandName)
     {
-        Option<FileInfo> outputFile = OutputFileOption();
-        Option<FileInfo> inputFile = InputFileOption();
-        Option<string> encoding = ToolParams.Encoding();
+        var outputFile = OutputFileOption();
+        var inputFile = InputFileOption();
+        var encoding = ToolParams.Encoding();
 
         var command = new Command(commandName, ShortDescription);
         command.Options.Add(outputFile);
@@ -76,8 +76,8 @@ public class DictionaryBuilderTool : BasicCmdLineTool
     }
 
     /// <summary>From <c>DictionaryBuilderParams</c>.</summary>
-    private static Option<FileInfo> InputFileOption() =>
-        new Option<FileInfo>("-inputFile")
+    private static Option<FileInfo> InputFileOption()
+        => new("-inputFile")
         {
             Description = "Plain file with one entry per line",
             HelpName = "in",
@@ -85,8 +85,8 @@ public class DictionaryBuilderTool : BasicCmdLineTool
         };
 
     /// <summary>From <c>DictionaryBuilderParams</c>.</summary>
-    private static Option<FileInfo> OutputFileOption() =>
-        new Option<FileInfo>("-outputFile")
+    private static Option<FileInfo> OutputFileOption()
+        => new("-outputFile")
         {
             Description = "The dictionary file.",
             HelpName = "out",
@@ -123,13 +123,13 @@ public class DictionaryBuilderTool : BasicCmdLineTool
                 detectEncodingFromByteOrderMarks: false);
             using Stream @out = dictOutFile.Create();
 
-            JDict.Dictionary dict = JDict.Dictionary.ParseOneEntryPerLine(@in);
+            var dict = JDict.Dictionary.ParseOneEntryPerLine(@in);
             dict.Serialize(@out);
         }
         catch (IOException e)
         {
             throw new TerminateToolException(-1,
-                "IO error while reading training data or indexing data: " + e.Message, e);
+                $"IO error while reading training data or indexing data: {e.Message}", e);
         }
     }
 }

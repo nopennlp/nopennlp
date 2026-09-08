@@ -42,12 +42,12 @@ public sealed class TokenizerTrainerTool : AbstractTrainerTool<TokenSample?>
     public override string ShortDescription => "trainer for the learnable tokenizer";
 
     /// <inheritdoc/>
-    protected override IEnumerable<Option> GetToolOptions() =>
-        [alphaNumOpt, abbDict, factoryName, lang, @params, model];
+    protected override IEnumerable<Option> GetToolOptions()
+        => [alphaNumOpt, abbDict, factoryName, lang, @params, model];
 
     /// <inheritdoc/>
-    public override string GetHelp(string format) =>
-        "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format) +
+    public override string GetHelp(string format)
+        => "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format) +
         OptionUsage.CreateUsage(GetToolOptions(), GetStreamFactory(format).Parameters);
 
     /// <exception cref="IOException">if the dictionary cannot be read</exception>
@@ -75,8 +75,7 @@ public sealed class TokenizerTrainerTool : AbstractTrainerTool<TokenSample?>
         {
             if (!TrainerFactory.IsValid(mlParams))
             {
-                throw new TerminateToolException(1, "Training parameters file '" + paramsFile +
-                    "' is invalid!");
+                throw new TerminateToolException(1, $"Training parameters file '{paramsFile}' is invalid!");
             }
 
             if (TrainerFactory.TrainerType.EVENT_MODEL_TRAINER
@@ -91,15 +90,15 @@ public sealed class TokenizerTrainerTool : AbstractTrainerTool<TokenSample?>
             mlParams = ModelUtil.CreateDefaultTrainingParameters();
         }
 
-        FileInfo modelOutFile = parseResult.GetRequiredValueByName(model);
+        var modelOutFile = parseResult.GetRequiredValueByName(model);
         CmdLineUtil.CheckOutputFile("tokenizer model", modelOutFile);
 
         TokenizerModel tokenizerModel;
         try
         {
-            OpenNlpDictionary? dict = LoadDict(parseResult.GetValueByName(abbDict));
+            var dict = LoadDict(parseResult.GetValueByName(abbDict));
 
-            TokenizerFactory? tokFactory = TokenizerFactory.Create(
+            var tokFactory = TokenizerFactory.Create(
                 parseResult.GetValueByName(factoryName), parseResult.GetRequiredValueByName(lang), dict,
                 ToolParams.JavaBooleanValue(parseResult.GetValueByName(alphaNumOpt)), null!);
             tokenizerModel = TokenizerME.Train(sampleStream!, tokFactory!, mlParams);

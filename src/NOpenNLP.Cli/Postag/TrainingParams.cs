@@ -33,36 +33,34 @@ namespace NOpenNLP.Tools.Cmdline.Postag;
 // BasicTrainingParams contributes -- -lang and -params -- live on ToolParams.
 internal static class TrainingParams
 {
-    public static Option<FileInfo?> Featuregen() =>
-        new Option<FileInfo?>("-featuregen")
+    public static Option<FileInfo?> Featuregen()
+        => new("-featuregen")
         {
             Description = "The feature generator descriptor file",
             HelpName = "featuregenFile",
         };
 
-    public static Option<DirectoryInfo?> Resources() =>
-        new Option<DirectoryInfo?>("-resources")
+    public static Option<DirectoryInfo?> Resources()
+        => new("-resources")
         {
             Description = "The resources directory",
             HelpName = "resourcesDir",
         };
 
-    public static Option<FileInfo?> Dict() =>
-        new Option<FileInfo?>("-dict")
+    public static Option<FileInfo?> Dict()
+        => new("-dict")
         {
             Description = "The XML tag dictionary file",
             HelpName = "dictionaryPath",
         };
 
-    public static Option<int?> TagDictCutoff() =>
-        new Option<int?>("-tagDictCutoff")
+    public static Option<int?> TagDictCutoff()
+        => new("-tagDictCutoff")
         {
-            Description =
-                "TagDictionary cutoff. If specified will create/expand a mutable TagDictionary",
+            Description = "TagDictionary cutoff. If specified will create/expand a mutable TagDictionary",
             HelpName = "tagDictCutoff",
         };
 
-    public static Option<string?> Factory() =>
-        ToolParams.Factory(
-            "A sub-class of POSTaggerFactory where to get implementation and resources.");
+    public static Option<string?> Factory()
+        => ToolParams.Factory("A sub-class of POSTaggerFactory where to get implementation and resources.");
 }

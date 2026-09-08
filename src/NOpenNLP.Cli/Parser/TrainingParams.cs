@@ -32,23 +32,23 @@ namespace NOpenNLP.Tools.Cmdline.Parser;
 // ToolParams; only the ones this package adds are here.
 internal static class TrainingParams
 {
-    public static Option<string> ParserType() =>
-        new Option<string>("-parserType")
+    public static Option<string> ParserType()
+        => new("-parserType")
         {
             Description = "one of CHUNKING or TREEINSERT, default is CHUNKING.",
             HelpName = "CHUNKING|TREEINSERT",
             DefaultValueFactory = _ => "CHUNKING",
         };
 
-    public static Option<string?> HeadRulesSerializerImpl() =>
-        new Option<string?>("-headRulesSerializerImpl")
+    public static Option<string?> HeadRulesSerializerImpl()
+        => new("-headRulesSerializerImpl")
         {
             Description = "head rules artifact serializer class name",
             HelpName = "className",
         };
 
-    public static Option<FileInfo> HeadRules() =>
-        new Option<FileInfo>("-headRules")
+    public static Option<FileInfo> HeadRules()
+        => new("-headRules")
         {
             Description = "head rules file.",
             HelpName = "headRulesFile",
@@ -57,6 +57,6 @@ internal static class TrainingParams
 
     // NOpenNLP: parsed leniently, the way Java's Boolean.parseBoolean is. See
     // ToolParams.JavaBoolean.
-    public static Option<string?> Fun() =>
-        ToolParams.JavaBoolean("-fun", "Learn to generate function tags.", false);
+    public static Option<string?> Fun()
+        => ToolParams.JavaBoolean("-fun", "Learn to generate function tags.", false);
 }

@@ -41,14 +41,14 @@ public sealed class SentenceDetectorEvaluatorTool : AbstractEvaluatorTool<Senten
     public override string ShortDescription => "evaluator for the learnable sentence detector";
 
     /// <inheritdoc/>
-    public override string GetHelp(string format) =>
-        "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format)
+    public override string GetHelp(string format)
+        => "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format)
             + OptionUsage.CreateUsage(GetToolOptions(), GetStreamFactory(format).Parameters);
 
     /// <inheritdoc/>
     protected override void Run(ParseResult parseResult)
     {
-        SentenceModel model = new SentenceModelLoader().Load(parseResult.GetValueByName(this.model)!);
+        var model = new SentenceModelLoader().Load(parseResult.GetValueByName(this.model)!);
 
         ISentenceDetectorEvaluationMonitor? errorListener = null;
         if (ToolParams.JavaBooleanValue(parseResult.GetValueByName(misclassified)))
@@ -56,8 +56,7 @@ public sealed class SentenceDetectorEvaluatorTool : AbstractEvaluatorTool<Senten
             errorListener = new SentenceEvaluationErrorListener();
         }
 
-        var evaluator = new SentenceDetectorEvaluator(
-            new SentenceDetectorME(model), errorListener);
+        var evaluator = new SentenceDetectorEvaluator(new SentenceDetectorME(model), errorListener);
 
         Console.Write("Evaluating ... ");
         try
@@ -66,8 +65,7 @@ public sealed class SentenceDetectorEvaluatorTool : AbstractEvaluatorTool<Senten
         }
         catch (IOException e)
         {
-            throw new TerminateToolException(-1,
-                "IO error while reading training data or indexing data: " + e.Message, e);
+            throw new TerminateToolException(-1, $"IO error while reading training data or indexing data: {e.Message}", e);
         }
         finally
         {

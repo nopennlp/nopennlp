@@ -28,13 +28,8 @@ namespace NOpenNLP.Tools.Cmdline.Tokenizer;
 /// <para/>
 /// <b>Note:</b> Do not use this class, internal use only!
 /// </summary>
-public sealed class TokenizerModelLoader : ModelLoader<TokenizerModel>
+public sealed class TokenizerModelLoader() : ModelLoader<TokenizerModel>("Tokenizer")
 {
-    public TokenizerModelLoader()
-        : base("Tokenizer")
-    {
-    }
-
     /// <inheritdoc/>
-    protected override TokenizerModel LoadModel(Stream modelIn) => new TokenizerModel(modelIn);
+    protected override TokenizerModel LoadModel(Stream modelIn) => new(modelIn);
 }

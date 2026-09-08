@@ -69,8 +69,8 @@ public class XmlUtil
     // XmlException. DtdProcessing.Parse restores upstream's behaviour, and the null
     // XmlResolver is what actually supplies the security property, refusing to fetch
     // any external DTD or entity the document points at.
-    public static XmlReaderSettings CreateSecureReaderSettings() =>
-        new XmlReaderSettings
+    public static XmlReaderSettings CreateSecureReaderSettings()
+        => new XmlReaderSettings
         {
             DtdProcessing = DtdProcessing.Parse,
             XmlResolver = null,

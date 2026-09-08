@@ -38,16 +38,16 @@ public sealed class LanguageDetectorCrossValidatorTool
     private readonly Option<FileInfo?> reportOutputFile = ToolParams.ReportOutputFile();
 
     /// <inheritdoc/>
-    public override string ShortDescription =>
-        "K-fold cross validator for the learnable Language Detector";
+    public override string ShortDescription
+        => "K-fold cross validator for the learnable Language Detector";
 
     /// <inheritdoc/>
-    protected override IEnumerable<Option> GetToolOptions() =>
-        [folds, misclassified, @params, factoryName, reportOutputFile];
+    protected override IEnumerable<Option> GetToolOptions()
+        => [folds, misclassified, @params, factoryName, reportOutputFile];
 
     /// <inheritdoc/>
-    public override string GetHelp(string format) =>
-        "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format) +
+    public override string GetHelp(string format)
+        => "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format) +
         OptionUsage.CreateUsage(GetToolOptions(), GetStreamFactory(format).Parameters);
 
     /// <inheritdoc/>
@@ -66,7 +66,7 @@ public sealed class LanguageDetectorCrossValidatorTool
         }
 
         LanguageDetectorFineGrainedReportListener? reportListener = null;
-        FileInfo? reportFile = parseResult.GetValueByName(reportOutputFile);
+        var reportFile = parseResult.GetValueByName(reportOutputFile);
         Stream? reportOutputStream = null;
         if (reportFile != null)
         {
@@ -86,13 +86,12 @@ public sealed class LanguageDetectorCrossValidatorTool
             }
         }
 
-        ILanguageDetectorEvaluationMonitor[] listenersArr = listeners.ToArray();
+        var listenersArr = listeners.ToArray();
 
         LanguageDetectorCrossValidator validator;
         try
         {
-            LanguageDetectorFactory factory =
-                LanguageDetectorFactory.Create(parseResult.GetValueByName(factoryName));
+            var factory = LanguageDetectorFactory.Create(parseResult.GetValueByName(factoryName));
             validator = new LanguageDetectorCrossValidator(mlParams, factory, listenersArr);
 
             validator.Evaluate(sampleStream!, parseResult.GetRequiredValueByName(folds));
@@ -100,7 +99,7 @@ public sealed class LanguageDetectorCrossValidatorTool
         catch (IOException e)
         {
             throw new Formats.TerminateToolException(-1,
-                "IO error while reading training data or indexing data: " + e.Message, e);
+                $"IO error while reading training data or indexing data: {e.Message}", e);
         }
         finally
         {
@@ -118,7 +117,7 @@ public sealed class LanguageDetectorCrossValidatorTool
 
         if (reportListener != null)
         {
-            Console.WriteLine("Writing fine-grained report to " + reportFile!.FullName);
+            Console.WriteLine($"Writing fine-grained report to {reportFile!.FullName}");
             reportListener.WriteReport();
 
             try
@@ -137,8 +136,9 @@ public sealed class LanguageDetectorCrossValidatorTool
         // NOpenNLP: upstream concatenates a double, which Java renders with
         // Double.toString; J2N's "J" format reproduces that, as it does elsewhere in
         // the port.
-        Console.WriteLine("Accuracy: " + J2N.Numerics.Double.ToString(
-            validator.DocumentAccuracy, "J", CultureInfo.InvariantCulture) + "\n" +
-            "Number of documents: " + validator.DocumentCount);
+        var accuracy = J2N.Numerics.Double.ToString(
+            validator.DocumentAccuracy, "J", CultureInfo.InvariantCulture);
+        Console.WriteLine($"Accuracy: {accuracy}\n" +
+                          $"Number of documents: {validator.DocumentCount}");
     }
 }

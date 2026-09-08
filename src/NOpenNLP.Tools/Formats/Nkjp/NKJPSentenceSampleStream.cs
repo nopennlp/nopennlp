@@ -118,8 +118,8 @@ public class NKJPSentenceSampleStream : ObjectStreamBase<SentenceSample?>
     // substring() and fails with a NullPointerException, so the mismatch is a broken
     // document either way -- but this keeps the failure at the same place and lets a
     // paragraph that is present but empty behave identically.
-    private static string Paragraph(IDictionary<string, string> paragraphs, string id) =>
-        paragraphs.TryGetValue(id, out string? paragraph) ? paragraph : null!;
+    private static string Paragraph(IDictionary<string, string> paragraphs, string id)
+        => paragraphs.TryGetValue(id, out string? paragraph) ? paragraph : null!;
 
     /// <inheritdoc/>
     public override void Reset() => segmentIt.Reset();

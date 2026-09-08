@@ -37,22 +37,22 @@ public sealed class POSTaggerEvaluatorTool : AbstractEvaluatorTool<POSSample?>
     private readonly Option<FileInfo?> reportOutputFile = ToolParams.ReportOutputFile();
 
     /// <inheritdoc/>
-    protected override IEnumerable<Option> GetToolOptions() =>
-        [model, misclassified, reportOutputFile];
+    protected override IEnumerable<Option> GetToolOptions()
+        => [model, misclassified, reportOutputFile];
 
     /// <inheritdoc/>
-    public override string ShortDescription =>
-        "Measures the performance of the POS tagger model with the reference data";
+    public override string ShortDescription
+        => "Measures the performance of the POS tagger model with the reference data";
 
     /// <inheritdoc/>
-    public override string GetHelp(string format) =>
-        "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format)
+    public override string GetHelp(string format)
+        => "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format)
             + OptionUsage.CreateUsage(GetToolOptions(), GetStreamFactory(format).Parameters);
 
     /// <inheritdoc/>
     protected override void Run(ParseResult parseResult)
     {
-        POSModel model = new POSModelLoader().Load(parseResult.GetValueByName(this.model)!);
+        var model = new POSModelLoader().Load(parseResult.GetValueByName(this.model)!);
 
         IPOSTaggerEvaluationMonitor? missclassifiedListener = null;
         if (ToolParams.JavaBooleanValue(parseResult.GetValueByName(misclassified)))
@@ -61,7 +61,7 @@ public sealed class POSTaggerEvaluatorTool : AbstractEvaluatorTool<POSSample?>
         }
 
         POSTaggerFineGrainedReportListener? reportListener = null;
-        FileInfo? reportFile = parseResult.GetValueByName(reportOutputFile);
+        var reportFile = parseResult.GetValueByName(reportOutputFile);
         Stream? reportOutputStream = null;
         if (reportFile != null)
         {
@@ -73,9 +73,7 @@ public sealed class POSTaggerEvaluatorTool : AbstractEvaluatorTool<POSSample?>
             }
             catch (Exception e) when (e is IOException or UnauthorizedAccessException)
             {
-                throw new TerminateToolException(-1,
-                    "IO error while creating POS Tagger fine-grained report file: "
-                        + e.Message);
+                throw new TerminateToolException(-1, $"IO error while creating POS Tagger fine-grained report file: {e.Message}");
             }
         }
 
@@ -90,8 +88,7 @@ public sealed class POSTaggerEvaluatorTool : AbstractEvaluatorTool<POSSample?>
         catch (IOException e)
         {
             Console.Error.WriteLine("failed");
-            throw new TerminateToolException(-1, "IO error while reading test data: "
-                + e.Message, e);
+            throw new TerminateToolException(-1, $"IO error while reading test data: {e.Message}", e);
         }
         finally
         {
@@ -109,8 +106,7 @@ public sealed class POSTaggerEvaluatorTool : AbstractEvaluatorTool<POSSample?>
 
         if (reportListener != null)
         {
-            Console.WriteLine("Writing fine-grained report to "
-                + reportFile!.FullName);
+            Console.WriteLine($"Writing fine-grained report to {reportFile!.FullName}");
             reportListener.WriteReport();
 
             try
@@ -129,7 +125,6 @@ public sealed class POSTaggerEvaluatorTool : AbstractEvaluatorTool<POSSample?>
         // NOpenNLP: upstream concatenates a double, which Java renders with
         // Double.toString; J2N's "J" format reproduces that, as it does elsewhere in
         // the port.
-        Console.WriteLine("Accuracy: " + J2N.Numerics.Double.ToString(
-            evaluator.WordAccuracy, "J", CultureInfo.InvariantCulture));
+        Console.WriteLine($"Accuracy: {J2N.Numerics.Double.ToString(evaluator.WordAccuracy, "J", CultureInfo.InvariantCulture)}");
     }
 }

@@ -28,14 +28,9 @@ namespace NOpenNLP.Tools.Cmdline.Parser;
 /// <para/>
 /// <b>Note:</b> Do not use this class, internal use only!
 /// </summary>
-public sealed class ParserModelLoader : ModelLoader<ParserModel>
+public sealed class ParserModelLoader() : ModelLoader<ParserModel>("Parser")
 {
-    public ParserModelLoader()
-        : base("Parser")
-    {
-    }
-
     /// <inheritdoc/>
     /// <exception cref="Util.InvalidFormatException">if the model has an invalid format</exception>
-    protected override ParserModel LoadModel(Stream modelIn) => new ParserModel(modelIn);
+    protected override ParserModel LoadModel(Stream modelIn) => new(modelIn);
 }

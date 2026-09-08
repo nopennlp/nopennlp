@@ -36,12 +36,12 @@ namespace NOpenNLP.Tools.Cmdline;
 public abstract class AbstractConverterTool<T> : TypedCmdLineTool
 {
     /// <inheritdoc/>
-    protected override IEnumerable<string> GetFormatNames() =>
-        StreamFactoryRegistry.GetFactories<T>().Keys;
+    protected override IEnumerable<string> GetFormatNames()
+        => StreamFactoryRegistry.GetFactories<T>().Keys;
 
     /// <inheritdoc/>
-    protected override IEnumerable<IFormatParameter>? GetFormatParameters(string format) =>
-        StreamFactoryRegistry.GetFactory<T>(format)?.Parameters;
+    protected override IEnumerable<IFormatParameter>? GetFormatParameters(string format)
+        => StreamFactoryRegistry.GetFactory<T>(format)?.Parameters;
 
     /// <inheritdoc/>
     // NOpenNLP: upstream builds this from a HashMap's key order, so the format list is in
@@ -51,33 +51,30 @@ public abstract class AbstractConverterTool<T> : TypedCmdLineTool
     {
         get
         {
-            IReadOnlyDictionary<string, IObjectStreamFactory<T>> factories =
-                StreamFactoryRegistry.GetFactories<T>();
+            var factories = StreamFactoryRegistry.GetFactories<T>();
 
-            List<string> foreign = factories.Keys
+            var foreign = factories.Keys
                 .Where(f => !StreamFactoryRegistry.DefaultFormat.Equals(f, StringComparison.Ordinal))
                 .ToList();
 
             if (2 == factories.Count)
             {
                 // opennlp + foreign
-                return "converts " + string.Concat(foreign) + " data format to native OpenNLP format";
+                return $"converts {string.Concat(foreign)} data format to native OpenNLP format";
             }
             else if (2 < factories.Count)
             {
-                return "converts foreign data formats (" + string.Join(",", foreign) +
-                    ") to native OpenNLP format";
+                return $"converts foreign data formats ({string.Join(",", foreign)}) to native OpenNLP format";
             }
             else
             {
-                throw new InvalidOperationException(
-                    "There should be more than 1 factory registered for converter tool");
+                throw new InvalidOperationException("There should be more than 1 factory registered for converter tool");
             }
         }
     }
 
-    private string CreateHelpString(string format, string usage) =>
-        "Usage: " + CLI.Cmd + " " + Name + " " + format + " " + usage;
+    private string CreateHelpString(string format, string usage)
+        => $"Usage: {CLI.Cmd} {Name} {format} {usage}";
 
     /// <inheritdoc/>
     public override string GetHelp()
@@ -131,11 +128,11 @@ public abstract class AbstractConverterTool<T> : TypedCmdLineTool
                 return 0;
             }
 
-            IObjectStreamFactory<T>? streamFactory = StreamFactoryRegistry.GetFactory<T>(format);
+            var streamFactory = StreamFactoryRegistry.GetFactory<T>(format);
 
             if (streamFactory is null)
             {
-                throw new TerminateToolException(1, "Format " + format + " is not found.\n" + GetHelp());
+                throw new TerminateToolException(1, $"Format {format} is not found.\n{GetHelp()}");
             }
 
             string[] formatArgs = parseResult.GetValue(remaining) ?? [];
@@ -151,33 +148,32 @@ public abstract class AbstractConverterTool<T> : TypedCmdLineTool
 
             // Parse the format's own options out of the remaining arguments.
             var formatCommand = new Command(format);
-            foreach (IFormatParameter parameter in streamFactory.Parameters)
+            foreach (var parameter in streamFactory.Parameters)
             {
                 formatCommand.Options.Add(FormatOptions.ToOption(parameter));
             }
 
-            ParseResult formatResult = formatCommand.Parse(formatArgs);
+            var formatResult = formatCommand.Parse(formatArgs);
 
             if (formatResult.Errors.Count > 0)
             {
                 string errorMessage = string.Join("\n", formatResult.Errors.Select(e => e.Message));
-                throw new TerminateToolException(1, errorMessage + "\n" + helpString);
+                throw new TerminateToolException(1, $"{errorMessage}\n{helpString}");
             }
 
             try
             {
-                using IObjectStream<T> sampleStream =
+                using var sampleStream =
                     streamFactory.Create(new ParseResultParameterValues(formatResult));
 
-                object? sample;
-                while ((sample = sampleStream.Read()) != null)
+                while (sampleStream.Read() is { } sample)
                 {
                     Console.WriteLine(sample);
                 }
             }
             catch (IOException e)
             {
-                throw new TerminateToolException(-1, "IO error while converting data : " + e.Message, e);
+                throw new TerminateToolException(-1, $"IO error while converting data : {e.Message}", e);
             }
 
             return 0;
@@ -195,7 +191,7 @@ public abstract class AbstractConverterTool<T> : TypedCmdLineTool
         var usage = new StringBuilder();
         var details = new StringBuilder();
 
-        foreach (IFormatParameter parameter in parameters)
+        foreach (var parameter in parameters)
         {
             if (parameter.IsOptional)
             {

@@ -33,8 +33,8 @@ public class POSToTokenSampleStreamFactory : DetokenizerSampleStreamFactory<Toke
     /// <inheritdoc/>
     // NOpenNLP: upstream's Parameters interface extends WordTagSampleStreamFactory.Parameters
     // (which is BasicFormatParams) and DetokenizerParameter.
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [FormatParameters.Data, FormatParameters.Encoding, FormatParameters.Detokenizer];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [FormatParameters.Data, FormatParameters.Encoding, FormatParameters.Detokenizer];
 
     /// <inheritdoc/>
     public override IObjectStream<TokenSample?> Create(IFormatParameterValues values)
@@ -48,7 +48,7 @@ public class POSToTokenSampleStreamFactory : DetokenizerSampleStreamFactory<Toke
         return new POSToTokenSampleStream(CreateDetokenizer(values), posSampleStream);
     }
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<TokenSample?>(
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<TokenSample?>(
             "pos", new POSToTokenSampleStreamFactory());
 }

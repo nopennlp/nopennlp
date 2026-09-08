@@ -42,12 +42,12 @@ public sealed class SentenceDetectorTrainerTool : AbstractTrainerTool<SentenceSa
     public override string ShortDescription => "trainer for the learnable sentence detector";
 
     /// <inheritdoc/>
-    protected override IEnumerable<Option> GetToolOptions() =>
-        [abbDict, eosChars, factoryName, lang, @params, model];
+    protected override IEnumerable<Option> GetToolOptions()
+        => [abbDict, eosChars, factoryName, lang, @params, model];
 
     /// <inheritdoc/>
-    public override string GetHelp(string format) =>
-        "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format) +
+    public override string GetHelp(string format)
+        => "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format) +
         OptionUsage.CreateUsage(GetToolOptions(), GetStreamFactory(format).Parameters);
 
     /// <exception cref="IOException">if the dictionary cannot be read</exception>
@@ -83,7 +83,7 @@ public sealed class SentenceDetectorTrainerTool : AbstractTrainerTool<SentenceSa
             mlParams = ModelUtil.CreateDefaultTrainingParameters();
         }
 
-        FileInfo modelOutFile = parseResult.GetRequiredValueByName(model);
+        var modelOutFile = parseResult.GetRequiredValueByName(model);
         CmdLineUtil.CheckOutputFile("sentence detector model", modelOutFile);
 
         char[]? eos = null;
@@ -98,8 +98,8 @@ public sealed class SentenceDetectorTrainerTool : AbstractTrainerTool<SentenceSa
 
         try
         {
-            OpenNlpDictionary? dict = LoadDict(parseResult.GetValueByName(abbDict));
-            SentenceDetectorFactory sdFactory = SentenceDetectorFactory.Create(
+            var dict = LoadDict(parseResult.GetValueByName(abbDict));
+            var sdFactory = SentenceDetectorFactory.Create(
                 parseResult.GetValueByName(factoryName), parseResult.GetRequiredValueByName(lang), true,
                 dict!, eos!);
             sentenceModel = SentenceDetectorME.Train(parseResult.GetRequiredValueByName(lang),

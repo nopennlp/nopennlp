@@ -40,12 +40,12 @@ public class DoccatTrainerTool : AbstractTrainerTool<DocumentSample?>
     public override string ShortDescription => "trainer for the learnable document categorizer";
 
     /// <inheritdoc/>
-    protected override IEnumerable<Option> GetToolOptions() =>
-        [lang, @params, featureGenerators, factoryName, model];
+    protected override IEnumerable<Option> GetToolOptions()
+        => [lang, @params, featureGenerators, factoryName, model];
 
     /// <inheritdoc/>
-    public override string GetHelp(string format) =>
-        "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format) +
+    public override string GetHelp(string format)
+        => "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format) +
         OptionUsage.CreateUsage(GetToolOptions(), GetStreamFactory(format).Parameters);
 
     /// <inheritdoc/>
@@ -57,18 +57,17 @@ public class DoccatTrainerTool : AbstractTrainerTool<DocumentSample?>
             mlParams = ModelUtil.CreateDefaultTrainingParameters();
         }
 
-        FileInfo modelOutFile = parseResult.GetRequiredValueByName(model);
+        var modelOutFile = parseResult.GetRequiredValueByName(model);
 
         CmdLineUtil.CheckOutputFile("document categorizer model", modelOutFile);
 
-        IFeatureGenerator[] featureGeneratorsArr =
+        var featureGeneratorsArr =
             CreateFeatureGenerators(parseResult.GetValueByName(featureGenerators));
 
         DoccatModel doccatModel;
         try
         {
-            DoccatFactory factory = DoccatFactory.Create(parseResult.GetValueByName(factoryName),
-                featureGeneratorsArr);
+            var factory = DoccatFactory.Create(parseResult.GetValueByName(factoryName), featureGeneratorsArr);
             doccatModel = DocumentCategorizerME.Train(parseResult.GetRequiredValueByName(lang),
                 sampleStream!, mlParams, factory);
         }

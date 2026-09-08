@@ -30,14 +30,14 @@ namespace NOpenNLP.Tools.Formats;
 public class ChunkerSampleStreamFactory : AbstractSampleStreamFactory<ChunkSample?>
 {
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [FormatParameters.Data, FormatParameters.Encoding];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [FormatParameters.Data, FormatParameters.Encoding];
 
     /// <inheritdoc/>
-    public override IObjectStream<ChunkSample?> Create(IFormatParameterValues values) =>
-        new ChunkSampleStream(ReadData(values));
+    public override IObjectStream<ChunkSample?> Create(IFormatParameterValues values)
+        => new ChunkSampleStream(ReadData(values));
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<ChunkSample?>(
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<ChunkSample?>(
             StreamFactoryRegistry.DefaultFormat, new ChunkerSampleStreamFactory());
 }

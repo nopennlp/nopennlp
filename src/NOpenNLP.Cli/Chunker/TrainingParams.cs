@@ -31,7 +31,6 @@ namespace NOpenNLP.Tools.Cmdline.Chunker;
 // ToolParams; only the one this package adds is here.
 internal static class TrainingParams
 {
-    public static Option<string?> Factory() =>
-        ToolParams.Factory(
-            "A sub-class of ChunkerFactory where to get implementation and resources.");
+    public static Option<string?> Factory()
+        => ToolParams.Factory("A sub-class of ChunkerFactory where to get implementation and resources.");
 }

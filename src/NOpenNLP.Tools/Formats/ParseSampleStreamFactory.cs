@@ -30,14 +30,14 @@ namespace NOpenNLP.Tools.Formats;
 public class ParseSampleStreamFactory : AbstractSampleStreamFactory<Parse?>
 {
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [FormatParameters.Data, FormatParameters.Encoding];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [FormatParameters.Data, FormatParameters.Encoding];
 
     /// <inheritdoc/>
-    public override IObjectStream<Parse?> Create(IFormatParameterValues values) =>
-        new ParseSampleStream(ReadData(values));
+    public override IObjectStream<Parse?> Create(IFormatParameterValues values)
+        => new ParseSampleStream(ReadData(values));
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<Parse?>(
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<Parse?>(
             StreamFactoryRegistry.DefaultFormat, new ParseSampleStreamFactory());
 }

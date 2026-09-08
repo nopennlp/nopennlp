@@ -30,14 +30,14 @@ namespace NOpenNLP.Tools.Formats;
 public class WordTagSampleStreamFactory : AbstractSampleStreamFactory<POSSample?>
 {
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [FormatParameters.Data, FormatParameters.Encoding];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [FormatParameters.Data, FormatParameters.Encoding];
 
     /// <inheritdoc/>
-    public override IObjectStream<POSSample?> Create(IFormatParameterValues values) =>
-        new WordTagSampleStream(ReadData(values));
+    public override IObjectStream<POSSample?> Create(IFormatParameterValues values)
+        => new WordTagSampleStream(ReadData(values));
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<POSSample?>(
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<POSSample?>(
             StreamFactoryRegistry.DefaultFormat, new WordTagSampleStreamFactory());
 }

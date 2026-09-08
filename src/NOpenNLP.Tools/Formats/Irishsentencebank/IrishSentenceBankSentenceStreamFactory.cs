@@ -28,8 +28,8 @@ namespace NOpenNLP.Tools.Formats.Irishsentencebank;
 public class IrishSentenceBankSentenceStreamFactory : AbstractSampleStreamFactory<SentenceSample?>
 {
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [FormatParameters.Data, FormatParameters.Encoding];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [FormatParameters.Data, FormatParameters.Encoding];
 
     /// <inheritdoc/>
     public override IObjectStream<SentenceSample?> Create(IFormatParameterValues values)
@@ -54,7 +54,7 @@ public class IrishSentenceBankSentenceStreamFactory : AbstractSampleStreamFactor
         return new IrishSentenceBankSentenceStream(isbDoc);
     }
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<SentenceSample?>("irishsentencebank",
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<SentenceSample?>("irishsentencebank",
             new IrishSentenceBankSentenceStreamFactory());
 }

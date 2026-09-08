@@ -48,8 +48,8 @@ public class ADNameSampleStreamFactory : LanguageSampleStreamFactory<NameSample?
             "if true all hyphenated tokens will be separated (default true)", true);
 
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [EncodingParam, FormatParameters.Data, SplitHyphenatedTokensParam, FormatParameters.Lang];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [EncodingParam, FormatParameters.Data, SplitHyphenatedTokensParam, FormatParameters.Lang];
 
     /// <inheritdoc/>
     public override IObjectStream<NameSample?> Create(IFormatParameterValues values)
@@ -67,7 +67,7 @@ public class ADNameSampleStreamFactory : LanguageSampleStreamFactory<NameSample?
         return new ADNameSampleStream(lineStream, values.Get<bool>(SplitHyphenatedTokensParam));
     }
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<NameSample?>(
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<NameSample?>(
             "ad", new ADNameSampleStreamFactory());
 }

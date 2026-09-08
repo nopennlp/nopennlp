@@ -41,16 +41,16 @@ public sealed class SentenceDetectorCrossValidatorTool
     private readonly Option<string?> misclassified = ToolParams.Misclassified();
 
     /// <inheritdoc/>
-    public override string ShortDescription =>
-        "K-fold cross validator for the learnable sentence detector";
+    public override string ShortDescription
+        => "K-fold cross validator for the learnable sentence detector";
 
     /// <inheritdoc/>
-    protected override IEnumerable<Option> GetToolOptions() =>
-        [abbDict, eosChars, factoryName, lang, @params, folds, misclassified];
+    protected override IEnumerable<Option> GetToolOptions()
+        => [abbDict, eosChars, factoryName, lang, @params, folds, misclassified];
 
     /// <inheritdoc/>
-    public override string GetHelp(string format) =>
-        "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format) +
+    public override string GetHelp(string format)
+        => "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format) +
         OptionUsage.CreateUsage(GetToolOptions(), GetStreamFactory(format).Parameters);
 
     /// <inheritdoc/>
@@ -80,9 +80,8 @@ public sealed class SentenceDetectorCrossValidatorTool
 
         try
         {
-            OpenNlpDictionary? abbreviations =
-                SentenceDetectorTrainerTool.LoadDict(parseResult.GetValueByName(abbDict));
-            SentenceDetectorFactory sdFactory = SentenceDetectorFactory.Create(
+            var abbreviations = SentenceDetectorTrainerTool.LoadDict(parseResult.GetValueByName(abbDict));
+            var sdFactory = SentenceDetectorFactory.Create(
                 parseResult.GetValueByName(factoryName), parseResult.GetRequiredValueByName(lang), true,
                 abbreviations!, eos!);
             validator = new SDCrossValidator(parseResult.GetRequiredValueByName(lang), mlParams,
@@ -106,7 +105,7 @@ public sealed class SentenceDetectorCrossValidatorTool
             }
         }
 
-        FMeasure result = validator.FMeasure;
+        var result = validator.FMeasure;
 
         Console.WriteLine(result);
     }

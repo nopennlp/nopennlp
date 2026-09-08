@@ -23,7 +23,6 @@ using System.Collections.Generic;
 using System.CommandLine;
 using System.IO;
 using NOpenNLP.Tools.Chunker;
-using NOpenNLP.Tools.Util.Eval;
 using NOpenNLP.Tools.Util.Model;
 
 namespace NOpenNLP.Tools.Cmdline.Chunker;
@@ -41,12 +40,12 @@ public sealed class ChunkerCrossValidatorTool : AbstractCrossValidatorTool<Chunk
     public override string ShortDescription => "K-fold cross validator for the chunker";
 
     /// <inheritdoc/>
-    protected override IEnumerable<Option> GetToolOptions() =>
-        [factoryName, lang, @params, folds, misclassified, detailedF];
+    protected override IEnumerable<Option> GetToolOptions()
+        => [factoryName, lang, @params, folds, misclassified, detailedF];
 
     /// <inheritdoc/>
-    public override string GetHelp(string format) =>
-        "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format) +
+    public override string GetHelp(string format)
+        => "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format) +
         OptionUsage.CreateUsage(GetToolOptions(), GetStreamFactory(format).Parameters);
 
     /// <inheritdoc/>
@@ -75,7 +74,7 @@ public sealed class ChunkerCrossValidatorTool : AbstractCrossValidatorTool<Chunk
 
         try
         {
-            ChunkerFactory chunkerFactory = ChunkerFactory.Create(parseResult.GetValueByName(factoryName));
+            var chunkerFactory = ChunkerFactory.Create(parseResult.GetValueByName(factoryName));
 
             validator = new ChunkerCrossValidator(parseResult.GetRequiredValueByName(lang), mlParams,
                 chunkerFactory, listeners.ToArray());
@@ -99,7 +98,7 @@ public sealed class ChunkerCrossValidatorTool : AbstractCrossValidatorTool<Chunk
 
         if (detailedFMeasureListener == null)
         {
-            FMeasure result = validator.FMeasure;
+            var result = validator.FMeasure;
             Console.WriteLine(result);
         }
         else

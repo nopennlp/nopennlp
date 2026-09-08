@@ -33,36 +33,36 @@ namespace NOpenNLP.Tools.Cmdline.Namefind;
 // ToolParams; only the ones this package adds are here.
 internal static class TrainingParams
 {
-    public static Option<string?> Type() =>
-        new Option<string?>("-type")
+    public static Option<string?> Type()
+        => new("-type")
         {
             Description = "The type of the token name finder model",
             HelpName = "modelType",
         };
 
-    public static Option<DirectoryInfo?> Resources() =>
-        new Option<DirectoryInfo?>("-resources")
+    public static Option<DirectoryInfo?> Resources()
+        => new("-resources")
         {
             Description = "The resources directory",
             HelpName = "resourcesDir",
         };
 
-    public static Option<FileInfo?> Featuregen() =>
-        new Option<FileInfo?>("-featuregen")
+    public static Option<FileInfo?> Featuregen()
+        => new("-featuregen")
         {
             Description = "The feature generator descriptor file",
             HelpName = "featuregenFile",
         };
 
-    public static Option<string?> NameTypes() =>
-        new Option<string?>("-nameTypes")
+    public static Option<string?> NameTypes()
+        => new("-nameTypes")
         {
             Description = "name types to use for training",
             HelpName = "types",
         };
 
-    public static Option<string> SequenceCodec() =>
-        new Option<string>("-sequenceCodec")
+    public static Option<string> SequenceCodec()
+        => new("-sequenceCodec")
         {
             Description = "sequence codec used to code name spans",
             HelpName = "codec",
@@ -73,6 +73,6 @@ internal static class TrainingParams
             DefaultValueFactory = _ => typeof(BioCodec).FullName!,
         };
 
-    public static Option<string?> Factory() =>
-        ToolParams.Factory("A sub-class of TokenNameFinderFactory");
+    public static Option<string?> Factory()
+        => ToolParams.Factory("A sub-class of TokenNameFinderFactory");
 }

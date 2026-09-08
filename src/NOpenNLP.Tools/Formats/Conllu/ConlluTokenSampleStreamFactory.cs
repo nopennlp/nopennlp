@@ -28,8 +28,8 @@ namespace NOpenNLP.Tools.Formats.Conllu;
 public class ConlluTokenSampleStreamFactory : AbstractSampleStreamFactory<TokenSample?>
 {
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [FormatParameters.Data, FormatParameters.Encoding];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [FormatParameters.Data, FormatParameters.Encoding];
 
     /// <inheritdoc/>
     public override IObjectStream<TokenSample?> Create(IFormatParameterValues values)
@@ -51,7 +51,7 @@ public class ConlluTokenSampleStreamFactory : AbstractSampleStreamFactory<TokenS
         }
     }
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<TokenSample?>(
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<TokenSample?>(
             ConlluPOSSampleStreamFactory.ConlluFormat, new ConlluTokenSampleStreamFactory());
 }

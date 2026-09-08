@@ -154,8 +154,8 @@ public class NKJPTextDocument
     /// A paragraph holding only indentation would otherwise fail the "#text" test that
     /// upstream passes.
     /// </remarks>
-    private static string NodeName(XmlNode node) =>
-        node.NodeType is XmlNodeType.Whitespace or XmlNodeType.SignificantWhitespace
+    private static string NodeName(XmlNode node)
+        => node.NodeType is XmlNodeType.Whitespace or XmlNodeType.SignificantWhitespace
             ? "#text"
             : node.Name;
 
@@ -166,11 +166,11 @@ public class NKJPTextDocument
         return Parse(@in);
     }
 
-    internal IDictionary<string, string> Divtypes =>
-        new ReadOnlyDictionary<string, string>(this.divtypes);
+    internal IDictionary<string, string> Divtypes
+        => new ReadOnlyDictionary<string, string>(this.divtypes);
 
-    internal IDictionary<string, IDictionary<string, IDictionary<string, string>>> Texts =>
-        new ReadOnlyDictionary<string, IDictionary<string, IDictionary<string, string>>>(this.texts);
+    internal IDictionary<string, IDictionary<string, IDictionary<string, string>>> Texts
+        => new ReadOnlyDictionary<string, IDictionary<string, IDictionary<string, string>>>(this.texts);
 
     /// <summary>
     /// Segmentation etc. is done only in relation to the paragraph,

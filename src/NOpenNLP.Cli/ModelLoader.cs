@@ -32,15 +32,10 @@ namespace NOpenNLP.Tools.Cmdline;
 /// <para/>
 /// <b>Note:</b> Do not use this class, internal use only!
 /// </summary>
-public abstract class ModelLoader<T>
+public abstract class ModelLoader<T>(string modelName)
 {
-    private readonly string modelName;
-
-    protected ModelLoader(string modelName)
-    {
-        this.modelName = modelName
-            ?? throw new ArgumentNullException(nameof(modelName), "modelName must not be null!");
-    }
+    private readonly string modelName = modelName
+                                        ?? throw new ArgumentNullException(nameof(modelName), "modelName must not be null!");
 
     /// <exception cref="IOException">if the model cannot be read</exception>
     protected abstract T LoadModel(Stream modelIn);
@@ -49,9 +44,9 @@ public abstract class ModelLoader<T>
     {
         var stopwatch = Stopwatch.StartNew();
 
-        CmdLineUtil.CheckInputFile(modelName + " model", modelFile);
+        CmdLineUtil.CheckInputFile($"{modelName} model", modelFile);
 
-        Console.Error.Write("Loading " + modelName + " model ... ");
+        Console.Error.Write($"Loading {modelName} model ... ");
 
         T model;
         try
@@ -68,8 +63,7 @@ public abstract class ModelLoader<T>
         catch (IOException e)
         {
             Console.Error.WriteLine("failed");
-            throw new TerminateToolException(-1,
-                "IO error while loading model file '" + modelFile + "'", e);
+            throw new TerminateToolException(-1, $"IO error while loading model file '{modelFile}'", e);
         }
 
         stopwatch.Stop();
@@ -77,8 +71,7 @@ public abstract class ModelLoader<T>
         // NOpenNLP: upstream uses printf("done (%.3fs)\n"), which is always LF and uses
         // the JVM's default locale for the decimal separator. The invariant culture
         // keeps it a period, which is what the English-only messages around it assume.
-        Console.Error.Write(string.Format(CultureInfo.InvariantCulture,
-            "done ({0:F3}s)\n", stopwatch.Elapsed.TotalSeconds));
+        Console.Error.Write(string.Format(CultureInfo.InvariantCulture, "done ({0:F3}s)\n", stopwatch.Elapsed.TotalSeconds));
 
         return model;
     }

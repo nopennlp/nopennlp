@@ -47,15 +47,15 @@ public sealed class TokenNameFinderCrossValidatorTool : AbstractCrossValidatorTo
     public override string ShortDescription => "K-fold cross validator for the learnable Name Finder";
 
     /// <inheritdoc/>
-    protected override IEnumerable<Option> GetToolOptions() =>
-    [
+    protected override IEnumerable<Option> GetToolOptions()
+        => [
         type, resources, featuregen, nameTypes, sequenceCodec, factoryName, lang, @params,
         folds, misclassified, detailedF, reportOutputFile,
     ];
 
     /// <inheritdoc/>
-    public override string GetHelp(string format) =>
-        "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format) +
+    public override string GetHelp(string format)
+        => "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format) +
         OptionUsage.CreateUsage(GetToolOptions(), GetStreamFactory(format).Parameters);
 
     /// <inheritdoc/>
@@ -67,7 +67,7 @@ public sealed class TokenNameFinderCrossValidatorTool : AbstractCrossValidatorTo
             mlParams = new TrainingParameters();
         }
 
-        FileInfo? featuregenFile = parseResult.GetValueByName(featuregen);
+        var featuregenFile = parseResult.GetValueByName(featuregen);
 
         byte[]? featureGeneratorBytes =
             TokenNameFinderTrainerTool.OpenFeatureGeneratorBytes(featuregenFile);
@@ -119,17 +119,15 @@ public sealed class TokenNameFinderCrossValidatorTool : AbstractCrossValidatorTo
             TokenNameFinderFactory.InstantiateSequenceCodec(sequenceCodecImplName);
 
         TokenNameFinderFineGrainedReportListener? reportListener = null;
-        FileInfo? reportFile = parseResult.GetValueByName(reportOutputFile);
-        Stream? reportOutputStream = null;
+        var reportFile = parseResult.GetValueByName(reportOutputFile);
 
         if (reportFile != null)
         {
             CmdLineUtil.CheckOutputFile("Report Output File", reportFile);
             try
             {
-                reportOutputStream = reportFile.Create();
-                reportListener = new TokenNameFinderFineGrainedReportListener(codec,
-                    reportOutputStream);
+                var reportOutputStream = reportFile.Create();
+                reportListener = new TokenNameFinderFineGrainedReportListener(codec, reportOutputStream);
                 listeners.Add(reportListener);
             }
             catch (IOException e)
@@ -139,7 +137,7 @@ public sealed class TokenNameFinderCrossValidatorTool : AbstractCrossValidatorTo
                 // conditions as IOException. Upstream drops the cause here, so it is
                 // dropped here too.
                 throw new TerminateToolException(-1,
-                    "IO error while creating Name Finder fine-grained report file: " + e.Message);
+                    $"IO error while creating Name Finder fine-grained report file: {e.Message}");
             }
         }
 

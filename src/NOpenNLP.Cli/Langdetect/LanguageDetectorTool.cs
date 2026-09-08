@@ -31,7 +31,7 @@ public class LanguageDetectorTool : BasicCmdLineTool
     public override string ShortDescription => "learned language detector";
 
     /// <inheritdoc/>
-    public override string GetHelp() => "Usage: " + CLI.Cmd + " " + Name + " model < documents";
+    public override string GetHelp() => $"Usage: {CLI.Cmd} {Name} model < documents";
 
     /// <inheritdoc/>
     public override void Run(string[] args)
@@ -42,26 +42,24 @@ public class LanguageDetectorTool : BasicCmdLineTool
         }
         else
         {
-            LanguageDetectorModel model = new LanguageDetectorModelLoader().Load(new FileInfo(args[0]));
+            var model = new LanguageDetectorModelLoader().Load(new FileInfo(args[0]));
 
-            ILanguageDetector langDetectME = new LanguageDetectorME(model);
+            var langDetectME = new LanguageDetectorME(model);
 
             /*
              * moved initialization to the try block to catch new IOException
              */
-            IObjectStream<string?> documentStream;
 
             using var perfMon = new PerformanceMonitor(Console.Error, "doc");
             perfMon.Start();
 
             try
             {
-                documentStream = new ParagraphStream(new PlainTextByLineStream(
+                var documentStream = new ParagraphStream(new PlainTextByLineStream(
                     new SystemInputStreamFactory(), SystemInputStreamFactory.Encoding));
-                string? document;
-                while ((document = documentStream.Read()) != null)
+                while (documentStream.Read() is { } document)
                 {
-                    Language lang = langDetectME.PredictLanguage(document);
+                    var lang = langDetectME.PredictLanguage(document);
 
                     var sample = new LanguageSample(lang, document);
                     Console.WriteLine(sample);

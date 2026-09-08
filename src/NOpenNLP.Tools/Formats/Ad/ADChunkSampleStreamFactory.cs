@@ -57,8 +57,8 @@ public class ADChunkSampleStreamFactory : LanguageSampleStreamFactory<ChunkSampl
         FormatParameter<int>.Optional("-end", "end", "index of last sentence", -1);
 
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [EncodingParam, FormatParameters.Data, FormatParameters.Lang,
+    public override IEnumerable<IFormatParameter> Parameters
+        => [EncodingParam, FormatParameters.Data, FormatParameters.Lang,
             StartParam, EndParam];
 
     /// <inheritdoc/>
@@ -91,7 +91,7 @@ public class ADChunkSampleStreamFactory : LanguageSampleStreamFactory<ChunkSampl
         return sampleStream;
     }
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<ChunkSample?>(
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<ChunkSample?>(
             "ad", new ADChunkSampleStreamFactory());
 }

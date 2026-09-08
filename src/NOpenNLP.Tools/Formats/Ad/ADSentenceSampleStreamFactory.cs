@@ -43,8 +43,8 @@ public class ADSentenceSampleStreamFactory : LanguageSampleStreamFactory<Sentenc
             "if true will include sentences marked as headlines.", false);
 
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [EncodingParam, FormatParameters.Data, FormatParameters.Lang, IncludeTitlesParam];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [EncodingParam, FormatParameters.Data, FormatParameters.Lang, IncludeTitlesParam];
 
     /// <inheritdoc/>
     public override IObjectStream<SentenceSample?> Create(IFormatParameterValues values)
@@ -64,7 +64,7 @@ public class ADSentenceSampleStreamFactory : LanguageSampleStreamFactory<Sentenc
         return new ADSentenceSampleStream(lineStream, includeTitle);
     }
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<SentenceSample?>(
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<SentenceSample?>(
             "ad", new ADSentenceSampleStreamFactory());
 }

@@ -32,14 +32,14 @@ namespace NOpenNLP.Tools.Formats;
 public class LanguageDetectorSampleStreamFactory : AbstractSampleStreamFactory<LanguageSample?>
 {
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [FormatParameters.Data, FormatParameters.Encoding];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [FormatParameters.Data, FormatParameters.Encoding];
 
     /// <inheritdoc/>
-    public override IObjectStream<LanguageSample?> Create(IFormatParameterValues values) =>
-        new LanguageDetectorSampleStream(ReadData(values));
+    public override IObjectStream<LanguageSample?> Create(IFormatParameterValues values)
+        => new LanguageDetectorSampleStream(ReadData(values));
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<LanguageSample?>(
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<LanguageSample?>(
             StreamFactoryRegistry.DefaultFormat, new LanguageDetectorSampleStreamFactory());
 }

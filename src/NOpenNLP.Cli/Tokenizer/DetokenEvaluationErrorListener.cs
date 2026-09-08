@@ -57,6 +57,6 @@ public class DetokenEvaluationErrorListener : EvaluationErrorPrinter<TokenSample
     }
 
     /// <inheritdoc/>
-    public override void Misclassified(TokenSample reference, TokenSample prediction) =>
-        PrintError(reference, prediction);
+    public override void Misclassified(TokenSample reference, TokenSample prediction)
+        => PrintError(reference, prediction);
 }

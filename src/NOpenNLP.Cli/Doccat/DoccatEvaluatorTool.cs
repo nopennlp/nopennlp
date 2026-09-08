@@ -25,7 +25,6 @@ using System.IO;
 using NOpenNLP.Tools.Doccat;
 using NOpenNLP.Tools.Formats;
 using NOpenNLP.Tools.Util;
-using NOpenNLP.Tools.Util.Eval;
 using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Cmdline.Doccat;
@@ -39,22 +38,22 @@ public sealed class DoccatEvaluatorTool : AbstractEvaluatorTool<DocumentSample?>
     private readonly Option<FileInfo?> reportOutputFile = ToolParams.ReportOutputFile();
 
     /// <inheritdoc/>
-    protected override IEnumerable<Option> GetToolOptions() =>
-        [model, misclassified, reportOutputFile];
+    protected override IEnumerable<Option> GetToolOptions()
+        => [model, misclassified, reportOutputFile];
 
     /// <inheritdoc/>
-    public override string ShortDescription =>
-        "Measures the performance of the Doccat model with the reference data";
+    public override string ShortDescription
+        => "Measures the performance of the Doccat model with the reference data";
 
     /// <inheritdoc/>
-    public override string GetHelp(string format) =>
-        "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format)
+    public override string GetHelp(string format)
+        => "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format)
             + OptionUsage.CreateUsage(GetToolOptions(), GetStreamFactory(format).Parameters);
 
     /// <inheritdoc/>
     protected override void Run(ParseResult parseResult)
     {
-        DoccatModel model = new DoccatModelLoader().Load(parseResult.GetValueByName(this.model)!);
+        var model = new DoccatModelLoader().Load(parseResult.GetValueByName(this.model)!);
 
         var listeners = new JCG.List<IDoccatEvaluationMonitor>();
         if (ToolParams.JavaBooleanValue(parseResult.GetValueByName(misclassified)))
@@ -63,7 +62,7 @@ public sealed class DoccatEvaluatorTool : AbstractEvaluatorTool<DocumentSample?>
         }
 
         DoccatFineGrainedReportListener? reportListener = null;
-        FileInfo? reportFile = parseResult.GetValueByName(reportOutputFile);
+        var reportFile = parseResult.GetValueByName(reportOutputFile);
         Stream? reportOutputStream = null;
         if (reportFile != null)
         {

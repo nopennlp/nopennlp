@@ -43,8 +43,8 @@ public class LanguageDetectorTrainerTool : AbstractTrainerTool<LanguageSample?>
     protected override IEnumerable<Option> GetToolOptions() => [model, @params, factoryName];
 
     /// <inheritdoc/>
-    public override string GetHelp(string format) =>
-        "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format) +
+    public override string GetHelp(string format)
+        => "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format) +
         OptionUsage.CreateUsage(GetToolOptions(), GetStreamFactory(format).Parameters);
 
     /// <inheritdoc/>
@@ -56,15 +56,14 @@ public class LanguageDetectorTrainerTool : AbstractTrainerTool<LanguageSample?>
             mlParams = ModelUtil.CreateDefaultTrainingParameters();
         }
 
-        FileInfo modelOutFile = parseResult.GetRequiredValueByName(model);
+        var modelOutFile = parseResult.GetRequiredValueByName(model);
 
         CmdLineUtil.CheckOutputFile("language detector model", modelOutFile);
 
         LanguageDetectorModel languageDetectorModel;
         try
         {
-            LanguageDetectorFactory factory =
-                LanguageDetectorFactory.Create(parseResult.GetValueByName(factoryName));
+            var factory = LanguageDetectorFactory.Create(parseResult.GetValueByName(factoryName));
             languageDetectorModel = LanguageDetectorME.Train(sampleStream!, mlParams, factory);
         }
         catch (IOException e)

@@ -32,8 +32,8 @@ public class OntoNotesPOSSampleStreamFactory : AbstractSampleStreamFactory<POSSa
         new OntoNotesParseSampleStreamFactory(); // NOpenNLP: made readonly
 
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [OntoNotesFormatParameters.OntoNotesDir];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [OntoNotesFormatParameters.OntoNotesDir];
 
     /// <inheritdoc/>
     public override IObjectStream<POSSample?> Create(IFormatParameterValues values)
@@ -43,7 +43,7 @@ public class OntoNotesPOSSampleStreamFactory : AbstractSampleStreamFactory<POSSa
         return new ParseToPOSSampleStream(parseSampleStream);
     }
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<POSSample?>(
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<POSSample?>(
             "ontonotes", new OntoNotesPOSSampleStreamFactory());
 }

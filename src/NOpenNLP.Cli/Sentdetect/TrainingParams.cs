@@ -32,21 +32,20 @@ namespace NOpenNLP.Tools.Cmdline.Sentdetect;
 // ToolParams; only the ones this package adds are here.
 internal static class TrainingParams
 {
-    public static Option<FileInfo?> AbbDict() =>
-        new Option<FileInfo?>("-abbDict")
+    public static Option<FileInfo?> AbbDict()
+        => new("-abbDict")
         {
             Description = "abbreviation dictionary in XML format.",
             HelpName = "path",
         };
 
-    public static Option<string?> EosChars() =>
-        new Option<string?>("-eosChars")
+    public static Option<string?> EosChars()
+        => new("-eosChars")
         {
             Description = "EOS characters.",
             HelpName = "string",
         };
 
-    public static Option<string?> Factory() =>
-        ToolParams.Factory(
-            "A sub-class of SentenceDetectorFactory where to get implementation and resources.");
+    public static Option<string?> Factory()
+        => ToolParams.Factory("A sub-class of SentenceDetectorFactory where to get implementation and resources.");
 }

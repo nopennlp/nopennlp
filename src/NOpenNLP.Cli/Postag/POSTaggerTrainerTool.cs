@@ -46,12 +46,12 @@ public sealed class POSTaggerTrainerTool : AbstractTrainerTool<POSSample?>
     public override string ShortDescription => "trains a model for the part-of-speech tagger";
 
     /// <inheritdoc/>
-    protected override IEnumerable<Option> GetToolOptions() =>
-        [featuregen, resources, dict, tagDictCutoff, factoryName, lang, @params, model];
+    protected override IEnumerable<Option> GetToolOptions()
+        => [featuregen, resources, dict, tagDictCutoff, factoryName, lang, @params, model];
 
     /// <inheritdoc/>
-    public override string GetHelp(string format) =>
-        "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format) +
+    public override string GetHelp(string format)
+        => "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format) +
         OptionUsage.CreateUsage(GetToolOptions(), GetStreamFactory(format).Parameters);
 
     /// <inheritdoc/>
@@ -62,8 +62,7 @@ public sealed class POSTaggerTrainerTool : AbstractTrainerTool<POSSample?>
         mlParams = CmdLineUtil.LoadTrainingParameters(paramsFile, true);
         if (mlParams != null && !TrainerFactory.IsValid(mlParams))
         {
-            throw new TerminateToolException(1, "Training parameters file '" + paramsFile +
-                "' is invalid!");
+            throw new TerminateToolException(1, $"Training parameters file '{paramsFile}' is invalid!");
         }
 
         if (mlParams == null)
@@ -71,10 +70,10 @@ public sealed class POSTaggerTrainerTool : AbstractTrainerTool<POSSample?>
             mlParams = ModelUtil.CreateDefaultTrainingParameters();
         }
 
-        FileInfo modelOutFile = parseResult.GetRequiredValueByName(model);
+        var modelOutFile = parseResult.GetRequiredValueByName(model);
         CmdLineUtil.CheckOutputFile("pos tagger model", modelOutFile);
 
-        FileInfo? featuregenFile = parseResult.GetValueByName(featuregen);
+        var featuregenFile = parseResult.GetValueByName(featuregen);
 
         IDictionary<string, object> resourcesMap;
 
@@ -105,7 +104,7 @@ public sealed class POSTaggerTrainerTool : AbstractTrainerTool<POSSample?>
             throw new TerminateToolException(-1, e.Message, e);
         }
 
-        FileInfo? dictFile = parseResult.GetValueByName(dict);
+        var dictFile = parseResult.GetValueByName(dict);
         if (dictFile != null)
         {
             try
@@ -136,24 +135,21 @@ public sealed class POSTaggerTrainerTool : AbstractTrainerTool<POSSample?>
                 }
                 else
                 {
-                    throw new ArgumentException(
-                        "Can't extend a POSDictionary that does not implement MutableTagDictionary.");
+                    throw new ArgumentException("Can't extend a POSDictionary that does not implement MutableTagDictionary.");
                 }
 
                 sampleStream!.Reset();
             }
             catch (IOException e)
             {
-                throw new TerminateToolException(-1,
-                    "IO error while creating/extending POS Dictionary: " + e.Message, e);
+                throw new TerminateToolException(-1, $"IO error while creating/extending POS Dictionary: {e.Message}", e);
             }
         }
 
         POSModel posModel;
         try
         {
-            posModel = POSTaggerME.Train(parseResult.GetRequiredValueByName(lang), sampleStream!,
-                mlParams, postaggerFactory);
+            posModel = POSTaggerME.Train(parseResult.GetRequiredValueByName(lang), sampleStream!, mlParams, postaggerFactory);
         }
         catch (IOException e)
         {

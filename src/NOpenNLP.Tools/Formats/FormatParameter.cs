@@ -63,8 +63,8 @@ public sealed class FormatParameter<T> : IFormatParameter
     /// carries no <c>defaultValue</c>.
     /// </summary>
     public static FormatParameter<T> Optional(string name, string valueName,
-        string description = "", T? defaultValue = default) =>
-        new FormatParameter<T>(name, valueName, description, defaultValue);
+        string description = "", T? defaultValue = default)
+        => new FormatParameter<T>(name, valueName, description, defaultValue);
 
     /// <inheritdoc/>
     public string Name { get; }

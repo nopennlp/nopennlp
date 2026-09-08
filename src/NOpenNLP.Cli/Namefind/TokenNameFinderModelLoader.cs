@@ -28,14 +28,8 @@ namespace NOpenNLP.Tools.Cmdline.Namefind;
 /// <para/>
 /// <b>Note:</b> Do not use this class, internal use only!
 /// </summary>
-public sealed class TokenNameFinderModelLoader : ModelLoader<TokenNameFinderModel>
+public sealed class TokenNameFinderModelLoader() : ModelLoader<TokenNameFinderModel>("Token Name Finder")
 {
-    public TokenNameFinderModelLoader()
-        : base("Token Name Finder")
-    {
-    }
-
     /// <inheritdoc/>
-    protected override TokenNameFinderModel LoadModel(Stream modelIn) =>
-        new TokenNameFinderModel(modelIn);
+    protected override TokenNameFinderModel LoadModel(Stream modelIn) => new(modelIn);
 }

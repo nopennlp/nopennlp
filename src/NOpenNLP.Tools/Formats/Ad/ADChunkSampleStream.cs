@@ -322,6 +322,6 @@ public class ADChunkSampleStream : ObjectStreamBase<ChunkSample?>
 
     protected virtual bool IsIncludePunctuations => false;
 
-    protected virtual bool IsIntermediate(IList<string> tags, IList<string> target, string phraseTag) =>
-        target.Count > 0 && target[^1].EndsWith("-" + phraseTag, StringComparison.Ordinal);
+    protected virtual bool IsIntermediate(IList<string> tags, IList<string> target, string phraseTag)
+        => target.Count > 0 && target[^1].EndsWith("-" + phraseTag, StringComparison.Ordinal);
 }

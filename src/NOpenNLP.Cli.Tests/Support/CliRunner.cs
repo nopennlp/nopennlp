@@ -17,8 +17,6 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
-using System.Text;
 
 namespace NOpenNLP.Tools.Cmdline.Support;
 
@@ -41,7 +39,7 @@ internal sealed record CliResult(int ExitCode, string Out, string Error);
 /// Tools that do not read standard input run in-process, which is fast and gives clean
 /// stack traces when a test fails. Tools that do read it run as a child process instead:
 /// they reach standard input through <c>SystemInputStreamFactory</c>, which calls
-/// <see cref="Console.OpenStandardInput"/> and so takes the process's real handle,
+/// <see cref="Console.OpenStandardInput()"/> and so takes the process's real handle,
 /// bypassing a <see cref="Console.SetIn"/> redirect entirely. Redirecting the handle
 /// itself would mean P/Invoking <c>dup2</c>, which is Unix-only and leaves the test host
 /// with a permanently altered standard input; spawning the real executable avoids both
@@ -52,6 +50,9 @@ internal static class CliRunner
     /// <summary>
     /// Runs the CLI with <paramref name="args"/> and captures its output.
     /// </summary>
+    /// <param name="args">
+    /// the command-line arguments
+    /// </param>
     /// <param name="stdin">
     /// text to supply on standard input; when given, the CLI runs as a child process
     /// </param>

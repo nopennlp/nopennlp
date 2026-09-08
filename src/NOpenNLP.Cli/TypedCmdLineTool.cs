@@ -76,7 +76,7 @@ public abstract class TypedCmdLineTool : CmdLineTool
         if (!string.IsNullOrEmpty(format)
             && !StreamFactoryRegistry.DefaultFormat.Equals(format, System.StringComparison.Ordinal))
         {
-            return "." + format + " ";
+            return $".{format} ";
         }
 
         return GetFormatsHelp();
@@ -88,7 +88,7 @@ public abstract class TypedCmdLineTool : CmdLineTool
     /// </summary>
     protected string GetFormatsHelp()
     {
-        List<string> formats = GetFormatNames()
+        var formats = GetFormatNames()
             .Where(f => !StreamFactoryRegistry.DefaultFormat.Equals(f, System.StringComparison.Ordinal))
             .ToList();
 
@@ -104,6 +104,6 @@ public abstract class TypedCmdLineTool : CmdLineTool
             builder.Append('.').Append(format).Append('|');
         }
 
-        return "[" + builder.ToString(0, builder.Length - 1) + "] ";
+        return $"[{builder.ToString(0, builder.Length - 1)}] ";
     }
 }

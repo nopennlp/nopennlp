@@ -30,14 +30,14 @@ namespace NOpenNLP.Tools.Formats;
 public class TokenSampleStreamFactory : LanguageSampleStreamFactory<TokenSample?>
 {
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [FormatParameters.Data, FormatParameters.Encoding];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [FormatParameters.Data, FormatParameters.Encoding];
 
     /// <inheritdoc/>
-    public override IObjectStream<TokenSample?> Create(IFormatParameterValues values) =>
-        new TokenSampleStream(ReadData(values));
+    public override IObjectStream<TokenSample?> Create(IFormatParameterValues values)
+        => new TokenSampleStream(ReadData(values));
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<TokenSample?>(
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<TokenSample?>(
             StreamFactoryRegistry.DefaultFormat, new TokenSampleStreamFactory());
 }

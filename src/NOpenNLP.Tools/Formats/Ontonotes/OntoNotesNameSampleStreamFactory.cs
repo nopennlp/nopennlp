@@ -31,8 +31,8 @@ namespace NOpenNLP.Tools.Formats.Ontonotes;
 public class OntoNotesNameSampleStreamFactory : AbstractSampleStreamFactory<NameSample?>
 {
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [OntoNotesFormatParameters.OntoNotesDir];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [OntoNotesFormatParameters.OntoNotesDir];
 
     /// <inheritdoc/>
     public override IObjectStream<NameSample?> Create(IFormatParameterValues values)
@@ -53,7 +53,7 @@ public class OntoNotesNameSampleStreamFactory : AbstractSampleStreamFactory<Name
             new FileToStringSampleStream(documentStream, Encoding.UTF8));
     }
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<NameSample?>(
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<NameSample?>(
             "ontonotes", new OntoNotesNameSampleStreamFactory());
 }

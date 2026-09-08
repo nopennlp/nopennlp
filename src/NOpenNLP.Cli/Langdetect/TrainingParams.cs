@@ -35,7 +35,6 @@ internal static class TrainingParams
 {
     public static Option<string?> Params() => ToolParams.Params();
 
-    public static Option<string?> Factory() =>
-        ToolParams.Factory(
-            "A sub-class of LanguageDetectorFactory where to get implementation and resources.");
+    public static Option<string?> Factory()
+        => ToolParams.Factory("A sub-class of LanguageDetectorFactory where to get implementation and resources.");
 }

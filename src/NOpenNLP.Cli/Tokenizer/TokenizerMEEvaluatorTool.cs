@@ -41,14 +41,14 @@ public sealed class TokenizerMEEvaluatorTool : AbstractEvaluatorTool<TokenSample
     public override string ShortDescription => "evaluator for the learnable tokenizer";
 
     /// <inheritdoc/>
-    public override string GetHelp(string format) =>
-        "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format)
+    public override string GetHelp(string format)
+        => "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format)
             + OptionUsage.CreateUsage(GetToolOptions(), GetStreamFactory(format).Parameters);
 
     /// <inheritdoc/>
     protected override void Run(ParseResult parseResult)
     {
-        TokenizerModel model = new TokenizerModelLoader().Load(parseResult.GetValueByName(this.model)!);
+        var model = new TokenizerModelLoader().Load(parseResult.GetValueByName(this.model)!);
 
         ITokenizerEvaluationMonitor? misclassifiedListener = null;
         if (ToolParams.JavaBooleanValue(parseResult.GetValueByName(misclassified)))
@@ -56,8 +56,7 @@ public sealed class TokenizerMEEvaluatorTool : AbstractEvaluatorTool<TokenSample
             misclassifiedListener = new TokenEvaluationErrorListener();
         }
 
-        var evaluator = new TokenizerEvaluator(
-            new TokenizerME(model), misclassifiedListener);
+        var evaluator = new TokenizerEvaluator(new TokenizerME(model), misclassifiedListener);
 
         Console.Write("Evaluating ... ");
 
@@ -68,8 +67,7 @@ public sealed class TokenizerMEEvaluatorTool : AbstractEvaluatorTool<TokenSample
         catch (IOException e)
         {
             Console.Error.WriteLine("failed");
-            throw new TerminateToolException(-1, "IO error while reading test data: "
-                + e.Message, e);
+            throw new TerminateToolException(-1, $"IO error while reading test data: {e.Message}", e);
         }
         finally
         {

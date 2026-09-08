@@ -28,7 +28,7 @@ public sealed class SimpleTokenizerTool : BasicCmdLineTool
     public override string ShortDescription => "character class tokenizer";
 
     /// <inheritdoc/>
-    public override string GetHelp() => "Usage: " + CLI.Cmd + " " + Name + " < sentences";
+    public override string GetHelp() => $"Usage: {CLI.Cmd} {Name} < sentences";
 
     /// <inheritdoc/>
     public override bool HasParams => false;
@@ -42,7 +42,7 @@ public sealed class SimpleTokenizerTool : BasicCmdLineTool
         }
         else
         {
-            var tokenizer = new CommandLineTokenizer(NOpenNLP.Tools.Tokenize.SimpleTokenizer.INSTANCE);
+            var tokenizer = new CommandLineTokenizer(Tokenize.SimpleTokenizer.INSTANCE);
 
             tokenizer.Process();
         }

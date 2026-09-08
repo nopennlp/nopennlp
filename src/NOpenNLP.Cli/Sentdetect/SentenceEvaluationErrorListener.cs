@@ -57,7 +57,7 @@ public class SentenceEvaluationErrorListener : EvaluationErrorPrinter<SentenceSa
     }
 
     /// <inheritdoc/>
-    public override void Misclassified(SentenceSample reference, SentenceSample prediction) =>
-        PrintError(reference.GetSentences(), prediction.GetSentences(), reference,
+    public override void Misclassified(SentenceSample reference, SentenceSample prediction)
+        => PrintError(reference.GetSentences(), prediction.GetSentences(), reference,
             prediction, reference.Document);
 }

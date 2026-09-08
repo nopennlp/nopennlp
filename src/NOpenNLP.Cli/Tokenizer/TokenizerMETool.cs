@@ -30,7 +30,7 @@ public sealed class TokenizerMETool : BasicCmdLineTool
     public override string ShortDescription => "learnable tokenizer";
 
     /// <inheritdoc/>
-    public override string GetHelp() => "Usage: " + CLI.Cmd + " " + Name + " model < sentences";
+    public override string GetHelp() => $"Usage: {CLI.Cmd} {Name} model < sentences";
 
     /// <inheritdoc/>
     public override void Run(string[] args)
@@ -41,7 +41,7 @@ public sealed class TokenizerMETool : BasicCmdLineTool
         }
         else
         {
-            TokenizerModel model = new TokenizerModelLoader().Load(new FileInfo(args[0]));
+            var model = new TokenizerModelLoader().Load(new FileInfo(args[0]));
 
             var tokenizer = new CommandLineTokenizer(new TokenizerME(model));
 

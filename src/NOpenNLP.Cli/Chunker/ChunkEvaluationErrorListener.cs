@@ -57,8 +57,8 @@ public class ChunkEvaluationErrorListener : EvaluationErrorPrinter<ChunkSample>,
     }
 
     /// <inheritdoc/>
-    public override void Misclassified(ChunkSample reference, ChunkSample prediction) =>
-        PrintError(reference.PhrasesAsSpanList,
+    public override void Misclassified(ChunkSample reference, ChunkSample prediction)
+        => PrintError(reference.PhrasesAsSpanList,
             prediction.PhrasesAsSpanList, reference, prediction,
             reference.Sentence);
 }

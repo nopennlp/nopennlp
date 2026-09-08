@@ -31,14 +31,9 @@ namespace NOpenNLP.Tools.Cmdline.Sentdetect;
 // NOpenNLP: upstream is package-private and used only from opennlp.tools.cmdline.sentdetect.
 // C# has no package scope, so `internal` keeps it off the public API surface while the
 // sentence detector tools in this assembly can still reach it.
-internal sealed class SentenceModelLoader : ModelLoader<SentenceModel>
+internal sealed class SentenceModelLoader() : ModelLoader<SentenceModel>("Sentence Detector")
 {
-    public SentenceModelLoader()
-        : base("Sentence Detector")
-    {
-    }
-
     /// <inheritdoc/>
     /// <exception cref="Util.InvalidFormatException">if the model has an invalid format</exception>
-    protected override SentenceModel LoadModel(Stream modelIn) => new SentenceModel(modelIn);
+    protected override SentenceModel LoadModel(Stream modelIn) => new(modelIn);
 }

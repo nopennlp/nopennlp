@@ -57,7 +57,7 @@ public class NameEvaluationErrorListener : EvaluationErrorPrinter<NameSample>,
     }
 
     /// <inheritdoc/>
-    public override void Misclassified(NameSample reference, NameSample prediction) =>
-        PrintError(reference.Id, reference.Names, prediction.Names, reference,
+    public override void Misclassified(NameSample reference, NameSample prediction)
+        => PrintError(reference.Id, reference.Names, prediction.Names, reference,
             prediction, reference.Sentence);
 }

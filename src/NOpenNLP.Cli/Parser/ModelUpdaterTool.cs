@@ -51,8 +51,8 @@ public abstract class ModelUpdaterTool : AbstractEvaluatorTool<Parse?>
     protected override IEnumerable<Option> GetToolOptions() => [model, @params, lang];
 
     /// <inheritdoc/>
-    public override string GetHelp(string format) =>
-        "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format) +
+    public override string GetHelp(string format)
+        => "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format) +
         OptionUsage.CreateUsage(GetToolOptions(), GetStreamFactory(format).Parameters);
 
     /// <exception cref="IOException">if reading the samples fails</exception>
@@ -65,8 +65,8 @@ public abstract class ModelUpdaterTool : AbstractEvaluatorTool<Parse?>
     protected sealed override void Run(ParseResult parseResult)
     {
         // Load model to be updated
-        FileInfo modelFile = parseResult.GetRequiredValueByName(model);
-        ParserModel originalParserModel = new ParserModelLoader().Load(modelFile);
+        var modelFile = parseResult.GetRequiredValueByName(model);
+        var originalParserModel = new ParserModelLoader().Load(modelFile);
 
         ParserModel updatedParserModel;
         try
@@ -75,8 +75,7 @@ public abstract class ModelUpdaterTool : AbstractEvaluatorTool<Parse?>
         }
         catch (IOException e)
         {
-            throw new TerminateToolException(-1,
-                "IO error while reading training data or indexing data: " + e.Message, e);
+            throw new TerminateToolException(-1, $"IO error while reading training data or indexing data: {e.Message}", e);
         }
         finally
         {

@@ -45,8 +45,8 @@ public class AnnotationConfiguration(IDictionary<string, string> typeToClassMap)
     // NOpenNLP: upstream returns Map.get, which yields null for an unconfigured type;
     // the C# indexer would throw instead, so this uses TryGetValue and keeps the null.
     // BratAnnotationStream relies on that null to skip unsupported annotation types.
-    public string? GetTypeClass(string type) =>
-        typeToClassMap.TryGetValue(type, out string? typeClass) ? typeClass : null;
+    public string? GetTypeClass(string type)
+        => typeToClassMap.TryGetValue(type, out string? typeClass) ? typeClass : null;
 
     /// <summary>
     /// Parses an annotation configuration from the given <paramref name="in"/> stream.

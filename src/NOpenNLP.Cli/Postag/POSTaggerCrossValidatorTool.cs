@@ -47,15 +47,15 @@ public sealed class POSTaggerCrossValidatorTool : AbstractCrossValidatorTool<POS
     public override string ShortDescription => "K-fold cross validator for the learnable POS tagger";
 
     /// <inheritdoc/>
-    protected override IEnumerable<Option> GetToolOptions() =>
-    [
+    protected override IEnumerable<Option> GetToolOptions()
+        => [
         folds, misclassified, featuregen, resources, dict, tagDictCutoff, factoryName, lang,
         @params, reportOutputFile,
     ];
 
     /// <inheritdoc/>
-    public override string GetHelp(string format) =>
-        "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format) +
+    public override string GetHelp(string format)
+        => "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format) +
         OptionUsage.CreateUsage(GetToolOptions(), GetStreamFactory(format).Parameters);
 
     /// <inheritdoc/>
@@ -74,7 +74,7 @@ public sealed class POSTaggerCrossValidatorTool : AbstractCrossValidatorTool<POS
         }
 
         POSTaggerFineGrainedReportListener? reportListener = null;
-        FileInfo? reportFile = parseResult.GetValueByName(reportOutputFile);
+        var reportFile = parseResult.GetValueByName(reportOutputFile);
         Stream? reportOutputStream = null;
         if (reportFile != null)
         {
@@ -93,7 +93,7 @@ public sealed class POSTaggerCrossValidatorTool : AbstractCrossValidatorTool<POS
             }
         }
 
-        FileInfo? featuregenFile = parseResult.GetValueByName(featuregen);
+        var featuregenFile = parseResult.GetValueByName(featuregen);
 
         IDictionary<string, object> resourcesMap;
         try
@@ -123,8 +123,7 @@ public sealed class POSTaggerCrossValidatorTool : AbstractCrossValidatorTool<POS
         }
         catch (IOException e)
         {
-            throw new TerminateToolException(-1,
-                "IO error while reading training data or indexing data: " + e.Message, e);
+            throw new TerminateToolException(-1, $"IO error while reading training data or indexing data: {e.Message}", e);
         }
         finally
         {
@@ -142,7 +141,7 @@ public sealed class POSTaggerCrossValidatorTool : AbstractCrossValidatorTool<POS
 
         if (reportListener != null)
         {
-            Console.WriteLine("Writing fine-grained report to " + reportFile!.FullName);
+            Console.WriteLine($"Writing fine-grained report to {reportFile!.FullName}");
             reportListener.WriteReport();
 
             try
@@ -161,7 +160,6 @@ public sealed class POSTaggerCrossValidatorTool : AbstractCrossValidatorTool<POS
         // NOpenNLP: upstream concatenates a double, which Java renders with
         // Double.toString; J2N's "J" format reproduces that, as it does elsewhere in
         // the port.
-        Console.WriteLine("Accuracy: " + J2N.Numerics.Double.ToString(
-            validator.WordAccuracy, "J", CultureInfo.InvariantCulture));
+        Console.WriteLine($"Accuracy: {J2N.Numerics.Double.ToString(validator.WordAccuracy, "J", CultureInfo.InvariantCulture)}");
     }
 }

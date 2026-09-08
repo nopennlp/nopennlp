@@ -47,12 +47,12 @@ public sealed class TokenNameFinderTrainerTool : AbstractTrainerTool<NameSample?
     public override string ShortDescription => "trainer for the learnable name finder";
 
     /// <inheritdoc/>
-    protected override IEnumerable<Option> GetToolOptions() =>
-        [type, resources, featuregen, nameTypes, sequenceCodec, factoryName, lang, @params, model];
+    protected override IEnumerable<Option> GetToolOptions()
+        => [type, resources, featuregen, nameTypes, sequenceCodec, factoryName, lang, @params, model];
 
     /// <inheritdoc/>
-    public override string GetHelp(string format) =>
-        "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format) +
+    public override string GetHelp(string format)
+        => "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format) +
         OptionUsage.CreateUsage(GetToolOptions(), GetStreamFactory(format).Parameters);
 
     internal static byte[]? OpenFeatureGeneratorBytes(string? featureGenDescriptorFile)
@@ -74,13 +74,13 @@ public sealed class TokenNameFinderTrainerTool : AbstractTrainerTool<NameSample?
         {
             try
             {
-                using Stream bytesIn = CmdLineUtil.OpenInFile(featureGenDescriptorFile);
+                using var bytesIn = CmdLineUtil.OpenInFile(featureGenDescriptorFile);
                 featureGeneratorBytes = ModelUtil.Read(bytesIn);
             }
             catch (IOException e)
             {
                 throw new TerminateToolException(-1,
-                    "IO error while reading training data or indexing data: " + e.Message, e);
+                    $"IO error while reading training data or indexing data: {e.Message}", e);
             }
         }
 
@@ -100,7 +100,7 @@ public sealed class TokenNameFinderTrainerTool : AbstractTrainerTool<NameSample?
     public static IDictionary<string, object> LoadResources(DirectoryInfo? resourcePath,
         FileInfo? featureGenDescriptor)
     {
-        IDictionary<string, object> resources = new JCG.Dictionary<string, object>();
+        var resources = new JCG.Dictionary<string, object>();
 
         if (resourcePath != null)
         {
@@ -108,20 +108,18 @@ public sealed class TokenNameFinderTrainerTool : AbstractTrainerTool<NameSample?
 
             if (featureGenDescriptor != null)
             {
-                using Stream xmlDescriptorIn = CmdLineUtil.OpenInFile(featureGenDescriptor);
-                foreach (KeyValuePair<string, IArtifactSerializer> mapping in
+                using var xmlDescriptorIn = CmdLineUtil.OpenInFile(featureGenDescriptor);
+                foreach (var mapping in
                     GeneratorFactory.ExtractArtifactSerializerMappings(xmlDescriptorIn))
                 {
                     artifactSerializers[mapping.Key] = mapping.Value;
                 }
             }
 
-            foreach (KeyValuePair<string, IArtifactSerializer> serializerMapping in artifactSerializers)
+            foreach (var (resourceName, value) in artifactSerializers)
             {
-                string resourceName = serializerMapping.Key;
-                using Stream resourceIn = CmdLineUtil.OpenInFile(
-                    new FileInfo(Path.Combine(resourcePath.FullName, resourceName)));
-                resources[resourceName] = serializerMapping.Value.Create(resourceIn)!;
+                using var resourceIn = CmdLineUtil.OpenInFile(new FileInfo(Path.Combine(resourcePath.FullName, resourceName)));
+                resources[resourceName] = value.Create(resourceIn)!;
             }
         }
 
@@ -137,9 +135,9 @@ public sealed class TokenNameFinderTrainerTool : AbstractTrainerTool<NameSample?
             mlParams = new TrainingParameters();
         }
 
-        FileInfo modelOutFile = parseResult.GetRequiredValueByName(model);
+        var modelOutFile = parseResult.GetRequiredValueByName(model);
 
-        FileInfo? featuregenFile = parseResult.GetValueByName(featuregen);
+        var featuregenFile = parseResult.GetValueByName(featuregen);
 
         byte[]? featureGeneratorBytes = OpenFeatureGeneratorBytes(featuregenFile);
 
@@ -177,8 +175,7 @@ public sealed class TokenNameFinderTrainerTool : AbstractTrainerTool<NameSample?
             sequenceCodecImplName = typeof(BilouCodec).FullName;
         }
 
-        ISequenceCodec<string> codec =
-            TokenNameFinderFactory.InstantiateSequenceCodec(sequenceCodecImplName);
+        var codec = TokenNameFinderFactory.InstantiateSequenceCodec(sequenceCodecImplName);
 
         TokenNameFinderFactory nameFinderFactory;
         try

@@ -39,16 +39,16 @@ public sealed class DoccatCrossValidatorTool : AbstractCrossValidatorTool<Docume
     private readonly Option<FileInfo?> reportOutputFile = ToolParams.ReportOutputFile();
 
     /// <inheritdoc/>
-    public override string ShortDescription =>
-        "K-fold cross validator for the learnable Document Categorizer";
+    public override string ShortDescription
+        => "K-fold cross validator for the learnable Document Categorizer";
 
     /// <inheritdoc/>
-    protected override IEnumerable<Option> GetToolOptions() =>
-        [folds, misclassified, lang, @params, featureGenerators, factoryName, reportOutputFile];
+    protected override IEnumerable<Option> GetToolOptions()
+        => [folds, misclassified, lang, @params, featureGenerators, factoryName, reportOutputFile];
 
     /// <inheritdoc/>
-    public override string GetHelp(string format) =>
-        "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format) +
+    public override string GetHelp(string format)
+        => "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format) +
         OptionUsage.CreateUsage(GetToolOptions(), GetStreamFactory(format).Parameters);
 
     /// <inheritdoc/>
@@ -67,7 +67,7 @@ public sealed class DoccatCrossValidatorTool : AbstractCrossValidatorTool<Docume
         }
 
         DoccatFineGrainedReportListener? reportListener = null;
-        FileInfo? reportFile = parseResult.GetValueByName(reportOutputFile);
+        var reportFile = parseResult.GetValueByName(reportOutputFile);
         Stream? reportOutputStream = null;
         if (reportFile != null)
         {
@@ -87,15 +87,15 @@ public sealed class DoccatCrossValidatorTool : AbstractCrossValidatorTool<Docume
             }
         }
 
-        IFeatureGenerator[] featureGeneratorsArr =
+        var featureGeneratorsArr =
             DoccatTrainerTool.CreateFeatureGenerators(parseResult.GetValueByName(featureGenerators));
 
-        IDoccatEvaluationMonitor[] listenersArr = listeners.ToArray();
+        var listenersArr = listeners.ToArray();
 
         DoccatCrossValidator validator;
         try
         {
-            DoccatFactory factory = DoccatFactory.Create(parseResult.GetValueByName(factoryName),
+            var factory = DoccatFactory.Create(parseResult.GetValueByName(factoryName),
                 featureGeneratorsArr);
             validator = new DoccatCrossValidator(parseResult.GetRequiredValueByName(lang), mlParams,
                 factory, listenersArr);
@@ -105,7 +105,7 @@ public sealed class DoccatCrossValidatorTool : AbstractCrossValidatorTool<Docume
         catch (IOException e)
         {
             throw new Formats.TerminateToolException(-1,
-                "IO error while reading training data or indexing data: " + e.Message, e);
+                $"IO error while reading training data or indexing data: {e.Message}", e);
         }
         finally
         {
@@ -142,8 +142,9 @@ public sealed class DoccatCrossValidatorTool : AbstractCrossValidatorTool<Docume
         // NOpenNLP: upstream concatenates a double, which Java renders with
         // Double.toString; J2N's "J" format reproduces that, as it does elsewhere in
         // the port.
-        Console.WriteLine("Accuracy: " + J2N.Numerics.Double.ToString(
-            validator.DocumentAccuracy, "J", CultureInfo.InvariantCulture) + "\n" +
-            "Number of documents: " + validator.DocumentCount);
+        var accuracy = J2N.Numerics.Double.ToString(
+            validator.DocumentAccuracy, "J", CultureInfo.InvariantCulture);
+        Console.WriteLine($"Accuracy: {accuracy}\n" +
+                          $"Number of documents: {validator.DocumentCount}");
     }
 }

@@ -32,8 +32,8 @@ public class BioNLP2004NameSampleStreamFactory : AbstractSampleStreamFactory<Nam
         new FormatParameter<string>("-types", "DNA,protein,cell_type,cell_line,RNA");
 
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [FormatParameters.Data, FormatParameters.Encoding, TypesParam];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [FormatParameters.Data, FormatParameters.Encoding, TypesParam];
 
     /// <inheritdoc/>
     public override IObjectStream<NameSample?> Create(IFormatParameterValues values)
@@ -79,7 +79,7 @@ public class BioNLP2004NameSampleStreamFactory : AbstractSampleStreamFactory<Nam
         }
     }
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<NameSample?>(
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<NameSample?>(
             "bionlp2004", new BioNLP2004NameSampleStreamFactory());
 }

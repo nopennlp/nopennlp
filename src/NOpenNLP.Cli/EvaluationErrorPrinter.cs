@@ -30,17 +30,12 @@ namespace NOpenNLP.Tools.Cmdline;
 /// <summary>
 /// <b>Note:</b> Do not use this class, internal use only!
 /// </summary>
-public abstract class EvaluationErrorPrinter<T> : IEvaluationMonitor<T>
+public abstract class EvaluationErrorPrinter<T>(TextWriter outputStream) : IEvaluationMonitor<T>
 {
     // NOpenNLP: upstream wraps the OutputStream in a PrintStream. A TextWriter is the
     // .NET counterpart, and the callers already hand over Console.Error rather than a
-    // raw stream, so no wrapping is needed.
-    protected TextWriter printStream;
-
-    protected EvaluationErrorPrinter(TextWriter outputStream)
-    {
-        this.printStream = outputStream;
-    }
+    // raw stream, so no wrapping is needed. Made readonly.
+    protected readonly TextWriter printStream = outputStream;
 
     // for the sentence detector
     protected void PrintError(Span[] references, Span[] predictions,
@@ -72,7 +67,7 @@ public abstract class EvaluationErrorPrinter<T> : IEvaluationMonitor<T>
         {
             if (id != null)
             {
-                printStream.WriteLine("Id: {" + id + "}");
+                printStream.WriteLine($"Id: {{{id}}}");
             }
 
             PrintSamples(referenceSample, predictedSample);
@@ -82,8 +77,8 @@ public abstract class EvaluationErrorPrinter<T> : IEvaluationMonitor<T>
     }
 
     protected void PrintError(Span[] references, Span[] predictions,
-        T referenceSample, T predictedSample, string[] sentenceTokens) =>
-        PrintError(null, references, predictions, referenceSample, predictedSample, sentenceTokens);
+        T referenceSample, T predictedSample, string[] sentenceTokens)
+        => PrintError(null, references, predictions, referenceSample, predictedSample, sentenceTokens);
 
     // for pos tagger
     protected void PrintError(string[] references, string[] predictions,
@@ -124,16 +119,14 @@ public abstract class EvaluationErrorPrinter<T> : IEvaluationMonitor<T>
     /// <param name="filteredDoc">the document tokens which were tagged wrong</param>
     /// <param name="filteredRefs">the reference tags</param>
     /// <param name="filteredPreds">the predicted tags</param>
-    private void PrintErrors(IList<string> filteredDoc, IList<string> filteredRefs,
-        IList<string> filteredPreds)
+    private void PrintErrors(IList<string> filteredDoc, IList<string> filteredRefs, IList<string> filteredPreds)
     {
         printStream.WriteLine("Errors: {");
         printStream.WriteLine("Tok: Ref | Pred");
         printStream.WriteLine("---------------");
         for (int i = 0; i < filteredDoc.Count; i++)
         {
-            printStream.WriteLine(filteredDoc[i] + ": " + filteredRefs[i]
-                + " | " + filteredPreds[i]);
+            printStream.WriteLine($"{filteredDoc[i]}: {filteredRefs[i]} | {filteredPreds[i]}");
         }
 
         printStream.WriteLine("}\n");
@@ -149,13 +142,13 @@ public abstract class EvaluationErrorPrinter<T> : IEvaluationMonitor<T>
         IList<Span> falseNegatives, string doc)
     {
         printStream.WriteLine("False positives: {");
-        foreach (Span span in falsePositives)
+        foreach (var span in falsePositives)
         {
             printStream.WriteLine(span.GetCoveredText(doc.AsCharSequence()).ToString());
         }
 
         printStream.WriteLine("} False negatives: {");
-        foreach (Span span in falseNegatives)
+        foreach (var span in falseNegatives)
         {
             printStream.WriteLine(span.GetCoveredText(doc.AsCharSequence()).ToString());
         }
@@ -188,8 +181,8 @@ public abstract class EvaluationErrorPrinter<T> : IEvaluationMonitor<T>
     // NOpenNLP: upstream renders the array with Arrays.toString, which is
     // "[a, b, c]" -- and "[]" for an empty array. Composed here since .NET has no
     // equivalent.
-    private static string Print(IList<Span> spans, string[] toks) =>
-        "[" + string.Join(", ", Span.SpansToStrings([.. spans], toks)) + "]";
+    private static string Print(IList<Span> spans, string[] toks)
+        => $"[{string.Join(", ", Span.SpansToStrings([.. spans], toks))}]";
 
     /// <summary>
     /// Auxiliary method to print expected and predicted samples.
@@ -198,8 +191,7 @@ public abstract class EvaluationErrorPrinter<T> : IEvaluationMonitor<T>
     /// <param name="predictedSample">the predicted sample</param>
     private void PrintSamples<S>(S referenceSample, S predictedSample)
     {
-        string details = "Expected: {\n" + referenceSample + "}\nPredicted: {\n"
-            + predictedSample + "}";
+        string details = $"Expected: {{\n{referenceSample}}}\nPredicted: {{\n{predictedSample}}}";
         printStream.WriteLine(details);
     }
 
@@ -211,22 +203,21 @@ public abstract class EvaluationErrorPrinter<T> : IEvaluationMonitor<T>
     /// <param name="predictions">the predicted spans</param>
     /// <param name="falseNegatives">[out] the false negatives list</param>
     /// <param name="falsePositives">[out] the false positives list</param>
-    private static void FindErrors(Span[] references, Span[] predictions,
-        IList<Span> falseNegatives, IList<Span> falsePositives)
+    private static void FindErrors(Span[] references, Span[] predictions, IList<Span> falseNegatives, IList<Span> falsePositives)
     {
-        foreach (Span reference in references)
+        foreach (var reference in references)
         {
             falseNegatives.Add(reference);
         }
 
-        foreach (Span prediction in predictions)
+        foreach (var prediction in predictions)
         {
             falsePositives.Add(prediction);
         }
 
-        foreach (Span referenceName in references)
+        foreach (var referenceName in references)
         {
-            foreach (Span prediction in predictions)
+            foreach (var prediction in predictions)
             {
                 if (referenceName.Equals(prediction))
                 {

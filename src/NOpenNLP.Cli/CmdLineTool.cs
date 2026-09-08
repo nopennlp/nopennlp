@@ -28,10 +28,6 @@ namespace NOpenNLP.Tools.Cmdline;
 /// </summary>
 public abstract class CmdLineTool
 {
-    protected CmdLineTool()
-    {
-    }
-
     /// <summary>
     /// The name of the tool, used as the command. Must not contain white spaces.
     /// </summary>
@@ -47,7 +43,7 @@ public abstract class CmdLineTool
             string simpleName = GetType().Name;
 
             return simpleName.EndsWith("Tool", StringComparison.Ordinal)
-                ? simpleName.Substring(0, simpleName.Length - 4)
+                ? simpleName[..^4]
                 : simpleName;
         }
     }

@@ -41,18 +41,18 @@ public sealed class ChunkerEvaluatorTool : AbstractEvaluatorTool<ChunkSample?>
     protected override IEnumerable<Option> GetToolOptions() => [model, misclassified, detailedF];
 
     /// <inheritdoc/>
-    public override string ShortDescription =>
-        "Measures the performance of the Chunker model with the reference data";
+    public override string ShortDescription
+        => "Measures the performance of the Chunker model with the reference data";
 
     /// <inheritdoc/>
-    public override string GetHelp(string format) =>
-        "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format)
+    public override string GetHelp(string format)
+        => "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format)
             + OptionUsage.CreateUsage(GetToolOptions(), GetStreamFactory(format).Parameters);
 
     /// <inheritdoc/>
     protected override void Run(ParseResult parseResult)
     {
-        ChunkerModel model = new ChunkerModelLoader().Load(parseResult.GetValueByName(this.model)!);
+        var model = new ChunkerModelLoader().Load(parseResult.GetValueByName(this.model)!);
 
         var listeners = new JCG.List<IChunkerEvaluationMonitor>();
         ChunkerDetailedFMeasureListener? detailedFMeasureListener = null;
@@ -82,8 +82,7 @@ public sealed class ChunkerEvaluatorTool : AbstractEvaluatorTool<ChunkSample?>
         catch (IOException e)
         {
             Console.Error.WriteLine("failed");
-            throw new TerminateToolException(-1, "IO error while reading test data: "
-                + e.Message, e);
+            throw new TerminateToolException(-1, $"IO error while reading test data: {e.Message}", e);
         }
 
         // sorry that this can fail

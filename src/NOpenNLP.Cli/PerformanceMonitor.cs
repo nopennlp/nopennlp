@@ -19,7 +19,6 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
 using System;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Threading;
@@ -36,12 +35,8 @@ namespace NOpenNLP.Tools.Cmdline;
 /// This class is not thread safe. <br/>
 /// Do not use this class, internal use only!
 /// </summary>
-public class PerformanceMonitor : IDisposable
+public class PerformanceMonitor(TextWriter @out, string unit) : IDisposable
 {
-    private readonly string unit;
-
-    private readonly TextWriter @out;
-
     // NOpenNLP: upstream schedules the throughput line on a daemon thread through a
     // ScheduledExecutorService. A System.Threading.Timer callback runs on the thread
     // pool, whose threads are background threads, so it does not hold the process open
@@ -51,12 +46,6 @@ public class PerformanceMonitor : IDisposable
     private long startTime = -1;
 
     private int counter;
-
-    public PerformanceMonitor(TextWriter @out, string unit)
-    {
-        this.@out = @out;
-        this.unit = unit;
-    }
 
     // NOpenNLP: upstream's one-argument constructor defaults to System.out. The
     // evaluator tools rely on that -- their throughput goes to stdout while the basic
@@ -75,7 +64,7 @@ public class PerformanceMonitor : IDisposable
 
         if (increment < 0)
             throw new ArgumentException(
-                "increment must be zero or positive but was " + increment + "!", nameof(increment));
+                $"increment must be zero or positive but was {increment}!", nameof(increment));
 
         counter += increment;
     }
@@ -97,6 +86,9 @@ public class PerformanceMonitor : IDisposable
         long lastTimeStamp = startTime;
         int lastCount = counter;
 
+        beeperHandle = new Timer(Beeper, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+        return;
+
         void Beeper(object? state)
         {
             int deltaCount = counter - lastCount;
@@ -114,14 +106,12 @@ public class PerformanceMonitor : IDisposable
                 : 0;
 
             @out.WriteLine(string.Format(CultureInfo.InvariantCulture,
-                "current: {0:F1} " + unit + "/s avg: {1:F1} " + unit + "/s total: {2} " + unit,
+                $"current: {{0:F1}} {unit}/s avg: {{1:F1}} {unit}/s total: {{2}} {unit}",
                 currentThroughput, averageThroughput, counter));
 
             lastTimeStamp = CurrentTimeMillis();
             lastCount = counter;
         }
-
-        beeperHandle = new Timer(Beeper, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
     }
 
     public void StopAndPrintFinalResult()
@@ -141,16 +131,13 @@ public class PerformanceMonitor : IDisposable
 
         // NOpenNLP: upstream's "%.1f %n" leaves a trailing space before the newline;
         // it is reproduced so the output matches byte for byte.
-        @out.WriteLine(string.Format(CultureInfo.InvariantCulture,
-            "Average: {0:F1} " + unit + "/s ", average));
-        @out.WriteLine("Total: " + counter + " " + unit);
+        @out.WriteLine(string.Format(CultureInfo.InvariantCulture, $"Average: {{0:F1}} {unit}/s ", average));
+        @out.WriteLine($"Total: {counter} {unit}");
         // NOpenNLP: upstream concatenates a double, and Java's Double.toString always
         // renders a decimal point -- "1.0s", "60.0s". .NET's default formatting drops
         // it, giving "1s" and "60s". J2N.Numerics.Double.ToString with the "J" format
         // reproduces Java's rendering, as it does elsewhere in the port.
-        @out.WriteLine("Runtime: "
-            + J2N.Numerics.Double.ToString(timePassed / 1000d, "J", CultureInfo.InvariantCulture)
-            + "s");
+        @out.WriteLine($"Runtime: {J2N.Numerics.Double.ToString(timePassed / 1000d, "J", CultureInfo.InvariantCulture)}s");
     }
 
     // NOpenNLP: stands in for System.currentTimeMillis(), which the throughput maths

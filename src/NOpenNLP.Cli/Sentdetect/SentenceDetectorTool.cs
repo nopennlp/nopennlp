@@ -34,7 +34,7 @@ public sealed class SentenceDetectorTool : BasicCmdLineTool
     public override string ShortDescription => "learnable sentence detector";
 
     /// <inheritdoc/>
-    public override string GetHelp() => "Usage: " + CLI.Cmd + " " + Name + " model < sentences";
+    public override string GetHelp() => $"Usage: {CLI.Cmd} {Name} model < sentences";
 
     /// <summary>
     /// Perform sentence detection the input stream.
@@ -49,7 +49,7 @@ public sealed class SentenceDetectorTool : BasicCmdLineTool
         }
         else
         {
-            SentenceModel model = new SentenceModelLoader().Load(new FileInfo(args[0]));
+            var model = new SentenceModelLoader().Load(new FileInfo(args[0]));
 
             var sdetector = new SentenceDetectorME(model);
 
@@ -62,8 +62,7 @@ public sealed class SentenceDetectorTool : BasicCmdLineTool
                     new PlainTextByLineStream(new SystemInputStreamFactory(),
                         SystemInputStreamFactory.Encoding));
 
-                string? para;
-                while ((para = paraStream.Read()) != null)
+                while (paraStream.Read() is { } para)
                 {
                     string[] sents = sdetector.SentDetect(para);
                     foreach (string sentence in sents)

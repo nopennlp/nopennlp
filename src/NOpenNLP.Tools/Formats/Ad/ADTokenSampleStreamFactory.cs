@@ -41,8 +41,8 @@ public class ADTokenSampleStreamFactory : DetokenizerSampleStreamFactory<TokenSa
         new ADNameSampleStreamFactory();
 
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [ADNameSampleStreamFactory.EncodingParam, FormatParameters.Data,
+    public override IEnumerable<IFormatParameter> Parameters
+        => [ADNameSampleStreamFactory.EncodingParam, FormatParameters.Data,
             ADNameSampleStreamFactory.SplitHyphenatedTokensParam, FormatParameters.Lang,
             FormatParameters.Detokenizer];
 
@@ -54,7 +54,7 @@ public class ADTokenSampleStreamFactory : DetokenizerSampleStreamFactory<TokenSa
         return new NameToTokenSampleStream(CreateDetokenizer(values), samples);
     }
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<TokenSample?>(
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<TokenSample?>(
             "ad", new ADTokenSampleStreamFactory());
 }

@@ -67,20 +67,20 @@ public static class CmdLineUtil
         // to keep upstream's more specific message.
         if (Directory.Exists(inFile.FullName))
         {
-            isFailure = "The " + name + " file is a directory!";
+            isFailure = $"The {name} file is a directory!";
         }
         else if (!inFile.Exists)
         {
-            isFailure = "The " + name + " file does not exist!";
+            isFailure = $"The {name} file does not exist!";
         }
         else if (!CanRead(inFile))
         {
-            isFailure = "No permissions to read the " + name + " file!";
+            isFailure = $"No permissions to read the {name} file!";
         }
 
         if (null != isFailure)
         {
-            throw new TerminateToolException(-1, isFailure + " Path: " + inFile.FullName);
+            throw new TerminateToolException(-1, $"{isFailure} Path: {inFile.FullName}");
         }
     }
 
@@ -102,39 +102,38 @@ public static class CmdLineUtil
 
         if (Directory.Exists(outFile.FullName))
         {
-            isFailure = "The " + name + " file is a directory!";
+            isFailure = $"The {name} file is a directory!";
         }
         else if (outFile.Exists)
         {
             // The file already exists, ensure that it is possible to write into it.
             if (!CanWrite(outFile))
             {
-                isFailure = "No permissions to write the " + name + " file!";
+                isFailure = $"No permissions to write the {name} file!";
             }
         }
         else
         {
             // The file does not exist, ensure its parent directory exists and has write
             // permissions to create a new file in it.
-            DirectoryInfo? parentDir = outFile.Directory;
+            var parentDir = outFile.Directory;
 
             if (parentDir != null && parentDir.Exists)
             {
                 if (!CanWriteDirectory(parentDir))
                 {
-                    isFailure = "No permissions to create the " + name + " file!";
+                    isFailure = $"No permissions to create the {name} file!";
                 }
             }
             else
             {
-                isFailure = "The parent directory of the " + name + " file does not exist, " +
-                    "please create it first!";
+                isFailure = $"The parent directory of the {name} file does not exist, please create it first!";
             }
         }
 
         if (null != isFailure)
         {
-            throw new TerminateToolException(-1, isFailure + " Path: " + outFile.FullName);
+            throw new TerminateToolException(-1, $"{isFailure} Path: {outFile.FullName}");
         }
     }
 
@@ -196,7 +195,7 @@ public static class CmdLineUtil
         }
         catch (Exception e) when (e is FileNotFoundException or DirectoryNotFoundException)
         {
-            throw new TerminateToolException(-1, "File '" + file + "' cannot be found", e);
+            throw new TerminateToolException(-1, $"File '{file}' cannot be found", e);
         }
     }
 
@@ -208,7 +207,7 @@ public static class CmdLineUtil
         }
         catch (FileNotFoundException e)
         {
-            throw new TerminateToolException(-1, "File '" + file + "' cannot be found", e);
+            throw new TerminateToolException(-1, $"File '{file}' cannot be found", e);
         }
     }
 
@@ -223,7 +222,7 @@ public static class CmdLineUtil
     {
         CheckOutputFile(modelName + " model", modelFile);
 
-        Console.Error.Write("Writing " + modelName + " model ... ");
+        Console.Error.Write($"Writing {modelName} model ... ");
 
         var stopwatch = Stopwatch.StartNew();
 
@@ -236,7 +235,7 @@ public static class CmdLineUtil
         {
             Console.Error.WriteLine("failed");
             throw new TerminateToolException(-1,
-                "Error during writing model file '" + modelFile + "'", e);
+                $"Error during writing model file '{modelFile}'", e);
         }
 
         stopwatch.Stop();
@@ -246,8 +245,8 @@ public static class CmdLineUtil
 
         Console.Error.WriteLine();
 
-        Console.Error.WriteLine("Wrote " + modelName + " model to");
-        Console.Error.WriteLine("path: " + modelFile.FullName);
+        Console.Error.WriteLine($"Wrote {modelName} model to");
+        Console.Error.WriteLine($"path: {modelFile.FullName}");
 
         Console.Error.WriteLine();
     }
@@ -329,8 +328,7 @@ public static class CmdLineUtil
         // two-letter ISO name of every specific culture; ICU supplies the same ISO 639-1
         // set. "x-unspecified" is added exactly as upstream does.
         var languageCodes = new HashSet<string>(
-            System.Globalization.CultureInfo
-                .GetCultures(CultureTypes.NeutralCultures)
+            CultureInfo.GetCultures(CultureTypes.NeutralCultures)
                 .Select(c => c.TwoLetterISOLanguageName)
                 .Where(n => n.Length == 2),
             StringComparer.Ordinal)
@@ -340,24 +338,23 @@ public static class CmdLineUtil
 
         if (!languageCodes.Contains(code))
         {
-            throw new TerminateToolException(1, "Unknown language code " + code + ", " +
-                "must be an ISO 639 code!");
+            throw new TerminateToolException(1, $"Unknown language code {code}, must be an ISO 639 code!");
         }
     }
 
-    public static bool ContainsParam(string param, string[] args) =>
-        args.Any(arg => arg.Equals(param, StringComparison.Ordinal));
+    public static bool ContainsParam(string param, string[] args)
+        => args.Any(arg => arg.Equals(param, StringComparison.Ordinal));
 
-    public static void HandleStdinIoError(IOException e) =>
-        throw new TerminateToolException(-1,
-            "IO Error while reading from stdin: " + e.Message, e);
+    public static void HandleStdinIoError(IOException e)
+        => throw new TerminateToolException(-1,
+            $"IO Error while reading from stdin: {e.Message}", e);
 
-    public static TerminateToolException CreateObjectStreamError(IOException e) =>
-        new TerminateToolException(-1,
-            "IO Error while creating an Input Stream: " + e.Message, e);
+    public static TerminateToolException CreateObjectStreamError(IOException e)
+        => new TerminateToolException(-1,
+            $"IO Error while creating an Input Stream: {e.Message}", e);
 
-    public static void HandleCreateObjectStreamError(IOException e) =>
-        throw CreateObjectStreamError(e);
+    public static void HandleCreateObjectStreamError(IOException e)
+        => throw CreateObjectStreamError(e);
 
     /// <summary>
     /// Loads the training parameters from <paramref name="paramFile"/>, which is
@@ -379,17 +376,15 @@ public static class CmdLineUtil
             }
             catch (IOException e)
             {
-                throw new TerminateToolException(-1,
-                    "Error during parameters loading: " + e.Message, e);
+                throw new TerminateToolException(-1, $"Error during parameters loading: {e.Message}", e);
             }
 
             if (!TrainerFactory.IsValid(parameters))
             {
-                throw new TerminateToolException(1,
-                    "Training parameters file '" + paramFile + "' is invalid!");
+                throw new TerminateToolException(1, $"Training parameters file '{paramFile}' is invalid!");
             }
 
-            TrainerFactory.TrainerType? trainerType = TrainerFactory.GetTrainerType(parameters);
+            var trainerType = TrainerFactory.GetTrainerType(parameters);
 
             if (!supportSequenceTraining
                 && trainerType == TrainerFactory.TrainerType.EVENT_MODEL_SEQUENCE_TRAINER)

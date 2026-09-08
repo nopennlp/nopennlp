@@ -46,13 +46,13 @@ internal static class OptionUsage
         var details = new StringBuilder();
         var seen = new HashSet<string>();
 
-        foreach (Option option in options)
+        foreach (var option in options)
         {
             Append(usage, details, seen, option.Name, ValueNameOf(option),
                 option.Description ?? "", !option.Required);
         }
 
-        foreach (IFormatParameter parameter in parameters)
+        foreach (var parameter in parameters)
         {
             Append(usage, details, seen, parameter.Name, parameter.ValueName,
                 parameter.Description, parameter.IsOptional);

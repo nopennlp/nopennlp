@@ -55,12 +55,12 @@ public sealed class ParserTrainerTool : AbstractTrainerTool<Parse?>
     public override string ShortDescription => "trains the learnable parser";
 
     /// <inheritdoc/>
-    protected override IEnumerable<Option> GetToolOptions() =>
-        [parserType, headRulesSerializerImpl, headRules, fun, lang, @params, model, encoding];
+    protected override IEnumerable<Option> GetToolOptions()
+        => [parserType, headRulesSerializerImpl, headRules, fun, lang, @params, model, encoding];
 
     /// <inheritdoc/>
-    public override string GetHelp(string format) =>
-        "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format) +
+    public override string GetHelp(string format)
+        => "Usage: " + CLI.Cmd + " " + Name + GetFormatsHelp(format) +
         OptionUsage.CreateUsage(GetToolOptions(), GetStreamFactory(format).Parameters);
 
     internal static OpenNlpDictionary? BuildDictionary(IObjectStream<Parse?> parseSamples,
@@ -75,7 +75,7 @@ public sealed class ParserTrainerTool : AbstractTrainerTool<Parse?>
         }
         catch (IOException e)
         {
-            Console.Error.WriteLine("Error while building dictionary: " + e.Message);
+            Console.Error.WriteLine($"Error while building dictionary: {e.Message}");
             mdict = null;
         }
 
@@ -87,13 +87,12 @@ public sealed class ParserTrainerTool : AbstractTrainerTool<Parse?>
     internal static ParserType? ParseParserType(string? typeAsString)
     {
         ParserType? type = null;
-        if (typeAsString != null && typeAsString.Length > 0)
+        if (typeAsString is { Length: > 0 })
         {
             type = ParserTypeExtensions.Parse(typeAsString);
             if (type == null)
             {
-                throw new TerminateToolException(1, "ParserType training parameter '" + typeAsString +
-                    "' is invalid!");
+                throw new TerminateToolException(1, $"ParserType training parameter '{typeAsString}' is invalid!");
             }
         }
 
@@ -104,15 +103,13 @@ public sealed class ParserTrainerTool : AbstractTrainerTool<Parse?>
     // because the method is not part of the user-facing contract, unlike the option
     // names and help text.
     /// <exception cref="IOException">if the head rules cannot be read</exception>
-    internal static IHeadRules CreateHeadRules(string? serializerImpl, string language,
-        FileInfo headRulesFile)
+    internal static IHeadRules CreateHeadRules(string? serializerImpl, string language, FileInfo headRulesFile)
     {
         IArtifactSerializer headRulesSerializer;
 
         if (serializerImpl != null)
         {
-            headRulesSerializer =
-                ExtensionLoader.InstantiateExtension<IArtifactSerializer>(serializerImpl)!;
+            headRulesSerializer = ExtensionLoader.InstantiateExtension<IArtifactSerializer>(serializerImpl)!;
         }
         else
         {
@@ -124,8 +121,7 @@ public sealed class ParserTrainerTool : AbstractTrainerTool<Parse?>
             else if ("es".Equals(language, StringComparison.Ordinal)
                 || "spa".Equals(language, StringComparison.Ordinal))
             {
-                headRulesSerializer =
-                    new Tools.Parser.Lang.Es.AncoraSpanishHeadRules.HeadRulesSerializer();
+                headRulesSerializer = new Tools.Parser.Lang.Es.AncoraSpanishHeadRules.HeadRulesSerializer();
             }
             else
             {
@@ -143,8 +139,7 @@ public sealed class ParserTrainerTool : AbstractTrainerTool<Parse?>
         }
         else
         {
-            throw new TerminateToolException(-1,
-                "HeadRules Artifact Serializer must create an object of type HeadRules!");
+            throw new TerminateToolException(-1, "HeadRules Artifact Serializer must create an object of type HeadRules!");
         }
     }
 
@@ -187,16 +182,16 @@ public sealed class ParserTrainerTool : AbstractTrainerTool<Parse?>
             mlParams = ModelUtil.CreateDefaultTrainingParameters();
         }
 
-        FileInfo modelOutFile = parseResult.GetRequiredValueByName(model);
+        var modelOutFile = parseResult.GetRequiredValueByName(model);
         CmdLineUtil.CheckOutputFile("parser model", modelOutFile);
 
         ParserModel parserModel;
         try
         {
-            IHeadRules rules = CreateHeadRules(parseResult.GetValueByName(headRulesSerializerImpl),
+            var rules = CreateHeadRules(parseResult.GetValueByName(headRulesSerializerImpl),
                 parseResult.GetRequiredValueByName(lang), parseResult.GetRequiredValueByName(headRules));
 
-            ParserType? type = ParseParserType(parseResult.GetValueByName(parserType));
+            var type = ParseParserType(parseResult.GetValueByName(parserType));
             if (ToolParams.JavaBooleanValue(parseResult.GetValueByName(fun)))
             {
                 Parse.UseFunctionTags(true);
@@ -204,13 +199,11 @@ public sealed class ParserTrainerTool : AbstractTrainerTool<Parse?>
 
             if (ParserType.CHUNKING == type)
             {
-                parserModel = ChunkingParser.Train(parseResult.GetRequiredValueByName(lang),
-                    sampleStream!, rules, mlParams);
+                parserModel = ChunkingParser.Train(parseResult.GetRequiredValueByName(lang), sampleStream!, rules, mlParams);
             }
             else if (ParserType.TREEINSERT == type)
             {
-                parserModel = TreeinsertParser.Train(parseResult.GetRequiredValueByName(lang),
-                    sampleStream!, rules, mlParams);
+                parserModel = TreeinsertParser.Train(parseResult.GetRequiredValueByName(lang), sampleStream!, rules, mlParams);
             }
             else
             {

@@ -31,7 +31,7 @@ namespace NOpenNLP.Tools.Cmdline.Tokenizer;
 public sealed class DictionaryDetokenizerTool : BasicCmdLineTool
 {
     /// <inheritdoc/>
-    public override string GetHelp() => "Usage: " + CLI.Cmd + " " + Name + " detokenizerDictionary";
+    public override string GetHelp() => $"Usage: {CLI.Cmd} {Name} detokenizerDictionary";
 
     /// <inheritdoc/>
     public override void Run(string[] args)
@@ -44,18 +44,14 @@ public sealed class DictionaryDetokenizerTool : BasicCmdLineTool
         {
             try
             {
-                IDetokenizer detokenizer = new DictionaryDetokenizer(
-                    new DetokenizationDictionaryLoader().Load(new FileInfo(args[0])));
+                var detokenizer = new DictionaryDetokenizer(new DetokenizationDictionaryLoader().Load(new FileInfo(args[0])));
 
-                using IObjectStream<string?> tokenizedLineStream =
-                    new PlainTextByLineStream(new SystemInputStreamFactory(),
-                        SystemInputStreamFactory.Encoding);
+                using var tokenizedLineStream = new PlainTextByLineStream(new SystemInputStreamFactory(), SystemInputStreamFactory.Encoding);
 
                 using var perfMon = new PerformanceMonitor(Console.Error, "sent");
                 perfMon.Start();
 
-                string? tokenizedLine;
-                while ((tokenizedLine = tokenizedLineStream.Read()) != null)
+                while (tokenizedLineStream.Read() is { } tokenizedLine)
                 {
                     // white space tokenize line
                     string[] tokens = WhitespaceTokenizer.INSTANCE.Tokenize(tokenizedLine);

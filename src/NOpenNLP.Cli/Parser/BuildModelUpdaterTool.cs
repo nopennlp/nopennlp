@@ -38,20 +38,17 @@ public sealed class BuildModelUpdaterTool : ModelUpdaterTool
     protected override ParserModel TrainAndUpdate(ParserModel originalModel,
         IObjectStream<Parse?> parseSamples)
     {
-        OpenNlpDictionary? mdict = ParserTrainerTool.BuildDictionary(parseSamples,
-            originalModel.HeadRules!, 5);
+        var mdict = ParserTrainerTool.BuildDictionary(parseSamples, originalModel.HeadRules!, 5);
 
         parseSamples.Reset();
 
         // TODO: training individual models should be in the chunking parser, not here
         // Training build
         Console.WriteLine("Training builder");
-        IObjectStream<Event?> bes = new ParserEventStream(parseSamples, originalModel.HeadRules!,
-            ParserEventTypeEnum.BUILD, mdict);
+        var bes = new ParserEventStream(parseSamples, originalModel.HeadRules!, ParserEventTypeEnum.BUILD, mdict);
 
-        IEventTrainer trainer = TrainerFactory.GetEventTrainer(
-            ModelUtil.CreateDefaultTrainingParameters(), null);
-        IMaxentModel buildModel = trainer.Train(bes);
+        var trainer = TrainerFactory.GetEventTrainer(ModelUtil.CreateDefaultTrainingParameters(), null);
+        var buildModel = trainer.Train(bes);
 
         parseSamples.Dispose();
 

@@ -35,8 +35,8 @@ public class ConlluLemmaSampleStreamFactory : AbstractSampleStreamFactory<LemmaS
             "u|x u for unified tags and x for language-specific part-of-speech tags", "u");
 
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [FormatParameters.Data, FormatParameters.Encoding, TagsetParam];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [FormatParameters.Data, FormatParameters.Encoding, TagsetParam];
 
     /// <inheritdoc/>
     public override IObjectStream<LemmaSample?> Create(IFormatParameterValues values)
@@ -67,7 +67,7 @@ public class ConlluLemmaSampleStreamFactory : AbstractSampleStreamFactory<LemmaS
         }
     }
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<LemmaSample?>(
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<LemmaSample?>(
             ConlluPOSSampleStreamFactory.ConlluFormat, new ConlluLemmaSampleStreamFactory());
 }

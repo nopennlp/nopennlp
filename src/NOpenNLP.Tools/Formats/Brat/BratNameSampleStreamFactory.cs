@@ -56,8 +56,8 @@ public class BratNameSampleStreamFactory : AbstractSampleStreamFactory<NameSampl
     // NOpenNLP: upstream's Parameters interface extends nothing, so this format takes
     // neither -data nor -encoding.
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [
+    public override IEnumerable<IFormatParameter> Parameters
+        => [
             BratDataDirParam, AnnotationConfigParam, SentenceDetectorModelParam,
             TokenizerModelParam, RuleBasedTokenizerParam, RecursiveParam, NameTypesParam
         ];
@@ -195,7 +195,7 @@ public class BratNameSampleStreamFactory : AbstractSampleStreamFactory<NameSampl
         return new BratNameSampleStream(sentDetector, tokenizer, samples, nameTypes);
     }
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<NameSample?>("brat",
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<NameSample?>("brat",
             new BratNameSampleStreamFactory());
 }

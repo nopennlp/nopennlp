@@ -147,10 +147,13 @@ is gitignored and cleared at the start of each run.
 
 Differences that are expected are normalized away rather than reported: the
 command and product name, timings, absolute paths, and the order of a tool's
-options and of a format list. Java derives those last two from `Class.getMethods()`
+options and of its format lists. Java derives those last two from `Class.getMethods()`
 and `HashMap` iteration, neither of which the JDK specifies, so the script sorts
-both sides before diffing. Everything else is compared verbatim. The comment-based
-help at the top of the script covers the setup and the differences that remain.
+both sides before diffing. Floating-point numbers are compared to a relative
+tolerance of 1e-9, because upstream's trainers use `StrictMath` (fdlibm) where the
+port uses `Math`, and the two disagree in the last ulp on a few percent of inputs.
+Everything else is compared verbatim, and a clean run passes every case. The
+comment-based help at the top of the script covers the setup and the details.
 
 ## Attribution
 

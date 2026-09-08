@@ -31,8 +31,8 @@ public class NKJPSentenceSampleStreamFactory : AbstractSampleStreamFactory<Sente
         new FormatParameter<FileInfo>("-textFile", "text", "file containing NKJP text");
 
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [FormatParameters.Data, FormatParameters.Encoding, TextFileParam];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [FormatParameters.Data, FormatParameters.Encoding, TextFileParam];
 
     /// <inheritdoc/>
     public override IObjectStream<SentenceSample?> Create(IFormatParameterValues values)
@@ -62,7 +62,7 @@ public class NKJPSentenceSampleStreamFactory : AbstractSampleStreamFactory<Sente
         return new NKJPSentenceSampleStream(segDoc, textDoc);
     }
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<SentenceSample?>("nkjp",
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<SentenceSample?>("nkjp",
             new NKJPSentenceSampleStreamFactory());
 }

@@ -105,15 +105,15 @@ public abstract class FineGrainedReportListener
 
     private double GetTokenAccuracy(string token) => stats.GetTokenAccuracy(token);
 
-    private IReadOnlyCollection<string> GetTokensOrderedByFrequency() =>
-        stats.GetTokensOrderedByFrequency();
+    private IReadOnlyCollection<string> GetTokensOrderedByFrequency()
+        => stats.GetTokensOrderedByFrequency();
 
     private int GetTokenFrequency(string token) => stats.GetTokenFrequency(token);
 
     private int GetTokenErrors(string token) => stats.GetTokenErrors(token);
 
-    private IReadOnlyCollection<string> GetTokensOrderedByNumberOfErrors() =>
-        stats.GetTokensOrderedByNumberOfErrors();
+    private IReadOnlyCollection<string> GetTokensOrderedByNumberOfErrors()
+        => stats.GetTokensOrderedByNumberOfErrors();
 
     private IReadOnlyCollection<string> GetTagsOrderedByErrors() => stats.GetTagsOrderedByErrors();
 
@@ -129,8 +129,8 @@ public abstract class FineGrainedReportListener
 
     private IReadOnlyCollection<string> GetConfusionMatrixTagset() => stats.GetConfusionMatrixTagset();
 
-    private IReadOnlyCollection<string> GetConfusionMatrixTagset(string token) =>
-        stats.GetConfusionMatrixTagset(token);
+    private IReadOnlyCollection<string> GetConfusionMatrixTagset(string token)
+        => stats.GetConfusionMatrixTagset(token);
 
     private double[][] GetConfusionMatrix() => stats.GetConfusionMatrix();
 
@@ -237,7 +237,7 @@ public abstract class FineGrainedReportListener
     {
         PrintHeader("Most frequent tokens");
 
-        IReadOnlyCollection<string> toks = GetTokensOrderedByFrequency();
+        var toks = GetTokensOrderedByFrequency();
         const int maxLines = 20;
 
         int maxTokSize = 5;
@@ -257,10 +257,6 @@ public abstract class FineGrainedReportListener
         }
 
         int tableSize = maxTokSize + 19;
-
-        // format is "| %3s | %6s | %<maxTokSize>s |"
-        string Row(string pos, string cnt, string token) =>
-            "| " + PadLeft(pos, 3) + " | " + PadLeft(cnt, 6) + " | " + PadLeft(token, maxTokSize) + " |";
 
         PrintLine(tableSize);
         printStream.Write(Row("Pos", "Count", "Token"));
@@ -285,6 +281,11 @@ public abstract class FineGrainedReportListener
 
         PrintLine(tableSize);
         PrintFooter("Most frequent tokens");
+        return;
+
+        // format is "| %3s | %6s | %<maxTokSize>s |"
+        string Row(string pos, string cnt, string token)
+            => $"| {PadLeft(pos, 3)} | {PadLeft(cnt, 6)} | {PadLeft(token, maxTokSize)} |";
     }
 
     protected void PrintTokenErrorRank()
@@ -292,7 +293,7 @@ public abstract class FineGrainedReportListener
         PrintHeader("Tokens with the highest number of errors");
         printStream.Write("\n");
 
-        IReadOnlyCollection<string> toks = GetTokensOrderedByNumberOfErrors();
+        var toks = GetTokensOrderedByNumberOfErrors();
         int maxTokenSize = 5;
 
         int count = 0;
@@ -310,11 +311,6 @@ public abstract class FineGrainedReportListener
         }
 
         int tableSize = 31 + maxTokenSize;
-
-        // format is "| %<maxTokenSize>s | %6s | %5s | %7s |\n"
-        string Row(string token, string errs, string cnt, string rate) =>
-            "| " + PadLeft(token, maxTokenSize) + " | " + PadLeft(errs, 6) + " | "
-                + PadLeft(cnt, 5) + " | " + PadLeft(rate, 7) + " |\n";
 
         PrintLine(tableSize);
         printStream.Write(Row("Token", "Errors", "Count", "% Err"));
@@ -339,12 +335,17 @@ public abstract class FineGrainedReportListener
 
         PrintLine(tableSize);
         PrintFooter("Tokens with the highest number of errors");
+        return;
+
+        // format is "| %<maxTokenSize>s | %6s | %5s | %7s |\n"
+        string Row(string token, string errs, string cnt, string rate)
+            => $"| {PadLeft(token, maxTokenSize)} | {PadLeft(errs, 6)} | {PadLeft(cnt, 5)} | {PadLeft(rate, 7)} |\n";
     }
 
     protected void PrintTagsErrorRank()
     {
         PrintHeader("Detailed Accuracy By Tag");
-        IReadOnlyCollection<string> tags = GetTagsOrderedByErrors();
+        var tags = GetTagsOrderedByErrors();
         printStream.Write("\n");
 
         int maxTagSize = 3;
@@ -358,20 +359,6 @@ public abstract class FineGrainedReportListener
         }
 
         int tableSize = 65 + maxTagSize;
-
-        // headerFormat is "| %<maxTagSize>s | %6s | %6s | %7s | %9s | %6s | %9s |\n"
-        string HeaderRow(string tag, string errs, string cnt, string err,
-            string precision, string recall, string fmeasure) =>
-            "| " + PadLeft(tag, maxTagSize) + " | " + PadLeft(errs, 6) + " | " + PadLeft(cnt, 6)
-                + " | " + PadLeft(err, 7) + " | " + PadLeft(precision, 9) + " | "
-                + PadLeft(recall, 6) + " | " + PadLeft(fmeasure, 9) + " |\n";
-
-        // format is "| %<maxTagSize>s | %6s | %6s | %-7s | %-9s | %-6s | %-9s |\n"
-        string Row(string tag, string errs, string cnt, string err,
-            string precision, string recall, string fmeasure) =>
-            "| " + PadLeft(tag, maxTagSize) + " | " + PadLeft(errs, 6) + " | " + PadLeft(cnt, 6)
-                + " | " + PadRight(err, 7) + " | " + PadRight(precision, 9) + " | "
-                + PadRight(recall, 6) + " | " + PadRight(fmeasure, 9) + " |\n";
 
         PrintLine(tableSize);
         printStream.Write(HeaderRow("Tag", "Errors", "Count", "% Err", "Precision", "Recall",
@@ -398,13 +385,23 @@ public abstract class FineGrainedReportListener
         PrintLine(tableSize);
 
         PrintFooter("Tags with the highest number of errors");
+        return;
+
+        // format is "| %<maxTagSize>s | %6s | %6s | %-7s | %-9s | %-6s | %-9s |\n"
+        string Row(string tag, string errs, string cnt, string err,
+            string precision, string recall, string fmeasure)
+            => $"| {PadLeft(tag, maxTagSize)} | {PadLeft(errs, 6)} | {PadLeft(cnt, 6)} | {PadRight(err, 7)} | {PadRight(precision, 9)} | {PadRight(recall, 6)} | {PadRight(fmeasure, 9)} |\n";
+
+        // headerFormat is "| %<maxTagSize>s | %6s | %6s | %7s | %9s | %6s | %9s |\n"
+        string HeaderRow(string tag, string errs, string cnt, string err, string precision, string recall, string fmeasure)
+            => $"| {PadLeft(tag, maxTagSize)} | {PadLeft(errs, 6)} | {PadLeft(cnt, 6)} | {PadLeft(err, 7)} | {PadLeft(precision, 9)} | {PadLeft(recall, 6)} | {PadLeft(fmeasure, 9)} |\n";
     }
 
     protected void PrintGeneralConfusionTable()
     {
         PrintHeader("Confusion matrix");
 
-        IReadOnlyCollection<string> labels = GetConfusionMatrixTagset();
+        var labels = GetConfusionMatrixTagset();
 
         double[][] confusionMatrix = GetConfusionMatrix();
 
@@ -434,7 +431,7 @@ public abstract class FineGrainedReportListener
     {
         PrintHeader("Confusion matrix for tokens");
         printStream.Write("  sorted by number of errors\n");
-        IReadOnlyCollection<string> toks = GetTokensOrderedByNumberOfErrors();
+        var toks = GetTokensOrderedByNumberOfErrors();
 
         foreach (string t in toks)
         {
@@ -453,7 +450,7 @@ public abstract class FineGrainedReportListener
                     GetTokenErrors(t).ToString(CultureInfo.InvariantCulture)));
                 printStream.Write("\n");
 
-                IReadOnlyCollection<string> labels = GetConfusionMatrixTagset(t);
+                var labels = GetConfusionMatrixTagset(t);
 
                 double[][] confusionMatrix = GetConfusionMatrix(t);
 
@@ -500,30 +497,30 @@ public abstract class FineGrainedReportListener
     // Numbers are rendered with the current culture, matching MessageFormat's use of the
     // default locale.
 
-    private static string PadLeft(string value, int width) =>
-        value.Length >= width ? value : value.PadLeft(width);
+    private static string PadLeft(string value, int width)
+        => value.Length >= width ? value : value.PadLeft(width);
 
-    private static string PadRight(string value, int width) =>
-        value.Length >= width ? value : value.PadRight(width);
+    private static string PadRight(string value, int width)
+        => value.Length >= width ? value : value.PadRight(width);
 
     /// <summary>Reproduces <c>String.format("%21s: %6s", label, value)</c>.</summary>
-    private static string Format21And6(string label, string value) =>
-        PadLeft(label, 21) + ": " + PadLeft(value, 6);
+    private static string Format21And6(string label, string value)
+        => $"{PadLeft(label, 21)}: {PadLeft(value, 6)}";
 
     /// <summary>Reproduces <c>String.format("%12s: %-8s", label, value)</c>.</summary>
-    private static string Format12AndLeft8(string label, string value) =>
-        PadLeft(label, 12) + ": " + PadRight(value, 8);
+    private static string Format12AndLeft8(string label, string value)
+        => $"{PadLeft(label, 12)}: {PadRight(value, 8)}";
 
     /// <summary>Reproduces <c>MessageFormat.format("{0,number,#.##%}", value)</c>.</summary>
-    private static string FormatPercent(double value) =>
-        FormatHalfEven(value * 100, 2, CultureInfo.CurrentCulture) + "%";
+    private static string FormatPercent(double value)
+        => FormatHalfEven(value * 100, 2, CultureInfo.CurrentCulture) + "%";
 
     /// <summary>
     /// Reproduces <c>MessageFormat.format("{0,number,#.##}", value)</c> and
     /// <c>"{0,number,#.###}"</c>.
     /// </summary>
-    private static string FormatNumber(double value, int fractionDigits) =>
-        FormatHalfEven(value, fractionDigits, CultureInfo.CurrentCulture);
+    private static string FormatNumber(double value, int fractionDigits)
+        => FormatHalfEven(value, fractionDigits, CultureInfo.CurrentCulture);
 
     /// <summary>
     /// Rounds <paramref name="value"/> to <paramref name="fractionDigits"/> the way Java's
@@ -548,7 +545,7 @@ public abstract class FineGrainedReportListener
 
         decimal rounded = Math.Round(exact, fractionDigits, MidpointRounding.ToEven);
 
-        return rounded.ToString("#0." + new string('#', fractionDigits), culture);
+        return rounded.ToString($"#0.{new string('#', fractionDigits)}", culture);
     }
 
     /// <summary>
@@ -558,8 +555,6 @@ public abstract class FineGrainedReportListener
     public class MatrixLabelComparator(IDictionary<string, ConfusionMatrixLine> confusionMatrix)
         : IComparer<string>
     {
-        private readonly IDictionary<string, ConfusionMatrixLine> confusionMatrix = confusionMatrix;
-
         public virtual int Compare(string? o1, string? o2)
         {
             if (string.Equals(o1, o2, StringComparison.Ordinal))
@@ -567,8 +562,8 @@ public abstract class FineGrainedReportListener
                 return 0;
             }
 
-            ConfusionMatrixLine? t1 = Lookup(confusionMatrix, o1);
-            ConfusionMatrixLine? t2 = Lookup(confusionMatrix, o2);
+            var t1 = Lookup(confusionMatrix, o1);
+            var t2 = Lookup(confusionMatrix, o2);
 
             if (t1 == null || t2 == null)
             {
@@ -607,11 +602,9 @@ public abstract class FineGrainedReportListener
             this.categoryAccuracy = new JCG.Dictionary<string, double>();
 
             // compute grouped categories
-            foreach (KeyValuePair<string, ConfusionMatrixLine> entry in confusionMatrix)
+            foreach (var (key, confusionMatrixLine) in confusionMatrix)
             {
-                string key = entry.Key;
-                ConfusionMatrixLine confusionMatrixLine = entry.Value;
-                string category = key.Contains("-") ? key.Split('-')[0] : key;
+                string category = key.Contains('-') ? key.Split('-')[0] : key;
 
                 categoryAccuracy.TryGetValue(category, out double currentAccuracy);
                 categoryAccuracy[category] = currentAccuracy + confusionMatrixLine.Accuracy;
@@ -628,12 +621,12 @@ public abstract class FineGrainedReportListener
             string? c1 = o1;
             string? c2 = o2;
 
-            if (o1 != null && o1.Contains("-"))
+            if (o1 != null && o1.Contains('-'))
             {
                 c1 = o1.Split('-')[0];
             }
 
-            if (o2 != null && o2.Contains("-"))
+            if (o2 != null && o2.Contains('-'))
             {
                 c2 = o2.Split('-')[0];
             }
@@ -641,8 +634,8 @@ public abstract class FineGrainedReportListener
             if (string.Equals(c1, c2, StringComparison.Ordinal))
             {
                 // same category - sort by confusion matrix
-                ConfusionMatrixLine? t1 = Lookup(confusionMatrix, o1);
-                ConfusionMatrixLine? t2 = Lookup(confusionMatrix, o2);
+                var t1 = Lookup(confusionMatrix, o1);
+                var t2 = Lookup(confusionMatrix, o2);
 
                 if (t1 == null || t2 == null)
                 {
@@ -702,13 +695,11 @@ public abstract class FineGrainedReportListener
     }
 
     public virtual IComparer<string> GetMatrixLabelComparator(
-        IDictionary<string, ConfusionMatrixLine> confusionMatrix) =>
-        new MatrixLabelComparator(confusionMatrix);
+        IDictionary<string, ConfusionMatrixLine> confusionMatrix)
+        => new MatrixLabelComparator(confusionMatrix);
 
     public class SimpleLabelComparator(IDictionary<string, Counter> map) : IComparer<string>
     {
-        private readonly IDictionary<string, Counter> map = map;
-
         public virtual int Compare(string? o1, string? o2)
         {
             if (string.Equals(o1, o2, StringComparison.Ordinal))
@@ -718,12 +709,12 @@ public abstract class FineGrainedReportListener
 
             int e1 = 0, e2 = 0;
 
-            if (o1 != null && map.TryGetValue(o1, out Counter? c1))
+            if (o1 != null && map.TryGetValue(o1, out var c1))
             {
                 e1 = c1.Value;
             }
 
-            if (o2 != null && map.TryGetValue(o2, out Counter? c2))
+            if (o2 != null && map.TryGetValue(o2, out var c2))
             {
                 e2 = c2.Value;
             }
@@ -737,8 +728,8 @@ public abstract class FineGrainedReportListener
         }
     }
 
-    public virtual IComparer<string> GetLabelComparator(IDictionary<string, Counter> map) =>
-        new SimpleLabelComparator(map);
+    public virtual IComparer<string> GetLabelComparator(IDictionary<string, Counter> map)
+        => new SimpleLabelComparator(map);
 
     public class GroupedLabelComparator : IComparer<string>
     {
@@ -751,11 +742,9 @@ public abstract class FineGrainedReportListener
             this.categoryCounter = new JCG.Dictionary<string, int>();
 
             // compute grouped categories
-            foreach (KeyValuePair<string, Counter> entry in labelCounter)
+            foreach (var (key, value) in labelCounter)
             {
-                string key = entry.Key;
-                Counter value = entry.Value;
-                string category = key.Contains("-") ? key.Split('-')[0] : key;
+                string category = key.Contains('-') ? key.Split('-')[0] : key;
 
                 categoryCounter.TryGetValue(category, out int currentCount);
                 categoryCounter[category] = currentCount + value.Value;
@@ -772,12 +761,12 @@ public abstract class FineGrainedReportListener
             string? c1 = o1;
             string? c2 = o2;
 
-            if (o1 != null && o1.Contains("-"))
+            if (o1 != null && o1.Contains('-'))
             {
                 c1 = o1.Split('-')[0];
             }
 
-            if (o2 != null && o2.Contains("-"))
+            if (o2 != null && o2.Contains('-'))
             {
                 c2 = o2.Split('-')[0];
             }
@@ -785,8 +774,8 @@ public abstract class FineGrainedReportListener
             if (string.Equals(c1, c2, StringComparison.Ordinal))
             {
                 // same category - sort by confusion matrix
-                Counter? t1 = o1 != null && labelCounter.TryGetValue(o1, out Counter? l1) ? l1 : null;
-                Counter? t2 = o2 != null && labelCounter.TryGetValue(o2, out Counter? l2) ? l2 : null;
+                var t1 = o1 != null && labelCounter.TryGetValue(o1, out var l1) ? l1 : null;
+                var t2 = o2 != null && labelCounter.TryGetValue(o2, out var l2) ? l2 : null;
 
                 if (t1 == null || t2 == null)
                 {
@@ -846,16 +835,15 @@ public abstract class FineGrainedReportListener
     // NOpenNLP: Java's Map.get returns null for an absent key, and the comparators lean
     // on that; the ported dictionaries throw, so the lookups go through this helper.
     private static ConfusionMatrixLine? Lookup(IDictionary<string, ConfusionMatrixLine> map,
-        string? key) =>
-        key != null && map.TryGetValue(key, out ConfusionMatrixLine? value) ? value : null;
+        string? key)
+        => key != null && map.TryGetValue(key, out var value) ? value : null;
 
     /// <summary>
     /// Represents a line in the confusion table.
     /// </summary>
     public class ConfusionMatrixLine
     {
-        internal readonly JCG.Dictionary<string, Counter> line =
-            new JCG.Dictionary<string, Counter>(); // NOpenNLP: made readonly
+        internal readonly JCG.Dictionary<string, Counter> line = new(); // NOpenNLP: made readonly
         private readonly string @ref; // NOpenNLP: made readonly
         private int total = 0;
         private int correct = 0;
@@ -919,8 +907,8 @@ public abstract class FineGrainedReportListener
         /// </summary>
         /// <param name="column">the column</param>
         /// <returns>the counter value</returns>
-        public int GetValue(string column) =>
-            line.TryGetValue(column, out Counter? c) ? c.Value : 0;
+        public int GetValue(string column)
+            => line.TryGetValue(column, out var c) ? c.Value : 0;
     }
 
     /// <summary>
@@ -940,22 +928,20 @@ public abstract class FineGrainedReportListener
         private readonly FineGrainedReportListener owner;
 
         // general statistics
-        private readonly Mean accuracy = new Mean();
-        private readonly Mean averageSentenceLength = new Mean();
+        private readonly Mean accuracy = new();
+        private readonly Mean averageSentenceLength = new();
         // token statistics
-        private readonly JCG.Dictionary<string, Mean> tokAccuracies = new JCG.Dictionary<string, Mean>();
-        private readonly JCG.Dictionary<string, Counter> tokOcurrencies = new JCG.Dictionary<string, Counter>();
-        private readonly JCG.Dictionary<string, Counter> tokErrors = new JCG.Dictionary<string, Counter>();
+        private readonly JCG.Dictionary<string, Mean> tokAccuracies = new();
+        private readonly JCG.Dictionary<string, Counter> tokOcurrencies = new();
+        private readonly JCG.Dictionary<string, Counter> tokErrors = new();
         // tag statistics
-        private readonly JCG.Dictionary<string, Counter> tagOcurrencies = new JCG.Dictionary<string, Counter>();
-        private readonly JCG.Dictionary<string, Counter> tagErrors = new JCG.Dictionary<string, Counter>();
-        private readonly JCG.Dictionary<string, FMeasure> tagFMeasure = new JCG.Dictionary<string, FMeasure>();
+        private readonly JCG.Dictionary<string, Counter> tagOcurrencies = new();
+        private readonly JCG.Dictionary<string, Counter> tagErrors = new();
+        private readonly JCG.Dictionary<string, FMeasure> tagFMeasure = new();
         // represents a Confusion Matrix that aggregates all tokens
-        private readonly JCG.Dictionary<string, ConfusionMatrixLine> generalConfusionMatrix =
-            new JCG.Dictionary<string, ConfusionMatrixLine>();
+        private readonly JCG.Dictionary<string, ConfusionMatrixLine> generalConfusionMatrix = new();
         // represents a set of Confusion Matrix for each token
-        private readonly JCG.Dictionary<string, JCG.Dictionary<string, ConfusionMatrixLine>> tokenConfusionMatrix =
-            new JCG.Dictionary<string, JCG.Dictionary<string, ConfusionMatrixLine>>();
+        private readonly JCG.Dictionary<string, JCG.Dictionary<string, ConfusionMatrixLine>> tokenConfusionMatrix = new();
         private int minimalSentenceLength = int.MaxValue;
         private int maximumSentenceLength = int.MinValue;
 
@@ -1170,17 +1156,17 @@ public abstract class FineGrainedReportListener
             return tags;
         }
 
-        internal IReadOnlyCollection<string> GetConfusionMatrixTagset() =>
-            GetConfusionMatrixTagset(generalConfusionMatrix);
+        internal IReadOnlyCollection<string> GetConfusionMatrixTagset()
+            => GetConfusionMatrixTagset(generalConfusionMatrix);
 
-        internal double[][] GetConfusionMatrix() =>
-            CreateConfusionMatrix(GetConfusionMatrixTagset(), generalConfusionMatrix);
+        internal double[][] GetConfusionMatrix()
+            => CreateConfusionMatrix(GetConfusionMatrixTagset(), generalConfusionMatrix);
 
-        internal IReadOnlyCollection<string> GetConfusionMatrixTagset(string token) =>
-            GetConfusionMatrixTagset(tokenConfusionMatrix[token]!);
+        internal IReadOnlyCollection<string> GetConfusionMatrixTagset(string token)
+            => GetConfusionMatrixTagset(tokenConfusionMatrix[token]!);
 
-        internal double[][] GetConfusionMatrix(string token) =>
-            CreateConfusionMatrix(GetConfusionMatrixTagset(token), tokenConfusionMatrix[token]!);
+        internal double[][] GetConfusionMatrix(string token)
+            => CreateConfusionMatrix(GetConfusionMatrixTagset(token), tokenConfusionMatrix[token]!);
 
         /// <summary>
         /// Creates a matrix with N lines and N + 1 columns with the data from
@@ -1200,7 +1186,7 @@ public abstract class FineGrainedReportListener
             foreach (string @ref in tagset)
             {
                 int column = 0;
-                ConfusionMatrixLine? refLine = Lookup(data, @ref);
+                var refLine = Lookup(data, @ref);
 
                 foreach (string pred in tagset)
                 {

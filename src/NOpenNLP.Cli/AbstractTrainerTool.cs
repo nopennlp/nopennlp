@@ -46,7 +46,7 @@ public abstract class AbstractTrainerTool<T> : AbstractEvaluatorTool<T>
         }
 
         return new TerminateToolException(-1,
-            "IO error while reading training data or indexing data: " + e.Message, e);
+            $"IO error while reading training data or indexing data: {e.Message}", e);
     }
 }
 

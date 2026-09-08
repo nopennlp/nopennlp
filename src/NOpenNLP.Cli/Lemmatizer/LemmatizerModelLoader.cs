@@ -28,13 +28,8 @@ namespace NOpenNLP.Tools.Cmdline.Lemmatizer;
 /// <para/>
 /// <b>Note:</b> Do not use this class, internal use only!
 /// </summary>
-public class LemmatizerModelLoader : ModelLoader<LemmatizerModel>
+public class LemmatizerModelLoader() : ModelLoader<LemmatizerModel>("Lemmatizer")
 {
-    public LemmatizerModelLoader()
-        : base("Lemmatizer")
-    {
-    }
-
     /// <inheritdoc/>
-    protected override LemmatizerModel LoadModel(Stream modelIn) => new LemmatizerModel(modelIn);
+    protected override LemmatizerModel LoadModel(Stream modelIn) => new(modelIn);
 }

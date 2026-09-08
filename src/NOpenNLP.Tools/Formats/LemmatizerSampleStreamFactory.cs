@@ -30,14 +30,14 @@ namespace NOpenNLP.Tools.Formats;
 public class LemmatizerSampleStreamFactory : AbstractSampleStreamFactory<LemmaSample?>
 {
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [FormatParameters.Data, FormatParameters.Encoding];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [FormatParameters.Data, FormatParameters.Encoding];
 
     /// <inheritdoc/>
-    public override IObjectStream<LemmaSample?> Create(IFormatParameterValues values) =>
-        new LemmaSampleStream(ReadData(values));
+    public override IObjectStream<LemmaSample?> Create(IFormatParameterValues values)
+        => new LemmaSampleStream(ReadData(values));
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<LemmaSample?>(
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<LemmaSample?>(
             StreamFactoryRegistry.DefaultFormat, new LemmatizerSampleStreamFactory());
 }

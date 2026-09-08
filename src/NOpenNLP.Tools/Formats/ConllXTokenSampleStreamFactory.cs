@@ -37,8 +37,8 @@ public class ConllXTokenSampleStreamFactory : DetokenizerSampleStreamFactory<Tok
         new ConllXPOSSampleStreamFactory();
 
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [FormatParameters.Data, FormatParameters.Encoding, FormatParameters.Detokenizer];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [FormatParameters.Data, FormatParameters.Encoding, FormatParameters.Detokenizer];
 
     /// <inheritdoc/>
     public override IObjectStream<TokenSample?> Create(IFormatParameterValues values)
@@ -48,7 +48,7 @@ public class ConllXTokenSampleStreamFactory : DetokenizerSampleStreamFactory<Tok
         return new POSToTokenSampleStream(CreateDetokenizer(values), samples);
     }
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<TokenSample?>(
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<TokenSample?>(
             ConllXPOSSampleStreamFactory.ConllxFormat, new ConllXTokenSampleStreamFactory());
 }

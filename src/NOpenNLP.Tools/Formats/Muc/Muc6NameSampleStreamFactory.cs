@@ -35,8 +35,8 @@ public class Muc6NameSampleStreamFactory : AbstractSampleStreamFactory<NameSampl
         new FormatParameter<FileInfo>("-tokenizerModel", "modelFile");
 
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [FormatParameters.Data, FormatParameters.Encoding, TokenizerModelParam];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [FormatParameters.Data, FormatParameters.Encoding, TokenizerModelParam];
 
     /// <inheritdoc/>
     public override IObjectStream<NameSample?> Create(IFormatParameterValues values)
@@ -79,7 +79,7 @@ public class Muc6NameSampleStreamFactory : AbstractSampleStreamFactory<NameSampl
         return new MucNameSampleStream(tokenizer, mucDocStream);
     }
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<NameSample?>("muc6",
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<NameSample?>("muc6",
             new Muc6NameSampleStreamFactory());
 }

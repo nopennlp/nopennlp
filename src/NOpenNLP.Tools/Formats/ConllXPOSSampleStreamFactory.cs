@@ -34,8 +34,8 @@ public class ConllXPOSSampleStreamFactory : AbstractSampleStreamFactory<POSSampl
     public const string ConllxFormat = "conllx";
 
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [FormatParameters.Data, FormatParameters.Encoding];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [FormatParameters.Data, FormatParameters.Encoding];
 
     /// <inheritdoc/>
     public override IObjectStream<POSSample?> Create(IFormatParameterValues values)
@@ -50,7 +50,7 @@ public class ConllXPOSSampleStreamFactory : AbstractSampleStreamFactory<POSSampl
         return new ConllXPOSSampleStream(inFactory, Encoding.UTF8);
     }
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<POSSample?>(
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<POSSample?>(
             ConllxFormat, new ConllXPOSSampleStreamFactory());
 }

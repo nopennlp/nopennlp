@@ -33,8 +33,8 @@ public class NameToTokenSampleStreamFactory : DetokenizerSampleStreamFactory<Tok
     /// <inheritdoc/>
     // NOpenNLP: upstream's Parameters interface extends NameSampleDataStreamFactory.Parameters
     // (which is BasicFormatParams) and DetokenizerParameter.
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [FormatParameters.Data, FormatParameters.Encoding, FormatParameters.Detokenizer];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [FormatParameters.Data, FormatParameters.Encoding, FormatParameters.Detokenizer];
 
     /// <inheritdoc/>
     public override IObjectStream<TokenSample?> Create(IFormatParameterValues values)
@@ -48,7 +48,7 @@ public class NameToTokenSampleStreamFactory : DetokenizerSampleStreamFactory<Tok
         return new NameToTokenSampleStream(CreateDetokenizer(values), nameSampleStream);
     }
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<TokenSample?>(
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<TokenSample?>(
             "namefinder", new NameToTokenSampleStreamFactory());
 }

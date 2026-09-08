@@ -68,12 +68,12 @@ public class TokenNameFinderFineGrainedReportListener : FineGrainedReportListene
     // methods inherited from EvaluationMonitor
 
     /// <inheritdoc/>
-    public void Misclassified(NameSample reference, NameSample prediction) =>
-        StatsAdd(reference, prediction);
+    public void Misclassified(NameSample reference, NameSample prediction)
+        => StatsAdd(reference, prediction);
 
     /// <inheritdoc/>
-    public void CorrectlyClassified(NameSample reference, NameSample prediction) =>
-        StatsAdd(reference, prediction);
+    public void CorrectlyClassified(NameSample reference, NameSample prediction)
+        => StatsAdd(reference, prediction);
 
     private void StatsAdd(NameSample reference, NameSample prediction)
     {
@@ -97,12 +97,12 @@ public class TokenNameFinderFineGrainedReportListener : FineGrainedReportListene
 
     /// <inheritdoc/>
     public override IComparer<string> GetMatrixLabelComparator(
-        IDictionary<string, ConfusionMatrixLine> confusionMatrix) =>
-        new GroupedMatrixLabelComparator(confusionMatrix);
+        IDictionary<string, ConfusionMatrixLine> confusionMatrix)
+        => new GroupedMatrixLabelComparator(confusionMatrix);
 
     /// <inheritdoc/>
-    public override IComparer<string> GetLabelComparator(IDictionary<string, Counter> map) =>
-        new GroupedLabelComparator(map);
+    public override IComparer<string> GetLabelComparator(IDictionary<string, Counter> map)
+        => new GroupedLabelComparator(map);
 
     /// <inheritdoc/>
     public override void WriteReport()

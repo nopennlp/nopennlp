@@ -30,8 +30,8 @@ public class ConstitParseSampleStreamFactory : AbstractSampleStreamFactory<Parse
 {
     // TODO: The parameters have an encoding, but the data is in xml
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [FormatParameters.Data, FormatParameters.Encoding];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [FormatParameters.Data, FormatParameters.Encoding];
 
     /// <inheritdoc/>
     public override IObjectStream<Parse?> Create(IFormatParameterValues values)
@@ -45,7 +45,7 @@ public class ConstitParseSampleStreamFactory : AbstractSampleStreamFactory<Parse
             new DirectorySampleStream(dataDir, null, false)));
     }
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<Parse?>("frenchtreebank",
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<Parse?>("frenchtreebank",
             new ConstitParseSampleStreamFactory());
 }

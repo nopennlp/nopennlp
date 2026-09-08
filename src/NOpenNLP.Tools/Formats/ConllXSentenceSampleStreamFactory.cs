@@ -42,8 +42,8 @@ public class ConllXSentenceSampleStreamFactory : DetokenizerSampleStreamFactory<
 
     /// <inheritdoc/>
     // TODO: make chunk size configurable
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [FormatParameters.Data, FormatParameters.Encoding, FormatParameters.Detokenizer];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [FormatParameters.Data, FormatParameters.Encoding, FormatParameters.Detokenizer];
 
     /// <inheritdoc/>
     public override IObjectStream<SentenceSample?> Create(IFormatParameterValues values)
@@ -53,7 +53,7 @@ public class ConllXSentenceSampleStreamFactory : DetokenizerSampleStreamFactory<
         return new POSToSentenceSampleStream(CreateDetokenizer(values), posSampleStream, 30);
     }
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<SentenceSample?>(
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<SentenceSample?>(
             ConllXPOSSampleStreamFactory.ConllxFormat, new ConllXSentenceSampleStreamFactory());
 }

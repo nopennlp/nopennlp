@@ -108,9 +108,9 @@ public class CLITest
     [Test]
     public void TestEveryToolHasAShortDescriptionExceptDictionaryDetokenizer()
     {
-        IReadOnlyDictionary<string, CmdLineTool> tools = CLI.GetToolLookupMap();
+        var tools = CLI.GetToolLookupMap();
 
-        foreach (KeyValuePair<string, CmdLineTool> entry in tools)
+        foreach (var entry in tools)
         {
             if ("DictionaryDetokenizer".Equals(entry.Key, StringComparison.Ordinal))
             {
@@ -139,7 +139,7 @@ public class CLITest
     [Test]
     public void TestNoArgumentsPrintsUsageAndExitsZero()
     {
-        CliResult result = CliRunner.Run([]);
+        var result = CliRunner.Run([]);
 
         ClassicAssert.AreEqual(0, result.ExitCode);
         StringAssert.Contains("Usage: nopennlp TOOL", result.Out);
@@ -159,7 +159,7 @@ public class CLITest
     {
         // Upstream reaches the "Execution time:" line only on the fully successful path,
         // and returns from the no-arguments branch before it.
-        CliResult result = CliRunner.Run([]);
+        var result = CliRunner.Run([]);
 
         StringAssert.DoesNotContain("Execution time:", result.Out);
         StringAssert.DoesNotContain("Execution time:", result.Error);
@@ -168,7 +168,7 @@ public class CLITest
     [Test]
     public void TestUnknownToolExitsOneWithMessageOnStandardError()
     {
-        CliResult result = CliRunner.Run(["NoSuchTool"]);
+        var result = CliRunner.Run(["NoSuchTool"]);
 
         ClassicAssert.AreEqual(1, result.ExitCode);
         StringAssert.Contains("Tool NoSuchTool is not found.", result.Error);
@@ -178,7 +178,7 @@ public class CLITest
     [Test]
     public void TestUnknownFormatExitsOneWithMessageOnStandardError()
     {
-        CliResult result = CliRunner.Run(["TokenizerTrainer.nosuchformat", "-model", "m.bin"]);
+        var result = CliRunner.Run(["TokenizerTrainer.nosuchformat", "-model", "m.bin"]);
 
         ClassicAssert.AreEqual(1, result.ExitCode);
         StringAssert.Contains("Format nosuchformat is not found.", result.Error);
@@ -188,7 +188,7 @@ public class CLITest
     public void TestFormatOnABasicToolExitsOneWithMessageOnStandardError()
     {
         // A BasicCmdLineTool takes positional arguments and has no format to select.
-        CliResult result = CliRunner.Run(["SimpleTokenizer.conllu", "somearg"]);
+        var result = CliRunner.Run(["SimpleTokenizer.conllu", "somearg"]);
 
         ClassicAssert.AreEqual(1, result.ExitCode);
         StringAssert.Contains("Tool SimpleTokenizer does not support formats.", result.Error);
@@ -197,7 +197,7 @@ public class CLITest
     [Test]
     public void TestHelpArgumentPrintsHelpAndExitsZero()
     {
-        CliResult result = CliRunner.Run(["TokenizerTrainer", "help"]);
+        var result = CliRunner.Run(["TokenizerTrainer", "help"]);
 
         ClassicAssert.AreEqual(0, result.ExitCode);
         StringAssert.Contains("Usage: nopennlp TokenizerTrainer", result.Out);
@@ -206,7 +206,7 @@ public class CLITest
     [Test]
     public void TestNoArgumentsToAToolWithParamsPrintsHelpAndExitsZero()
     {
-        CliResult result = CliRunner.Run(["TokenizerTrainer"]);
+        var result = CliRunner.Run(["TokenizerTrainer"]);
 
         ClassicAssert.AreEqual(0, result.ExitCode);
         StringAssert.Contains("Usage: nopennlp TokenizerTrainer", result.Out);

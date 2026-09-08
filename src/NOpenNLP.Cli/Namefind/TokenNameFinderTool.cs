@@ -33,8 +33,8 @@ public sealed class TokenNameFinderTool : BasicCmdLineTool
     public override string ShortDescription => "learnable name finder";
 
     /// <inheritdoc/>
-    public override string GetHelp() =>
-        "Usage: " + CLI.Cmd + " " + Name + " model1 model2 ... modelN < sentences";
+    public override string GetHelp()
+        => $"Usage: {CLI.Cmd} {Name} model1 model2 ... modelN < sentences";
 
     /// <inheritdoc/>
     public override void Run(string[] args)
@@ -45,24 +45,21 @@ public sealed class TokenNameFinderTool : BasicCmdLineTool
         }
         else
         {
-            NameFinderME[] nameFinders = new NameFinderME[args.Length];
+            var nameFinders = new NameFinderME[args.Length];
 
             for (int i = 0; i < nameFinders.Length; i++)
             {
-                TokenNameFinderModel model = new TokenNameFinderModelLoader().Load(new FileInfo(args[i]));
+                var model = new TokenNameFinderModelLoader().Load(new FileInfo(args[i]));
                 nameFinders[i] = new NameFinderME(model);
             }
 
-            IObjectStream<string?> untokenizedLineStream;
             using var perfMon = new PerformanceMonitor(Console.Error, "sent");
             perfMon.Start();
 
             try
             {
-                untokenizedLineStream = new PlainTextByLineStream(
-                    new SystemInputStreamFactory(), SystemInputStreamFactory.Encoding);
-                string? line;
-                while ((line = untokenizedLineStream.Read()) != null)
+                var untokenizedLineStream = new PlainTextByLineStream(new SystemInputStreamFactory(), SystemInputStreamFactory.Encoding);
+                while (untokenizedLineStream.Read() is { } line)
                 {
                     string[] whitespaceTokenizerLine = WhitespaceTokenizer.INSTANCE.Tokenize(line);
 
@@ -71,7 +68,7 @@ public sealed class TokenNameFinderTool : BasicCmdLineTool
 
                     if (whitespaceTokenizerLine.Length == 0)
                     {
-                        foreach (NameFinderME nameFinder in nameFinders)
+                        foreach (var nameFinder in nameFinders)
                         {
                             nameFinder.ClearAdaptiveData();
                         }
@@ -86,7 +83,7 @@ public sealed class TokenNameFinderTool : BasicCmdLineTool
 
                     // Simple way to drop intersecting spans, otherwise the
                     // NameSample is invalid
-                    Span[] reducedNames = NameFinderME.DropOverlappingSpans([.. names]);
+                    var reducedNames = NameFinderME.DropOverlappingSpans([.. names]);
 
                     var nameSample = new NameSample(whitespaceTokenizerLine, reducedNames, false);
 

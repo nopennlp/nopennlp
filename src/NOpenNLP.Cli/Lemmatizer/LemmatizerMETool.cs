@@ -32,7 +32,7 @@ public class LemmatizerMETool : BasicCmdLineTool
     public override string ShortDescription => "learnable lemmatizer";
 
     /// <inheritdoc/>
-    public override string GetHelp() => "Usage: " + CLI.Cmd + " " + Name + " model < sentences";
+    public override string GetHelp() => $"Usage: {CLI.Cmd} {Name} model < sentences";
 
     /// <inheritdoc/>
     public override void Run(string[] args)
@@ -43,11 +43,9 @@ public class LemmatizerMETool : BasicCmdLineTool
         }
         else
         {
-            LemmatizerModel model = new LemmatizerModelLoader().Load(new FileInfo(args[0]));
+            var model = new LemmatizerModelLoader().Load(new FileInfo(args[0]));
 
             var lemmatizer = new LemmatizerME(model);
-
-            IObjectStream<string?> lineStream;
 
             // NOpenNLP: upstream leaves perfMon null until inside the try, so an
             // IOException from the stream construction makes the
@@ -57,11 +55,9 @@ public class LemmatizerMETool : BasicCmdLineTool
 
             try
             {
-                lineStream = new PlainTextByLineStream(new SystemInputStreamFactory(),
-                    SystemInputStreamFactory.Encoding);
+                var lineStream = new PlainTextByLineStream(new SystemInputStreamFactory(), SystemInputStreamFactory.Encoding);
                 perfMon.Start();
-                string? line;
-                while ((line = lineStream.Read()) != null)
+                while (lineStream.Read() is { } line)
                 {
                     POSSample posSample;
                     try

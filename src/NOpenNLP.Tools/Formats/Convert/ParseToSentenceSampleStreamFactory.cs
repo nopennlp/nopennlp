@@ -37,8 +37,8 @@ public class ParseToSentenceSampleStreamFactory : DetokenizerSampleStreamFactory
     /// <inheritdoc/>
     // NOpenNLP: upstream's Parameters interface extends ParseSampleStreamFactory.Parameters
     // (which is BasicFormatParams) and DetokenizerParameter.
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [FormatParameters.Data, FormatParameters.Encoding, FormatParameters.Detokenizer];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [FormatParameters.Data, FormatParameters.Encoding, FormatParameters.Detokenizer];
 
     /// <inheritdoc/>
     public override IObjectStream<SentenceSample?> Create(IFormatParameterValues values)
@@ -53,7 +53,7 @@ public class ParseToSentenceSampleStreamFactory : DetokenizerSampleStreamFactory
             new ParseToPOSSampleStream(parseSampleStream), 30);
     }
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<SentenceSample?>(
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<SentenceSample?>(
             "parse", new ParseToSentenceSampleStreamFactory());
 }

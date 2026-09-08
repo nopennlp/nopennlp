@@ -279,8 +279,8 @@ public class GISTrainer : AbstractEventTrainer
     /// The newly trained model, which can be used immediately or saved to disk
     /// using a <see cref="Io.GISModelWriter"/>.
     /// </returns>
-    public virtual GISModel TrainModel(IObjectStream<Event?> eventStream) =>
-        TrainModel(eventStream, 100, 0);
+    public virtual GISModel TrainModel(IObjectStream<Event?> eventStream)
+        => TrainModel(eventStream, 100, 0);
 
     /// <summary>
     /// Trains a GIS model on the events in the specified event stream, using the specified
@@ -307,8 +307,8 @@ public class GISTrainer : AbstractEventTrainer
     /// </summary>
     /// <param name="iterations">The number of GIS iterations to perform.</param>
     /// <param name="di">The data indexer used to compress events in memory.</param>
-    public virtual GISModel TrainModel(int iterations, IDataIndexer di) =>
-        TrainModel(iterations, di, new UniformPrior(), 1);
+    public virtual GISModel TrainModel(int iterations, IDataIndexer di)
+        => TrainModel(iterations, di, new UniformPrior(), 1);
 
     /// <summary>
     /// Trains a model using the GIS algorithm.
@@ -316,8 +316,8 @@ public class GISTrainer : AbstractEventTrainer
     /// <param name="iterations">The number of GIS iterations to perform.</param>
     /// <param name="di">The data indexer used to compress events in memory.</param>
     /// <param name="threads">The number of threads to compute model expectations with.</param>
-    public virtual GISModel TrainModel(int iterations, IDataIndexer di, int threads) =>
-        TrainModel(iterations, di, new UniformPrior(), threads);
+    public virtual GISModel TrainModel(int iterations, IDataIndexer di, int threads)
+        => TrainModel(iterations, di, new UniformPrior(), threads);
 
     /// <summary>
     /// Trains a model using the GIS algorithm.

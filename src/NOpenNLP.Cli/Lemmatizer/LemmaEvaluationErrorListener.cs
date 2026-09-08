@@ -57,7 +57,7 @@ public class LemmaEvaluationErrorListener : EvaluationErrorPrinter<LemmaSample>,
     }
 
     /// <inheritdoc/>
-    public override void Misclassified(LemmaSample reference, LemmaSample prediction) =>
-        PrintError(reference.Lemmas, prediction.Lemmas, reference,
+    public override void Misclassified(LemmaSample reference, LemmaSample prediction)
+        => PrintError(reference.Lemmas, prediction.Lemmas, reference,
             prediction, reference.Tokens);
 }

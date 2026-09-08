@@ -34,15 +34,13 @@ namespace NOpenNLP.Tools.Cmdline.Doccat;
 // added there rather than repeated here.
 internal static class TrainingParams
 {
-    public static Option<string?> FeatureGenerators() =>
-        new Option<string?>("-featureGenerators")
+    public static Option<string?> FeatureGenerators()
+        => new("-featureGenerators")
         {
-            Description =
-                "Comma separated feature generator classes. Bag of words is used if not specified.",
+            Description = "Comma separated feature generator classes. Bag of words is used if not specified.",
             HelpName = "fg",
         };
 
-    public static Option<string?> Factory() =>
-        ToolParams.Factory(
-            "A sub-class of DoccatFactory where to get implementation and resources.");
+    public static Option<string?> Factory()
+        => ToolParams.Factory("A sub-class of DoccatFactory where to get implementation and resources.");
 }

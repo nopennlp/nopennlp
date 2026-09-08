@@ -40,8 +40,8 @@ public class TwentyNewsgroupSampleStreamFactory : AbstractSampleStreamFactory<Do
         FormatParameter<string>.Optional("-ruleBasedTokenizer", "name");
 
     /// <inheritdoc/>
-    public override IEnumerable<IFormatParameter> Parameters =>
-        [FormatParameters.Encoding, DataDirParam, TokenizerModelParam, RuleBasedTokenizerParam];
+    public override IEnumerable<IFormatParameter> Parameters
+        => [FormatParameters.Encoding, DataDirParam, TokenizerModelParam, RuleBasedTokenizerParam];
 
     /// <inheritdoc/>
     public override IObjectStream<DocumentSample?> Create(IFormatParameterValues values)
@@ -94,7 +94,7 @@ public class TwentyNewsgroupSampleStreamFactory : AbstractSampleStreamFactory<Do
         }
     }
 
-    public static void RegisterFactory() =>
-        StreamFactoryRegistry.RegisterFactory<DocumentSample?>(
+    public static void RegisterFactory()
+        => StreamFactoryRegistry.RegisterFactory<DocumentSample?>(
             "20newsgroup", new TwentyNewsgroupSampleStreamFactory());
 }
