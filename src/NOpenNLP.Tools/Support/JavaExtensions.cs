@@ -29,6 +29,21 @@ namespace NOpenNLP.Tools.Support;
 internal static class JavaExtensions
 {
     /// <summary>
+    /// Renders <paramref name="value"/> the way Java's <c>Boolean.toString</c>
+    /// does, in lower case.
+    /// </summary>
+    /// <remarks>
+    /// .NET's <c>bool.ToString()</c> yields <c>"True"</c>/<c>"False"</c>. Both
+    /// runtimes parse either casing, so this is not about being readable back;
+    /// it is about the bytes. A boolean written into a model manifest is part of
+    /// the serialized model, and a model that differs from what Apache OpenNLP
+    /// would have written for the same inputs is harder to diff and harder to
+    /// trust. Use this wherever a boolean is written to a manifest or any other
+    /// artifact that crosses between the two.
+    /// </remarks>
+    public static string ToJavaString(this bool value) => value ? "true" : "false";
+
+    /// <summary>
     /// Associates <paramref name="value"/> with <paramref name="key"/>, replacing
     /// any existing mapping, and returns the previous value as Java's
     /// <c>Map.put</c> does.

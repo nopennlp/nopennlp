@@ -69,9 +69,104 @@ public class PortRegressionTest
 
         ClassicAssert.AreEqual(1, current.Major);
         ClassicAssert.AreEqual(9, current.Minor);
-        ClassicAssert.AreEqual(4, current.Revision);
+        ClassicAssert.AreEqual(5, current.Revision);
         ClassicAssert.IsFalse(current.IsSnapshot);
-        ClassicAssert.AreEqual("1.9.4", current.ToString());
+        ClassicAssert.AreEqual("1.9.5", current.ToString());
+    }
+
+    /// <summary>
+    /// A model written by the port must name its factory, sequence codec and
+    /// artifact serializers with the Java class names Apache OpenNLP writes, or
+    /// Apache OpenNLP cannot load it: its ExtensionLoader rejects a class name
+    /// outside the allowed <c>opennlp.</c> package, so a manifest naming
+    /// <c>NOpenNLP.Tools.Sentdetect.SentenceDetectorFactory</c> fails there
+    /// before the model is ever read.
+    /// </summary>
+    /// <remarks>
+    /// Found by the bidirectional harness in <c>src/java/model-compat</c>, which
+    /// runs the real Java library on a JVM. This pins the naming without needing
+    /// a JDK, so a regression is caught by the ordinary test run rather than only
+    /// by the hand-run compatibility job.
+    /// </remarks>
+    [Test]
+    public void TestModelManifestUsesJavaClassNames()
+    {
+        // A real trained model rather than a synthetic one: the manifest is written
+        // during training, and SentenceModel validates its artifact map on
+        // construction, so a hand-built stand-in would not reach the code under test.
+        var mlParams = new TrainingParameters();
+        mlParams.Put(TrainingParameters.ITERATIONS_PARAM, 5);
+        mlParams.Put(TrainingParameters.CUTOFF_PARAM, 0);
+
+        IInputStreamFactory input =
+            new ResourceAsStreamFactory("/opennlp/tools/sentdetect/Sentences.txt");
+
+        var model = Sentdetect.SentenceDetectorME.Train("eng",
+            new Sentdetect.SentenceSampleStream(new PlainTextByLineStream(input, Encoding.UTF8)),
+            new Sentdetect.SentenceDetectorFactory("eng", true, null!, null),
+            mlParams);
+
+        using var stream = new MemoryStream();
+        model.Serialize(stream);
+        stream.Position = 0;
+
+        var read = new Sentdetect.SentenceModel(stream);
+
+        ClassicAssert.AreEqual("opennlp.tools.sentdetect.SentenceDetectorFactory",
+            read.GetManifestProperty("factory"));
+
+        // Java's Boolean.toString is lower case; .NET's bool.ToString is not. Both
+        // runtimes parse either casing, so this is about the model's bytes matching
+        // what Apache OpenNLP would have written rather than about readability.
+        ClassicAssert.AreEqual("true", read.GetManifestProperty("useTokenEnd"));
+
+        // The version the port targets, which the embedded opennlp.version resource
+        // supplies. It reached 1.9.5 only after this was found to still say 1.9.4.
+        ClassicAssert.AreEqual("1.9.5", read.GetManifestProperty("OpenNLP-Version"));
+    }
+
+    /// <summary>
+    /// A type the caller supplied, rather than one from the ported library, has no
+    /// upstream class to name and must be recorded under its own .NET name.
+    /// </summary>
+    /// <remarks>
+    /// Translating it would be worse than leaving it alone: the invented
+    /// <c>opennlp.*</c> name no longer resolves to the caller's type, and
+    /// ExtensionLoader's simple-name fallback can then bind it to an unrelated
+    /// type that happens to share the name. Scoping the translation by namespace
+    /// alone was not enough, since a caller's extension may itself sit under a
+    /// <c>NOpenNLP.</c> namespace, as the test factories in this project do.
+    /// </remarks>
+    [Test]
+    public void TestCallerSuppliedTypesKeepTheirDotNetNames()
+    {
+        // Defined in this assembly, under a NOpenNLP.* namespace, exactly like a
+        // caller's own extension would be.
+        ClassicAssert.AreEqual(typeof(PortRegressionTest).FullName,
+            InvokeToJavaClassName(typeof(PortRegressionTest)));
+
+        // A ported type, for contrast: same namespace prefix, different assembly.
+        ClassicAssert.AreEqual("opennlp.tools.util.model.DictionarySerializer",
+            InvokeToJavaClassName(typeof(DictionarySerializer)));
+
+        // A nested ported type uses Java's '$' separator, not .NET's '+'.
+        ClassicAssert.AreEqual("opennlp.tools.postag.POSTaggerFactory$POSDictionarySerializer",
+            InvokeToJavaClassName(typeof(POSTaggerFactory.POSDictionarySerializer)));
+    }
+
+    /// <summary>
+    /// ExtensionLoader.ToJavaClassName is internal to the library, so it is reached
+    /// by reflection rather than by making it public for a test's sake.
+    /// </summary>
+    private static string InvokeToJavaClassName(Type type)
+    {
+        var method = typeof(NOpenNLP.Tools.Util.Ext.ExtensionLoader).GetMethod(
+            "ToJavaClassName",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+
+        ClassicAssert.IsNotNull(method, "ExtensionLoader.ToJavaClassName was renamed or removed");
+
+        return (string)method!.Invoke(null, [type])!;
     }
 
     /// <summary>

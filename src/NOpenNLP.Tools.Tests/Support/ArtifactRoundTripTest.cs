@@ -380,8 +380,11 @@ public class ArtifactRoundTripTest
         ClassicAssert.IsTrue(dictionary.Contains(new StringList("beta", "gamma")));
 
         // Set for every ISerializableArtifact before the zip is written, and read back
-        // by ExtensionLoader to pick the serializer on load.
-        ClassicAssert.AreEqual(typeof(DictionarySerializer).FullName,
+        // by ExtensionLoader to pick the serializer on load. Recorded under the Java
+        // class name, which is what upstream writes and what makes the model loadable
+        // by Apache OpenNLP as well as by the port; ExtensionLoader resolves either
+        // spelling on the way back in.
+        ClassicAssert.AreEqual("opennlp.tools.util.model.DictionarySerializer",
             read.GetManifestProperty("serializer-class-" + RoundTripModel.DictionaryEntryName));
     }
 

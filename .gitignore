@@ -26,6 +26,11 @@ BenchmarkDotNet.Artifacts/
 # Maven build output for the JMH benchmarks under src/java/.
 target/
 
+# Models trained on demand by the model compatibility harness, in both
+# directions, plus the inference output each runtime records for the other to
+# compare against. Never committed; see src/java/model-compat/README.md.
+src/java/model-compat/work/
+
 # Scratch space for build/regress.ps1: the corpora copies and captured CLI
 # output it diffs. Cleared at the start of each run; never committed.
 _artifacts/

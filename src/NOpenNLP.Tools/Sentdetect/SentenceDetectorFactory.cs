@@ -93,7 +93,7 @@ public class SentenceDetectorFactory : BaseToolFactory
     public override IDictionary<string, string> CreateManifestEntries()
     {
         var manifestEntries = base.CreateManifestEntries();
-        manifestEntries.Put(TOKEN_END_PROPERTY, IsUseTokenEnd.ToString());
+        manifestEntries.Put(TOKEN_END_PROPERTY, IsUseTokenEnd.ToJavaString());
 
         // EOS characters are optional
         if (EOSCharacters is { } ec)

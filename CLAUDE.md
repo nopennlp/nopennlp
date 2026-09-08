@@ -187,3 +187,47 @@ When adding coverage:
   the JMH annotation processor explicitly: JDK 23 turned implicit annotation
   processing off, and without that the build silently produces a jar with no
   harness that fails only at run time.
+
+## Model compatibility
+
+`src/java/model-compat` proves, in both directions, that a model trained by one
+runtime loads in the other and produces the same inference output. NOpenNLP
+trains, Apache OpenNLP 1.9.5 reads on a real JVM, and vice versa. See its
+README for how to run it.
+
+This is the only coverage that can catch a serialization difference, because
+both halves of a .NET-only round trip share the same bug. When touching model
+serialization:
+
+- **Write what upstream writes, not what .NET produces.** A class name recorded
+  in a manifest must be the Java one (`ExtensionLoader.ToJavaClassName`), since
+  Apache OpenNLP's `ExtensionLoader` rejects anything outside the `opennlp.`
+  package before reading a byte of the model. A boolean must be Java's lower
+  case (`bool.ToJavaString()`). The port's own reader accepts either spelling,
+  which is exactly why a .NET-only test cannot see the problem.
+- **Scope a name translation by assembly, not by namespace.** Only types in
+  `NOpenNLP.Tools` have an upstream counterpart to name. A caller's extension
+  may itself sit under a `NOpenNLP.` namespace — the test factories in this
+  repository do — and rewriting its name makes it unresolvable, or worse, binds
+  it to an unrelated type through the simple-name fallback.
+- **Keep the two sides mirrored.** `CompatCorpus`, `CompatResults` and
+  `CompatModels` exist as a `.java`/`.cs` pair each, and the comparison is only
+  meaningful if both train on the same bytes with the same hyperparameters and
+  then ask the same questions. Change both together, as with the benchmarks.
+- **Record probabilities, not just the discrete output.** A model whose
+  parameters were misread will often still pick the same argmax on an easy case
+  while scoring it differently. The probabilities are what actually proves the
+  reader is correct.
+- **Assert on agreement, not on a constant.** Neither side states an expected
+  answer: each records what it got and the other diffs against it. Models
+  trained on a few hundred sentences produce output that is not interesting in
+  itself, and a hard-coded expectation would have to be rewritten every time the
+  corpora or the hyperparameters changed.
+- **Guard against the false green.** `dotnet test` exits 0 when a filter matches
+  nothing and when the only matching test is skipped. The .NET side deliberately
+  reports inconclusive when no Java models are present, since a JDK may not be
+  installed, so both the driver script and the CI workflow require `Passed: 1`
+  rather than trusting the exit code. Java takes the opposite stance and fails,
+  because a missing NOpenNLP model means a broken pipeline.
+- **Pin what the port targets.** Cover a new defect the harness finds with a
+  `PortRegressionTest` case as well, so it cannot regress without a JDK present.

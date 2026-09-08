@@ -76,7 +76,11 @@ public class DoccatFactory : BaseToolFactory
                 sb.Append(',');
             }
 
-            sb.Append(fgs[i].GetType().FullName);
+            // NOpenNLP: the Java class name rather than the .NET one, so a model
+            // written here loads in Apache OpenNLP as well as in the port, matching
+            // how the factory and serializer names are written. ExtensionLoader
+            // resolves either spelling on the way back in.
+            sb.Append(ExtensionLoader.ToJavaClassName(fgs[i].GetType()));
         }
 
         return sb.ToString();

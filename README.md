@@ -155,6 +155,26 @@ port uses `Math`, and the two disagree in the last ulp on a few percent of input
 Everything else is compared verbatim, and a clean run passes every case. The
 comment-based help at the top of the script covers the setup and the details.
 
+### Model compatibility with Apache OpenNLP
+
+`src/java/model-compat` checks, in both directions, that models are portable
+between the two implementations: NOpenNLP trains five models and Apache OpenNLP
+1.9.5 loads them on a real JVM, then Apache OpenNLP trains the same five and
+NOpenNLP loads those. Each side records the inference output it got, including
+the probabilities behind it, and the other must reproduce it exactly.
+
+```
+src/java/model-compat/run-compat.sh     # or .bat / .ps1
+```
+
+It needs a JDK, Maven, the .NET SDK and PowerShell 7, but no downloaded models:
+everything is trained on demand from corpora committed alongside it. A separate
+`Model Compatibility` workflow runs it on Linux and Windows, scoped to the paths
+that can affect serialization. Loading a model that another runtime wrote is the
+only check that can catch a serialization difference, since both halves of a
+.NET-only round trip share any bug in it. See
+[the harness README](src/java/model-compat/README.md) for the details.
+
 ## Attribution
 
 This product contains a modified C# port of Apache OpenNLP 1.9.5, specifically
