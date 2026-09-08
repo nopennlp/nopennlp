@@ -44,8 +44,8 @@ public class NKJPSegmentationDocument
 
         public Span ToSpan() => new Span(offset, offset + length);
 
-        public override string ToString() =>
-            $"{doc}#string-range({id},{offset.ToString(CultureInfo.InvariantCulture)},{length.ToString(CultureInfo.InvariantCulture)})";
+        public override string ToString()
+            => $"{doc}#string-range({id},{offset.ToString(CultureInfo.InvariantCulture)},{length.ToString(CultureInfo.InvariantCulture)})";
     }
 
     // NOpenNLP: upstream exposes getSegments(); the outer map preserves insertion order
@@ -182,8 +182,8 @@ public class NKJPSegmentationDocument
     /// runs; normalizing them back to "#text" keeps them out of the seg/nkjp:paren branches
     /// exactly as upstream leaves them out.
     /// </remarks>
-    private static string NodeName(XmlNode node) =>
-        node.NodeType is XmlNodeType.Whitespace or XmlNodeType.SignificantWhitespace
+    private static string NodeName(XmlNode node)
+        => node.NodeType is XmlNodeType.Whitespace or XmlNodeType.SignificantWhitespace
             ? "#text"
             : node.Name;
 
@@ -287,7 +287,11 @@ public class NKJPSegmentationDocument
         string document = ptr[..docend];
 
         int pointer_start = ptr.IndexOf('(') + 1;
-        string[] pieces = ptr.Substring(pointer_start, ptr.Length - 1 - pointer_start).Split(',');
+        // NOpenNLP: upstream's String.split(",") discards trailing empty strings, so a
+        // malformed corresp with a trailing comma still reaches the 3-field branch rather
+        // than the 4-field one, where int.Parse("") would throw.
+        string[] pieces = StringUtil.SplitDroppingTrailingEmpty(
+            ptr.Substring(pointer_start, ptr.Length - 1 - pointer_start), ',');
 
         if (pieces.Length is < 3 or > 4)
         {

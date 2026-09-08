@@ -42,8 +42,8 @@ public class DirectorySampleStreamTest
     // NOpenNLP: upstream declares this as a java.io.FileFilter inner class named
     // TempFileNameFilter. The ported DirectorySampleStream takes a
     // Func<FileSystemInfo, bool> instead, so the same predicate is a local method.
-    private static bool TempFileNameFilter(FileSystemInfo f) =>
-        f is DirectoryInfo || f.Name.EndsWith(".tmp", StringComparison.Ordinal);
+    private static bool TempFileNameFilter(FileSystemInfo f)
+        => f is DirectoryInfo || f.Name.EndsWith(".tmp", StringComparison.Ordinal);
 
     // NOpenNLP: upstream asserts files.contains(file), which works because java.io.File
     // has value equality on the path. FileInfo does not override Equals, so a

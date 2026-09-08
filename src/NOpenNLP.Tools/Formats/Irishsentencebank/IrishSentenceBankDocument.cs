@@ -127,8 +127,8 @@ public class IrishSentenceBankDocument
     /// stay a line-for-line match for upstream, and keeps whitespace between elements from
     /// falling into the "Unexpected node" branch.
     /// </remarks>
-    private static string NodeName(XmlNode node) =>
-        node.NodeType is XmlNodeType.Whitespace or XmlNodeType.SignificantWhitespace
+    private static string NodeName(XmlNode node)
+        => node.NodeType is XmlNodeType.Whitespace or XmlNodeType.SignificantWhitespace
             ? "#text"
             : node.Name;
 

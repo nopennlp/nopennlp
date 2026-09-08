@@ -33,17 +33,22 @@ public class XmlUtil
     // NOpenNLP: upstream exposes createDocumentBuilder()/createSaxParser(), which
     // return the JAXP factory objects a caller then parses with. .NET has no
     // DocumentBuilder equivalent -- XmlDocument parses directly -- so the secure
-    // settings and the parse are combined here. Java sets
-    // FEATURE_SECURE_PROCESSING, whose relevant effect is disabling DTD and
-    // external entity resolution; DtdProcessing.Prohibit and a null XmlResolver
-    // are the .NET counterparts.
+    // settings and the parse are combined here. See CreateSecureReaderSettings for
+    // why the DTD is parsed rather than prohibited.
     public static XmlDocument CreateDocument(Stream input)
     {
         var settings = CreateSecureReaderSettings();
 
+        // NOpenNLP: Java's DocumentBuilder keeps every text node, including one that is
+        // only whitespace; XmlDocument drops those unless PreserveWhitespace is set. The
+        // readers walk ChildNodes by index and concatenate the text they find, so a
+        // dropped node both shifts the child indices and loses a character from the
+        // reconstructed text -- in the Irish Sentence Bank reader, "<token>A</token>
+        // <token>B</token>" yielded "AB" rather than "A B", moving every Span after it.
         var document = new XmlDocument
         {
             XmlResolver = null,
+            PreserveWhitespace = true,
         };
 
         using var reader = XmlReader.Create(input, settings);
@@ -55,11 +60,19 @@ public class XmlUtil
     /// <summary>
     /// Creates <see cref="XmlReaderSettings"/> which process XML securely.
     /// </summary>
-    /// <returns>settings that disable DTD and external entity resolution</returns>
-    public static XmlReaderSettings CreateSecureReaderSettings() =>
-        new XmlReaderSettings
+    /// <returns>settings that resolve no external entities</returns>
+    // NOpenNLP: Java sets FEATURE_SECURE_PROCESSING, which blocks EXTERNAL entity
+    // resolution but still parses an internal DTD subset and expands the entities it
+    // declares. DtdProcessing.Prohibit is stricter than that, not equivalent: it throws
+    // on any DOCTYPE at all, so a corpus upstream reads happily -- a French Treebank
+    // distribution declaring <!ENTITY oe "oe">, for instance -- failed here with an
+    // XmlException. DtdProcessing.Parse restores upstream's behaviour, and the null
+    // XmlResolver is what actually supplies the security property, refusing to fetch
+    // any external DTD or entity the document points at.
+    public static XmlReaderSettings CreateSecureReaderSettings()
+        => new XmlReaderSettings
         {
-            DtdProcessing = DtdProcessing.Prohibit,
+            DtdProcessing = DtdProcessing.Parse,
             XmlResolver = null,
         };
 }

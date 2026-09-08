@@ -81,7 +81,7 @@ public class LemmatizerEvaluatorTest
         {
         }
 
-        public void Misclassified(LemmaSample reference, LemmaSample prediction) =>
-            output.Append(reference).Append('\n');
+        public void Misclassified(LemmaSample reference, LemmaSample prediction)
+            => output.Append(reference).Append('\n');
     }
 }

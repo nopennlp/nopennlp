@@ -382,4 +382,50 @@ public class StringUtil
 
         return ses;
     }
+
+    /// <summary>
+    /// Splits <paramref name="value"/> on <paramref name="separator"/> the way Java's
+    /// <c>String.split</c> does, discarding trailing empty strings.
+    /// </summary>
+    /// <remarks>
+    /// Authored for NOpenNLP; not part of the Apache OpenNLP source. Java's
+    /// <c>String.split(regex)</c> uses a limit of zero, which discards <b>all</b> trailing
+    /// empty strings; .NET's <see cref="string.Split(char[])"/> keeps them. So
+    /// <c>"a b ".split(" ")</c> is 3 elements in Java and 4 in .NET, the last empty. That
+    /// difference is silent and changes results: an extra empty token reaches a model, or
+    /// an empty class name reaches an extension loader. Interior empty strings are kept by
+    /// both, and both yield a single-element array when the separator is absent.
+    /// <para/>
+    /// The empty input is the one case where Java does <b>not</b> drop the trailing empty:
+    /// <c>"".split(",")</c> is one element, the empty string, while <c>",".split(",")</c>
+    /// is none. Both were checked against a real JDK. That single element matters -- a
+    /// caller that reads the last element of the result, as the OntoNotes line splitter
+    /// does, would otherwise fail on an empty document where upstream succeeds.
+    /// </remarks>
+    public static string[] SplitDroppingTrailingEmpty(string value, char separator)
+    {
+        string[] parts = value.Split(separator);
+
+        int length = parts.Length;
+        while (length > 0 && parts[length - 1].Length == 0)
+        {
+            length--;
+        }
+
+        if (length == parts.Length)
+        {
+            return parts;
+        }
+
+        // Java's split never returns an empty array for an empty input; it returns the
+        // input itself as the single element.
+        if (length == 0 && value.Length == 0)
+        {
+            return parts.Length > 0 ? [parts[0]] : [value];
+        }
+
+        string[] trimmed = new string[length];
+        System.Array.Copy(parts, trimmed, length);
+        return trimmed;
+    }
 }

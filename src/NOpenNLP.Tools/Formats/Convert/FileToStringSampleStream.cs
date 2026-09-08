@@ -41,7 +41,10 @@ public class FileToStringSampleStream(IObjectStream<FileInfo?> samples, Encoding
     /// <exception cref="IOException">Thrown if the file cannot be read.</exception>
     private static string ReadFile(FileInfo textFile, Encoding encoding)
     {
-        using var @in = new StreamReader(textFile.OpenRead(), encoding);
+        // NOpenNLP: detectEncodingFromByteOrderMarks is off to match Java's
+        // InputStreamReader, which decodes a BOM as U+FEFF rather than consuming it.
+        using var @in = new StreamReader(textFile.OpenRead(), encoding,
+            detectEncodingFromByteOrderMarks: false);
 
         var text = new StringBuilder();
 

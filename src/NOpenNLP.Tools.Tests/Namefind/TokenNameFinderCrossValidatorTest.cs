@@ -132,8 +132,8 @@ public class TokenNameFinderCrossValidatorTest
         {
         }
 
-        public void Misclassified(NameSample reference, NameSample prediction) =>
-            output.Append(reference).Append('\n');
+        public void Misclassified(NameSample reference, NameSample prediction)
+            => output.Append(reference).Append('\n');
     }
 
     // NOpenNLP: StandardCharsets.ISO_8859_1 has no named BCL counterpart that is

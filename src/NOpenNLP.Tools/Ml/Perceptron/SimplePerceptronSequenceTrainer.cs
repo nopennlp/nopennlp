@@ -20,6 +20,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using NOpenNLP.Tools.Ml.Model;
 using JCG = J2N.Collections.Generic;
 
@@ -365,7 +366,13 @@ public class SimplePerceptronSequenceTrainer<T> : AbstractEventModelSequenceTrai
             }
         }
 
-        Display(". (" + numCorrect + "/" + numEvents + ") " + ((double)numCorrect / numEvents) + "\n");
+        // NOpenNLP: Java's Double.toString always renders a decimal point -- a perfect
+        // training accuracy prints "1.0" where .NET's default formatting prints "1".
+        // J2N's "J" format reproduces Java's rendering so the training log matches
+        // upstream line for line.
+        Display(". (" + numCorrect + "/" + numEvents + ") "
+            + J2N.Numerics.Double.ToString((double)numCorrect / numEvents, "J", CultureInfo.InvariantCulture)
+            + "\n");
     }
 
     private void TrainingStats(MutableContext[] @params)
@@ -389,6 +396,12 @@ public class SimplePerceptronSequenceTrainer<T> : AbstractEventModelSequenceTrai
             }
         }
 
-        Display(". (" + numCorrect + "/" + numEvents + ") " + ((double)numCorrect / numEvents) + "\n");
+        // NOpenNLP: Java's Double.toString always renders a decimal point -- a perfect
+        // training accuracy prints "1.0" where .NET's default formatting prints "1".
+        // J2N's "J" format reproduces Java's rendering so the training log matches
+        // upstream line for line.
+        Display(". (" + numCorrect + "/" + numEvents + ") "
+            + J2N.Numerics.Double.ToString((double)numCorrect / numEvents, "J", CultureInfo.InvariantCulture)
+            + "\n");
     }
 }

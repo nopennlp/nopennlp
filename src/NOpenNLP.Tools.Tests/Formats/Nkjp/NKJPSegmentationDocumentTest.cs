@@ -45,10 +45,11 @@ public class NKJPSegmentationDocumentTest
         ClassicAssert.AreEqual(0, offset);
         int length = doc.Segments["segm_1.1-s"]["segm_1.1-seg"].Length;
         ClassicAssert.AreEqual(2, length);
-        // NOpenNLP: Java's String.substring(begin, end) takes an end index, while .NET's
-        // Substring(start, length) takes a length. Upstream passes (offset, length) here,
-        // which for offset 0 makes the two spellings coincide; the port keeps the same
-        // characters by passing (offset, length - offset).
+        // NOpenNLP: the range operator's second operand is an end index, exactly like the
+        // second argument of Java's String.substring(begin, end), so this is a direct
+        // transcription of upstream's src.substring(offset, length). Upstream's own naming
+        // is misleading -- it passes a length where an end index belongs -- but the two
+        // coincide here because offset is 0, and the port reproduces it as written.
         ClassicAssert.AreEqual("To", src[offset..length]);
     }
 }

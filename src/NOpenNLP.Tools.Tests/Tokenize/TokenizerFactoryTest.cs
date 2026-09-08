@@ -41,8 +41,8 @@ public class TokenizerFactoryTest
         return new TokenSampleStream(new PlainTextByLineStream(@in, Encoding.UTF8));
     }
 
-    private static TokenizerModel Train(TokenizerFactory factory) =>
-        TokenizerME.Train(CreateSampleStream(), factory, TrainingParameters.DefaultParams());
+    private static TokenizerModel Train(TokenizerFactory factory)
+        => TokenizerME.Train(CreateSampleStream(), factory, TrainingParameters.DefaultParams());
 
     private static NOpenNLP.Tools.Dictionary.Dictionary LoadAbbDictionary()
     {

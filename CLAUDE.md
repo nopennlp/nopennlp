@@ -69,6 +69,10 @@ When converting the original Java code to C#, take care to:
 - For private fields and variables, prefer using the concrete collection type over the interface where possible for performance. So combined with the collection expressions rule, `IList<X> foo = new JCG.List<X>()` becomes `JCG.List<X> foo = [];`. Do not do this for anything in the public API surface.
 - Use pattern matching for inline variable declarations where possible. i.e. instead of `ADSentenceStream.Sentence? paragraph;\nwhile ((paragraph = adSentenceStream.Read()) != null)`, use `while (adSentenceStream.Read() is { } paragraph)`
 - Use string interpolation instead of concatenation except where it doesn't make sense.
+- Use expression-bodied members where possible when it is a single line. Put the `=>` arrow at the start of a line below if it needs to wrap, rather than at the end of the first line.
+- Use target-typed `new` where the type is already stated, i.e. `new Option<string?>("-x")` becomes `new("-x")`
+- Use `const` for locals that are never reassigned and initialized to a literal
+- Join wrapped lines back onto one line when they fit within 120 chars
 
 ## Unit Test Porting
 

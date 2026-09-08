@@ -608,6 +608,10 @@ public class ADNameSampleStream : ObjectStreamBase<NameSample?>
     // NOpenNLP-specific: reproduces Java's String.split(regex)/Pattern.split trailing-empty-string
     // behavior, which .NET's Regex.Split does not share. Java drops trailing empty strings but
     // keeps interior ones. This matters because callers read parts[parts.Length - 1].
+    //
+    // This is the Regex counterpart of StringUtil.SplitDroppingTrailingEmpty, which the
+    // char-separator callers use; the two agree on the empty input, which Java alone treats
+    // as a single empty element rather than no elements.
     private static string[] SplitDroppingTrailingEmpty(Regex separator, string value)
     {
         string[] parts = separator.Split(value);
@@ -621,6 +625,13 @@ public class ADNameSampleStream : ObjectStreamBase<NameSample?>
         if (length == parts.Length)
         {
             return parts;
+        }
+
+        // Java's split never returns an empty array for an empty input; it returns the
+        // input itself as the single element.
+        if (length == 0 && value.Length == 0)
+        {
+            return parts.Length > 0 ? [parts[0]] : [value];
         }
 
         string[] trimmed = new string[length];

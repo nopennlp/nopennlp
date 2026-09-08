@@ -208,6 +208,6 @@ public class BratDocumentParser
         return samples;
     }
 
-    private bool IsSpanAnnotation(BratAnnotation ann) =>
-        ann is SpanAnnotation && (nameTypes == null || nameTypes.Contains(ann.Type));
+    private bool IsSpanAnnotation(BratAnnotation ann)
+        => ann is SpanAnnotation && (nameTypes == null || nameTypes.Contains(ann.Type));
 }

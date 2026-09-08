@@ -100,7 +100,10 @@ public class Conll03NameSampleStream : ObjectStreamBase<NameSample?>
                     continue;
                 }
 
-                string[] fields = line.Split(' ');
+                // NOpenNLP: Java's String.split drops trailing empty strings; .NET's keeps them, so a
+                // line ending in the separator would fail the exact field count below that
+                // upstream accepts.
+                string[] fields = StringUtil.SplitDroppingTrailingEmpty(line, ' ');
 
                 // For English: WORD  POS-TAG SC-TAG NE-TAG
                 if (Language.EN.Equals(lang) && fields.Length == 4)

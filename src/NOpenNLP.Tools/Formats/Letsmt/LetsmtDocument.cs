@@ -69,9 +69,13 @@ public class LetsmtDocument
         StringBuilder chars = new();
         JCG.List<string> tokens = [];
 
-        // XmlUtil.CreateSecureReaderSettings sets DtdProcessing.Prohibit, which is the
-        // counterpart of upstream's disallow-doctype-decl feature.
+        // NOpenNLP: upstream layers disallow-doctype-decl on top of XmlUtil's parser here,
+        // unlike every other format reader, so this is the one place a DOCTYPE really is
+        // rejected. DtdProcessing.Prohibit is that feature's counterpart, and it is set
+        // here rather than in XmlUtil, whose settings must still parse an internal DTD
+        // subset to match FEATURE_SECURE_PROCESSING.
         var settings = XmlUtil.CreateSecureReaderSettings();
+        settings.DtdProcessing = DtdProcessing.Prohibit;
 
         try
         {

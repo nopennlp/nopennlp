@@ -36,10 +36,21 @@ public class DocumentToLineStream(IObjectStream<string?> samples)
     /// <exception cref="IOException">if there is an error during reading</exception>
     protected override IList<string>? Read(string sample)
     {
-        IList<string> lines = sample.Split('\n');
+        // NOpenNLP: upstream's String.split("\n") discards trailing empty strings, so a
+        // document ending in a newline yields no empty final line and the check below
+        // appends exactly one. string.Split keeps them, which would leave the check
+        // unsatisfied and pass an extra blank line to OntoNotesParseSampleStream, whose
+        // Read() stops at the first blank -- ending the stream a document early.
+        IList<string> lines = StringUtil.SplitDroppingTrailingEmpty(sample, '\n');
 
         // documents must be empty line terminated
-        if (lines[^1].Trim().Length != 0)
+        // NOpenNLP: the count check is not upstream's. Java's split returns one element
+        // for an empty document but none for one that is only newlines, and upstream
+        // indexes the last element unguarded, so such a document throws
+        // ArrayIndexOutOfBoundsException there. Treating it as already terminated returns
+        // the empty line list the rest of the pipeline expects, rather than trading
+        // upstream's crash for a different one.
+        if (lines.Count > 0 && lines[^1].Trim().Length != 0)
         {
             lines = new JCG.List<string>(lines) { "" };
         }

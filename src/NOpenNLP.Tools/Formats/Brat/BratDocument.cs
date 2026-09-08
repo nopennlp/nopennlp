@@ -86,8 +86,8 @@ public class BratDocument
     /// <returns>the annotation, or <c>null</c> if no annotation has that id</returns>
     // NOpenNLP: upstream returns Map.get, which yields null for an unknown id; the C#
     // indexer would throw, so this uses TryGetValue and keeps the null.
-    public BratAnnotation? GetAnnotation(string id) =>
-        annotationMap.TryGetValue(id, out var annotation) ? annotation : null;
+    public BratAnnotation? GetAnnotation(string id)
+        => annotationMap.TryGetValue(id, out var annotation) ? annotation : null;
 
     public ICollection<BratAnnotation> Annotations => annotationMap.Values;
 
@@ -105,8 +105,13 @@ public class BratDocument
     {
         // NOpenNLP: leaveOpen keeps the reader from closing the caller's stream, matching
         // upstream, which never closes the InputStreamReader it wraps around txtIn.
-        using var txtReader = new StreamReader(txtIn, Encoding.UTF8,
-            detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
+        //
+        // detectEncodingFromByteOrderMarks is off because Java's InputStreamReader does not
+        // consume a BOM -- it decodes it as U+FEFF, an ordinary character of the text. That
+        // matters most here: a brat .ann file carries character offsets into this .txt, so
+        // silently dropping a leading BOM shifts every annotation span by one.
+        using var txtReader = new StreamReader(txtIn, PlainTextByLineStream.Utf8NoPreamble,
+            detectEncodingFromByteOrderMarks: false, bufferSize: 1024, leaveOpen: true);
 
         var text = new StringBuilder();
 

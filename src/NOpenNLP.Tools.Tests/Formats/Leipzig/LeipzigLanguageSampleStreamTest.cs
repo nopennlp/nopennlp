@@ -36,8 +36,8 @@ public class LeipzigLanguageSampleStreamTest
     // LeipzigLanguageSampleStream walks a real folder rather than reading a single
     // resource. Embedded resources have no directory structure to walk, so the
     // fixture is copied to the test output directory instead and located there.
-    private static string TestDataPath =>
-        Path.Combine(TestContext.CurrentContext.TestDirectory, "Formats", "Leipzig", "samples");
+    private static string TestDataPath
+        => Path.Combine(TestContext.CurrentContext.TestDirectory, "Formats", "Leipzig", "samples");
 
     [Test]
     public void TestReadSentenceFiles()

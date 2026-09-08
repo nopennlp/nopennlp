@@ -222,8 +222,8 @@ public class LeipzigLanguageSampleStream : ObjectStreamBase<LanguageSample?>
     }
 
     // NOpenNLP: stands in for java.io.File.isHidden().
-    private static bool IsHidden(FileInfo file) =>
-        file.Name.StartsWith(".", StringComparison.Ordinal)
+    private static bool IsHidden(FileInfo file)
+        => file.Name.StartsWith(".", StringComparison.Ordinal)
         || (file.Attributes & FileAttributes.Hidden) == FileAttributes.Hidden;
 
     /// <inheritdoc/>

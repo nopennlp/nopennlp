@@ -37,6 +37,6 @@ public class AttributeAnnotation : BratAnnotation
 
     public string? Value => value;
 
-    public override string ToString() =>
-        $"{base.ToString()} {attachedTo}{(value != null ? " " + value : "")}";
+    public override string ToString()
+        => $"{base.ToString()} {attachedTo}{(value != null ? " " + value : "")}";
 }

@@ -44,8 +44,8 @@ public class SentenceDetectorFactoryTest
             @in, Encoding.UTF8));
     }
 
-    private static SentenceModel Train(SentenceDetectorFactory factory) =>
-        SentenceDetectorME.Train("eng", CreateSampleStream(), factory,
+    private static SentenceModel Train(SentenceDetectorFactory factory)
+        => SentenceDetectorME.Train("eng", CreateSampleStream(), factory,
             TrainingParameters.DefaultParams());
 
     private static NOpenNLP.Tools.Dictionary.Dictionary LoadAbbDictionary()

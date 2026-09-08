@@ -551,8 +551,8 @@ public class ArtifactRoundTripTest
         CollectionAssert.AreEqual(new[] { "VB", "VBD", "VBN", "NN" }, read.GetTags("set"));
     }
 
-    private static Stream ToStream(string content) =>
-        new MemoryStream(Encoding.UTF8.GetBytes(content));
+    private static Stream ToStream(string content)
+        => new MemoryStream(Encoding.UTF8.GetBytes(content));
 
     private static T WriteAndRead<T>(System.Action<Stream> serialize, System.Func<Stream, T> create)
     {

@@ -370,8 +370,8 @@ public class NameFinderMETest
     // NOpenNLP: upstream splits on the regex "\\s+". Splitting on a space alone
     // would agree on these inputs but not on a tab or newline, so the character
     // set matches what Java's \\s does.
-    private static string[] SplitOnWhitespace(string s) =>
-        s.Split([' ', '\t', '\n', '\r', '\f', '\v'], StringSplitOptions.RemoveEmptyEntries);
+    private static string[] SplitOnWhitespace(string s)
+        => s.Split([' ', '\t', '\n', '\r', '\f', '\v'], StringSplitOptions.RemoveEmptyEntries);
 
     // NOpenNLP: StandardCharsets.ISO_8859_1 has no named BCL counterpart that is
     // registered on every target, so the code page is used directly.

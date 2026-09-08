@@ -5,6 +5,8 @@
   <Folder Name="/src/">
     <Project Path="src/NOpenNLP.Tools/NOpenNLP.Tools.csproj" />
     <Project Path="src/NOpenNLP.Tools.Tests/NOpenNLP.Tools.Tests.csproj" />
+    <Project Path="src/NOpenNLP.Cli/NOpenNLP.Cli.csproj" />
+    <Project Path="src/NOpenNLP.Cli.Tests/NOpenNLP.Cli.Tests.csproj" />
     <!--
       NOpenNLP.Benchmarks is here so it opens with the solution, but CI restores
       the library and test projects individually rather than the solution: this

@@ -177,7 +177,7 @@ public class PortugueseContractionUtility
             // NOpenNLP: Java's String.split(regex) drops trailing empty strings, .NET's
             // string.Split does not. The difference matters because parts[parts.Length - 1] is
             // read below, so a trailing "_" would yield "" here but the last real token in Java.
-            string[] parts = SplitDroppingTrailingEmpty(left, '_');
+            string[] parts = StringUtil.SplitDroppingTrailingEmpty(left, '_');
             for (int i = 0; i < parts.Length - 1; i++)
             {
                 sb.Append(parts[i]).Append(' ');
@@ -191,7 +191,7 @@ public class PortugueseContractionUtility
 
             if (right.Contains("_"))
             {
-                parts = SplitDroppingTrailingEmpty(right, '_');
+                parts = StringUtil.SplitDroppingTrailingEmpty(right, '_');
 
                 key = left + "+" + parts[0];
                 if (Contractions.TryGetValue(key, out contraction))
@@ -222,27 +222,4 @@ public class PortugueseContractionUtility
         return null;
     }
 
-    // NOpenNLP-specific: reproduces Java's String.split(regex) trailing-empty-string behavior,
-    // which .NET's string.Split does not share. Java removes trailing empty strings but keeps
-    // interior ones, and returns a single-element array containing the input when there is no
-    // separator. An input that is entirely separators yields an empty array in Java.
-    private static string[] SplitDroppingTrailingEmpty(string value, char separator)
-    {
-        string[] parts = value.Split(separator);
-
-        int length = parts.Length;
-        while (length > 0 && parts[length - 1].Length == 0)
-        {
-            length--;
-        }
-
-        if (length == parts.Length)
-        {
-            return parts;
-        }
-
-        string[] trimmed = new string[length];
-        System.Array.Copy(parts, trimmed, length);
-        return trimmed;
-    }
 }

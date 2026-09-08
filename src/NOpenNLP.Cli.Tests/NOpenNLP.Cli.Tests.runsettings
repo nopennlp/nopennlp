@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Quiets the console output the CLI writes while tests run.
+
+  This matters more here than in NOpenNLP.Tools.Tests. Writing to the console is
+  the CLI's whole job: every tool prints its usage, its progress, its results or
+  its errors, and the end-to-end tests drive real tools over real corpora. On
+  top of that the tools inherit the library's own progress and diagnostic
+  output, so a single test can emit a training log.
+
+  The VSTest MSBuild task surfaces anything a test writes to stderr as a build
+  *warning*, attributed to Microsoft.TestPlatform.targets rather than to this
+  repo, which makes routine tool output read like build problems. Since these
+  tests assert on what the tools print, they capture it deliberately via
+  Console.SetOut/SetError and then assert on the captured text; letting the
+  adapter also forward it to the runner adds nothing.
+
+  Suppressing at this layer rather than in the ported code keeps every
+  Console.Out/Console.Error call matching its Java counterpart, which is what
+  makes the next 1.9.x rebase cheap.
+
+  Applied automatically. The test csproj points RunSettingsFilePath here, so a
+  plain "dotnet test" picks it up, CI included. To see the full console output
+  for a run, pass the adapter setting NUnit.ConsoleOut=1 as a runner argument,
+  after a bare double-dash separator on the dotnet test command line.
+-->
+<RunSettings>
+
+  <NUnit>
+    <!--
+      Stops the NUnit adapter forwarding what a test writes to Console.Out and
+      Console.Error into the runner output. A failing test is unaffected: its
+      assertion message, stack trace and own standard output are still reported,
+      so nothing is lost when debugging a failure.
+    -->
+    <ConsoleOut>0</ConsoleOut>
+  </NUnit>
+
+</RunSettings>

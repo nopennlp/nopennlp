@@ -39,9 +39,9 @@ public class DocumentSampleTest
     // equivalent of java.io.Serializable (see the note on the ported class), so
     // there is nothing to exercise and the test is omitted.
 
-    public static DocumentSample CreateGoldSample() =>
-        new DocumentSample("aCategory", ["a", "small", "text"]);
+    public static DocumentSample CreateGoldSample()
+        => new DocumentSample("aCategory", ["a", "small", "text"]);
 
-    public static DocumentSample CreatePredSample() =>
-        new DocumentSample("anotherCategory", ["a", "small", "text"]);
+    public static DocumentSample CreatePredSample()
+        => new DocumentSample("anotherCategory", ["a", "small", "text"]);
 }

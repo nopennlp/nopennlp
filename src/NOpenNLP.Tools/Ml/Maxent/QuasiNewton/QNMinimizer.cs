@@ -203,8 +203,12 @@ public class QNMinimizer
         {
             Display("\nSolving convex optimization problem.");
             Display("\nObjective function has " + dimension + " variable(s).");
-            Display("\n\nPerforming " + iterations + " iterations with " +
-                "L1Cost=" + l1Cost + " and L2Cost=" + l2Cost + "\n");
+            // NOpenNLP: Java's Double.toString always renders a decimal point, so an
+            // integral cost prints "0.0" where .NET's default formatting prints "0".
+            // J2N's "J" format reproduces Java's rendering.
+            Display("\n\nPerforming " + iterations + " iterations with "
+                + "L1Cost=" + J2N.Numerics.Double.ToString(l1Cost, "J", CultureInfo.InvariantCulture)
+                + " and L2Cost=" + J2N.Numerics.Double.ToString(l2Cost, "J", CultureInfo.InvariantCulture) + "\n");
         }
 
         double[] direction = new double[dimension];
@@ -263,15 +267,22 @@ public class QNMinimizer
                 else
                     Display(iter + ":  ");
 
+                // NOpenNLP: Java's Double.toString always renders a decimal point and
+                // formats exponents differently from .NET, so these values print as
+                // "1.0" and "1.0E-5" upstream. J2N's "J" format reproduces that.
                 if (Evaluator != null)
                 {
-                    Display("\t" + lsr.ValueAtNext + "\t" + lsr.FuncChangeRate
-                        + "\t" + Evaluator.Evaluate(lsr.NextPoint) + "\n");
+                    Display("\t" + J2N.Numerics.Double.ToString(lsr.ValueAtNext, "J", CultureInfo.InvariantCulture)
+                        + "\t" + J2N.Numerics.Double.ToString(lsr.FuncChangeRate, "J", CultureInfo.InvariantCulture)
+                        + "\t" + J2N.Numerics.Double.ToString(
+                            Evaluator.Evaluate(lsr.NextPoint), "J", CultureInfo.InvariantCulture)
+                        + "\n");
                 }
                 else
                 {
-                    Display("\t " + lsr.ValueAtNext +
-                        "\t" + lsr.FuncChangeRate + "\n");
+                    Display("\t " + J2N.Numerics.Double.ToString(lsr.ValueAtNext, "J", CultureInfo.InvariantCulture)
+                        + "\t" + J2N.Numerics.Double.ToString(lsr.FuncChangeRate, "J", CultureInfo.InvariantCulture)
+                        + "\n");
                 }
             }
 
@@ -293,8 +304,12 @@ public class QNMinimizer
         }
 
         stopwatch.Stop();
+        // NOpenNLP: Java's Double.toString always renders a decimal point, so a whole
+        // number of seconds prints "3.0" where .NET's default formatting prints "3".
+        // J2N's "J" format reproduces Java's rendering.
         Display("Running time: "
-            + (stopwatch.ElapsedMilliseconds / 1000.0).ToString(CultureInfo.InvariantCulture) + "s\n");
+            + J2N.Numerics.Double.ToString(stopwatch.ElapsedMilliseconds / 1000.0, "J", CultureInfo.InvariantCulture)
+            + "s\n");
 
         // Release memory
         // NOpenNLP: upstream also calls System.gc() here; forcing a collection is not
@@ -392,8 +407,12 @@ public class QNMinimizer
         if (lsr.FuncChangeRate < CONVERGE_TOLERANCE)
         {
             if (verbose)
+                // NOpenNLP: Java's Double.toString renders this threshold as "1.0E-4"
+                // where .NET's default formatting gives "0.0001". J2N's "J" format
+                // reproduces Java's rendering.
                 Display("Function change rate is smaller than the threshold "
-                    + CONVERGE_TOLERANCE + ".\nTraining will stop.\n\n");
+                    + J2N.Numerics.Double.ToString(CONVERGE_TOLERANCE, "J", CultureInfo.InvariantCulture)
+                    + ".\nTraining will stop.\n\n");
             return true;
         }
 
@@ -405,8 +424,12 @@ public class QNMinimizer
         if (gradNorm / xNorm < REL_GRAD_NORM_TOL)
         {
             if (verbose)
+                // NOpenNLP: Java's Double.toString renders this threshold as "1.0E-4"
+                // where .NET's default formatting gives "0.0001". J2N's "J" format
+                // reproduces Java's rendering.
                 Display("Relative L2-norm of the gradient is smaller than the threshold "
-                    + REL_GRAD_NORM_TOL + ".\nTraining will stop.\n\n");
+                    + J2N.Numerics.Double.ToString(REL_GRAD_NORM_TOL, "J", CultureInfo.InvariantCulture)
+                    + ".\nTraining will stop.\n\n");
             return true;
         }
 
@@ -414,8 +437,12 @@ public class QNMinimizer
         if (lsr.StepSize < MIN_STEP_SIZE)
         {
             if (verbose)
+                // NOpenNLP: Java's Double.toString renders this threshold as "1.0E-10"
+                // where .NET's default formatting gives "1E-10". J2N's "J" format
+                // reproduces Java's rendering.
                 Display("Step size is smaller than the minimum step size "
-                    + MIN_STEP_SIZE + ".\nTraining will stop.\n\n");
+                    + J2N.Numerics.Double.ToString(MIN_STEP_SIZE, "J", CultureInfo.InvariantCulture)
+                    + ".\nTraining will stop.\n\n");
             return true;
         }
 
