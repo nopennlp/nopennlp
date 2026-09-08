@@ -1,9 +1,13 @@
 # NOpenNLP
 
 [![Build and Test](https://github.com/nopennlp/nopennlp/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/nopennlp/nopennlp/actions/workflows/build-and-test.yml)
+[![Docs](https://github.com/nopennlp/nopennlp/actions/workflows/docs.yml/badge.svg)](https://nopennlp.github.io/nopennlp/)
 
 A C# port of [Apache OpenNLP](https://opennlp.apache.org/) 1.9.5 — a machine
 learning toolkit for natural language processing.
+
+The API reference and guides are at
+[nopennlp.github.io/nopennlp](https://nopennlp.github.io/nopennlp/).
 
 ## Status
 
@@ -168,6 +172,26 @@ installed):
 ```
 dotnet test NOpenNLP.slnx -p:TestFrameworks=true
 ```
+
+### Documentation site
+
+`websites/apidocs` holds a [docfx](https://dotnet.github.io/docfx/) site: the API
+reference generated from the two shipping projects, plus the guides under
+`websites/apidocs/docs`. A `Docs` workflow builds it on every push and pull
+request and publishes it to GitHub Pages from `main`.
+
+```
+dotnet tool restore
+dotnet docfx websites/apidocs/docfx.json --serve
+```
+
+The namespace documentation comes from `package.md` files sitting beside the
+ported code, one per namespace, carrying the text of upstream's
+`package-info.java` and `package.html`. docfx binds each to its namespace through
+the `uid` in its front matter, the way Lucene.NET does it. That binding fails
+silently, so `build/verify-package-docs.ps1` checks after a build that every one
+of them reached the page it names; the workflow runs it, and it also fails on any
+broken link or cross-reference docfx reported.
 
 ### Comparing the CLI against Apache OpenNLP
 

@@ -232,6 +232,43 @@ serialization:
 - **Pin what the port targets.** Cover a new defect the harness finds with a
   `PortRegressionTest` case as well, so it cannot regress without a JDK present.
 
+## Documentation site
+
+`websites/apidocs` is a docfx site: the API reference generated from
+`NOpenNLP.Tools` and `NOpenNLP.Cli`, plus the guides under `docs/`. The `Docs`
+workflow builds it and publishes it to GitHub Pages from `main`.
+
+- **Namespace docs are `package.md` files beside the code.** Upstream documents
+  a package in `package-info.java` or, in three older cases, `package.html`.
+  Each becomes a `package.md` in the matching directory, carrying the text
+  verbatim, the way Lucene.NET does it. docfx binds one to a namespace through
+  the `uid` in its front matter plus the `overwrite` section of `docfx.json`;
+  `summary: *content` is what makes the body the namespace summary rather than a
+  page of its own. Port the text as upstream wrote it, typos included: the
+  sentence under `Sentdetect` reads "identifying sentece boundries" because that
+  is what `package-info.java` says.
+- **A uid that does not resolve is dropped in silence.** docfx neither warns nor
+  fails when an overwrite names a namespace that was renamed or that holds no
+  ported types; the page just renders without its summary. So
+  `build/verify-package-docs.ps1` reads every `package.md` after a build and
+  requires its text to appear on the page its uid names. Run it after touching a
+  namespace name or adding a `package.md`.
+- **`--warningsAsErrors` is not usable here.** docfx compiles both projects on
+  the way to generating metadata and relays the C# warnings already present in
+  the ported source, which would fail the build for reasons that have nothing to
+  do with the docs. The verify script reads docfx's structured log instead and
+  fails only on entries carrying a diagnostic code, which is what separates
+  docfx's own warnings, such as a broken link or an unresolved cross-reference,
+  from the compiler's.
+- **`memberLayout: separatePages` cannot be used.** The port keeps upstream's
+  Java field names, so a `protected` field and its property differ only in case
+  (`outcomeLabels` and `OutcomeLabels`, and twelve more pairs). One page per
+  member gives those the same file name, and the build dies on a case-insensitive
+  filesystem while passing on Linux.
+- **Only `NOpenNLP.Tools` and `NOpenNLP.Cli` are built.** A solution-wide restore
+  would pull the benchmarks' IKVM dependency and its 4 GB unpack, exactly as in
+  `build-and-test.yml`.
+
 ## Docker
 
 The root `Dockerfile` builds an image that drops into a shell with the
