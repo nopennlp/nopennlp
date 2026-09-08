@@ -25,14 +25,15 @@ namespace NOpenNLP.Tools.Tokenize;
 
 public class TokenSampleTest
 {
-    public static TokenSample CreateGoldSample() =>
-        new TokenSample("A test.", [new Span(0, 1), new Span(2, 6)]);
+    // NOpenNLP: upstream declares these three factories here. They live in
+    // TokenSampleFixtures so NOpenNLP.Cli.Tests can link them without also linking
+    // this class's tests; see the notes there. Kept as forwarding members so the
+    // ported tests below read as upstream wrote them.
+    public static TokenSample CreateGoldSample() => TokenSampleFixtures.CreateGoldSample();
 
-    public static TokenSample CreatePredSample() =>
-        new TokenSample("A test.", [new Span(0, 3), new Span(2, 6)]);
+    public static TokenSample CreatePredSample() => TokenSampleFixtures.CreatePredSample();
 
-    public static TokenSample CreatePredSilverSample() =>
-        new TokenSample("A t st.", [new Span(0, 1), new Span(2, 6)]);
+    public static TokenSample CreatePredSilverSample() => TokenSampleFixtures.CreatePredSilverSample();
 
     [Test]
     public void TestRetrievingContent()

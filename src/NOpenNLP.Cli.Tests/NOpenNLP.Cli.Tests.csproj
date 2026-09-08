@@ -27,6 +27,28 @@
   </ItemGroup>
 
   <!--
+    Test fixtures shared with NOpenNLP.Tools.Tests. Upstream keeps these tests beside
+    the fixtures, in one opennlp-tools test tree; this port splits the CLI into its own
+    project, and a test project referencing another test project would invert the
+    dependency and pull the whole library suite in for a handful of helpers. Linking the
+    individual files instead keeps one copy of each, which is the pattern Lucene.NET uses
+    for the same problem. Keep this list to fixtures: linking a file that declares
+    [Test] methods would re-run those tests in this assembly.
+  -->
+  <ItemGroup>
+    <Compile Include="..\NOpenNLP.Tools.Tests\Tokenize\TokenSampleFixtures.cs"
+             Link="Tokenize\TokenSampleFixtures.cs" />
+    <Compile Include="..\NOpenNLP.Tools.Tests\Chunker\DummyChunker.cs"
+             Link="Chunker\DummyChunker.cs" />
+    <Compile Include="..\NOpenNLP.Tools.Tests\Chunker\DummyChunkSampleStream.cs"
+             Link="Chunker\DummyChunkSampleStream.cs" />
+    <Compile Include="..\NOpenNLP.Tools.Tests\Formats\ResourceAsStreamFactory.cs"
+             Link="Formats\ResourceAsStreamFactory.cs" />
+    <Compile Include="..\NOpenNLP.Tools.Tests\Util\MockInputStreamFactory.cs"
+             Link="Util\MockInputStreamFactory.cs" />
+  </ItemGroup>
+
+  <!--
     Corpora for the end-to-end tests, copied from opennlp-tools/src/test/resources and
     embedded under their upstream classpath names, as NOpenNLP.Tools.Tests does. The CLI
     takes file paths rather than streams, so the tests materialize these to a temp
@@ -35,6 +57,20 @@
   <ItemGroup>
     <EmbeddedResource Include="Data\*"
                       LogicalName="opennlp.tools.cmdline.%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <!--
+    Corpora for the tests ported from opennlp-tools, embedded under their upstream
+    classpath names so ResourceAsStreamFactory resolves them the way the ported tests
+    expect, exactly as NOpenNLP.Tools.Tests does.
+  -->
+  <ItemGroup>
+    <EmbeddedResource Include="Corpora\Chunker\*"
+                      LogicalName="opennlp.tools.chunker.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Corpora\Namefind\*"
+                      LogicalName="opennlp.tools.namefind.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Corpora\Postag\*"
+                      LogicalName="opennlp.tools.postag.%(Filename)%(Extension)" />
   </ItemGroup>
 
 </Project>
