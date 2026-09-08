@@ -231,3 +231,38 @@ serialization:
   because a missing NOpenNLP model means a broken pipeline.
 - **Pin what the port targets.** Cover a new defect the harness finds with a
   `PortRegressionTest` case as well, so it cannot regress without a JDK present.
+
+## Docker
+
+The root `Dockerfile` builds an image that drops into a shell with the
+`nopennlp` command available. Upstream keeps its equivalent under
+`opennlp-distr/src/main/docker` and feeds it a release tarball; this one sits at
+the repository root and builds from the source beside it, because someone
+reaching for a container wants to try the working tree rather than a release.
+
+- **Install the local pack, never NuGet.** The build stage packs
+  `NOpenNLP.Cli` and installs that package with `--source` pointing at the
+  output directory. `--add-source` would leave nuget.org in the list, so a
+  published version could satisfy the install and the image would silently test
+  a release instead of the checkout. `--prerelease` is required because
+  `version.json` gives development builds an `-alpha` suffix.
+- **`dotnet tool install` is an SDK command.** The runtime image has no SDK, so
+  the install happens in the build stage against a `--tool-path` and the runtime
+  stage copies that directory. Adding the SDK to the final image instead would
+  cost roughly a gigabyte for a command that is only needed at build time.
+- **Keep `.git` out of `.dockerignore`.** Nerdbank.GitVersioning derives the
+  version from the commit height and the build fails without it. The repository
+  is small enough that the context stays a few megabytes; exclude the test data
+  and the benchmark project instead, since those are what would actually bloat
+  it.
+- **Smoke-test in the final stage.** A `nopennlp Doccat help` in the runtime
+  image proves the copied tool directory runs there, so a broken image fails the
+  build rather than the user's first `docker run`.
+- **CI builds the image but does not push it.** The `Docker` workflow needs a
+  full-depth checkout, because the version comes from commit height and the
+  Dockerfile copies `.git` in; a shallow clone breaks the build inside the
+  container. What it verifies is what only a container can show: that the tool
+  directory copied out of the build stage runs against the runtime image, that
+  PATH reaches the command, and that stdin-driven invocation works. Packing and
+  installing the tool are already covered by the Pack job in
+  `build-and-test.yml`, so do not duplicate that here.

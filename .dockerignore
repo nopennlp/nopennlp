@@ -1,0 +1,32 @@
+# Build output, which the image builds for itself and which would otherwise be
+# copied in from the host and confuse the container's own restore.
+**/bin/
+**/obj/
+artifacts/
+_artifacts/
+BenchmarkDotNet.Artifacts/
+**/target/
+TestResults/
+testresults/
+**/*.nupkg
+**/*.snupkg
+
+# Downloaded models and trained compatibility models: large, and not part of the
+# command line tools.
+testdata/
+src/java/model-compat/work/
+
+# Projects the image does not build. NOpenNLP.Benchmarks in particular pulls in
+# IKVM, which unpacks to over 4 GB.
+src/NOpenNLP.Benchmarks/
+src/NOpenNLP.Tools.Tests/
+src/NOpenNLP.Cli.Tests/
+src/java/
+
+.vs/
+.idea/
+.vscode/
+.DS_Store
+
+# .git is deliberately NOT ignored: Nerdbank.GitVersioning derives the package
+# version from the commit height, and the build fails without it.
