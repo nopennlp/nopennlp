@@ -42,7 +42,7 @@
     A clean run passes every case. A failure is a real difference.
 
 .PARAMETER Jar
-    The Apache OpenNLP 1.9.4 tools jar. Defaults to the Maven local repository.
+    The Apache OpenNLP 1.9.5 tools jar. Defaults to the Maven local repository.
 
 .PARAMETER NOpenNLP
     The ported CLI to compare against. Defaults to the tool installed into
@@ -86,7 +86,7 @@ $homeDirectory = if ($IsWindows) { $env:USERPROFILE } else { $env:HOME }
 
 if (-not $Jar) {
     $Jar = Join-Path $homeDirectory '.m2' 'repository' 'org' 'apache' 'opennlp' `
-        'opennlp-tools' '1.9.4' 'opennlp-tools-1.9.4.jar'
+        'opennlp-tools' '1.9.5' 'opennlp-tools-1.9.5.jar'
 }
 
 if (-not $NOpenNLP) {

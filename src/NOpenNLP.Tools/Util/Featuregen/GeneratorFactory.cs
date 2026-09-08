@@ -605,18 +605,22 @@ public static class GeneratorFactory // NOpenNLP: made static
 
     private static XmlDocument CreateDOM(Stream xmlDescriptorIn)
     {
-        var xmlDoc = new XmlDocument();
-
         try
         {
-            xmlDoc.Load(xmlDescriptorIn);
+            // NOpenNLP: upstream parses with XmlUtil.createDocumentBuilder(); the port called
+            // XmlDocument.Load(Stream) directly, relying on the framework's own default of a
+            // null XmlResolver for its XXE safety. That default holds on every runtime targeted
+            // here, so this was not exploitable, but a descriptor arrives inside a model file
+            // and is untrusted -- its safety should be stated by this code rather than inherited
+            // from a default that .NET Framework did not share and a future runtime could
+            // revisit. Going through XmlUtil also picks up the entity-expansion and document
+            // size bounds the raw call had no way to express.
+            return XmlUtil.CreateDocument(xmlDescriptorIn);
         }
         catch (XmlException ex)
         {
             throw new InvalidFormatException("Descriptor is not valid XML!", ex);
         }
-
-        return xmlDoc;
     }
 
     /// <summary>
