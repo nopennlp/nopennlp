@@ -86,7 +86,12 @@ public class TokenNameFinderModelTest
         // file path against the Maven test classpath directory. The corpora are embedded
         // resources here, so the training data is materialized to a temp file first.
         using TempResourceFile trainData = new("/opennlp/tools/namefind/voa1.train");
-        IObjectStream<NameSample?> sampleStream = new NameSampleDataStream(
+        // NOpenNLP: upstream leaves this stream open -- it reads the corpus straight off
+        // the classpath, so nothing has to be released. Here the corpus is materialized
+        // to a temp file that TempResourceFile deletes, and Windows will not delete a
+        // file that is still open, so the stream is disposed first. Declared after
+        // trainData so it is disposed before it, since `using` unwinds in reverse.
+        using IObjectStream<NameSample?> sampleStream = new NameSampleDataStream(
             new PlainTextByLineStream(new MockInputStreamFactory(
                 new FileInfo(trainData.Path)), Encoding.UTF8));
 

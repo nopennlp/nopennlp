@@ -79,5 +79,25 @@ internal sealed class TempResourceFile : IDisposable
 
     public string Path { get; }
 
-    public void Dispose() => File.Delete(Path);
+    /// <remarks>
+    /// NOpenNLP: best effort. A reader that still holds the file open makes File.Delete
+    /// throw on Windows while succeeding elsewhere, which would fail an otherwise
+    /// passing test on one platform only. The file is in the system temp directory, so
+    /// the OS reclaims it either way.
+    /// </remarks>
+    public void Dispose()
+    {
+        try
+        {
+            File.Delete(Path);
+        }
+        catch (IOException)
+        {
+            // Something still holds the file open; leave it to the OS.
+        }
+        catch (UnauthorizedAccessException)
+        {
+            // As above.
+        }
+    }
 }
