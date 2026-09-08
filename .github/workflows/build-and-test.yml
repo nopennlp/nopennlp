@@ -11,6 +11,11 @@ on:
       # here reads it, so a prose or styling change has no reason to rerun the
       # nine test legs. The API reference is generated from the library source,
       # which is outside this directory and so still triggers a full run.
+      #
+      # This bites on push, where the filter sees one commit. On pull_request
+      # GitHub matches against every file the branch changes, so a docs-only
+      # commit still runs the matrix whenever an earlier commit on the same
+      # branch touched src/.
       - 'websites/**'
   pull_request:
     branches: [main]
@@ -22,6 +27,11 @@ on:
       # here reads it, so a prose or styling change has no reason to rerun the
       # nine test legs. The API reference is generated from the library source,
       # which is outside this directory and so still triggers a full run.
+      #
+      # This bites on push, where the filter sees one commit. On pull_request
+      # GitHub matches against every file the branch changes, so a docs-only
+      # commit still runs the matrix whenever an earlier commit on the same
+      # branch touched src/.
       - 'websites/**'
   workflow_dispatch:
 
