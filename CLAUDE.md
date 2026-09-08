@@ -2,7 +2,7 @@
 
 The goal of this project is to create a faithful .NET port of Apache OpenNLP.
 
-The current version of OpenNLP being targeted is: 1.9.4
+The current version of OpenNLP being targeted is: 1.9.5
 
 ## C# Conversion
 

@@ -74,5 +74,25 @@ public class XmlUtil
         {
             DtdProcessing = DtdProcessing.Parse,
             XmlResolver = null,
+
+            // NOpenNLP: 1.9.5 added a second layer of hardening on top of
+            // FEATURE_SECURE_PROCESSING -- ACCESS_EXTERNAL_DTD and ACCESS_EXTERNAL_SCHEMA set
+            // to "", external-general-entities and external-parameter-entities off,
+            // load-external-dtd off, and XInclude off. In .NET the first five are all one
+            // knob: a null XmlResolver, already set above, is what refuses to fetch an
+            // external DTD, schema, or entity. XInclude has no counterpart at all -- the BCL
+            // XmlReader does not implement XInclude, so there is nothing to switch off.
+            //
+            // What .NET does have and Java's flags do not cover is the billion-laughs
+            // amplification an internal DTD subset still permits once DtdProcessing.Parse
+            // allows one. MaxCharactersFromEntities caps the characters an entity expansion
+            // may produce and already defaults to this value, so it is restated rather than
+            // introduced -- pinning it here keeps the guarantee from resting on a framework
+            // default that a future runtime could change. MaxCharactersInDocument defaults to
+            // 0, meaning unbounded, and is the one genuinely new limit: it bounds the parsed
+            // document itself, so a small compressed model artifact cannot inflate without
+            // limit. Both are far above any real corpus; the largest here are a few MB.
+            MaxCharactersFromEntities = 10_000_000,
+            MaxCharactersInDocument = 512L * 1024 * 1024,
         };
 }

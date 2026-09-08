@@ -2,7 +2,7 @@
 
 [![Build and Test](https://github.com/nopennlp/nopennlp/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/nopennlp/nopennlp/actions/workflows/build-and-test.yml)
 
-A C# port of [Apache OpenNLP](https://opennlp.apache.org/) 1.9.4 — a machine
+A C# port of [Apache OpenNLP](https://opennlp.apache.org/) 1.9.5 — a machine
 learning toolkit for natural language processing.
 
 ## Status
@@ -51,7 +51,7 @@ byte-for-byte against a native macOS run. Pass `-NoDocker` to use a local C
 toolchain instead.
 
 Measured over the full Snowball vocabularies (1,113,209 words), 17 of the 21
-languages produce output identical to OpenNLP 1.9.4. Finnish, Hungarian, French
+languages produce output identical to OpenNLP 1.9.5. Finnish, Hungarian, French
 and Indonesian differ on 0.4% to 6% of words, because OpenNLP ships generated
 code predating several upstream fixes and the sources behind it survive at no
 revision that can be pinned. In each case the port has the corrected behavior -
@@ -139,7 +139,7 @@ dotnet test NOpenNLP.slnx -p:TestFrameworks=true
 `build/regress.ps1` runs the same invocation through both the `nopennlp` tool and
 the real `opennlp` command and diffs stdout and the exit code, so a change in the
 CLI's observable behaviour shows up as a failing case. It is a developer tool
-rather than part of CI: it needs PowerShell 7, a JVM, the OpenNLP 1.9.4 jar, a
+rather than part of CI: it needs PowerShell 7, a JVM, the OpenNLP 1.9.5 jar, a
 clone of the upstream source for its test corpora, and the models
 `build/download-test-models.ps1` fetches. Its value is at rebase time, after
 pulling a new upstream release. Its scratch space is `_artifacts/regress`, which
@@ -157,7 +157,7 @@ comment-based help at the top of the script covers the setup and the details.
 
 ## Attribution
 
-This product contains a modified C# port of Apache OpenNLP 1.9.4, specifically
+This product contains a modified C# port of Apache OpenNLP 1.9.5, specifically
 the `opennlp-tools` module. The original Java source is:
 
 > Apache OpenNLP

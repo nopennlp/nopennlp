@@ -18,6 +18,7 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using System;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using J2N.Text;
@@ -26,6 +27,41 @@ namespace NOpenNLP.Tools.Ml.Model;
 
 public abstract class AbstractModelReader
 {
+    /// <summary>
+    /// Setting for overriding the maximum number of entries (outcomes, predicates,
+    /// outcome patterns, chunk counts) that may be read from a model file or training data.
+    /// <para/>
+    /// Falls back to <c>10_000_000</c> if absent or invalid.
+    /// </summary>
+    // NOpenNLP: upstream reads this from a JVM system property, set with
+    // -DOPENNLP_MAX_ENTRIES=5000000. .NET has no such thing, so the value is read from
+    // AppContext data (settable in runtimeconfig.json or via AppContext.SetSwitch's data
+    // counterpart) and falls back to the environment variable of the same name.
+    public const string MAX_ENTRIES_PROPERTY = "OPENNLP_MAX_ENTRIES";
+
+    /// <summary>
+    /// Upper bound on count fields read from a model file.
+    /// Prevents OOM on crafted inputs with oversized array size declarations.
+    /// Configurable via the <see cref="MAX_ENTRIES_PROPERTY"/> setting.
+    /// </summary>
+    internal static readonly int MAX_ENTRIES = InitMaxEntries();
+
+    private static int InitMaxEntries()
+    {
+        string prop = (AppContext.GetData(MAX_ENTRIES_PROPERTY) as string
+                       ?? Environment.GetEnvironmentVariable(MAX_ENTRIES_PROPERTY)
+                       ?? string.Empty).Trim();
+
+        if (prop.Length > 0
+            && int.TryParse(prop, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out int val)
+            && val > 0)
+        {
+            return val;
+        }
+
+        return 10_000_000;
+    }
+
     /// <summary>
     /// The number of predicates contained in the model.
     /// </summary>
@@ -110,6 +146,12 @@ public abstract class AbstractModelReader
         get
         {
             int numOutcomes = ReadInt32();
+            if (numOutcomes < 0 || numOutcomes > MAX_ENTRIES)
+            {
+                throw new ArgumentException(
+                    $"Outcome count {numOutcomes} exceeds safe limit of {MAX_ENTRIES}");
+            }
+
             string[] outcomeLabels = new string[numOutcomes];
             for (int i = 0; i < numOutcomes; i++)
                 outcomeLabels[i] = ReadUTF();
@@ -122,6 +164,12 @@ public abstract class AbstractModelReader
         get
         {
             int numOCTypes = ReadInt32();
+            if (numOCTypes < 0 || numOCTypes > MAX_ENTRIES)
+            {
+                throw new ArgumentException(
+                    $"Outcome pattern count {numOCTypes} exceeds safe limit of {MAX_ENTRIES}");
+            }
+
             int[][] outcomePatterns = new int[numOCTypes][];
             for (int i = 0; i < numOCTypes; i++)
             {
@@ -146,6 +194,12 @@ public abstract class AbstractModelReader
         get
         {
             NUM_PREDS = ReadInt32();
+            if (NUM_PREDS < 0 || NUM_PREDS > MAX_ENTRIES)
+            {
+                throw new ArgumentException(
+                    $"Predicate count {NUM_PREDS} exceeds safe limit of {MAX_ENTRIES}");
+            }
+
             string[] predLabels = new string[NUM_PREDS];
             for (int i = 0; i < NUM_PREDS; i++)
                 predLabels[i] = ReadUTF();

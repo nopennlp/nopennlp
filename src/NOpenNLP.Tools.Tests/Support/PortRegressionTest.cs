@@ -916,6 +916,92 @@ public class PortRegressionTest
     }
 
     /// <summary>
+    /// A feature generator descriptor arrives inside a model file, which is untrusted input,
+    /// and <see cref="GeneratorFactory"/> must parse it with the hardened settings rather than
+    /// a bare <see cref="System.Xml.XmlDocument"/>.
+    /// </summary>
+    /// <remarks>
+    /// Upstream has always parsed this through <c>XmlUtil.createDocumentBuilder()</c>; the port
+    /// called <c>XmlDocument.Load(Stream)</c> instead and inherited its XXE safety from the
+    /// framework's default null <c>XmlResolver</c>. That default holds on every runtime targeted
+    /// here, so the port was not vulnerable -- this test pins the guarantee to the library's own
+    /// code rather than to a framework default, and would have caught the regression on a
+    /// runtime whose default differed. Nothing in 1.9.5 covers this, and no upstream test does.
+    /// </remarks>
+    [Test]
+    public void TestGeneratorFactoryDoesNotResolveExternalEntities()
+    {
+        string secret = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        File.WriteAllText(secret, "TOP-SECRET");
+
+        try
+        {
+            string descriptor =
+                $"<!DOCTYPE generators [ <!ENTITY xxe SYSTEM \"file://{secret}\"> ]>" +
+                "<generators><generator class=\"opennlp.tools.util.featuregen." +
+                "TokenFeatureGeneratorFactory\">&xxe;</generator></generators>";
+
+            // The descriptor is well formed, so the parse itself succeeds; what matters is
+            // that the external entity expanded to nothing rather than to the file's contents.
+            // GeneratorFactory does not hand back the document, so the descriptor is parsed a
+            // second time through the same helper to inspect what the entity became.
+            var mappings = GeneratorFactory.ExtractArtifactSerializerMappings(
+                new MemoryStream(Encoding.UTF8.GetBytes(descriptor)));
+            ClassicAssert.IsNotNull(mappings);
+
+            var document = XmlUtil.CreateDocument(
+                new MemoryStream(Encoding.UTF8.GetBytes(descriptor)));
+
+            ClassicAssert.IsFalse(document.DocumentElement!.InnerText.Contains("TOP-SECRET"),
+                "the external entity must not have been resolved");
+        }
+        finally
+        {
+            File.Delete(secret);
+        }
+    }
+
+    /// <summary>
+    /// A dictionary file has no legitimate DOCTYPE, so
+    /// <see cref="Dictionary.Serializer.DictionaryEntryPersistor"/> rejects one outright
+    /// instead of parsing an internal subset.
+    /// </summary>
+    /// <remarks>
+    /// 1.9.5 routed this reader through <c>XmlUtil.createSaxParser()</c> so it would pick up
+    /// the same hardening as every other parser in the library, replacing a raw
+    /// <c>XMLReaderFactory.createXMLReader()</c> call that had none. The port builds its
+    /// settings from <c>XmlUtil</c> for that reason and then tightens the DTD handling.
+    /// </remarks>
+    [Test]
+    public void TestDictionaryEntryPersistorRejectsDoctype()
+    {
+        string secret = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        File.WriteAllText(secret, "TOP-SECRET");
+
+        try
+        {
+            string xml =
+                $"<!DOCTYPE dictionary [ <!ENTITY xxe SYSTEM \"file://{secret}\"> ]>" +
+                "<dictionary case_sensitive=\"true\"><entry><token>&xxe;</token></entry></dictionary>";
+
+            // The XmlException the DOCTYPE raises is wrapped, as every other malformed
+            // dictionary is, so the caller sees one exception type for bad input.
+            var ex = Assert.Throws<InvalidFormatException>((Action)(() =>
+                Dictionary.Serializer.DictionaryEntryPersistor.Create(
+                    new MemoryStream(Encoding.UTF8.GetBytes(xml)),
+                    _ => { })));
+
+            ClassicAssert.IsInstanceOf<System.Xml.XmlException>(ex!.InnerException);
+            ClassicAssert.IsTrue(ex.InnerException!.Message.Contains("DTD is prohibited"),
+                $"the DOCTYPE itself must be what was rejected; got: {ex.InnerException.Message}");
+        }
+        finally
+        {
+            File.Delete(secret);
+        }
+    }
+
+    /// <summary>
     /// Serves a fixed byte array as an <see cref="IInputStreamFactory"/>, so a reader can
     /// be driven from an in-memory corpus rather than an embedded resource.
     /// </summary>

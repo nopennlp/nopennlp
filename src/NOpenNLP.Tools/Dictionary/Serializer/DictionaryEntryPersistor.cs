@@ -59,13 +59,15 @@ public static class DictionaryEntryPersistor // NOpenNLP-specific: made static
         var tokenList = new List<string>();
         Attributes? attributes = null;
 
-        var settings = new XmlReaderSettings
-        {
-            DtdProcessing = DtdProcessing.Prohibit,
-            XmlResolver = null,
-            IgnoreWhitespace = false,
-            CloseInput = false,
-        };
+        // NOpenNLP: 1.9.5 replaced the raw XMLReaderFactory.createXMLReader() call here with
+        // XmlUtil.createSaxParser(), so that this reader picks up the same hardening as every
+        // other parser in the library. The settings are built from XmlUtil for that reason,
+        // then tightened: a dictionary file has no legitimate DOCTYPE, so Prohibit rejects one
+        // outright rather than parsing an internal subset the way the corpus readers must.
+        var settings = XmlUtil.CreateSecureReaderSettings();
+        settings.DtdProcessing = DtdProcessing.Prohibit;
+        settings.IgnoreWhitespace = false;
+        settings.CloseInput = false;
 
         try
         {

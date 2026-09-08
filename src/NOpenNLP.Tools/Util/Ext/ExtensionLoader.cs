@@ -19,6 +19,7 @@
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using NOpenNLP.Tools.Support;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -29,14 +30,156 @@ namespace NOpenNLP.Tools.Util.Ext;
 /// <summary>
 /// The <see cref="ExtensionLoader"/> is responsible to load extensions to the OpenNLP library.
 /// <para/>
+/// Only types whose full name starts with a registered namespace prefix are permitted. The
+/// default allowed prefixes are <c>NOpenNLP.</c> and <c>opennlp.</c>, which cover all built-in
+/// factories and serializers, both under their ported names and under the Java names that
+/// serialized OpenNLP models record.
+/// <para/>
+/// To allow custom extension types from other namespaces, either:
+/// <list type="bullet">
+///   <item><description>Call <see cref="RegisterAllowedPackage"/> programmatically before
+///     loading any model that uses the custom type.</description></item>
+///   <item><description>Set the <c>OPENNLP_EXT_ALLOWED_PACKAGES</c> setting to a
+///     comma-separated list of namespace prefixes before the type is first used.</description></item>
+/// </list>
+/// <para/>
 /// <b>Note:</b> Do not use this class, internal use only!
 /// </summary>
 public class ExtensionLoader
 {
+    /// <summary>
+    /// Setting for supplying additional allowed namespace prefixes.
+    /// The value is a comma-separated list, e.g. <c>Acme.Nlp.,Other.</c>.
+    /// <para/>
+    /// This setting is read once when the type is initialized. If it cannot be supplied that
+    /// early, call <see cref="RegisterAllowedPackage"/> before loading any model that uses a
+    /// custom factory or serializer.
+    /// </summary>
+    // NOpenNLP: upstream reads this from a JVM system property, set with
+    // -DOPENNLP_EXT_ALLOWED_PACKAGES=... . .NET has no such thing, so the value is read from
+    // AppContext data (settable in runtimeconfig.json) and falls back to the environment
+    // variable of the same name.
+    public const string ALLOWED_PACKAGES_PROPERTY = "OPENNLP_EXT_ALLOWED_PACKAGES";
+
+    /// <summary>
+    /// Namespace prefixes whose types are permitted to be instantiated as extensions.
+    /// Seeded from <c>NOpenNLP.</c> and <c>opennlp.</c> plus any prefixes in
+    /// <see cref="ALLOWED_PACKAGES_PROPERTY"/>.
+    /// </summary>
+    // NOpenNLP: upstream seeds only "opennlp." because that is the package its own classes
+    // live in. The port's own types are in NOpenNLP.*, and its models still record the Java
+    // names, so both prefixes must be allowed for built-in factories and serializers to load.
+    private static readonly ConcurrentDictionary<string, byte> AllowedPrefixes = InitAllowedPrefixes();
+
     private static bool isOsgiAvailable = false;
+
+    private static ConcurrentDictionary<string, byte> InitAllowedPrefixes()
+    {
+        var prefixes = new ConcurrentDictionary<string, byte>(StringComparer.Ordinal);
+        prefixes["NOpenNLP."] = 0;
+        prefixes["opennlp."] = 0;
+
+        string prop = AppContext.GetData(ALLOWED_PACKAGES_PROPERTY) as string
+                      ?? Environment.GetEnvironmentVariable(ALLOWED_PACKAGES_PROPERTY)
+                      ?? string.Empty;
+
+        if (prop.Trim().Length > 0)
+        {
+            foreach (string prefix in prop.Split(','))
+            {
+                string trimmed = prefix.Trim();
+                if (trimmed.Length > 0)
+                {
+                    prefixes[Normalize(trimmed)] = 0;
+                }
+            }
+        }
+
+        return prefixes;
+    }
 
     private ExtensionLoader()
     {
+    }
+
+    private static string Normalize(string packagePrefix) =>
+        packagePrefix.EndsWith(".", StringComparison.Ordinal) ? packagePrefix : packagePrefix + ".";
+
+    /// <summary>
+    /// Registers an additional namespace prefix whose types are permitted to be loaded as
+    /// OpenNLP extensions. Call this once at application startup, before loading any model
+    /// that uses a custom factory or serializer from that namespace.
+    /// <para/>
+    /// The prefix is normalized to end with <c>'.'</c> to prevent collision attacks
+    /// (e.g. registering <c>"Acme"</c> cannot be exploited via <c>"AcmeEvil.*"</c>).
+    /// </summary>
+    /// <param name="packagePrefix">The namespace prefix to allow, e.g. <c>"Example.Nlp"</c>.
+    ///     Must not be <c>null</c> or blank.</param>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="packagePrefix"/>
+    ///     is <c>null</c>.</exception>
+    /// <exception cref="ArgumentException">Thrown if <paramref name="packagePrefix"/>
+    ///     is blank.</exception>
+    public static void RegisterAllowedPackage(string packagePrefix)
+    {
+        if (packagePrefix is null)
+        {
+            throw new ArgumentNullException(nameof(packagePrefix), "packagePrefix must not be null");
+        }
+
+        if (packagePrefix.Trim().Length == 0)
+        {
+            throw new ArgumentException("packagePrefix must not be blank", nameof(packagePrefix));
+        }
+
+        AllowedPrefixes[Normalize(packagePrefix)] = 0;
+    }
+
+    /// <summary>
+    /// Removes a previously registered namespace prefix. Has no effect if the prefix was not
+    /// registered. The default <c>NOpenNLP.</c> and <c>opennlp.</c> prefixes can also be
+    /// removed, though this is not recommended.
+    /// <para/>
+    /// The prefix is normalized to end with <c>'.'</c> before removal, matching the
+    /// normalization applied in <see cref="RegisterAllowedPackage"/>.
+    /// </summary>
+    /// <param name="packagePrefix">The namespace prefix to remove, e.g. <c>"Example.Nlp"</c>.
+    ///     Must not be <c>null</c>.</param>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="packagePrefix"/>
+    ///     is <c>null</c>.</exception>
+    public static void UnregisterAllowedPackage(string packagePrefix)
+    {
+        if (packagePrefix is null)
+        {
+            throw new ArgumentNullException(nameof(packagePrefix), "packagePrefix must not be null");
+        }
+
+        AllowedPrefixes.TryRemove(Normalize(packagePrefix), out _);
+    }
+
+    /// <summary>
+    /// NOpenNLP: whether <paramref name="extensionClassName"/> names a type in an allowed
+    /// namespace.
+    /// <para/>
+    /// Upstream compares the raw class name against each prefix. A .NET caller may pass an
+    /// assembly-qualified name (<c>"Ns.Type, Assembly, Version=..."</c>), whose namespace is
+    /// still the leading segment, so only the part before the first comma is tested. Nothing
+    /// is trimmed beyond that: a leading space or any other decoration would make the name
+    /// unresolvable anyway.
+    /// </summary>
+    private static bool IsAllowed(string extensionClassName)
+    {
+        int comma = extensionClassName.IndexOf(',');
+        string typeName = comma >= 0 ? extensionClassName[..comma] : extensionClassName;
+
+        foreach (string prefix in AllowedPrefixes.Keys)
+        {
+            if (typeName.StartsWith(prefix, StringComparison.Ordinal))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -186,6 +329,20 @@ public class ExtensionLoader
     // TODO: Throw custom exception if loading fails ...
     public static T? InstantiateExtension<T>(string extensionClassName)
     {
+        if (extensionClassName is null)
+        {
+            throw new ExtensionNotLoadedException("extensionClassName must not be null");
+        }
+
+        // Validate BEFORE the type is resolved -- resolving a type runs its static
+        // constructor (CWE-470), which must not happen for untrusted type names.
+        if (!IsAllowed(extensionClassName))
+        {
+            throw new ExtensionNotLoadedException(
+                $"Class '{extensionClassName}' is not in an allowed package. " +
+                "Register the package via ExtensionLoader.RegisterAllowedPackage() or set " +
+                $"the {ALLOWED_PACKAGES_PROPERTY} setting before first use.");
+        }
 
         // First try to load extension and instantiate extension from class path
         try

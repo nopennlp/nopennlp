@@ -48,6 +48,12 @@ namespace NOpenNLP.Tools.Parser.Lang.Es;
 /// </summary>
 public class AncoraSpanishHeadRules : IHeadRules, IGapLabeler, ISerializableArtifact
 {
+    // POS tagsets are fixed by linguistic convention (Penn Treebank: ~45 tags).
+    // No single head rule will ever list more than a small fraction of the tagset.
+    // 1000 gives 20x headroom over the real-world maximum and is not configurable
+    // because tag counts are a linguistics constraint, not a deployment parameter.
+    private const int MAX_TAGS_PER_RULE = 1_000;
+
     public class HeadRulesSerializer : IArtifactSerializer<AncoraSpanishHeadRules>
     {
         public virtual AncoraSpanishHeadRules Create(Stream @in) =>
@@ -258,7 +264,19 @@ public class AncoraSpanishHeadRules : IHeadRules, IGapLabeler, ISerializableArti
             string num = NextToken(st);
             string type = NextToken(st);
             string dir = NextToken(st);
-            string[] tags = new string[int.Parse(num) - 2];
+            if (!int.TryParse(num, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture,
+                    out int rawCount))
+            {
+                throw new IOException($"Invalid tag count in head rules: {num}");
+            }
+
+            int numTags = rawCount - 2;
+            if (numTags < 0 || numTags > MAX_TAGS_PER_RULE)
+            {
+                throw new IOException($"Invalid tag count in head rules: {num}");
+            }
+
+            string[] tags = new string[numTags];
             int ti = 0;
             while (st.MoveNext())
             {
