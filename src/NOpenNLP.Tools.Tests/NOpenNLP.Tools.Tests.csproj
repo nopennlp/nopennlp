@@ -152,6 +152,8 @@
                       LogicalName="opennlp.tools.ngram.ngram-model-no-count.xml" />
     <EmbeddedResource Include="Ngram\ngram-model-not-a-number.xml"
                       LogicalName="opennlp.tools.ngram.ngram-model-not-a-number.xml" />
+    <EmbeddedResource Include="Languagemodel\sentences.txt"
+                      LogicalName="opennlp.tools.languagemodel.sentences.txt" />
     <EmbeddedResource Include="Util\Featuregen\*.xml"
                       LogicalName="opennlp.tools.util.featuregen.%(Filename)%(Extension)" />
     <EmbeddedResource Include="Formats\brown-cluster.txt"
