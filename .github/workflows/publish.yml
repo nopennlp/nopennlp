@@ -1,0 +1,137 @@
+name: Publish
+
+# Publishes NOpenNLP.Tools and NOpenNLP.Cli to nuget.org when a version tag is
+# pushed. The tag is what makes the version public: version.json's
+# publicReleaseRefSpec matches refs/tags/v\d+\.\d+, which drops the +<commit>
+# build metadata Nerdbank.GitVersioning otherwise appends. Tagging a commit that
+# is not on main would therefore still publish, so tag main.
+on:
+  push:
+    tags:
+      - 'v*'
+  # Lets a failed publish be retried against the same tag without pushing a new
+  # one, since a tag that has already been consumed cannot be moved safely.
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Tag to publish (e.g. v1.9.5-beta.1)'
+        required: true
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  DOTNET_NOLOGO: 1
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+
+jobs:
+  publish:
+    name: Publish to NuGet
+    runs-on: ubuntu-latest
+
+    # Trusted publishing exchanges a GitHub OIDC token for a short-lived nuget.org
+    # API key, so no long-lived secret is stored in the repository. id-token: write
+    # is what allows requesting that token; contents: read is the default minimum
+    # once permissions are named explicitly.
+    permissions:
+      id-token: write
+      contents: read
+
+    # Gives the publish a required-reviewer gate and a place to scope the
+    # nuget.org policy, so a tag push cannot ship to nuget.org unattended.
+    environment: nuget
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          # Nerdbank.GitVersioning derives the version from commit height, so it
+          # needs the full history rather than the default shallow clone.
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: 10.0.x
+
+      # Restoring the two shipping projects individually rather than the solution
+      # keeps NOpenNLP.Benchmarks out of it, whose IKVM dependency unpacks to over
+      # 4 GB. build-and-test.yml and the Dockerfile restore project by project for
+      # the same reason.
+      - name: Restore
+        run: |
+          dotnet restore src/NOpenNLP.Tools/NOpenNLP.Tools.csproj
+          dotnet restore src/NOpenNLP.Cli/NOpenNLP.Cli.csproj
+
+      - name: Pack
+        run: |
+          dotnet pack src/NOpenNLP.Tools/NOpenNLP.Tools.csproj --configuration Release --no-restore --output ./artifacts
+          dotnet pack src/NOpenNLP.Cli/NOpenNLP.Cli.csproj --configuration Release --no-restore --output ./artifacts
+
+      # The tag is the release's identity, so a tag that disagrees with the
+      # version Nerdbank.GitVersioning computed means one of the two is wrong.
+      # Publishing anyway would put a package on nuget.org that no tag describes,
+      # and nuget.org does not allow republishing a version to correct it.
+      - name: Verify tag matches the built version
+        shell: bash
+        run: |
+          set -euo pipefail
+          ref='${{ inputs.ref || github.ref_name }}'
+          tag_version="${ref#v}"
+          package="$(find ./artifacts -name 'NOpenNLP.Tools.*.nupkg' ! -name '*.symbols.nupkg' | head -1)"
+          built_version="$(basename "$package" .nupkg)"
+          built_version="${built_version#NOpenNLP.Tools.}"
+          echo "Tag version:   $tag_version"
+          echo "Built version: $built_version"
+          if [ "$tag_version" != "$built_version" ]; then
+            echo "::error::Tag $ref implies version $tag_version but the package built as $built_version."
+            exit 1
+          fi
+
+      # Guards against shipping an empty or partial release: nupkg and snupkg for
+      # both packages is four files, and a `dotnet nuget push` glob that matched
+      # nothing would otherwise succeed silently.
+      - name: Verify both packages were produced
+        shell: bash
+        run: |
+          set -euo pipefail
+          ls -l ./artifacts
+          for required in \
+            NOpenNLP.Tools:nupkg NOpenNLP.Tools:snupkg \
+            NOpenNLP.Cli:nupkg NOpenNLP.Cli:snupkg; do
+            id="${required%%:*}"
+            ext="${required##*:}"
+            if ! find ./artifacts -name "$id.*.$ext" ! -name '*.symbols.nupkg' | grep -q .; then
+              echo "::error::No $ext produced for $id"
+              exit 1
+            fi
+          done
+
+      # Uploaded before the push so a failed or rejected publish still leaves the
+      # exact bytes that were meant to ship available for inspection.
+      - name: Upload packages
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: packages
+          path: |
+            ./artifacts/*.nupkg
+            ./artifacts/*.snupkg
+
+      # Trusted publishing. Requires a policy on nuget.org for this repository,
+      # workflow and environment; the exchanged key is short-lived and scoped to
+      # the package ids that policy names.
+      - name: NuGet login
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      # --skip-duplicate keeps a retry of a partially completed publish from
+      # failing on the package that already made it through. The snupkg symbol
+      # packages are pushed by the same glob, as nuget.org takes them on the same
+      # endpoint.
+      - name: Push
+        run: |
+          dotnet nuget push ./artifacts/*.nupkg \
+            --source https://api.nuget.org/v3/index.json \
+            --api-key '${{ steps.login.outputs.NUGET_API_KEY }}' \
+            --skip-duplicate
