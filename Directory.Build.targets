@@ -1,0 +1,38 @@
+<Project>
+
+  <!--
+    Points each package's Release Notes tab at the GitHub release for the exact
+    version being built, so the notes live on the release page and are not
+    duplicated in the repository.
+
+    Two things force this to be a target reading NuGetPackageVersion rather than
+    a plain property reading PackageVersion in Directory.Build.props:
+
+    Nerdbank.GitVersioning computes the version in its GetBuildVersion target,
+    long after every property group has been evaluated, so a condition on
+    PackageVersion in the props file is always false and the property comes out
+    empty with no warning.
+
+    And nbgv sets Version, not PackageVersion; the SDK derives PackageVersion
+    from Version later still. Reading PackageVersion even from a target ordered
+    after GetBuildVersion yields the SDK's 1.0.0 default, which is how the URL
+    silently ends up pointing at a release tag that does not exist.
+
+    A caller that sets PackageReleaseNotes explicitly keeps it.
+  -->
+  <PropertyGroup>
+    <GenerateNuspecDependsOn>
+      SetPackageReleaseNotes;
+      $(GenerateNuspecDependsOn)
+    </GenerateNuspecDependsOn>
+  </PropertyGroup>
+
+  <Target Name="SetPackageReleaseNotes"
+          DependsOnTargets="GetBuildVersion"
+          Condition=" '$(PackageReleaseNotes)' == '' ">
+    <PropertyGroup>
+      <PackageReleaseNotes Condition=" '$(NuGetPackageVersion)' != '' ">https://github.com/$(GitHubOrganization)/$(GitHubProject)/releases/tag/v$(NuGetPackageVersion)</PackageReleaseNotes>
+    </PropertyGroup>
+  </Target>
+
+</Project>

@@ -1,5 +1,69 @@
 <Project>
 
+  <!-- Named once here so the URLs built from them stay in step. -->
+  <PropertyGroup>
+    <GitHubOrganization>nopennlp</GitHubOrganization>
+    <GitHubProject>nopennlp</GitHubProject>
+  </PropertyGroup>
+
+  <!--
+    Copyright, derived rather than written out, so the year range does not go
+    stale in five separate csproj files. CurrentYear is overridable so a
+    reproducible rebuild of an old tag can pin the year it shipped with.
+  -->
+  <PropertyGroup Label="Copyright Info">
+    <Company>NOpenNLP</Company>
+    <CurrentYear Condition=" '$(CurrentYear)' == '' ">$([System.DateTime]::UtcNow.Year.ToString())</CurrentYear>
+    <BeginCopyrightYear>2026</BeginCopyrightYear>
+    <CopyrightYearRange>$(BeginCopyrightYear) - $(CurrentYear)</CopyrightYearRange>
+    <CopyrightYearRange Condition=" '$(BeginCopyrightYear)' == '$(CurrentYear)' ">$(CurrentYear)</CopyrightYearRange>
+    <Copyright>Copyright © $(CopyrightYearRange) $(Company)</Copyright>
+  </PropertyGroup>
+
+  <!--
+    Packaging defaults shared by both shipping packages. Nothing here sets a
+    version: Nerdbank.GitVersioning derives every version property from
+    version.json plus the git height and overwrites whatever is set. See the
+    comment in NOpenNLP.Tools.csproj.
+
+    IsPackable defaults to false so a project has to opt in; the tests and the
+    benchmarks would otherwise pack by default and could be pushed by the
+    publish workflow's glob.
+  -->
+  <PropertyGroup Label="NuGet Package Defaults">
+    <IsPackable>false</IsPackable>
+    <Authors>NOpenNLP Contributors</Authors>
+    <PackageProjectUrl>https://nopennlp.github.io/nopennlp/</PackageProjectUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <!-- snupkg is the only symbol format nuget.org accepts. -->
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <!-- PackageReleaseNotes is set in Directory.Build.targets; see the note there. -->
+  </PropertyGroup>
+
+  <!--
+    Source Link: puts the repository URL and commit in the package, and makes a
+    debugger step into the exact source a release was built from.
+
+    No PackageReference is needed. The .NET SDK imports Microsoft.SourceLink.GitHub
+    itself as of .NET 8, and referencing the package explicitly would set
+    SuppressImplicitGitSourceLink and take over from the SDK's copy for no gain.
+
+    ContinuousIntegrationBuild normalizes the source paths embedded in the PDB,
+    which is what makes the build deterministic and the Source Link mapping
+    resolvable off the build machine. It is set only on CI: locally it would
+    strip the absolute paths a local debugger needs to find the working tree.
+  -->
+  <PropertyGroup Label="Source Link">
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(GITHUB_ACTIONS)' == 'true' ">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
   <!--
     Strong naming, applied to every project in the repository.
 

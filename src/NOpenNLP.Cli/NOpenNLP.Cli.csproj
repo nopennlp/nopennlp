@@ -34,20 +34,16 @@
     <!--
       As in NOpenNLP.Tools, no version properties are set here: Nerdbank.GitVersioning
       derives them from version.json plus the git height and overwrites anything set
-      here. Set the version in version.json instead.
+      here. Set the version in version.json instead. The metadata shared by both
+      packages lives in Directory.Build.props; only what differs is here.
 
       The package id follows Apache OpenNLP's own post-1.9.4 layout, which extracted
       the command line tools into an `opennlp-cli` module while keeping them in the
       `opennlp.tools.cmdline` package.
     -->
     <PackageId>NOpenNLP.Cli</PackageId>
-    <Authors>NOpenNLP Contributors</Authors>
     <Description>The command line interface of NOpenNLP, a C# port of Apache OpenNLP 1.9.5. Installs as the `nopennlp` dotnet tool. This product includes software developed at The Apache Software Foundation. Not affiliated with or endorsed by the Apache Software Foundation.</Description>
-    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageTags>nlp;opennlp;cli;dotnet-tool;tokenizer;pos;lemmatizer;chunker;ner;maxent</PackageTags>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup>
