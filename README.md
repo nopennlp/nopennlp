@@ -17,7 +17,7 @@ which install as the `nopennlp` dotnet tool.
 
 | Included | Not yet ported |
 |---|---|
-| Tokenization, sentence detection, POS tagging | UIMA integration |
+| Tokenization, sentence detection, POS tagging | `eval` tests |
 | Lemmatization, chunking, name finding (NER) | Morfologik addon |
 | Language detection, document categorization | brat annotator service |
 | Maxent / Perceptron / Naive Bayes inference | |
@@ -28,41 +28,9 @@ which install as the `nopennlp` dotnet tool.
 | Model training, evaluation, cross validation | |
 | The `nopennlp` command line tools | |
 
-### Corpus format readers
-
-`NOpenNLP.Tools.Formats` reads third-party corpora into streams of native
-`*Sample` objects: CoNLL 2002, CoNLL 2003, CoNLL-X, CoNLL-U, brat, MUC, NKJP,
-Leipzig, LETSMT, French Treebank, OntoNotes, Irish Sentence Bank, Moses,
-Évalita, BioNLP/NLPBA 2004, 20 Newsgroups, Census90, and the Portuguese Árvores
-Deitadas (AD) corpus, plus converters between sample types.
-
-The matching `*SampleStreamFactory` classes are ported too. They expose these
-readers to the command line tools as the format suffix on a tool name
-(`POSTaggerTrainer.conllu`) and as a converter's format argument; constructing a
-reader directly does not need them.
-
-### Stemmers
-
-Apache OpenNLP does not hand-write its Snowball stemmers; it generates them with
-the Snowball compiler and commits the output. This port does the same thing with
-that compiler's C# backend, pinned to Snowball 2.0.0, rather than translating the
-generated Java by hand.
-
-`build/generate-snowball-stemmers.ps1` regenerates them. It runs the compiler in
-a Linux container by default, so PowerShell 7 and Docker are the only
-prerequisites and the result is identical on Windows, macOS and Linux — verified
-byte-for-byte against a native macOS run. Pass `-NoDocker` to use a local C
-toolchain instead.
-
-Measured over the full Snowball vocabularies (1,113,209 words), 17 of the 21
-languages produce output identical to OpenNLP 1.9.5. Finnish, Hungarian, French
-and Indonesian differ on 0.4% to 6% of words, because OpenNLP ships generated
-code predating several upstream fixes and the sources behind it survive at no
-revision that can be pinned. In each case the port has the corrected behavior -
-OpenNLP's Finnish gives one noun four different stems, and its Hungarian leaves
-the ablative and delative case suffixes unstripped. The measurements, the
-reasoning, and the individual cases are documented in the generation script and
-pinned by `SnowballDeviationTest`.
+Note: the UIMA library (`opennlp-uima` upstream) will likely never be ported.
+There is no .NET port of UIMA (which is also not a goal of this project),
+and there only seems to be some casual and research interest in creating one.
 
 ## Usage
 
@@ -107,7 +75,7 @@ As upstream, a `.format` suffix on a tool name selects the corpus format to read
 and converters take their format as the first argument
 (`nopennlp POSTaggerConverter conllu -data corpus.conllu`).
 
-The name follows Apache OpenNLP's own post-1.9.4 layout, which moved these tools
+The name follows Apache OpenNLP's own post-1.x layout, which moved these tools
 into an `opennlp-cli` module.
 
 ### Docker
@@ -134,16 +102,10 @@ is where the container starts:
 docker run --rm -it -v "$PWD/models:/data" nopennlp
 ```
 
-Unlike upstream's Dockerfile, which takes a release tarball as a build argument,
-this one builds `NOpenNLP.Cli` from the source next to it and installs the
-package it just packed. Someone reaching for a container wants to try the
-working tree, and pulling from NuGet would run a release instead of whatever
-change prompted the build. The build needs `.git`, since Nerdbank.GitVersioning
-derives the version from the commit height.
-
-A `Docker` workflow builds the image and runs the `nopennlp` command inside it,
-scoped to the paths that can change what the image contains. It builds the image
-without pushing it anywhere.
+> [!NOTE]
+> Unlike upstream's Dockerfile, which takes a release tarball as a build argument,
+> this one builds `NOpenNLP.Cli` from the source next to it and installs the
+> package it just packed.
 
 ## Building and testing
 
@@ -200,19 +162,7 @@ the real `opennlp` command and diffs stdout and the exit code, so a change in th
 CLI's observable behaviour shows up as a failing case. It is a developer tool
 rather than part of CI: it needs PowerShell 7, a JVM, the OpenNLP 1.9.5 jar, a
 clone of the upstream source for its test corpora, and the models
-`build/download-test-models.ps1` fetches. Its value is at rebase time, after
-pulling a new upstream release. Its scratch space is `_artifacts/regress`, which
-is gitignored and cleared at the start of each run.
-
-Differences that are expected are normalized away rather than reported: the
-command and product name, timings, absolute paths, and the order of a tool's
-options and of its format lists. Java derives those last two from `Class.getMethods()`
-and `HashMap` iteration, neither of which the JDK specifies, so the script sorts
-both sides before diffing. Floating-point numbers are compared to a relative
-tolerance of 1e-9, because upstream's trainers use `StrictMath` (fdlibm) where the
-port uses `Math`, and the two disagree in the last ulp on a few percent of inputs.
-Everything else is compared verbatim, and a clean run passes every case. The
-comment-based help at the top of the script covers the setup and the details.
+`build/download-test-models.ps1` fetches.
 
 ### Model compatibility with Apache OpenNLP
 
