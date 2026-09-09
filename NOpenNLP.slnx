@@ -1,7 +1,17 @@
 <Solution>
-  <Configurations>
-    <Platform Name="Any CPU" />
-  </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitignore" />
+    <File Path="BUILD.md" />
+    <File Path="CLAUDE.md" />
+    <File Path="CONTRIBUTING.md" />
+    <File Path="Dockerfile" />
+    <File Path="LICENSE" />
+    <File Path="NOpenNLP.sln.DotSettings" />
+    <File Path="NOpenNLP.slnx" />
+    <File Path="NOTICE" />
+    <File Path="README.md" />
+    <File Path="version.json" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/NOpenNLP.Tools/NOpenNLP.Tools.csproj" />
     <Project Path="src/NOpenNLP.Tools.Tests/NOpenNLP.Tools.Tests.csproj" />
