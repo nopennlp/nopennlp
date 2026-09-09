@@ -1,0 +1,49 @@
+<Project>
+
+  <!--
+    Strong naming, applied to every project in the repository.
+
+    Consumers that are themselves strong named cannot reference an assembly that
+    is not, so shipping unsigned would shut out .NET Framework callers and anyone
+    building on Lucene.NET, which is the consumer this port is for. The key lives
+    in the repository, as Lucene.NET's and J2N's do: a strong name identifies an
+    assembly, it does not authenticate one, and a private key that every
+    contributor's build needs cannot be kept secret in any case. Authenticity is
+    what NuGet package signing provides, on the published artifact.
+
+    The public key must never change once a version is published: it is part of
+    the assembly identity, so a new key breaks every binding to the old one.
+
+    NOpenNLP.Benchmarks opts out. It references the real Apache OpenNLP through
+    IKVM, whose cross-compiled output carries no strong name of its own, and it
+    ships to no one.
+  -->
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)NOpenNLP.snk</AssemblyOriginatorKeyFile>
+    <!--
+      The public half of NOpenNLP.snk. Signing makes a bare simple name in
+      InternalsVisibleTo stop resolving, so the friend has to be named by its
+      public key too. Declaring it here, and defaulting the item metadata below,
+      keeps the 640 characters out of every csproj that names a friend, which is
+      how Lucene.NET handles the same problem.
+    -->
+    <PublicKey>0024000004800000140100000602000000240000525341310008000001000100ebdcfb158db679b25ea289ac9ffb7441b4e61e401ca683435cb6dabeeecc2513277b0c3d3eec316db8a6244dbff9f8e2e32c556953e438bb4b6a177302ded27a0554da34d485c2bcd57d4e6434eae4ed670ec844739a585a44fc8b8dd57c6db3a5a533b5b1122036ced5ba3583f9a795756ad65475337984a381f79a487d75fef34e3e34e4fc0465ae676ca11978e33bfd04679e27c0e10363f5e44f66843606128bc4d4c3499c9e8d32e620450c927407404571c4a213358384ad9894466cd41f2e8a309d0d5c920c4369ea0ed895687f228f00037033427690753080e2961152922b32805dbf8727176939785fabfa4007fbbdc4055fc6db16e2236dc446a3</PublicKey>
+  </PropertyGroup>
+
+  <!--
+    Supplies the key to every InternalsVisibleTo item without each csproj having
+    to repeat it. Unlike Lucene.NET, which predates the SDK support and appends
+    the key in a custom BeforeCompile target, the SDK's own generator already
+    understands Key metadata; only the default value is needed here.
+
+    ItemDefinitionGroup applies to items declared after this file is imported,
+    which every project's own ItemGroup is. The condition leaves the metadata
+    empty when a project opts out of signing, since naming a public key that the
+    referencing assembly does not have would not resolve.
+  -->
+  <ItemDefinitionGroup Condition=" '$(SignAssembly)' == 'true' And '$(PublicKey)' != '' ">
+    <InternalsVisibleTo Key="$(PublicKey)" />
+  </ItemDefinitionGroup>
+
+</Project>

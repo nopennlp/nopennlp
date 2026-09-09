@@ -28,6 +28,15 @@
 
     <!-- BenchmarkDotNet generates its own entry point per benchmark assembly. -->
     <ServerGarbageCollection>false</ServerGarbageCollection>
+
+    <!--
+      Opts out of the repository-wide strong naming in Directory.Build.props. The
+      IKVM-compiled Apache OpenNLP assembly this project measures against carries
+      no strong name of its own, and a signed assembly cannot reference an
+      unsigned one. Nothing here ships, so there is nothing to lose by staying
+      unsigned.
+    -->
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
 
   <ItemGroup>
