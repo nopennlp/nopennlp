@@ -26,6 +26,36 @@ installed):
 dotnet test NOpenNLP.slnx -p:TestFrameworks=true
 ```
 
+## Strong naming
+
+Every shipping assembly is strong named with `NOpenNLP.snk`, checked in at the
+repository root and applied to all projects by `Directory.Build.props`. Nothing
+needs to be installed or configured to build a signed assembly.
+
+The key is in the repository on purpose, as Lucene.NET's and J2N's are. A strong
+name identifies an assembly; it does not authenticate one. Anyone can rebuild
+this source under a key of their own, and a key that every contributor's build
+needs could not be kept secret in any case, so committing it gives up nothing
+that was ever protected.
+
+Authenticating the published artifact is a separate mechanism: NuGet package
+signing, which the released packages already carry. `NOpenNLP.Tools` 1.9.5-beta.1
+holds an author signature under a DigiCert code signing certificate, plus the
+repository counter-signature nuget.org applies to everything it accepts. That,
+not the strong name, is what tells a consumer where a package came from.
+
+The public key is part of the assembly identity, so it must not change once a
+version is published: a new key breaks every existing binding.
+
+Signing also means a friend assembly has to be named by its public key, not just
+its simple name. `Directory.Build.props` supplies that to every
+`InternalsVisibleTo` item through an `ItemDefinitionGroup`, so a project naming a
+friend still writes nothing but the simple name.
+
+`NOpenNLP.Benchmarks` is the one project that opts out. It references the real
+Apache OpenNLP through IKVM, whose cross-compiled output carries no strong name,
+and a signed assembly cannot reference an unsigned one.
+
 ## Documentation site
 
 `websites/apidocs` holds a [docfx](https://dotnet.github.io/docfx/) site: the API
