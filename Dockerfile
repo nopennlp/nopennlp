@@ -16,11 +16,14 @@
 #   docker run --rm -it -v "$PWD/models:/data" nopennlp
 
 ARG DOTNET_VERSION=10.0
+# The library targets net11.0, so restoring it needs the .NET 11 SDK even though
+# the CLI runs on net10.0. TODO: set to 11.0 once .NET 11 is released.
+ARG DOTNET_SDK_VERSION=11.0-preview
 
 # ---------------------------------------------------------------------------
 # Build stage: pack NOpenNLP.Cli into a .nupkg the runtime stage installs from.
 # ---------------------------------------------------------------------------
-FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_VERSION} AS build
+FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_SDK_VERSION} AS build
 
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1 \
     DOTNET_NOLOGO=1 \

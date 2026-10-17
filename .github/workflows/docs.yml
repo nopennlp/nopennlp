@@ -7,7 +7,7 @@
 #
 # It is separate from build-and-test.yml because the two answer different
 # questions and would otherwise block each other: a docs build that fails must
-# not gate a release, and the test matrix's nine legs have no reason to rerun
+# not gate a release, and the test matrix legs have no reason to rerun
 # because a prose page changed.
 
 name: Docs
@@ -76,6 +76,15 @@ jobs:
           # The site documents the net10.0 build of both projects, so the other
           # targets the library ships are not needed here.
           dotnet-version: 10.0.x
+
+      # TODO: fold into the step above once .NET 11 is released; until then it is
+      # only on the preview channel. The library targets net11.0, so every build
+      # of it needs this SDK.
+      - name: Setup .NET 11 (preview)
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: 11.0.x
+          dotnet-quality: preview
 
       # docfx is pinned in .config/dotnet-tools.json so CI and a local build
       # render with the same version.
