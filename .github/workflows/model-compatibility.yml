@@ -97,6 +97,15 @@ jobs:
             9.0.x
             10.0.x
 
+      # TODO: fold into the step above once .NET 11 is released; until then it is
+      # only on the preview channel. The library targets net11.0, so every build
+      # of it needs this SDK.
+      - name: Setup .NET 11 (preview)
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: 11.0.x
+          dotnet-quality: preview
+
       - name: Cache NuGet packages
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:

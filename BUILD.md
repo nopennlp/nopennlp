@@ -5,12 +5,14 @@ dotnet build NOpenNLP.slnx
 dotnet test NOpenNLP.slnx
 ```
 
-Tests run against `net10.0` by default, so the current SDK alone is enough. CI
+Building needs the .NET 11 SDK, since the library targets `net11.0`. Tests run
+against `net10.0` by default, so they also need the .NET 10 runtime. CI
 additionally runs them against every target the library ships, on Linux, Windows
 and macOS:
 
 | Test client | Library under test |
 |---|---|
+| `net11.0` | `net11.0` |
 | `net10.0` | `net10.0` |
 | `net9.0` | `netstandard2.0` |
 | `net8.0` | `net8.0` |
@@ -19,7 +21,7 @@ and macOS:
 client. The matrix covers the library; `NOpenNLP.Cli` ships as a `net10.0` dotnet
 tool and so has a single target, and its tests run once rather than on every leg.
 
-To reproduce the full matrix locally (this needs the .NET 8, 9 and 10 runtimes
+To reproduce the full matrix locally (this needs the .NET 8, 9, 10 and 11 runtimes
 installed):
 
 ```

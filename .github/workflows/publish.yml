@@ -53,6 +53,15 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
+      # TODO: fold into the step above once .NET 11 is released; until then it is
+      # only on the preview channel. The library targets net11.0, so every build
+      # of it needs this SDK.
+      - name: Setup .NET 11 (preview)
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: 11.0.x
+          dotnet-quality: preview
+
       # Restoring the two shipping projects individually rather than the solution
       # keeps NOpenNLP.Benchmarks out of it, whose IKVM dependency unpacks to over
       # 4 GB. build-and-test.yml and the Dockerfile restore project by project for

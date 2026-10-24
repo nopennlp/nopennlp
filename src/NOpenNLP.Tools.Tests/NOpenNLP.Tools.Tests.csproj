@@ -8,6 +8,7 @@
       Test client to target under test:
 
         Test client | Library under test
+        net11.0     | net11.0
         net10.0     | net10.0
         net9.0      | netstandard2.0
         net8.0      | net8.0
@@ -28,7 +29,7 @@
       macOS TestFrameworks=true yields the three cross-platform clients.
     -->
     <TargetFrameworks>net10.0</TargetFrameworks>
-    <TargetFrameworks Condition=" '$(TestFrameworks)' == 'true' ">net10.0;net9.0;net8.0</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(TestFrameworks)' == 'true' ">net11.0;net10.0;net9.0;net8.0</TargetFrameworks>
     <TargetFrameworks Condition=" '$(TestFrameworks)' == 'true' and '$([MSBuild]::IsOSPlatform(Windows))' == 'true' ">$(TargetFrameworks);net462</TargetFrameworks>
     <LangVersion>12.0</LangVersion>
     <RootNamespace>NOpenNLP.Tools</RootNamespace>

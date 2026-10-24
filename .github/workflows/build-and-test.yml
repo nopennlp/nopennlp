@@ -9,7 +9,7 @@ on:
       - 'NOTICE'
       # The documentation site. Its own Docs workflow builds it, and nothing
       # here reads it, so a prose or styling change has no reason to rerun the
-      # nine test legs. The API reference is generated from the library source,
+      # test legs. The API reference is generated from the library source,
       # which is outside this directory and so still triggers a full run.
       #
       # This bites on push, where the filter sees one commit. On pull_request
@@ -25,7 +25,7 @@ on:
       - 'NOTICE'
       # The documentation site. Its own Docs workflow builds it, and nothing
       # here reads it, so a prose or styling change has no reason to rerun the
-      # nine test legs. The API reference is generated from the library source,
+      # test legs. The API reference is generated from the library source,
       # which is outside this directory and so still triggers a full run.
       #
       # This bites on push, where the filter sees one commit. On pull_request
@@ -82,10 +82,11 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         # Test client to library under test:
+        #   net11.0 -> net11.0
         #   net10.0 -> net10.0
         #   net9.0  -> netstandard2.0  (see SetTargetFramework in the test csproj)
         #   net8.0  -> net8.0
-        framework: [net10.0, net9.0, net8.0]
+        framework: [net11.0, net10.0, net9.0, net8.0]
         # net462 -> netstandard2.0, a second client for the same library build as
         # net9.0. It is in include rather than the framework list because .NET
         # Framework only runs on Windows, so a cross product would create two
@@ -104,8 +105,8 @@ jobs:
           # needs the full history rather than the default shallow clone.
           fetch-depth: 0
 
-      # Each leg needs its own runtime to execute on, plus the .NET 10 SDK to
-      # build with. Installing all three keeps the setup identical across legs.
+      # Each leg needs its own runtime to execute on, plus the .NET 11 SDK to
+      # build with. Installing all of them keeps the setup identical across legs.
       - name: Setup .NET
         uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
@@ -113,6 +114,15 @@ jobs:
             8.0.x
             9.0.x
             10.0.x
+
+      # TODO: fold into the step above once .NET 11 is released; until then it is
+      # only on the preview channel. The library targets net11.0, so every build
+      # of it needs this SDK.
+      - name: Setup .NET 11 (preview)
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: 11.0.x
+          dotnet-quality: preview
 
       - name: Cache NuGet packages
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -147,8 +157,8 @@ jobs:
       # Restores the test project (and the library through its ProjectReference)
       # rather than the solution. The solution also carries NOpenNLP.Benchmarks,
       # whose IKVM dependency unpacks to over 4 GB; a solution-wide restore
-      # would download and cache that on every one of the nine legs to build
-      # something no CI job runs.
+      # would download and cache that on every leg to build something no CI job
+      # runs.
       - name: Restore
         run: |
           dotnet restore src/NOpenNLP.Tools/NOpenNLP.Tools.csproj
@@ -233,6 +243,15 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
+      # TODO: fold into the step above once .NET 11 is released; until then it is
+      # only on the preview channel. The library targets net11.0, so every build
+      # of it needs this SDK.
+      - name: Setup .NET 11 (preview)
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: 11.0.x
+          dotnet-quality: preview
+
       - name: Restore
         run: |
           dotnet restore src/NOpenNLP.Tools/NOpenNLP.Tools.csproj
@@ -253,7 +272,7 @@ jobs:
           echo "Inspecting $package"
           contents="$(unzip -Z1 "$package")"
           echo "$contents"
-          for required in NOTICE README.md lib/net10.0/NOpenNLP.Tools.dll lib/net8.0/NOpenNLP.Tools.dll lib/netstandard2.0/NOpenNLP.Tools.dll; do
+          for required in NOTICE README.md lib/net11.0/NOpenNLP.Tools.dll lib/net10.0/NOpenNLP.Tools.dll lib/net8.0/NOpenNLP.Tools.dll lib/netstandard2.0/NOpenNLP.Tools.dll; do
             if ! grep -qx "$required" <<<"$contents"; then
               echo "::error::$required is missing from the package"
               exit 1
