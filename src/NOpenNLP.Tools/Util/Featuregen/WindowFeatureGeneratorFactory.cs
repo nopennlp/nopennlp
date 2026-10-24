@@ -80,8 +80,7 @@ public class WindowFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeature
 
     public override IAdaptiveFeatureGenerator Create()
     {
-        IAdaptiveFeatureGenerator generator = (IAdaptiveFeatureGenerator)args["generator#0"];
-        if (generator == null)
+        if (!args.TryGetValue("generator#0", out object? value) || value is not IAdaptiveFeatureGenerator generator)
         {
             throw new InvalidFormatException("window feature generator must contain" + " an aggregator element");
         }

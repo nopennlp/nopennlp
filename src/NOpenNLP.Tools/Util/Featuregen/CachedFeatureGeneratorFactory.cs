@@ -59,7 +59,7 @@ public class CachedFeatureGeneratorFactory : GeneratorFactory.AbstractXmlFeature
 
     public override IAdaptiveFeatureGenerator Create()
     {
-        if (args["generator#0"] is not IAdaptiveFeatureGenerator generator)
+        if (!args.TryGetValue("generator#0", out object? value) || value is not IAdaptiveFeatureGenerator generator)
         {
             throw new InvalidFormatException("Could not find containing generator element!");
         }

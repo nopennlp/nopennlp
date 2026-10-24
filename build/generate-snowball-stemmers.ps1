@@ -23,11 +23,12 @@
 
     Provenance was established empirically, by running OpenNLP 1.9.4's own
     stemmers on a JVM and our generated C# over the same 1,113,209 words from the
-    snowball-data vocabularies. 17 of the 21 languages are byte-identical.
+    snowball-data vocabularies, plus Snowball's 9,196,215-word Arabic
+    vocabulary. 16 of the 21 languages are byte-identical.
 
-    Four are not - finnish, hungarian, french and indonesian - because OpenNLP
-    ships generated code older than any Snowball revision that can be pinned
-    here. See "Deviations" below; this is a deliberate, documented divergence.
+    Five are not - arabic, finnish, hungarian, french and indonesian - because
+    OpenNLP ships generated code older than any Snowball revision that can be
+    pinned here. See "Deviations" below; this is a deliberate, documented divergence.
 
     Generation happens here rather than in MSBuild on purpose. The compiler is C
     that needs `make`, there are no prebuilt binaries or GitHub releases for it,
@@ -89,12 +90,12 @@ $ParentClass = 'AbstractSnowballStemmer'
 # Deviations from Apache OpenNLP 1.9.4
 # ------------------------------------
 #
-# 17 of 21 languages match OpenNLP 1.9.4 byte-for-byte over 1,113,209 words:
-# arabic, catalan, danish, dutch, english, german, greek, irish, italian,
-# norwegian, porter, romanian, russian, spanish, swedish, turkish, portuguese.
+# 16 of 21 languages match OpenNLP 1.9.4 byte-for-byte over 1,113,209 words:
+# catalan, danish, dutch, english, german, greek, irish, italian, norwegian,
+# porter, romanian, russian, spanish, swedish, turkish, portuguese.
 #
-# Four differ. In every case OpenNLP ships generated code predating the fix, and
-# our output is the corrected behavior:
+# Five differ. In every case OpenNLP ships generated code predating the current
+# algorithm. For four of them our output is the corrected behavior:
 #
 #   finnish     953 of 84,399 (1.13%). OpenNLP fails to conflate the case forms
 #               of a single noun: aarteeseen/aarteiden/aarteisiin/aarteet - all
@@ -116,18 +117,32 @@ $ParentClass = 'AbstractSnowballStemmer'
 #               -asi/-ksi/-si loanword shape. Genuine -i suffixes are still
 #               stripped by both (mengambili -> ambil).
 #
-# All four move toward more conflation, which is what a stemmer is for: Finnish
-# goes from 44,601 distinct stem groups to 43,844 over the same vocabulary,
-# Hungarian from 16,041 to 15,503.
+# The fifth, arabic, was previously listed as identical, which the 1,113,209-word
+# measurement did not catch. Over Snowball's own 9,196,215-word Arabic
+# vocabulary 2,326,917 words (25.3%) stem differently from OpenNLP 1.9.4 and
+# 1.9.5, whose stemmers are identical. Nearly all of them, 2,326,850, are
+# OpenNLP stripping a leading conjunction or preposition that ours keeps
+# (wa-, fa-, li-, ka-, wal-: walkitab and falkitab -> kitab, which ours leaves
+# whole), and OpenNLP also strips '.' and the Arabic comma, which Snowball
+# stopped removing in a75f87c (2016-12-16). Unlike the other four this is not
+# clearly a fix: OpenNLP also over-strips, taking the root's kaf out of
+# words such as a'akabid. OpenNLP's arabicStemmer.java matches no revision
+# either: compiling stem_Unicode.sbl from 49c147e or 375e403, the only
+# revisions before the punctuation change, still misses Among entries upstream
+# has (teh marbuta, fal, wal), and every later revision differs more.
 #
-# These four cannot be fixed by choosing a different pin. OpenNLP's
+# The first four move toward more conflation, which is what a stemmer is for:
+# Finnish goes from 44,601 distinct stem groups to 43,844 over the same
+# vocabulary, Hungarian from 16,041 to 15,503.
+#
+# None of the five can be fixed by choosing a different pin. OpenNLP's
 # finnishStemmer.java and hungarianStemmer.java were committed 2013-11-20,
 # predating the Snowball git repository itself (the project was on SVN at
 # tartarus.org then), and the .sbl sources that generated them exist at no
 # revision. Generating Finnish from all 10 revisions of finnish.sbl in the repo
 # and hashing the Among data reproduces OpenNLP's at none of them - the oldest
 # available already differs, e.g. Among("tta",4,9) upstream vs Among("tta",4,2).
-# Matching OpenNLP for these four would mean hand-porting ~4,400 lines of
+# Matching OpenNLP for these would mean hand-porting ~6,500 lines of
 # generated labeled-break control flow, which is precisely what generating the
 # stemmers exists to avoid.
 #

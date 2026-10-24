@@ -192,7 +192,7 @@ public class TokenNameFinderFactory : BaseToolFactory
             {
                 if (artifactProvider != null)
                 {
-                    return artifactProvider.GetArtifact<IAdaptiveFeatureGenerator>(key);
+                    return artifactProvider.GetArtifact<object>(key);
                 }
                 else
                 {

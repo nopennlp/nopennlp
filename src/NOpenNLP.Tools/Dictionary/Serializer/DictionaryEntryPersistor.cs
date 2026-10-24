@@ -57,6 +57,8 @@ public static class DictionaryEntryPersistor // NOpenNLP-specific: made static
         // The element/attribute handling below mirrors DictionaryContenthandler.
         bool isCaseSensitiveDictionary = true;
         var tokenList = new List<string>();
+        var token = new StringBuilder();
+        bool isInsideTokenElement = false;
         Attributes? attributes = null;
 
         // NOpenNLP: 1.9.5 replaced the raw XMLReaderFactory.createXMLReader() call here with
@@ -103,17 +105,40 @@ public static class DictionaryEntryPersistor // NOpenNLP-specific: made static
                     }
                     else if (TOKEN_ELEMENT.Equals(localName, StringComparison.Ordinal))
                     {
-                        // ReadElementContentAsString advances past the end element,
-                        // so the token text is captured here rather than in a
-                        // separate characters()/endElement() pair.
-                        tokenList.Add(isEmpty ? string.Empty : reader.ReadElementContentAsString().Trim());
+                        if (isEmpty)
+                        {
+                            tokenList.Add(string.Empty);
+                        }
+                        else
+                        {
+                            isInsideTokenElement = true;
+                        }
                     }
                 }
-                else if (reader.NodeType == XmlNodeType.EndElement
-                    && ENTRY_ELEMENT.Equals(reader.LocalName, StringComparison.Ordinal))
+                else if (reader.NodeType is XmlNodeType.Text or XmlNodeType.CDATA
+                    or XmlNodeType.Whitespace or XmlNodeType.SignificantWhitespace)
                 {
-                    InsertEntry(inserter, tokenList, attributes);
-                    attributes = null;
+                    // NOpenNLP: mirrors characters(); the text is collected until the
+                    // closing tag rather than read with ReadElementContentAsString, which
+                    // consumes the end element and made the loop skip the node after it.
+                    if (isInsideTokenElement)
+                    {
+                        token.Append(reader.Value);
+                    }
+                }
+                else if (reader.NodeType == XmlNodeType.EndElement)
+                {
+                    if (TOKEN_ELEMENT.Equals(reader.LocalName, StringComparison.Ordinal))
+                    {
+                        tokenList.Add(StringUtil.JavaTrim(token.ToString()));
+                        token.Length = 0;
+                        isInsideTokenElement = false;
+                    }
+                    else if (ENTRY_ELEMENT.Equals(reader.LocalName, StringComparison.Ordinal))
+                    {
+                        InsertEntry(inserter, tokenList, attributes);
+                        attributes = null;
+                    }
                 }
             }
         }

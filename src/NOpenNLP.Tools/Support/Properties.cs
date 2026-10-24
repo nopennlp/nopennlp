@@ -61,7 +61,9 @@ internal class Properties : Dictionary<object, object>
             bufferSize: 1024, leaveOpen: true);
         while (reader.ReadLine() is { } line)
         {
-            line = line.Trim();
+            // NOpenNLP: Java skips only leading whitespace; whitespace at the end of a
+            // line belongs to the value, so trimming both ends dropped it.
+            line = line.TrimStart(JavaWhitespace);
             // NOpenNLP: Java treats both '#' and '!' as comment markers.
             // string.StartsWith(char) is net5.0+, so compare with strings.
             if (line.Length == 0 ||
@@ -97,13 +99,13 @@ internal class Properties : Dictionary<object, object>
                 string key = line.Substring(0, separatorIndex).Trim();
                 // A '=' or ':' directly after whitespace is part of the separator,
                 // not the value.
-                string rest = line.Substring(separatorIndex).TrimStart(' ', '\t');
+                string rest = line.Substring(separatorIndex).TrimStart(JavaWhitespace);
                 if (rest.Length > 0 && (rest[0] == '=' || rest[0] == ':'))
                 {
                     rest = rest.Substring(1);
                 }
 
-                this[Unescape(key)] = Unescape(rest.Trim());
+                this[Unescape(key)] = Unescape(rest.TrimStart(JavaWhitespace));
             }
         }
     }
@@ -150,14 +152,16 @@ internal class Properties : Dictionary<object, object>
     /// Reproduces the escaping of <c>java.util.Properties.store</c>: the key/value
     /// separators and the escape character are backslash-escaped, and anything
     /// outside printable ASCII becomes a <c>\uXXXX</c> sequence. A key also escapes
-    /// spaces, since an unescaped space would end the key.
+    /// spaces, since an unescaped space would end the key, and a value escapes a
+    /// space in its first position.
     /// </summary>
     private static string Escape(string value, bool escapeSpace)
     {
         var builder = new StringBuilder(value.Length * 2);
 
-        foreach (char c in value)
+        for (int x = 0; x < value.Length; x++)
         {
+            char c = value[x];
             switch (c)
             {
                 case '\\':
@@ -170,7 +174,9 @@ internal class Properties : Dictionary<object, object>
                     builder.Append('\\').Append(c);
                     break;
                 case ' ':
-                    if (escapeSpace)
+                    // A leading space is escaped even in a value, as saveConvert does,
+                    // since load skips whitespace after the separator.
+                    if (x == 0 || escapeSpace)
                     {
                         builder.Append('\\');
                     }
@@ -204,6 +210,9 @@ internal class Properties : Dictionary<object, object>
     /// <summary>
     /// Reverses <see cref="Escape"/>, matching <c>java.util.Properties.load</c>.
     /// </summary>
+    // The characters java.util.Properties treats as whitespace around keys and values.
+    private static readonly char[] JavaWhitespace = [' ', '\t', '\f'];
+
     private static string Unescape(string value)
     {
         if (value.IndexOf('\\') < 0)
