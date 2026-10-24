@@ -17,6 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using NOpenNLP.Tools.Chunker;
@@ -30,7 +31,9 @@ using NOpenNLP.Tools.Ml.Naivebayes;
 using NOpenNLP.Tools.Namefind;
 using NOpenNLP.Tools.Parser;
 using NOpenNLP.Tools.Postag;
+using NOpenNLP.Tools.Sentdetect;
 using NOpenNLP.Tools.Util;
+using NOpenNLP.Tools.Util.Ext;
 using NOpenNLP.Tools.Util.Featuregen;
 using NOpenNLP.Tools.Util.Model;
 using NOpenNLP.Tools.Util.Normalizer;
@@ -1098,6 +1101,398 @@ public class PortRegressionTest
         {
             File.Delete(secret);
         }
+    }
+
+    /// <summary>
+    /// A nested 1.5.x chunker model must be rebuilt with a
+    /// <see cref="ParserChunkerFactory"/>, as upstream's ChunkerModelSerializer does.
+    /// </summary>
+    /// <remarks>
+    /// 1.5 models record no factory, so without the rebuild the parser's chunker runs
+    /// with the default context generator and sequence validator. The port had left
+    /// the rebuild commented out as unported long after ParserChunkerFactory was
+    /// ported, and the SourceForge en-parser-chunking.bin produced right-branching
+    /// garbage: an F-measure of 0.084 where Apache OpenNLP scores 0.766.
+    /// </remarks>
+    [Test]
+    public void TestChunkerModelSerializerRebuilds15ModelWithParserChunkerFactory()
+    {
+        ParserModel parserModel = TrainSmallParserModel();
+
+        byte[] legacy = RewriteManifest(Serialize(parserModel.ParserChunkerModel!.Serialize), manifest =>
+        {
+            manifest["OpenNLP-Version"] = "1.5.0";
+            manifest.Remove("factory");
+        });
+
+        ChunkerModel model = new ChunkerModelSerializer().Create(new MemoryStream(legacy));
+
+        ClassicAssert.IsInstanceOf<ParserChunkerFactory>(model.Factory);
+    }
+
+    /// <summary>
+    /// A nested 1.5.x POS model without a beam size in its manifest must be rebuilt
+    /// with beam size 10, as upstream's POSModelSerializer does.
+    /// </summary>
+    /// <remarks>
+    /// In 1.5 the parser configured the beam size when it loaded the model. Without the
+    /// rebuild every 1.5 parser model tagged with the default beam of 3.
+    /// </remarks>
+    [Test]
+    public void TestPOSModelSerializerRebuilds15ModelWithBeamSize10()
+    {
+        ParserModel parserModel = TrainSmallParserModel();
+
+        byte[] legacy = RewriteManifest(Serialize(parserModel.ParserTaggerModel!.Serialize), manifest =>
+        {
+            manifest["OpenNLP-Version"] = "1.5.0";
+            manifest.Remove("BeamSize");
+        });
+
+        POSModel model = new POSModelSerializer().Create(new MemoryStream(legacy));
+
+        ClassicAssert.AreEqual("10", model.GetManifestProperty("BeamSize"));
+        ClassicAssert.AreEqual("1.5.0", model.GetManifestProperty("OpenNLP-Version"));
+    }
+
+    private static ParserModel TrainSmallParserModel()
+    {
+        using IObjectStream<Parse?> parseSamples = ParserTestUtil.OpenTestTrainingData();
+
+        TrainingParameters @params = new();
+        @params.Put(TrainingParameters.ITERATIONS_PARAM, 10);
+        @params.Put(TrainingParameters.CUTOFF_PARAM, 5);
+
+        return Tools.Parser.Chunking.Parser.Train("eng", parseSamples, ParserTestUtil.CreateTestHeadRules(), @params);
+    }
+
+    private static byte[] Serialize(Action<Stream> serialize)
+    {
+        using MemoryStream output = new();
+        serialize(output);
+        return output.ToArray();
+    }
+
+    // Rewrites manifest.properties inside a serialized model, to stand in for a model
+    // written by an older OpenNLP release.
+    private static byte[] RewriteManifest(byte[] model, Action<Properties> edit)
+    {
+        using MemoryStream buffer = new();
+        buffer.Write(model, 0, model.Length);
+
+        using (ZipArchive zip = new(buffer, ZipArchiveMode.Update, leaveOpen: true))
+        {
+            ZipArchiveEntry entry = zip.GetEntry("manifest.properties")!;
+            Properties manifest = new();
+            using (Stream input = entry.Open())
+            {
+                manifest.Load(input);
+            }
+
+            edit(manifest);
+            entry.Delete();
+
+            using Stream output = zip.CreateEntry("manifest.properties").Open();
+            manifest.Store(output, null);
+        }
+
+        return buffer.ToArray();
+    }
+
+    /// <summary>
+    /// A name finder model whose feature generator references a resource must be
+    /// usable, both as trained and after a serialize/load round trip.
+    /// </summary>
+    /// <remarks>
+    /// TokenNameFinderFactory asked the model for every resource as an
+    /// IAdaptiveFeatureGenerator, and BaseModel.GetArtifact casts, so constructing a
+    /// NameFinderME threw InvalidCastException for any model using a dictionary, POS
+    /// model or word cluster resource. Training succeeded, since it reads the
+    /// resources map instead, which is why upstream's tests never noticed.
+    /// </remarks>
+    [Test]
+    public void TestNameFinderUsesModelWithDictionaryResource()
+    {
+        const string descriptor =
+            "<featureGenerators name=\"test\">" +
+            "<generator class=\"opennlp.tools.util.featuregen.DictionaryFeatureGeneratorFactory\">" +
+            "<str name=\"dict\">test.dictionary</str><str name=\"prefix\">dict</str>" +
+            "</generator></featureGenerators>";
+
+        Tools.Dictionary.Dictionary dictionary = new();
+        dictionary.Put(new StringList("Alisa"));
+
+        IObjectStream<NameSample?> samples = new NameSampleDataStream(
+            new PlainTextByLineStream(new ResourceAsStreamFactory(
+                "/opennlp/tools/namefind/AnnotatedSentences.txt"), Encoding.GetEncoding(28591)));
+
+        TrainingParameters @params = new();
+        @params.Put(TrainingParameters.ITERATIONS_PARAM, 10);
+        @params.Put(TrainingParameters.CUTOFF_PARAM, 1);
+
+        TokenNameFinderModel model = NameFinderME.Train("eng", null, samples, @params,
+            TokenNameFinderFactory.Create(null, Encoding.UTF8.GetBytes(descriptor),
+                new JCG.Dictionary<string, object> { ["test.dictionary"] = dictionary }, new BioCodec()));
+
+        string[] sentence = ["Alisa", "appreciated", "the", "hint", "."];
+        ClassicAssert.NotNull(new NameFinderME(model).Find(sentence));
+
+        TokenNameFinderModel reloaded = new(new MemoryStream(Serialize(model.Serialize)));
+        ClassicAssert.NotNull(new NameFinderME(reloaded).Find(sentence));
+    }
+
+    /// <summary>
+    /// A dictionary written without whitespace between elements must load every
+    /// entry and every token.
+    /// </summary>
+    /// <remarks>
+    /// The reader took each token with ReadElementContentAsString, which already
+    /// moves past the closing tag, and its loop then advanced again. In indented XML
+    /// the skipped node is whitespace, so every bundled file loaded correctly; in
+    /// compact XML it is the next token or the entry's closing tag, so tokens were
+    /// dropped and entries merged without any error.
+    /// </remarks>
+    [Test]
+    public void TestDictionaryEntryPersistorReadsCompactXml()
+    {
+        const string xml =
+            "<dictionary case_sensitive=\"true\">" +
+            "<entry><token>New</token><token>York</token></entry>" +
+            "<entry><token> Boston </token></entry>" +
+            "<entry><token/></entry>" +
+            "</dictionary>";
+
+        List<string[]> entries = [];
+        Tools.Dictionary.Serializer.DictionaryEntryPersistor.Create(
+            new MemoryStream(Encoding.UTF8.GetBytes(xml)),
+            entry => entries.Add([.. entry.Tokens]));
+
+        ClassicAssert.AreEqual(3, entries.Count);
+        CollectionAssert.AreEqual(new[] { "New", "York" }, entries[0]);
+        CollectionAssert.AreEqual(new[] { "Boston" }, entries[1]);
+        CollectionAssert.AreEqual(new[] { "" }, entries[2]);
+    }
+
+    /// <summary>
+    /// Looking up a token absent from a word cluster file must return null, which
+    /// WordClusterFeatureGenerator takes to mean "no feature".
+    /// </summary>
+    /// <remarks>
+    /// Java's Map.get returns null for an absent key; the port used the dictionary
+    /// indexer, which throws, so the first unknown token aborted training or tagging
+    /// with any wordcluster generator.
+    /// </remarks>
+    [Test]
+    public void TestWordClusterDictionaryReturnsNullForUnknownToken()
+    {
+        WordClusterDictionary clusters = new(new MemoryStream(Encoding.UTF8.GetBytes("known 42\n")));
+
+        ClassicAssert.AreEqual("42", clusters.LookupToken("known"));
+        ClassicAssert.IsNull(clusters.LookupToken("unknown"));
+    }
+
+    /// <summary>
+    /// Extracting the artifact serializers from a descriptor must reach a resource
+    /// nested inside a window or cache generator.
+    /// </summary>
+    /// <remarks>
+    /// Extraction initializes each generator without a resource provider, and an
+    /// aggregated generator builds its children while it initializes, so the window or
+    /// cache is created around a resource-backed child that returned null. Those two
+    /// factories indexed their child directly and threw KeyNotFoundException rather than
+    /// upstream's InvalidFormatException, which extraction catches before recursing, so
+    /// the CLI's -resources option failed for such a descriptor. Expected keys verified
+    /// against Apache OpenNLP 1.9.5.
+    /// </remarks>
+    [TestCase("WindowFeatureGeneratorFactory")]
+    [TestCase("CachedFeatureGeneratorFactory")]
+    public void TestExtractArtifactSerializerMappingsReachesResourceInsideWrapper(string wrapper)
+    {
+        string descriptor =
+            "<featureGenerators name=\"test\">" +
+            "<generator class=\"opennlp.tools.util.featuregen.AggregatedFeatureGeneratorFactory\">" +
+            $"<generator class=\"opennlp.tools.util.featuregen.{wrapper}\">" +
+            "<int name=\"prevLength\">1</int><int name=\"nextLength\">1</int>" +
+            "<generator class=\"opennlp.tools.util.featuregen.DictionaryFeatureGeneratorFactory\">" +
+            "<str name=\"dict\">test.dictionary</str></generator></generator></generator>" +
+            "</featureGenerators>";
+
+        var mappings = GeneratorFactory.ExtractArtifactSerializerMappings(
+            new MemoryStream(Encoding.UTF8.GetBytes(descriptor)));
+
+        CollectionAssert.AreEquivalent(new[] { "test.dictionary" }, mappings.Keys);
+    }
+
+    /// <summary>
+    /// The emoji normalizer must replace what upstream's compiled pattern replaces.
+    /// </summary>
+    /// <remarks>
+    /// Java's Pattern joins the adjacent 􏰀 escapes in upstream's class into
+    /// U+10FC00, so the class is really U+D83C..U+10FC00, '-', and U+DFFF, matched by
+    /// code point. The port matched surrogate code units only: it kept hyphens and
+    /// U+E000-U+FFFF, and could split a surrogate pair. Language detection runs this
+    /// normalizer first, so the n-gram features differed from upstream's. Every case
+    /// here was checked against a real JDK.
+    /// </remarks>
+    [Test]
+    public void TestEmojiNormalizerMatchesJavaCompiledPattern()
+    {
+        // NOpenNLP: a table rather than [TestCase], because an attribute argument with a
+        // lone surrogate cannot be encoded in assembly metadata and arrives mangled.
+        string[][] cases =
+        [
+            ["a-b", "a b"],
+            ["a--b c", "a b c"],
+            ["x\uFF21y", "x y"],
+            ["\uE000z", " z"],
+            ["hi \uD83D\uDE00\uD83D\uDE01 there", "hi   there"],
+            ["q\uD834\uDD1Er", "q r"],
+            ["\uDBFF\uDC00", " "],
+            ["\uDBFF\uDC01", "\uDBFF\uDC01"],
+            ["\uDBFF\uDFFF", "\uDBFF\uDFFF"],
+            ["lone\uD800x", "lone\uD800x"],
+            ["lone\uDC00x", "lone x"],
+            ["plain text", "plain text"],
+        ];
+
+        foreach (string[] c in cases)
+        {
+            ClassicAssert.AreEqual(c[1], EmojiCharSequenceNormalizer.GetInstance().Normalize(c[0]),
+                $"input U+{string.Join(" U+", c[0].Select(ch => ((int)ch).ToString("X4")))}");
+        }
+    }
+
+    /// <summary>
+    /// The sentence detector's context must trim its substrings the way Java's
+    /// <c>String.trim()</c> does: characters at or below U+0020 and nothing else.
+    /// </summary>
+    /// <remarks>
+    /// .NET's Trim() strips NBSP and other Unicode spaces but keeps C0 controls, so
+    /// the prefix features, and with them the split decisions, differed from upstream.
+    /// Expected contexts produced by Apache OpenNLP 1.9.5.
+    /// </remarks>
+    [Test]
+    public void TestSentenceDetectorContextTrimsLikeJava()
+    {
+        DefaultSDContextGenerator generator = new(['.', '!', '?']);
+
+        const string control = "go \u0001ab. Cd \u0001x";
+        CollectionAssert.AreEqual(
+            new[] { "sn", "eos=.", "x=ab", "2", "v=go", "s=", "n=Cd", "ncap" },
+            generator.GetContext(control, control.IndexOf('.')));
+
+        const string nbsp = "go word ab. Cd";
+        CollectionAssert.AreEqual(
+            new[] { "sn", "eos=.", "x= ab", "3", "v=word", "s=", "n=Cd", "ncap" },
+            generator.GetContext(nbsp, nbsp.IndexOf('.')));
+    }
+
+    /// <summary>
+    /// A value starting with a space must survive a store/load round trip, as it does
+    /// with java.util.Properties, and so must a value ending in one.
+    /// </summary>
+    /// <remarks>
+    /// Java's store escapes a space in a value's first position, since load skips
+    /// whitespace after the separator; the port wrote it raw and lost it. Every Thai
+    /// sentence model, whose end-of-sentence characters are a space and a newline,
+    /// reloaded with the newline alone. Load also trimmed trailing whitespace, which
+    /// Java keeps as part of the value.
+    /// </remarks>
+    [Test]
+    public void TestPropertiesRoundTripsValuesWithLeadingAndTrailingSpaces()
+    {
+        Properties properties = new();
+        properties.SetProperty("eos", " \n");
+        properties.SetProperty("trailing", "x ");
+
+        using MemoryStream stream = new();
+        properties.Store(stream, null);
+
+        string written = Encoding.GetEncoding(28591).GetString(stream.ToArray());
+        StringAssert.Contains("eos=\\ \\n", written);
+
+        stream.Position = 0;
+        Properties reloaded = new();
+        reloaded.Load(stream);
+
+        ClassicAssert.AreEqual(" \n", reloaded.GetProperty("eos"));
+        ClassicAssert.AreEqual("x ", reloaded.GetProperty("trailing"));
+    }
+
+    /// <summary>
+    /// An upstream class name must resolve to the type it names, not to another type
+    /// that shares its simple name.
+    /// </summary>
+    /// <remarks>
+    /// ResolveType title-cased "opennlp" to "Opennlp" rather than "NOpenNLP", so no
+    /// Java name ever resolved exactly, and every lookup went through a fallback that
+    /// returned the first loaded type with a matching simple name in any namespace.
+    /// The Spanish head rules serializer resolved to the English one, so a Spanish
+    /// parser model loaded with English head rules. The fallback also let a name in an
+    /// allowed package bind a type outside it.
+    /// </remarks>
+    [Test]
+    public void TestResolveTypeBindsTheNamedType()
+    {
+        ClassicAssert.AreEqual(
+            typeof(Tools.Parser.Lang.Es.AncoraSpanishHeadRules.HeadRulesSerializer),
+            ExtensionLoader.ResolveType("opennlp.tools.parser.lang.es.AncoraSpanishHeadRules$HeadRulesSerializer"));
+        ClassicAssert.AreEqual(
+            typeof(Tools.Parser.Lang.En.HeadRules.HeadRulesSerializer),
+            ExtensionLoader.ResolveType("opennlp.tools.parser.lang.en.HeadRules$HeadRulesSerializer"));
+    }
+
+    /// <summary>
+    /// Every type in the library must survive a round trip through the Java class name
+    /// models record for it.
+    /// </summary>
+    [Test]
+    public void TestResolveTypeInvertsToJavaClassName()
+    {
+        List<string> failures = [];
+        foreach (Type type in typeof(ExtensionLoader).Assembly.GetTypes())
+        {
+            if (type.FullName is null || type.IsGenericTypeDefinition || type.ContainsGenericParameters
+                || type.FullName.Contains('<') || !type.FullName.StartsWith("NOpenNLP.", StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            string javaName = InvokeToJavaClassName(type);
+            if (ExtensionLoader.ResolveType(javaName) != type)
+            {
+                failures.Add($"{type.FullName} -> {javaName}");
+            }
+        }
+
+        CollectionAssert.IsEmpty(failures);
+    }
+
+    /// <summary>
+    /// The parser's context features must render offsets with an ASCII minus sign
+    /// whatever the current culture.
+    /// </summary>
+    /// <remarks>
+    /// StringBuilder.Append(int) formats with the current culture, which in sv-SE,
+    /// fi-FI and nb-NO uses U+2212 for the minus sign. The features then matched no
+    /// predicate in the model, and chunking output changed on 229 of 240 sentences.
+    /// </remarks>
+    [Test]
+    public void TestParserContextFeaturesAreCultureInvariant()
+    {
+        RunUnderCulture("sv-SE", () =>
+        {
+            Assume.That((-1).ToString(), Is.Not.EqualTo("-1"), "sv-SE must use a non-ASCII minus sign");
+
+            ConsContextGenerator generator = new();
+            ClassicAssert.AreEqual("-1=eos", generator.InvokeCons(null, -1));
+        });
+    }
+
+    // Exposes AbstractContextGenerator.Cons, which is protected.
+    private sealed class ConsContextGenerator : AbstractContextGenerator
+    {
+        public string InvokeCons(Parse? p, int i) => Cons(p, i);
     }
 
     /// <summary>

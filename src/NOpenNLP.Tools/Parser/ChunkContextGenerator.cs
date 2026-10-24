@@ -18,6 +18,7 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 
+using System.Globalization;
 using System.Text;
 using NOpenNLP.Tools.Chunker;
 using NOpenNLP.Tools.Util;
@@ -173,7 +174,7 @@ public class ChunkContextGenerator : IChunkerContextGenerator
     private static string Chunkandpostag(int i, string tok, string tag, string? chunk)
     {
         StringBuilder feat = new(20);
-        feat.Append(i).Append('=').Append(tok).Append('|').Append(tag);
+        feat.Append(i.ToString(CultureInfo.InvariantCulture)).Append('=').Append(tok).Append('|').Append(tag);
         if (i < 0)
         {
             // NOpenNLP: Java renders a null String as the literal text "null" when appended to a
@@ -187,7 +188,7 @@ public class ChunkContextGenerator : IChunkerContextGenerator
     private static string Chunkandpostagbo(int i, string tag, string? chunk)
     {
         StringBuilder feat = new(20);
-        feat.Append(i).Append("*=").Append(tag);
+        feat.Append(i.ToString(CultureInfo.InvariantCulture)).Append("*=").Append(tag);
         if (i < 0)
         {
             // NOpenNLP: see Chunkandpostag above; a null chunk must render as the text "null".

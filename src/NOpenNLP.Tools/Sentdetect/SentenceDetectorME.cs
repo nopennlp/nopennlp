@@ -25,7 +25,6 @@ using NOpenNLP.Tools.Util;
 using NOpenNLP.Tools.Util.Model;
 using J2N.Text;
 using System.Collections.Generic;
-using System.Text;
 using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Sentdetect;
@@ -169,7 +168,11 @@ public class SentenceDetectorME : ISentenceDetector
     public virtual Span[] SentPosDetect(string s)
     {
         sentProbs.Clear();
-        StringBuilder sb = new StringBuilder(s);
+        // NOpenNLP: upstream copies s into a StringBuffer that it never mutates and hands
+        // that to getContext as a CharSequence. GetContext takes a string, and calling
+        // ToString() on a copy for every candidate made detection quadratic, so s is
+        // passed directly.
+        // StringBuffer sb = new StringBuffer(s);
         IList<int> enders = scanner.GetPositions(s);
         IList<int> positions = new List<int>(enders.Count);
         for (int i = 0, end = enders.Count, index = 0; i < end; i++)
@@ -185,7 +188,7 @@ public class SentenceDetectorME : ISentenceDetector
 
             if (positions.Count > 0 && cint < positions[^1])
                 continue;
-            double[] probs = model.Eval(cgen.GetContext(sb.ToString(), cint));
+            double[] probs = model.Eval(cgen.GetContext(s, cint));
             string bestOutcome = model.GetBestOutcome(probs);
             if (bestOutcome.Equals(SPLIT) && IsAcceptableBreak(s, index, cint))
             {

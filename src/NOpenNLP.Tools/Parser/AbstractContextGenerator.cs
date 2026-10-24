@@ -65,7 +65,7 @@ public abstract class AbstractContextGenerator
     protected virtual string Cons(Parse? p, int i)
     {
         StringBuilder feat = new(20);
-        feat.Append(i).Append('=');
+        feat.Append(i.ToString(CultureInfo.InvariantCulture)).Append('=');
         if (p != null)
         {
             if (useLabel && i < 0)
@@ -90,7 +90,7 @@ public abstract class AbstractContextGenerator
     protected virtual string Consbo(Parse? p, int i) // cons back-off
     {
         StringBuilder feat = new(20);
-        feat.Append(i).Append("*=");
+        feat.Append(i.ToString(CultureInfo.InvariantCulture)).Append("*=");
         if (p != null)
         {
             if (useLabel && i < 0)
@@ -371,7 +371,7 @@ public abstract class AbstractContextGenerator
         IList<string> features)
     {
         StringBuilder feat = new(20);
-        feat.Append('s').Append(i).Append('=');
+        feat.Append('s').Append(i.ToString(CultureInfo.InvariantCulture)).Append('=');
         if (punctuation != null)
         {
             foreach (Parse punct in punctuation)
@@ -389,7 +389,7 @@ public abstract class AbstractContextGenerator
                 features.Add(feat.ToString());
 
                 feat.Length = 0;
-                feat.Append('s').Append(i).Append("*=");
+                feat.Append('s').Append(i.ToString(CultureInfo.InvariantCulture)).Append("*=");
                 if (node != null)
                 {
                     feat.Append(type).Append('|').Append(node.Type).Append('|').Append(punct.Type);
@@ -402,7 +402,7 @@ public abstract class AbstractContextGenerator
                 features.Add(feat.ToString());
 
                 feat.Length = 0;
-                feat.Append('s').Append(i).Append("*=");
+                feat.Append('s').Append(i.ToString(CultureInfo.InvariantCulture)).Append("*=");
                 feat.Append(type).Append('|').Append(punct.Type);
                 features.Add(feat.ToString());
 
@@ -425,7 +425,7 @@ public abstract class AbstractContextGenerator
 
             features.Add(feat.ToString());
             feat.Length = 0;
-            feat.Append('s').Append(i).Append("*=");
+            feat.Append('s').Append(i.ToString(CultureInfo.InvariantCulture)).Append("*=");
             if (node != null)
             {
                 feat.Append(type).Append('|').Append(node.Type);
@@ -451,11 +451,11 @@ public abstract class AbstractContextGenerator
     protected virtual void Checkcons(Parse child, string i, string type, IList<string> features)
     {
         StringBuilder feat = new(20);
-        feat.Append('c').Append(i).Append('=').Append(child.Type).Append('|')
+        feat.Append('c').Append(i.ToString(CultureInfo.InvariantCulture)).Append('=').Append(child.Type).Append('|')
             .Append(child.Head.CoveredText).Append('|').Append(type);
         features.Add(feat.ToString());
         feat.Length = 0;
-        feat.Append('c').Append(i).Append("*=").Append(child.Type).Append('|').Append(type);
+        feat.Append('c').Append(i.ToString(CultureInfo.InvariantCulture)).Append("*=").Append(child.Type).Append('|').Append(type);
         features.Add(feat.ToString());
     }
 

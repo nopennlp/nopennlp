@@ -20,6 +20,7 @@
 using NOpenNLP.Tools.Ml;
 using NOpenNLP.Tools.Postag;
 using System.IO;
+using JCG = J2N.Collections.Generic;
 
 namespace NOpenNLP.Tools.Util.Model;
 
@@ -37,14 +38,16 @@ public class POSModelSerializer : IArtifactSerializer<POSModel>
         {
             if (posModel.GetManifestProperty(BeamSearch.BEAM_SIZE_PARAMETER) == null)
             {
-                // NOpenNLP: this 1.5.x back-compat path rebuilds the model via a
-                // training constructor, which is not supported (inference only).
-                // Dictionary<string, string> manifestInfoEntries = new Dictionary<string, string>();
-                //
-                // // The version in the model must be correct or otherwise version
-                // // dependent code branches in other places fail
-                // manifestInfoEntries.Put("OpenNLP-Version", "1.5.0");
-                // posModel = new POSModel(posModel.GetLanguage(), posModel.GetPosModel(), 10, manifestInfoEntries, posModel.GetFactory());
+                JCG.Dictionary<string, string> manifestInfoEntries = [];
+
+                // The version in the model must be correct or otherwise version
+                // dependent code branches in other places fail
+                manifestInfoEntries["OpenNLP-Version"] = "1.5.0";
+
+#pragma warning disable CS0618 // the deprecated accessor exists for exactly this 1.5.x path
+                posModel = new POSModel(posModel.Language, posModel.PosModel!, 10,
+                    manifestInfoEntries, posModel.Factory);
+#pragma warning restore CS0618
             }
         }
 

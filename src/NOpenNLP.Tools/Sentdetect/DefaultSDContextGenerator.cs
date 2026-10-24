@@ -134,11 +134,11 @@ public class DefaultSDContextGenerator : ISDContextGenerator
                 }
             }
 
-            prefix = sb.Substring(prefixStart, (position) - (prefixStart)).Trim();
+            prefix = StringUtil.JavaTrim(sb.Substring(prefixStart, (position) - (prefixStart)));
         }
 
         int prevStart = PreviousSpaceIndex(sb, prefixStart);
-        previous = sb.Substring(prevStart, (prefixStart) - (prevStart)).Trim();
+        previous = StringUtil.JavaTrim(sb.Substring(prevStart, (prefixStart) - (prevStart)));
         int suffixEnd = NextSpaceIndex(sb, position, lastIndex);
         {
             c = position;
@@ -160,8 +160,8 @@ public class DefaultSDContextGenerator : ISDContextGenerator
         }
         else
         {
-            suffix = sb.Substring(position + 1, (suffixEnd) - (position + 1)).Trim();
-            next = sb.Substring(suffixEnd + 1, (nextEnd) - (suffixEnd + 1)).Trim();
+            suffix = StringUtil.JavaTrim(sb.Substring(position + 1, (suffixEnd) - (position + 1)));
+            next = StringUtil.JavaTrim(sb.Substring(suffixEnd + 1, (nextEnd) - (suffixEnd + 1)));
         }
 
         CollectFeatures(prefix, suffix, previous, next, sb[position]);

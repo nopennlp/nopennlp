@@ -428,4 +428,31 @@ public class StringUtil
         System.Array.Copy(parts, trimmed, length);
         return trimmed;
     }
+
+    /// <summary>
+    /// Removes leading and trailing characters at or below U+0020, as Java's
+    /// <c>String.trim()</c> does.
+    /// </summary>
+    /// <remarks>
+    /// NOpenNLP-specific: .NET's <see cref="string.Trim()"/> strips Unicode whitespace
+    /// such as NBSP and U+3000 but keeps the C0 controls, so it is not a drop-in
+    /// replacement wherever the trimmed text feeds a model feature or a parser.
+    /// </remarks>
+    internal static string JavaTrim(string value)
+    {
+        int start = 0;
+        int end = value.Length;
+
+        while (start < end && value[start] <= ' ')
+        {
+            start++;
+        }
+
+        while (end > start && value[end - 1] <= ' ')
+        {
+            end--;
+        }
+
+        return start == 0 && end == value.Length ? value : value[start..end];
+    }
 }

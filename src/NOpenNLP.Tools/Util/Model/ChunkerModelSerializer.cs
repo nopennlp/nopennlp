@@ -18,6 +18,7 @@
 // This file has been modified from the original Apache OpenNLP source:
 // translated from Java to C# and adapted for .NET. See NOTICE.
 using NOpenNLP.Tools.Chunker;
+using NOpenNLP.Tools.Parser;
 using System.IO;
 
 namespace NOpenNLP.Tools.Util.Model;
@@ -31,10 +32,9 @@ public class ChunkerModelSerializer : IArtifactSerializer<ChunkerModel>
         Version version = model.Version;
         if (version is { Major: 1, Minor: 5 })
         {
-            // NOpenNLP: this 1.5.x back-compat path rebuilds the model with a
-            // ParserChunkerFactory, which lives in the parser package and is
-            // not ported (inference only).
-            // model = new ChunkerModel(model.Language, model.GetChunkerModel(), new ParserChunkerFactory());
+#pragma warning disable CS0618 // the deprecated accessor exists for exactly this 1.5.x path
+            model = new ChunkerModel(model.Language, model.ChunkerModelValue!, new ParserChunkerFactory());
+#pragma warning restore CS0618
         }
 
         return model;

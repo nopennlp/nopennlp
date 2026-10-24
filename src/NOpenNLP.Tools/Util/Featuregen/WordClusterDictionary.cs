@@ -74,9 +74,7 @@ public class WordClusterDictionary : ISerializableArtifact
     }
 
     public virtual string? LookupToken(string @string)
-    {
-        return tokenToClusterMap[@string];
-    }
+        => tokenToClusterMap.TryGetValue(@string, out string? clusterId) ? clusterId : null;
 
     /// <summary>
     /// Writes the cluster dictionary to the given <see cref="Stream"/>.

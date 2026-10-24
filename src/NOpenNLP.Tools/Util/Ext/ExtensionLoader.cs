@@ -219,7 +219,8 @@ public class ExtensionLoader
         // "opennlp.tools.postag.POSTaggerFactory$POSDictionarySerializer" -- so without
         // this substitution a Java-trained model carrying a serializer-class- entry
         // fails to load.
-        string[] parts = className.Replace('$', '+').Split('.');
+        string dotNetName = className.Replace('$', '+');
+        string[] parts = dotNetName.Split('.');
         for (int i = 0; i < parts.Length; i++)
         {
             if (parts[i].Length > 0 && char.IsLower(parts[i][0]))
@@ -228,47 +229,77 @@ public class ExtensionLoader
             }
         }
 
+        // The exact inverse of ToJavaClassName: upstream's root package "opennlp" is the
+        // port's "NOpenNLP", which title-casing alone would render as "Opennlp".
+        bool isJavaName = className.StartsWith("opennlp.", StringComparison.Ordinal);
+        if (isJavaName)
+        {
+            parts[0] = "NOpenNLP";
+        }
+
         string portedName = string.Join(".", parts);
 
         // This assembly first, so a ported type always wins over a same-named type
-        // that happens to be loaded elsewhere.
+        // that happens to be loaded elsewhere. The untranslated name is tried as well,
+        // since a caller's own type is recorded under its .NET full name.
         foreach (Assembly assembly in GetSearchAssemblies())
         {
-            type = assembly.GetType(portedName, throwOnError: false);
+            type = assembly.GetType(portedName, throwOnError: false)
+                ?? assembly.GetType(dotNetName, throwOnError: false);
             if (type != null)
             {
                 return type;
             }
         }
 
-        // Fall back to matching on the simple type name, which covers cases where
-        // the Java package does not line up with the ported namespace.
-        // NOpenNLP: for a nested type this must be the innermost name alone, since
-        // that is what Type.Name reports -- "POSDictionarySerializer", not
-        // "POSTaggerFactory+POSDictionarySerializer".
-        string simpleName = parts[^1].Split('+')[^1];
-        foreach (Assembly assembly in GetSearchAssemblies())
+        // Fall back to matching on the simple type name, which covers an upstream class
+        // whose Java package differs from the ported namespace by more than casing.
+        // NOpenNLP: only a Java name is translated this way, and only into a type of this
+        // assembly, the one place an upstream counterpart can live. Matching any loaded
+        // type by simple name bound a name to an unrelated type in another namespace --
+        // AncoraSpanishHeadRules$HeadRulesSerializer resolved to the English serializer --
+        // and let a name in an allowed package instantiate a type outside it. Where
+        // several types share the simple name, the one whose namespace matches ignoring
+        // case wins, and an ambiguity that does not settle resolves to nothing.
+        // For a nested type the simple name is the innermost one alone, since that is
+        // what Type.Name reports.
+        if (!isJavaName)
         {
-            Type[] candidates;
-            try
+            return null;
+        }
+
+        string simpleName = parts[^1].Split('+')[^1];
+        Type[] candidates;
+        try
+        {
+            candidates = typeof(ExtensionLoader).Assembly.GetTypes();
+        }
+        catch (ReflectionTypeLoadException e)
+        {
+            candidates = [.. e.Types.Where(t => t != null)!];
+        }
+
+        Type? match = null;
+        int matches = 0;
+        foreach (Type candidate in candidates)
+        {
+            if (!string.Equals(candidate.Name, simpleName, StringComparison.Ordinal))
             {
-                candidates = assembly.GetTypes();
-            }
-            catch (ReflectionTypeLoadException e)
-            {
-                // A partially loadable assembly still contributes the types that
-                // did load; an unrelated assembly failing to load must not stop
-                // the search.
-                candidates = [.. e.Types.Where(t => t != null)!];
+                continue;
             }
 
-            foreach (Type candidate in candidates)
+            if (string.Equals(candidate.FullName, portedName, StringComparison.OrdinalIgnoreCase))
             {
-                if (string.Equals(candidate.Name, simpleName, StringComparison.Ordinal))
-                {
-                    return candidate;
-                }
+                return candidate;
             }
+
+            match = candidate;
+            matches++;
+        }
+
+        if (matches == 1)
+        {
+            return match;
         }
 
         return null;
